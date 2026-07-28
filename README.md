@@ -1,4 +1,4 @@
-# FE-SGW - Frontend G-SEE
+# FE-SMILE - Frontend SMILE
 
 Frontend untuk project G-SEE (Gajahwong Smart Education Ecosystem).
 
