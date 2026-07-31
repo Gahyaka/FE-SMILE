@@ -8,7 +8,7 @@ export default function KontakPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    role: "Mitra",
+    subject: "PPDB",
     message: "",
   });
 
@@ -22,8 +22,8 @@ export default function KontakPage() {
     setFormSubmitted(true);
     setTimeout(() => {
       setFormSubmitted(false);
-      setFormData({ name: "", email: "", role: "Mitra", message: "" });
-      alert("Terima kasih! Formulir kolaborasi Anda berhasil terkirim. Tim G-SEE akan segera membalas email Anda.");
+      setFormData({ name: "", email: "", subject: "PPDB", message: "" });
+      alert("Terima kasih! Pesan/Pertanyaan Anda berhasil terkirim. Admin RA Sahabat akan segera menghubungi Anda.");
     }, 1500);
   };
 
@@ -33,7 +33,7 @@ export default function KontakPage() {
       {/* HEADER SECTION */}
       <section className="relative bg-gradient-to-b from-[#FAF8F5] to-white py-16 text-center overflow-hidden border-b border-soft-mint">
         {/* Chalkboard grid overlay background */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(24,179,111,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(24,179,111,0.015)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none -z-10"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.015)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none -z-10"></div>
         {/* Swirly background doodles */}
         <div className="absolute top-10 left-10 text-warm-yellow/30 text-5xl select-none font-bold hidden md:block animate-pulse">★</div>
         <div className="absolute bottom-6 right-12 text-primary-green/20 text-5xl select-none font-bold hidden md:block">★</div>
@@ -43,7 +43,7 @@ export default function KontakPage() {
             Hubungi Kami
           </span>
           <h1 className="font-baloo text-4xl sm:text-5xl font-bold text-neutral-dark leading-tight">
-            Mulai <span className="text-primary-green relative">Kolaborasi
+            Hubungi Sekolah <span className="text-primary-green relative">RA Sahabat
               {/* Underline sketch */}
               <svg className="absolute -bottom-2 left-0 w-full h-2.5 text-warm-yellow" viewBox="0 0 100 10" preserveAspectRatio="none" fill="none">
                 <path d="M0,5 Q50,9 100,5" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
@@ -51,7 +51,7 @@ export default function KontakPage() {
             </span>
           </h1>
           <p className="text-sm sm:text-base text-neutral-gray max-w-2xl mx-auto leading-relaxed font-medium">
-            Punya pertanyaan mengenai program atau tertarik untuk mendukung kegiatan alternatif Sekolah Gajahwong? Sampaikan aspirasi Anda di sini.
+            Punya pertanyaan mengenai pendaftaran PPDB, program belajar, atau kemitraan yayasan? Sampaikan kepada kami di bawah ini.
           </p>
         </div>
       </section>
@@ -69,7 +69,7 @@ export default function KontakPage() {
           {/* Left Column: Contact details & school location */}
           <div className="lg:col-span-5 space-y-8 flex flex-col justify-between">
             <div className="bg-white p-8 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-6">
-              <h2 className="font-baloo text-2xl font-bold text-primary-dark">Sekolah Gajahwong</h2>
+              <h2 className="font-baloo text-2xl font-bold text-primary-dark">KB/RA Sahabat Berbah</h2>
               
               <div className="space-y-5 text-xs sm:text-sm text-neutral-gray font-semibold">
                 <div className="flex items-start gap-3.5">
@@ -80,7 +80,7 @@ export default function KontakPage() {
                   </svg>
                   <div>
                     <strong className="text-neutral-dark block mb-1">Alamat Fisik:</strong>
-                    Bantaran Sungai Gajahwong, RT 22 RW 05, Kelurahan Prenggan, Kotagede, Yogyakarta, Indonesia.
+                    KB/RA Sahabat, Berbah, Kabupaten Sleman, D.I. Yogyakarta, Indonesia.
                   </div>
                 </div>
                 
@@ -91,7 +91,7 @@ export default function KontakPage() {
                   </svg>
                   <div>
                     <strong className="text-neutral-dark block mb-1">Telepon/WhatsApp:</strong>
-                    +62 812-3456-7890 (Admin G-SEE)
+                    +62 812-3456-7890 (Admin RA Sahabat)
                   </div>
                 </div>
 
@@ -103,7 +103,7 @@ export default function KontakPage() {
                   </svg>
                   <div>
                     <strong className="text-neutral-dark block mb-1">Email Resmi:</strong>
-                    info@gajahwong-gsee.org
+                    admin@rasahabat.sch.id
                   </div>
                 </div>
               </div>
@@ -111,36 +111,27 @@ export default function KontakPage() {
 
             {/* Sketched Map Frame */}
             <div className="bg-[#FAF8F5] p-5 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/30 shadow-xs space-y-3">
-              <span className="text-xs font-extrabold text-primary-dark uppercase tracking-widest block">Lokasi Gajahwong Farm & School</span>
+              <span className="text-xs font-extrabold text-primary-dark uppercase tracking-widest block">Lokasi RA Sahabat Berbah</span>
               
               {/* Creative Map Doodle Illustration inside map container */}
               <div className="w-full aspect-video bg-white rounded-2xl border-2 border-neutral-dark relative overflow-hidden flex items-center justify-center p-3">
                 {/* Chalkboard grid overlay background */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(24,179,111,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(24,179,111,0.015)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.015)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
                 
-                {/* Sketched River Wave Doodle */}
+                {/* Sketched River/Road Wave Doodle */}
                 <svg className="absolute w-full h-full inset-0 text-primary-green/15 pointer-events-none" viewBox="0 0 200 100" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  {/* River flowing vertically in middle */}
-                  <path d="M100,-10 Q90,30 110,60 T90,110" strokeDasharray="4 3" />
-                  <path d="M115,-10 Q105,30 125,60 T105,110" strokeDasharray="4 3" />
+                  <path d="M10 50 Q100 20 190 50" strokeDasharray="4 3" />
+                  <path d="M60 10 L60 90" strokeDasharray="4 3" />
                   
-                  {/* Trees/Farming items left & right */}
-                  <circle cx="40" cy="30" r="8" strokeDasharray="2 2" />
-                  <line x1="40" y1="38" x2="40" y2="48" />
-                  
-                  <circle cx="160" cy="70" r="10" strokeDasharray="2 2" />
-                  <line x1="160" y1="80" x2="160" y2="90" />
-                  
-                  {/* Bridge */}
-                  <path d="M85,45 H125" />
-                  <path d="M85,52 H125" />
-                  <line x1="95" y1="45" x2="95" y2="52" />
-                  <line x1="115" y1="45" x2="115" y2="52" />
+                  {/* School House Marker */}
+                  <rect x="85" y="35" width="30" height="20" rx="3" fill="#FAF8F5" stroke="#2B2B2B" strokeWidth="2" />
+                  <polygon points="80,35 100,20 120,35" fill="#7A2E8F" stroke="#2B2B2B" strokeWidth="2" />
+                  <circle cx="100" cy="45" r="2" fill="#EC1E8C" />
                 </svg>
                 
-                <div className="relative z-10 bg-white/90 backdrop-blur-xs py-2.5 px-4 rounded-[12px_6px_10px_8px]/[8px_10px_6px_12px] border-2 border-primary-green/30 text-center shadow-xs rotate-[-1.5deg]">
-                  <p className="text-[10px] font-extrabold text-primary-dark uppercase">Bantaran Sungai Gajahwong</p>
-                  <p className="text-[9px] text-neutral-gray mt-0.5 font-bold">Kotagede, Yogyakarta</p>
+                <div className="relative z-10 bg-white/95 backdrop-blur-xs py-2 px-4 rounded-[12px_6px_10px_8px]/[8px_10px_6px_12px] border-2 border-primary-green/30 text-center shadow-xs rotate-[-1.5deg]">
+                  <p className="text-[10px] font-extrabold text-primary-dark uppercase">KB/RA Sahabat Berbah</p>
+                  <p className="text-[9px] text-neutral-gray mt-0.5 font-bold">Sleman, Yogyakarta</p>
                 </div>
               </div>
             </div>
@@ -156,7 +147,7 @@ export default function KontakPage() {
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
-                Chat WhatsApp Admin
+                Hubungi Admin Sekolah
               </a>
             </div>
           </div>
@@ -164,10 +155,10 @@ export default function KontakPage() {
           {/* Right Column: Dynamic Form */}
           <div className="lg:col-span-7 bg-white p-8 sm:p-12 rounded-[40px_15px_30px_25px]/[25px_30px_15px_40px] shadow-sm border-2 border-dashed border-primary-green/30 relative">
             {/* Notebook grid lines watermark */}
-            <div className="absolute inset-x-0 top-0 h-full bg-[linear-gradient(rgba(24,179,111,0.01)_1px,transparent_1px)] bg-[size:100%_24px] pointer-events-none rounded-[40px_15px_30px_25px]/[25px_30px_15px_40px]"></div>
+            <div className="absolute inset-x-0 top-0 h-full bg-[linear-gradient(rgba(44,178,74,0.01)_1px,transparent_1px)] bg-[size:100%_24px] pointer-events-none rounded-[40px_15px_30px_25px]/[25px_30px_15px_40px]"></div>
 
-            <h3 className="font-baloo text-2xl font-bold text-neutral-dark mb-2 relative z-10">Formulir Kolaborasi G-SEE</h3>
-            <p className="text-xs text-neutral-gray mb-8 font-medium relative z-10">Pilih opsi pilar keterlibatan Anda dan kirimkan proposal/maksud pesan kolaborasi Anda di bawah ini.</p>
+            <h3 className="font-baloo text-2xl font-bold text-neutral-dark mb-2 relative z-10">Formulir Pesan & Pertanyaan</h3>
+            <p className="text-xs text-neutral-gray mb-8 font-semibold relative z-10">Sampaikan pertanyaan atau permohonan kemitraan Anda secara langsung melalui formulir di bawah ini.</p>
             
             <form onSubmit={handleFormSubmit} className="space-y-5 relative z-10">
               <div>
@@ -199,23 +190,23 @@ export default function KontakPage() {
               </div>
 
               <div>
-                <label htmlFor="role" className="block text-xs font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">Pilihan Kolaborasi</label>
+                <label htmlFor="subject" className="block text-xs font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">Kategori Pertanyaan</label>
                 <select
-                  id="role"
-                  name="role"
-                  value={formData.role}
+                  id="subject"
+                  name="subject"
+                  value={formData.subject}
                   onChange={handleFormChange}
                   className="w-full px-4 py-3.5 rounded-[12px_8px_15px_10px]/[10px_15px_8px_12px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm bg-white transition-colors font-semibold select-text"
                 >
-                  <option value="Mitra">Mitra / Universitas Partner</option>
-                  <option value="Relawan">Relawan Pengajar Harian</option>
-                  <option value="Donatur">Donatur Buku / Media Belajar</option>
+                  <option value="PPDB">Informasi Pendaftaran Siswa Baru (PPDB)</option>
+                  <option value="SPP">Informasi Keuangan / SPP</option>
+                  <option value="Kemitraan">Kemitraan Yayasan / Donatur</option>
                   <option value="Lainnya">Lainnya</option>
                 </select>
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-xs font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">Pesan / Proposal Kerjasama</label>
+                <label htmlFor="message" className="block text-xs font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">Pesan / Detail Pertanyaan</label>
                 <textarea
                   id="message"
                   name="message"
@@ -224,7 +215,7 @@ export default function KontakPage() {
                   onChange={handleFormChange}
                   required
                   className="w-full px-4 py-3.5 rounded-[10px_15px_8px_12px]/[12px_8px_15px_10px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors resize-none font-semibold select-text"
-                  placeholder="Jelaskan secara ringkas maksud penawaran kolaborasi Anda..."
+                  placeholder="Jelaskan detail pertanyaan atau maksud pesan Anda..."
                 ></textarea>
               </div>
 

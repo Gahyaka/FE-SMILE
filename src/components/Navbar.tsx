@@ -41,12 +41,23 @@ export default function Navbar() {
   const navBg = "bg-[#FAF8F5]/95 backdrop-blur-md shadow-sm border border-primary-green/20 rounded-[24px_12px_36px_18px]/[18px_36px_12px_24px]";
   const textColor = "text-neutral-dark";
   const logoColor = "text-primary-dark";
-  const btnClass = "bg-primary-green text-white hover:bg-primary-dark border-2 border-primary-dark";
+  const btnClass = "bg-accent text-white hover:bg-accent-dark border-2 border-accent-dark";
 
   const isAdminPage = pathname?.startsWith('/admin') || pathname?.startsWith('/dashboard');
   if (isAdminPage) {
     return null;
   }
+
+  // RA Sahabat logo component
+  const RASahabatLogo = () => (
+    <div className="w-10 h-10 rounded-full border-2 border-primary-green flex-shrink-0 overflow-hidden bg-white shadow-xs">
+      <img
+        src="/images/logo.jpg"
+        alt="Logo RA Sahabat"
+        className="w-full h-full object-cover"
+      />
+    </div>
+  );
 
   return (
     <>
@@ -58,11 +69,7 @@ export default function Navbar() {
         <div className={`max-w-7xl mx-auto px-5 md:px-8 py-3 flex items-center justify-between transition-all duration-300 ${navBg}`}>
           {/* Logo G-SEE with asymmetric border */}
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-green to-primary-dark rounded-[12px_6px_10px_8px]/[8px_10px_6px_12px] border-2 border-primary-dark flex items-center justify-center shadow-sm">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-            </div>
+            <RASahabatLogo />
             <div className="flex flex-col">
               <span className={`font-baloo text-xl font-bold leading-none tracking-wide ${logoColor} group-hover:text-primary-green transition-colors`}>
                 {siteConfig.name}
@@ -97,10 +104,10 @@ export default function Navbar() {
             
             <div className="flex items-center gap-3">
               <a
-                href="https://www.instagram.com/gsee.changemakers/"
+                href="https://www.instagram.com/ra_sahabat/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`text-xs px-5 py-2 rounded-[15px_35px_15px_40px]/[40px_15px_35px_15px] font-extrabold transition-all duration-200 shadow-sm ${btnClass}`}
+                className={`text-xs px-5 py-2.5 rounded-[15px_35px_15px_40px]/[40px_15px_35px_15px] font-extrabold transition-all duration-200 shadow-sm ${btnClass}`}
               >
                 Instagram Kami
               </a>
@@ -110,7 +117,7 @@ export default function Navbar() {
           {/* Hamburger Icon with organic style */}
           <button
             onClick={() => setMobileOpen(true)}
-            className={`md:hidden p-2 rounded-[10px_6px_8px_6px] border-2 border-dashed border-primary-green/40 text-neutral-dark hover:bg-soft-mint transition-colors`}
+            className={`md:hidden p-2 rounded-[10px_6px_8px_6px] border-2 border-solid border-primary-green/40 text-neutral-dark hover:bg-soft-mint transition-colors`}
             aria-label="Buka menu"
           >
             <svg
@@ -151,11 +158,7 @@ export default function Navbar() {
               {/* Header Drawer */}
               <div className="flex items-center justify-between px-5 pt-6 pb-5 border-b-2 border-dashed border-soft-mint bg-soft-mint/10">
                 <Link href="/" onClick={() => setMobileOpen(false)} className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-primary-green to-primary-dark rounded-[8px_4px_6px_5px] border border-primary-dark flex items-center justify-center text-white">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                  </div>
+                  <RASahabatLogo />
                   <div className="flex flex-col">
                     <span className="font-baloo text-lg font-bold leading-none tracking-wide text-primary-dark">
                       {siteConfig.name}
@@ -200,7 +203,7 @@ export default function Navbar() {
               <div className="p-4 mt-auto mb-2 border-t-2 border-dashed border-soft-mint">
                 <div className="flex flex-col gap-2.5">
                   <a
-                    href="https://www.instagram.com/gsee.changemakers/"
+                    href="https://www.instagram.com/ra_sahabat/"
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setMobileOpen(false)}
