@@ -27,63 +27,7 @@ export default function HomePage() {
     }, 1500);
   };
 
-  // Custom Chibi Girl & Boy Illustration in SVG
-  const ChibiIllustration = () => (
-    <svg className="w-full h-full text-primary-green drop-shadow-md" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Background Circle with Chalkboard Dotted Line */}
-      <circle cx="100" cy="100" r="85" fill="#E7F8EA" stroke="#2CB24A" strokeWidth="3" strokeDasharray="6 4" />
-      
-      {/* Cloud Doodles */}
-      <path d="M20 60 C20 50, 40 45, 45 50 C50 40, 70 45, 65 55" stroke="#8ED96B" strokeWidth="2" strokeLinecap="round" />
-      <path d="M140 50 C140 42, 155 38, 160 42 C165 35, 180 38, 175 48" stroke="#8ED96B" strokeWidth="2" strokeLinecap="round" />
 
-      {/* Sparkles */}
-      <path d="M30 140 L38 140 M34 136 L34 144" stroke="#F5A623" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M170 130 L176 130 M173 127 L173 133" stroke="#EC1E8C" strokeWidth="2" strokeLinecap="round" />
-
-      {/* Boy Character (Left) */}
-      <g>
-        {/* Kopiah (Purple) */}
-        <path d="M50 100 L90 100 L85 82 L55 82 Z" fill="#7A2E8F" stroke="#2B2B2B" strokeWidth="2" />
-        <path d="M50 100 L90 100" stroke="#FAF8F5" strokeWidth="1.5" />
-        {/* Face */}
-        <circle cx="70" cy="115" r="18" fill="#FAF8F5" stroke="#2B2B2B" strokeWidth="2" />
-        {/* Ears */}
-        <circle cx="51" cy="115" r="4" fill="#FAF8F5" stroke="#2B2B2B" strokeWidth="2" />
-        {/* Hair */}
-        <path d="M53 105 Q65 100 75 103" stroke="#2B2B2B" strokeWidth="2" strokeLinecap="round" />
-        {/* Eyes */}
-        <circle cx="63" cy="112" r="2" fill="#2B2B2B" />
-        <circle cx="77" cy="112" r="2" fill="#2B2B2B" />
-        {/* Cheeks */}
-        <circle cx="59" cy="118" r="1.5" fill="#EC1E8C" opacity="0.5" />
-        <circle cx="81" cy="118" r="1.5" fill="#EC1E8C" opacity="0.5" />
-        {/* Smile */}
-        <path d="M66 123 Q70 127 74 123" stroke="#2B2B2B" strokeWidth="2" strokeLinecap="round" />
-        {/* Clothes (Green) */}
-        <path d="M50 133 C50 133, 45 160, 70 160 C95 160, 90 133, 90 133" fill="#2CB24A" stroke="#2B2B2B" strokeWidth="2" />
-      </g>
-
-      {/* Girl Character (Right) */}
-      <g>
-        {/* Hijab (Pink) */}
-        <path d="M105 105 C105 90, 145 90, 145 105 C145 125, 140 160, 125 162 C110 160, 105 125, 105 105" fill="#EC1E8C" stroke="#2B2B2B" strokeWidth="2" />
-        <path d="M110 120 C110 110, 140 110, 140 120 C140 130, 135 155, 125 155 C115 155, 110 130, 110 120" fill="#EC1E8C" />
-        {/* Face inside Hijab */}
-        <circle cx="125" cy="120" r="14" fill="#FAF8F5" stroke="#2B2B2B" strokeWidth="2" />
-        {/* Eyes */}
-        <circle cx="119" cy="118" r="2" fill="#2B2B2B" />
-        <circle cx="131" cy="118" r="2" fill="#2B2B2B" />
-        {/* Cheeks */}
-        <circle cx="115" cy="123" r="1.5" fill="#EC1E8C" opacity="0.5" />
-        <circle cx="135" cy="123" r="1.5" fill="#EC1E8C" opacity="0.5" />
-        {/* Smile */}
-        <path d="M121 127 Q125 130 129 127" stroke="#2B2B2B" strokeWidth="2" strokeLinecap="round" />
-        {/* Clothes (Purple) */}
-        <path d="M108 135 C108 135, 105 160, 125 160 C145 160, 142 135, 142 135" fill="#7A2E8F" stroke="#2B2B2B" strokeWidth="2" />
-      </g>
-    </svg>
-  );
 
   return (
     <div className="flex flex-col min-h-screen text-neutral-dark select-none bg-[#FAF8F5] pt-20">
@@ -132,8 +76,18 @@ export default function HomePage() {
             </div>
 
             {/* Right Illustration Column */}
-            <div className="lg:col-span-5 relative w-full aspect-square max-w-[380px] mx-auto">
-              <ChibiIllustration />
+            <div className="lg:col-span-5 relative w-full aspect-square max-w-[380px] mx-auto flex items-center justify-center p-4">
+              {/* Outer circle with chalkboard style dotted line */}
+              <div className="absolute inset-0 bg-[#E7F8EA] rounded-full border-4 border-dashed border-primary-green/30 pointer-events-none animate-pulse duration-[6000ms]"></div>
+              
+              {/* Logo image container */}
+              <div className="w-[85%] aspect-square rounded-full border-4 border-primary-green overflow-hidden bg-white shadow-md">
+                <img
+                  src="/images/logo.jpg"
+                  alt="Logo RA Sahabat"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
 
           </div>
