@@ -39,7 +39,6 @@ export default function HomePage() {
         
         {/* Decorative Doodles */}
         <div className="absolute top-12 left-10 text-warm-yellow/30 text-5xl font-bold select-none hidden md:block animate-bounce duration-[4000ms]">★</div>
-        <div className="absolute bottom-16 right-16 text-secondary-soft/80 text-6xl font-bold select-none hidden md:block rotate-12">✿</div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -50,11 +49,7 @@ export default function HomePage() {
                 Pendaftaran PPDB TA 2026/2027 Dibuka!
               </span>
               <h1 className="font-baloo text-4xl sm:text-5xl lg:text-6xl font-bold text-neutral-dark leading-tight">
-                Membentuk Generasi <span className="text-primary-green relative">Cerdas
-                  <svg className="absolute -bottom-2 left-0 w-full h-3 text-warm-yellow" viewBox="0 0 100 10" preserveAspectRatio="none" fill="none">
-                    <path d="M0,5 Q50,9 100,5" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                  </svg>
-                </span> & Berkarakter Islami
+                Membentuk Generasi <span className="text-primary-green">Cerdas</span> & Berkarakter Islami
               </h1>
               <p className="text-sm sm:text-base text-neutral-gray max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
                 KB/RA Sahabat Berbah Sleman berkomitmen menghadirkan ekosistem pendidikan anak usia dini yang menyenangkan, berakhlak mulia, dan berlandaskan nilai Aswaja NU.
@@ -76,18 +71,68 @@ export default function HomePage() {
             </div>
 
             {/* Right Illustration Column */}
-            <div className="lg:col-span-5 relative w-full aspect-square max-w-[380px] mx-auto flex items-center justify-center p-4">
-              {/* Outer circle with chalkboard style dotted line */}
-              <div className="absolute inset-0 bg-[#E7F8EA] rounded-full border-4 border-dashed border-primary-green/30 pointer-events-none animate-pulse duration-[6000ms]"></div>
+            <div className="lg:col-span-5 relative w-full aspect-square max-w-[380px] mx-auto flex items-center justify-center p-4 lg:-mt-12 -mt-4">
+              <style>{`
+                @keyframes slow-scale-pulse {
+                  0%, 100% { transform: scale(0.96); }
+                  50% { transform: scale(1.04); }
+                }
+                @keyframes slow-float-y {
+                  0%, 100% { transform: translateY(0); }
+                  50% { transform: translateY(-8px); }
+                }
+                @keyframes slow-float-x {
+                  0%, 100% { transform: translateX(0); }
+                  50% { transform: translateX(8px); }
+                }
+                .custom-pulse-bg {
+                  animation: slow-scale-pulse 7s ease-in-out infinite;
+                }
+                .custom-float-y {
+                  animation: slow-float-y 4s ease-in-out infinite;
+                }
+                .custom-float-x {
+                  animation: slow-float-x 5s ease-in-out infinite;
+                }
+              `}</style>
+
+              {/* Outer circle with chalkboard style dotted line - pulsing in scale, not fading */}
+              <div className="absolute inset-0 bg-[#E7F8EA] rounded-full border-4 border-dashed border-primary-green/30 pointer-events-none custom-pulse-bg"></div>
               
               {/* Logo image container */}
-              <div className="w-[85%] aspect-square rounded-full border-4 border-primary-green overflow-hidden bg-white shadow-md">
+              <div className="w-[85%] aspect-square rounded-full border-4 border-primary-green overflow-hidden bg-white shadow-md z-10 relative">
                 <img
                   src="/images/logo.jpg"
                   alt="Logo RA Sahabat"
                   className="w-full h-full object-cover"
                 />
               </div>
+
+              {/* Floating Doodles around logo */}
+              {/* Star on top right - soft warm yellow */}
+              <svg className="absolute -top-1 -right-1 w-10 h-10 text-warning/35 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#FAF8F5" stroke="#F5A623" strokeWidth="1.5" />
+              </svg>
+
+              {/* Cloud on top left - soft purple */}
+              <svg className="absolute -top-6 -left-6 w-14 h-10 text-secondary/25 z-20 pointer-events-none custom-float-x" viewBox="0 0 100 60" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M10,40 C10,25 30,20 40,25 C50,15 75,20 75,35 C85,35 95,45 85,55 H15 C5,55 5,45 10,40 Z" fill="#F2E6F5" stroke="#7A2E8F" strokeWidth="1.5" opacity="0.6" />
+              </svg>
+
+              {/* Flower on bottom left - soft pink (replaced the heart element) */}
+              <svg className="absolute -bottom-2 -left-2 w-10 h-10 text-accent/40 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <circle cx="12" cy="8" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1.2" />
+                <circle cx="12" cy="16" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1.2" />
+                <circle cx="8" cy="12" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1.2" />
+                <circle cx="16" cy="12" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1.2" />
+                <circle cx="12" cy="12" r="3" fill="#EC1E8C" opacity="0.7" />
+              </svg>
+
+              {/* Paperplane on bottom right - soft green */}
+              <svg className="absolute -bottom-6 -right-6 w-12 h-12 text-primary-green/25 z-20 pointer-events-none custom-float-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M22 2L2 8.66L11.5 12.5L16 21L22 2Z" fill="#E7F8EA" stroke="#2CB24A" strokeWidth="1.5" opacity="0.6" />
+                <path d="M11.5 12.5L22 2" stroke="#2CB24A" strokeDasharray="2 1" />
+              </svg>
             </div>
 
           </div>
