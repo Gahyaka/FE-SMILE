@@ -278,7 +278,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Gallery 1 */}
             <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[-1.5deg] hover:rotate-[1deg] hover:shadow-md transition-all duration-300">
               {/* Polaroid tape */}
@@ -308,7 +308,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Berkebun di Halaman Sekolah</h4>
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Berkebun di Halaman</h4>
                 <p className="text-[10px] text-neutral-gray font-semibold mt-1">Edukasi kecintaan alam & tanaman hijau</p>
               </div>
             </div>
@@ -325,8 +325,180 @@ export default function HomePage() {
                 </svg>
               </div>
               <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Hari Santri & Sholawat Bersama</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Penanaman akhlak mulia sejak usia dini</p>
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Hari Santri & Sholawat</h4>
+                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Penanaman akhlak mulia sejak dini</p>
+              </div>
+            </div>
+
+            {/* Gallery 4 */}
+            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[1.5deg] hover:rotate-[-1.5deg] hover:shadow-md transition-all duration-300">
+              {/* Polaroid tape */}
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[-1deg] shadow-3xs pointer-events-none"></div>
+              
+              <div className="w-full aspect-[4/3] bg-gradient-to-br from-soft-mint to-secondary-soft/30 rounded-md flex items-center justify-center text-primary-green relative overflow-hidden">
+                {/* Simulated kid drawing APE icon */}
+                <svg className="w-12 h-12 text-primary-green/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                  <circle cx="12" cy="12" r="10" strokeDasharray="3 2" />
+                  <path d="M12 8v8M8 12h8" />
+                </svg>
+              </div>
+              <div className="mt-4 text-center">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Eksperimen Pelangi Gembira</h4>
+                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Sains cilik & pencampuran warna</p>
+              </div>
+            </div>
+
+            {/* Gallery 5 */}
+            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[-2deg] hover:rotate-[1deg] hover:shadow-md transition-all duration-300">
+              {/* Polaroid tape */}
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[2deg] shadow-3xs pointer-events-none"></div>
+              
+              <div className="w-full aspect-[4/3] bg-gradient-to-br from-secondary-soft to-primary-light/20 rounded-md flex items-center justify-center text-secondary relative overflow-hidden">
+                {/* Simulated art drawing icon */}
+                <svg className="w-12 h-12 text-secondary/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93z" />
+                </svg>
+              </div>
+              <div className="mt-4 text-center">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Pentas Seni Anak RA</h4>
+                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Saluran ekspresi minat bakat & percaya diri</p>
+              </div>
+            </div>
+
+            {/* Gallery 6 */}
+            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[1deg] hover:rotate-[-2deg] hover:shadow-md transition-all duration-300">
+              {/* Polaroid tape */}
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[-2deg] shadow-3xs pointer-events-none"></div>
+              
+              <div className="w-full aspect-[4/3] bg-gradient-to-br from-accent-soft to-soft-mint/30 rounded-md flex items-center justify-center text-accent relative overflow-hidden">
+                {/* Simulated kid tooth/gizi icon */}
+                <svg className="w-12 h-12 text-accent/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                  <circle cx="12" cy="12" r="8" />
+                  <path d="M12 2a4 4 0 0 0-4 4c0 3 4 8 4 8s4-5 4-4a4 4 0 0 0-4-4z" />
+                </svg>
+              </div>
+              <div className="mt-4 text-center">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Senam & Gosok Gigi PHBS</h4>
+                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Pembiasaan perilaku hidup bersih sehat</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PRESTASI RA SAHABAT SECTION */}
+      <section className="py-20 bg-[#FAF8F5] relative overflow-hidden border-b border-soft-mint">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.01)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto space-y-3 mb-16">
+            <span className="inline-block text-xs font-accent font-semibold uppercase tracking-wider text-accent bg-accent-soft px-4 py-2 rounded-lg border-2 border-dashed border-accent/30">
+              Pencapaian Lembaga & Siswa
+            </span>
+            <h2 className="font-baloo text-3xl font-bold text-neutral-dark">Prestasi Kebanggaan RA Sahabat</h2>
+            <p className="text-xs sm:text-sm text-neutral-gray font-semibold leading-relaxed">
+              Bukti dedikasi dewan guru dan potensi cemerlang anak didik kami dalam berbagai ajang festival dan kesehatan.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Prestasi 1 */}
+            <div className="bg-white p-8 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs flex items-start gap-4">
+              <div className="w-12 h-12 bg-warning/10 rounded-full flex items-center justify-center text-warning flex-shrink-0">
+                🏆
+              </div>
+              <div>
+                <span className="text-[10px] font-extrabold text-primary-green uppercase tracking-wide">Tingkat Kecamatan Berbah</span>
+                <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1">Juara 1 Lomba Mewarnai & Menggambar</h4>
+                <p className="text-[11px] text-neutral-gray font-semibold mt-1">Meraih Juara Pertama pada Festival Kreasi Anak Usia Dini tingkat Kecamatan Berbah Sleman.</p>
+              </div>
+            </div>
+
+            {/* Prestasi 2 */}
+            <div className="bg-white p-8 rounded-[15px_30px_20px_25px]/[25px_20px_30px_15px] border-2 border-dashed border-primary-green/20 shadow-xs flex items-start gap-4">
+              <div className="w-12 h-12 bg-secondary-soft rounded-full flex items-center justify-center text-secondary flex-shrink-0">
+                🥇
+              </div>
+              <div>
+                <span className="text-[10px] font-extrabold text-secondary uppercase tracking-wide">Tingkat Kabupaten Sleman</span>
+                <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1">Juara 2 Lomba Adzan & Surat Pendek</h4>
+                <p className="text-[11px] text-neutral-gray font-semibold mt-1">Meraih juara kedua hafalan Juz Amma dan ketepatan lafadz adzan cilik se-Kabupaten Sleman.</p>
+              </div>
+            </div>
+
+            {/* Prestasi 3 */}
+            <div className="bg-white p-8 rounded-[30px_20px_25px_15px]/[15px_25px_20px_30px] border-2 border-dashed border-primary-green/20 shadow-xs flex items-start gap-4">
+              <div className="w-12 h-12 bg-accent-soft rounded-full flex items-center justify-center text-accent flex-shrink-0">
+                🛡
+              </div>
+              <div>
+                <span className="text-[10px] font-extrabold text-accent uppercase tracking-wide">Program Gizi Puskesmas</span>
+                <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1">Penghargaan PAUD Peduli PHBS</h4>
+                <p className="text-[11px] text-neutral-gray font-semibold mt-1">Penghargaan tertinggi atas konsistensi program sanitasi bersih serta monitoring berat & tinggi rutin.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONI WALI MURID SECTION */}
+      <section className="py-20 bg-white relative overflow-hidden border-b border-soft-mint">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto space-y-3 mb-16">
+            <span className="inline-block text-xs font-accent font-semibold uppercase tracking-wider text-secondary-dark bg-secondary-soft px-4 py-2 rounded-lg border-2 border-dashed border-secondary/30">
+              Kata Wali Murid
+            </span>
+            <h2 className="font-baloo text-3xl font-bold text-neutral-dark">Apa Kata Orang Tua Bersama Kami?</h2>
+            <p className="text-xs sm:text-sm text-neutral-gray font-semibold leading-relaxed">
+              Curahan hati dan apresiasi tulus dari para orang tua/wali murid yang mempercayakan putra-putrinya di RA Sahabat.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Testi 1 */}
+            <div className="bg-[#FAF8F5] p-6 rounded-[20px_40px_15px_35px]/[35px_15px_40px_20px] border-2 border-dashed border-primary-green/25 shadow-xs relative flex flex-col justify-between">
+              <p className="text-xs text-neutral-gray italic font-semibold leading-relaxed">
+                "Sangat bersyukur menyekolahkan anak di RA Sahabat. Selain lingkungannya yang ramah anak, guru-gurunya sabar sekali. Sekarang anak saya sudah hafal sholawat nabi dan doa harian penting."
+              </p>
+              <div className="flex items-center gap-3 mt-6 border-t border-primary-green/10 pt-4">
+                <div className="w-9 h-9 rounded-full bg-primary-green text-white flex items-center justify-center font-extrabold text-sm flex-shrink-0">
+                  IR
+                </div>
+                <div>
+                  <h4 className="font-baloo text-xs font-bold text-neutral-dark">Ibu Rina</h4>
+                  <p className="text-[10px] text-neutral-gray font-bold">Wali Murid Kelas RA (A)</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testi 2 */}
+            <div className="bg-[#FAF8F5] p-6 rounded-[30px_15px_40px_20px]/[20px_40px_15px_30px] border-2 border-dashed border-secondary/25 shadow-xs relative flex flex-col justify-between">
+              <p className="text-xs text-neutral-gray italic font-semibold leading-relaxed">
+                "Metode belajarnya sangat menyenangkan! Anak saya awalnya sangat pemalu dan takut masuk kelas baru. Tapi dengan perhatian dari guru-guru RA Sahabat, sekarang dia jadi aktif bersosialisasi."
+              </p>
+              <div className="flex items-center gap-3 mt-6 border-t border-secondary/15 pt-4">
+                <div className="w-9 h-9 rounded-full bg-secondary text-white flex items-center justify-center font-extrabold text-sm flex-shrink-0">
+                  BJ
+                </div>
+                <div>
+                  <h4 className="font-baloo text-xs font-bold text-neutral-dark">Bapak Joko</h4>
+                  <p className="text-[10px] text-neutral-gray font-bold">Wali Murid Kelas KB</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testi 3 */}
+            <div className="bg-[#FAF8F5] p-6 rounded-[25px_35px_15px_40px]/[40px_15px_35px_25px] border-2 border-dashed border-accent/25 shadow-xs relative flex flex-col justify-between">
+              <p className="text-xs text-neutral-gray italic font-semibold leading-relaxed">
+                "Pencatatan kesehatan tumbuh kembangnya sangat terstruktur. Koordinasi dengan Puskesmas Berbah membantu saya mengontrol nutrisi anak, dan program berkebun membuatnya jadi suka makan sayur!"
+              </p>
+              <div className="flex items-center gap-3 mt-6 border-t border-accent/15 pt-4">
+                <div className="w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center font-extrabold text-sm flex-shrink-0">
+                  IS
+                </div>
+                <div>
+                  <h4 className="font-baloo text-xs font-bold text-neutral-dark">Ibu Siti</h4>
+                  <p className="text-[10px] text-neutral-gray font-bold">Wali Murid Kelas RA (B)</p>
+                </div>
               </div>
             </div>
           </div>
