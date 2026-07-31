@@ -10,16 +10,28 @@
   --color-foreground: var(--foreground);
   --font-baloo: var(--font-baloo-2);
   --font-quicksand: var(--font-quicksand);
+  --font-fredoka: var(--font-fredoka);
   
-  /* Brand color palette */
-  --color-primary-green: #18B36F;
-  --color-primary-dark: #0E7A4D;
-  --color-primary-light: #5FD79B;
-  --color-soft-mint: #E6F9F1;
-  --color-warm-yellow: #FFC93C;
-  --color-soft-orange: #FF9F5B;
-  --color-neutral-dark: #2E3A32;
-  --color-neutral-gray: #6B7A72;
+  /* Brand color palette - RA Sahabat */
+  --color-primary-green: #2CB24A;
+  --color-primary-dark: #1C8A38;
+  --color-primary-light: #8ED96B;
+  --color-soft-mint: #E7F8EA;
+  
+  --color-secondary: #7A2E8F;
+  --color-secondary-dark: #5C2270;
+  --color-secondary-soft: #F2E6F5;
+  
+  --color-accent: #EC1E8C;
+  --color-accent-dark: #C4106E;
+  --color-accent-soft: #FCE4F1;
+  
+  --color-warning: #F5A623;
+  --color-danger: #E24C4C;
+  
+  --color-neutral-dark: #2B2B2B;
+  --color-neutral-gray: #6B6B6B;
+  --color-border-gray: #E2E2E2;
 }
 
 body {

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Baloo_2, Quicksand } from "next/font/google";
+import { Baloo_2, Quicksand, Fredoka } from "next/font/google";
 import "./globals.css";
 import NavbarWrapper from "@/components/NavbarWrapper";
 import Footer from "@/components/Footer";
@@ -16,10 +16,16 @@ const quicksand = Quicksand({
   weight: ["400", "500", "600", "700"],
 });
 
+const fredoka = Fredoka({
+  variable: "--font-fredoka",
+  subsets: ["latin"],
+  weight: ["500", "600"],
+});
+
 export const metadata: Metadata = {
-  title: "G-SEE — Gajahwong Smart Education Ecosystem",
-  description: "Membangun ekosistem pendidikan cerdas, ramah anak, dan peduli lingkungan di Sekolah Gajahwong melalui program Smart Learning, Smart Environment, dan Pendampingan Anak.",
-  keywords: ["G-SEE", "Sekolah Gajahwong", "Smart Learning", "Smart Environment", "Pendidikan Anak", "Komunitas Nonformal"],
+  title: "KB/RA Sahabat — Berbah, Sleman, Yogyakarta",
+  description: "Membangun ekosistem pendidikan anak usia dini yang cerdas, berakhlak mulia, dan berkarakter Islami di KB/RA Sahabat Berbah Sleman.",
+  keywords: ["RA Sahabat", "KB Sahabat", "Raudhatul Athfal Sleman", "PAUD Berbah", "Pendidikan Anak Usia Dini", "Kemenag", "Nahdlatul Ulama"],
 };
 
 export default function RootLayout({
@@ -30,7 +36,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${baloo2.variable} ${quicksand.variable} h-full scroll-smooth`}
+      className={`${baloo2.variable} ${quicksand.variable} ${fredoka.variable} h-full scroll-smooth`}
     >
       <body className="min-h-full flex flex-col font-quicksand text-neutral-dark antialiased bg-white">
         <NavbarWrapper />

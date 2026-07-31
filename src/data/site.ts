@@ -1,11 +1,11 @@
 export const navLinks = [
   { href: "/", label: "Beranda" },
-  { href: "/program", label: "Program Kami" },
-  { href: "/tim", label: "Tim Kami" },
-  { href: "/kontak", label: "Kontak" },
+  { href: "/tim", label: "Profil Guru" },
+  { href: "/program", label: "Kegiatan" },
+  { href: "/kontak", label: "PPDB & Kontak" },
 ];
 
 export const siteConfig = {
-  name: "G-SEE",
-  tagline: "Sekolah Gajahwong",
+  name: "RA Sahabat",
+  tagline: "KB/RA Sahabat Berbah",
 };
