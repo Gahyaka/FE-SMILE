@@ -48,29 +48,14 @@ export default function Navbar() {
     return null;
   }
 
-  // Chibi characters logo component
-  const ChibiLogo = () => (
-    <div className="w-10 h-10 bg-gradient-to-br from-primary-green to-primary-dark rounded-full border-2 border-primary-dark flex items-center justify-center shadow-sm overflow-hidden relative flex-shrink-0">
-      {/* Green circle background */}
-      <div className="absolute inset-0 bg-primary-green"></div>
-      
-      {/* Boy with Purple Kopiah (Left) */}
-      <svg className="w-6 h-6 text-white absolute bottom-0 left-[-2px] z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <rect x="4" y="6" width="6" height="3" fill="#7A2E8F" stroke="#2B2B2B" strokeWidth="1.2" />
-        <circle cx="7" cy="12" r="3.2" fill="#FAF8F5" stroke="#2B2B2B" strokeWidth="1.2" />
-        <circle cx="6" cy="11.5" r="0.5" fill="#2B2B2B" />
-        <circle cx="8" cy="11.5" r="0.5" fill="#2B2B2B" />
-        <path d="M6 13.5 Q7 14.5 8 13.5" stroke="#2B2B2B" strokeWidth="1" strokeLinecap="round" />
-      </svg>
-      
-      {/* Girl with Pink Hijab (Right) */}
-      <svg className="w-6 h-6 text-white absolute bottom-0 right-[-2px] z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M12 8 C12 5, 21 5, 21 8 C21 11, 21 15, 17 16 C13 15, 12 11, 12 8" fill="#EC1E8C" stroke="#2B2B2B" strokeWidth="1.2" />
-        <circle cx="16.5" cy="11.5" r="2.8" fill="#FAF8F5" stroke="#2B2B2B" strokeWidth="1.2" />
-        <circle cx="15.5" cy="11" r="0.5" fill="#2B2B2B" />
-        <circle cx="17.5" cy="11" r="0.5" fill="#2B2B2B" />
-        <path d="M15.5 13 Q16.5 14 17.5 13" stroke="#2B2B2B" strokeWidth="1" strokeLinecap="round" />
-      </svg>
+  // RA Sahabat logo component
+  const RASahabatLogo = () => (
+    <div className="w-10 h-10 rounded-full border-2 border-primary-green flex-shrink-0 overflow-hidden bg-white shadow-xs">
+      <img
+        src="/images/logo.jpg"
+        alt="Logo RA Sahabat"
+        className="w-full h-full object-cover"
+      />
     </div>
   );
 
@@ -84,7 +69,7 @@ export default function Navbar() {
         <div className={`max-w-7xl mx-auto px-5 md:px-8 py-3 flex items-center justify-between transition-all duration-300 ${navBg}`}>
           {/* Logo G-SEE with asymmetric border */}
           <Link href="/" className="flex items-center space-x-3 group">
-            <ChibiLogo />
+            <RASahabatLogo />
             <div className="flex flex-col">
               <span className={`font-baloo text-xl font-bold leading-none tracking-wide ${logoColor} group-hover:text-primary-green transition-colors`}>
                 {siteConfig.name}
@@ -171,7 +156,7 @@ export default function Navbar() {
               {/* Header Drawer */}
               <div className="flex items-center justify-between px-5 pt-6 pb-5 border-b-2 border-dashed border-soft-mint bg-soft-mint/10">
                 <Link href="/" onClick={() => setMobileOpen(false)} className="flex items-center space-x-2">
-                  <ChibiLogo />
+                  <RASahabatLogo />
                   <div className="flex flex-col">
                     <span className="font-baloo text-lg font-bold leading-none tracking-wide text-primary-dark">
                       {siteConfig.name}

@@ -5,29 +5,14 @@ import Link from "next/link";
 import { siteConfig } from "@/data/site";
 
 export default function Footer() {
-  // Chibi characters logo component (matching Navbar)
-  const ChibiLogo = () => (
-    <div className="w-10 h-10 bg-gradient-to-br from-primary-green to-primary-dark rounded-full border-2 border-white flex items-center justify-center shadow-md overflow-hidden relative flex-shrink-0">
-      {/* Green circle background */}
-      <div className="absolute inset-0 bg-primary-green"></div>
-      
-      {/* Boy with Purple Kopiah (Left) */}
-      <svg className="w-6 h-6 text-white absolute bottom-0 left-[-2px] z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <rect x="4" y="6" width="6" height="3" fill="#7A2E8F" stroke="#2B2B2B" strokeWidth="1.2" />
-        <circle cx="7" cy="12" r="3.2" fill="#FAF8F5" stroke="#2B2B2B" strokeWidth="1.2" />
-        <circle cx="6" cy="11.5" r="0.5" fill="#2B2B2B" />
-        <circle cx="8" cy="11.5" r="0.5" fill="#2B2B2B" />
-        <path d="M6 13.5 Q7 14.5 8 13.5" stroke="#2B2B2B" strokeWidth="1" strokeLinecap="round" />
-      </svg>
-      
-      {/* Girl with Pink Hijab (Right) */}
-      <svg className="w-6 h-6 text-white absolute bottom-0 right-[-2px] z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M12 8 C12 5, 21 5, 21 8 C21 11, 21 15, 17 16 C13 15, 12 11, 12 8" fill="#EC1E8C" stroke="#2B2B2B" strokeWidth="1.2" />
-        <circle cx="16.5" cy="11.5" r="2.8" fill="#FAF8F5" stroke="#2B2B2B" strokeWidth="1.2" />
-        <circle cx="15.5" cy="11" r="0.5" fill="#2B2B2B" />
-        <circle cx="17.5" cy="11" r="0.5" fill="#2B2B2B" />
-        <path d="M15.5 13 Q16.5 14 17.5 13" stroke="#2B2B2B" strokeWidth="1" strokeLinecap="round" />
-      </svg>
+  // RA Sahabat logo component (matching Navbar)
+  const RASahabatLogo = () => (
+    <div className="w-10 h-10 rounded-full border-2 border-white flex-shrink-0 overflow-hidden bg-white shadow-md">
+      <img
+        src="/images/logo.jpg"
+        alt="Logo RA Sahabat"
+        className="w-full h-full object-cover"
+      />
     </div>
   );
 
@@ -42,7 +27,7 @@ export default function Footer() {
           {/* Footer Brand */}
           <div className="md:col-span-5 space-y-4">
             <div className="flex items-center space-x-3">
-              <ChibiLogo />
+              <RASahabatLogo />
               <span className="font-baloo text-2xl font-bold tracking-wide">{siteConfig.name}</span>
             </div>
             <p className="text-xs text-stone-300 max-w-sm leading-relaxed font-medium">
