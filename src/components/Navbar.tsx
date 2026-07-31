@@ -41,7 +41,7 @@ export default function Navbar() {
   const navBg = "bg-[#FAF8F5]/95 backdrop-blur-md shadow-sm border border-primary-green/20 rounded-[24px_12px_36px_18px]/[18px_36px_12px_24px]";
   const textColor = "text-neutral-dark";
   const logoColor = "text-primary-dark";
-  const btnClass = "bg-accent text-white hover:bg-accent-dark border-2 border-primary-dark";
+  const btnClass = "bg-accent text-white hover:bg-accent-dark border-2 border-accent-dark";
 
   const isAdminPage = pathname?.startsWith('/admin') || pathname?.startsWith('/dashboard');
   if (isAdminPage) {
@@ -103,19 +103,21 @@ export default function Navbar() {
             })}
             
             <div className="flex items-center gap-3">
-              <Link
-                href="/kontak"
+              <a
+                href="https://www.instagram.com/ra_sahabat/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className={`text-xs px-5 py-2.5 rounded-[15px_35px_15px_40px]/[40px_15px_35px_15px] font-extrabold transition-all duration-200 shadow-sm ${btnClass}`}
               >
-                Daftar PPDB
-              </Link>
+                Instagram Kami
+              </a>
             </div>
           </nav>
 
           {/* Hamburger Icon with organic style */}
           <button
             onClick={() => setMobileOpen(true)}
-            className={`md:hidden p-2 rounded-[10px_6px_8px_6px] border-2 border-dashed border-primary-green/40 text-neutral-dark hover:bg-soft-mint transition-colors`}
+            className={`md:hidden p-2 rounded-[10px_6px_8px_6px] border-2 border-solid border-primary-green/40 text-neutral-dark hover:bg-soft-mint transition-colors`}
             aria-label="Buka menu"
           >
             <svg
@@ -200,13 +202,15 @@ export default function Navbar() {
               {/* Footer Drawer */}
               <div className="p-4 mt-auto mb-2 border-t-2 border-dashed border-soft-mint">
                 <div className="flex flex-col gap-2.5">
-                  <Link
-                    href="/kontak"
+                  <a
+                    href="https://www.instagram.com/ra_sahabat/"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     onClick={() => setMobileOpen(false)}
                     className={`block w-full text-center px-4 py-2.5 rounded-[15px_35px_15px_40px]/[40px_15px_35px_15px] font-extrabold transition-colors shadow-sm ${btnClass}`}
                   >
-                    Daftar PPDB
-                  </Link>
+                    Instagram Kami
+                  </a>
                 </div>
               </div>
             </motion.div>
