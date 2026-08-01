@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-// Mock Initial Activities (Modul B - Dokumentasi Kegiatan)
+// Mock Initial Activities (Dokumentasi Kegiatan)
 const initialActivities = [
   {
     id: 1,
@@ -31,16 +31,16 @@ const initialActivities = [
   },
 ];
 
-// Mock Initial Students for SPP (Modul C - Monitoring SPP & Data Dasar)
+// Mock Initial Students (Data Dasar Peserta Didik)
 const initialStudents = [
-  { id: 1, name: "Ahmad Rayyan", class: "RA (A)", status: { Jan: "Lunas", Feb: "Lunas", Mar: "Belum Lunas" } },
-  { id: 2, name: "Bilqis Azzahra", class: "RA (B)", status: { Jan: "Lunas", Feb: "Lunas", Mar: "Lunas" } },
-  { id: 3, name: "Fatih Al-Fatih", class: "KB", status: { Jan: "Lunas", Feb: "Belum Lunas", Mar: "Belum Lunas" } },
-  { id: 4, name: "Fatimah Az-Zahra", class: "RA (A)", status: { Jan: "Lunas", Feb: "Lunas", Mar: "Lunas" } },
-  { id: 5, name: "Yusuf Al-Hafidz", class: "KB", status: { Jan: "Belum Lunas", Feb: "Belum Lunas", Mar: "Belum Lunas" } },
+  { id: 1, name: "Ahmad Rayyan", class: "RA (A)", status: { Jan: "Lunas", Feb: "Lunas", Mar: "Belum Lunas" }, activeStatus: "Aktif", academicYear: "2026/2027", nisn: "1234567890" },
+  { id: 2, name: "Bilqis Azzahra", class: "RA (B)", status: { Jan: "Lunas", Feb: "Lunas", Mar: "Lunas" }, activeStatus: "Aktif", academicYear: "2026/2027", nisn: "1234567891" },
+  { id: 3, name: "Fatih Al-Fatih", class: "KB", status: { Jan: "Lunas", Feb: "Belum Lunas", Mar: "Belum Lunas" }, activeStatus: "Aktif", academicYear: "2026/2027", nisn: "1234567892" },
+  { id: 4, name: "Fatimah Az-Zahra", class: "RA (A)", status: { Jan: "Lunas", Feb: "Lunas", Mar: "Lunas" }, activeStatus: "Aktif", academicYear: "2026/2027", nisn: "1234567893" },
+  { id: 5, name: "Yusuf Al-Hafidz", class: "KB", status: { Jan: "Belum Lunas", Feb: "Belum Lunas", Mar: "Belum Lunas" }, activeStatus: "Aktif", academicYear: "2026/2027", nisn: "1234567894" },
 ];
 
-// Mock Initial Savings Transactions (Modul 3.C - Tabungan Anak)
+// Mock Initial Savings Transactions (Tabungan Anak)
 const initialSavings = [
   { id: 1, studentId: 1, type: "Setoran", amount: 50000, date: "2026-07-15", method: "Tunai", admin: "Ibu Guru Halimah" },
   { id: 2, studentId: 1, type: "Setoran", amount: 20000, date: "2026-07-20", method: "Tunai", admin: "Ibu Guru Halimah" },
@@ -48,7 +48,7 @@ const initialSavings = [
   { id: 4, studentId: 3, type: "Setoran", amount: 30000, date: "2026-07-22", method: "Tunai", admin: "Ibu Guru Halimah" },
 ];
 
-// Mock Initial Audit Logs (Modul 9 - Monitoring Aktivitas Admin)
+// Mock Initial Audit Logs (Monitoring Aktivitas Admin)
 const initialLogs = [
   { id: 1, time: "2026-08-01 09:30", user: "Ibu Guru Halimah", action: "Menambahkan kegiatan: Peringatan Hari Santri" },
   { id: 2, time: "2026-08-01 10:15", user: "Administrator", action: "Mengubah status SPP Ahmad Rayyan (Maret) menjadi Lunas" },
@@ -57,10 +57,17 @@ const initialLogs = [
 export default function DashboardClient() {
   const router = useRouter();
   const [session, setSession] = useState<{ role: "admin" | "walikelas"; name: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<"kegiatan" | "spp" | "tabungan" | "laporan" | "audit">("kegiatan");
+  const [activeTab, setActiveTab] = useState<"siswa" | "kegiatan" | "spp" | "tabungan" | "laporan" | "audit">("siswa");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
-  // Activities states (Modul B)
+  // Student registration states
+  const [students, setStudents] = useState(initialStudents);
+  const [newStudentName, setNewStudentName] = useState("");
+  const [newStudentClass, setNewStudentClass] = useState("KB");
+  const [newStudentNisn, setNewStudentNisn] = useState("");
+  const [newStudentYear, setNewStudentYear] = useState("2026/2027");
+
+  // Activities states
   const [activities, setActivities] = useState(initialActivities);
   const [newTitle, setNewTitle] = useState("");
   const [newDate, setNewDate] = useState("");
@@ -69,10 +76,7 @@ export default function DashboardClient() {
   const [newDesc, setNewDesc] = useState("");
   const [filterCategory, setFilterCategory] = useState("Semua");
 
-  // SPP states (Modul C)
-  const [students, setStudents] = useState(initialStudents);
-
-  // Savings states (Section 3.C)
+  // Savings states
   const [savings, setSavings] = useState(initialSavings);
   const [selectedStudentId, setSelectedStudentId] = useState<number>(1);
   const [transType, setTransType] = useState<"Setoran" | "Penarikan">("Setoran");
@@ -97,7 +101,78 @@ export default function DashboardClient() {
     router.push("/portal-belajar");
   };
 
-  // Add new activity handler
+  // Add new student handler
+  const handleAddStudent = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newStudentName || !newStudentNisn) return;
+
+    const newSt = {
+      id: Date.now(),
+      name: newStudentName,
+      class: newStudentClass,
+      status: { Jan: "Belum Lunas", Feb: "Belum Lunas", Mar: "Belum Lunas" },
+      activeStatus: "Aktif",
+      academicYear: newStudentYear,
+      nisn: newStudentNisn,
+    };
+
+    setStudents([...students, newSt]);
+
+    // Add audit log
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session?.name || "User",
+      action: `Mendaftarkan siswa baru: ${newStudentName} (NISN: ${newStudentNisn})`,
+    };
+    setLogs([newLog, ...logs]);
+
+    // Reset Form
+    setNewStudentName("");
+    setNewStudentNisn("");
+  };
+
+  // Update Student Active Status
+  const handleUpdateStudentStatus = (studentId: number, status: string) => {
+    let studentName = "";
+    setStudents((prev) =>
+      prev.map((student) => {
+        if (student.id === studentId) {
+          studentName = student.name;
+          return { ...student, activeStatus: status };
+        }
+        return student;
+      })
+    );
+
+    // Add audit log
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session?.name || "User",
+      action: `Mengubah status keaktifan siswa ${studentName} menjadi: ${status}`,
+    };
+    setLogs([newLog, ...logs]);
+  };
+
+  // Delete Student Data
+  const handleDeleteStudent = (studentId: number) => {
+    const studentName = students.find((s) => s.id === studentId)?.name || "Siswa";
+    if (confirm(`Apakah Anda yakin ingin menghapus data siswa ${studentName} secara permanen?`)) {
+      setStudents(students.filter((s) => s.id !== studentId));
+
+      // Add audit log
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session?.name || "User",
+        action: `Menghapus data siswa: ${studentName}`,
+      };
+      setLogs([newLog, ...logs]);
+    }
+  };
+
+  // Add new activity handler (Modul B)
   const handleAddActivity = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle || !newDate || !newDesc) return;
@@ -157,14 +232,12 @@ export default function DashboardClient() {
       id: Date.now(),
       time: new Date().toISOString().replace('T', ' ').substring(0, 16),
       user: session?.name || "User",
-      action: `Mengubah status SPP ${studentName} (${month}) menjadi ${
-        students.find(s => s.id === studentId)?.status[month] === "Lunas" ? "Belum Lunas" : "Lunas"
-      }`,
+      action: `Mengubah status SPP ${studentName} (${month})`,
     };
     setLogs([newLog, ...logs]);
   };
 
-  // Add savings transaction (Admin / Wali kelas)
+  // Add savings transaction
   const handleAddTransaction = (e: React.FormEvent) => {
     e.preventDefault();
     if (!transAmount || isNaN(Number(transAmount)) || Number(transAmount) <= 0) return;
@@ -172,7 +245,7 @@ export default function DashboardClient() {
     const amountNum = Number(transAmount);
     const selectedStudentName = students.find(s => s.id === selectedStudentId)?.name || "Anak";
 
-    // Recheck penarikan check (penarikan saldo tidak boleh melebihi saldo yang ada)
+    // Recheck penarikan check
     const currentSaldo = getStudentSaldo(selectedStudentId);
     if (transType === "Penarikan" && amountNum > currentSaldo) {
       alert("Saldo tidak cukup untuk melakukan penarikan!");
@@ -230,7 +303,7 @@ export default function DashboardClient() {
     : activities.filter(act => act.category === filterCategory);
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-neutral-dark flex flex-col md:flex-row relative">
+    <div className="min-h-screen bg-[#FAF8F5] text-neutral-dark flex flex-col md:flex-row relative font-sans">
       {/* Background Chalkboard Grid Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.012)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none -z-10"></div>
 
@@ -253,6 +326,24 @@ export default function DashboardClient() {
           <nav className="space-y-1.5">
             <span className="text-[9px] text-primary-green/60 font-extrabold uppercase tracking-widest block mb-2 px-3">Menu Utama</span>
             
+            {/* Data Siswa Tab */}
+            <button
+              onClick={() => {
+                setActiveTab("siswa");
+                setSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
+                activeTab === "siswa"
+                  ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
+                  : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span>Data Siswa</span>
+            </button>
+
             <button
               onClick={() => {
                 setActiveTab("kegiatan");
@@ -287,7 +378,6 @@ export default function DashboardClient() {
               <span>Monitoring SPP</span>
             </button>
 
-            {/* Tabungan Tab (Modul 3.C) */}
             <button
               onClick={() => {
                 setActiveTab("tabungan");
@@ -302,10 +392,9 @@ export default function DashboardClient() {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Tabungan Anak</span>
+              <span>Tabungan Siswa</span>
             </button>
 
-            {/* Laporan Tab (Modul 10) */}
             <button
               onClick={() => {
                 setActiveTab("laporan");
@@ -323,7 +412,6 @@ export default function DashboardClient() {
               <span>Laporan & Ekspor</span>
             </button>
 
-            {/* Audit Logs Tab (Modul 9) */}
             <button
               onClick={() => {
                 setActiveTab("audit");
@@ -338,7 +426,7 @@ export default function DashboardClient() {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Catatan Aktivitas</span>
+              <span>Log Aktivitas</span>
             </button>
           </nav>
         </div>
@@ -405,11 +493,12 @@ export default function DashboardClient() {
                 Portal Belajar & Administrasi
               </span>
               <h2 className="font-baloo text-2xl font-bold text-neutral-dark mt-1">
-                {activeTab === "kegiatan" && "Dokumentasi Kegiatan (Modul B)"}
-                {activeTab === "spp" && "Monitoring SPP bulanan (Modul C)"}
-                {activeTab === "tabungan" && "Pengelolaan Tabungan Siswa (Modul 3.C)"}
-                {activeTab === "laporan" && "Ekspor & Rekap Laporan Sekolah (Modul 10)"}
-                {activeTab === "audit" && "Log Riwayat Transaksi Audit (Modul 9)"}
+                {activeTab === "siswa" && "Manajemen Data Peserta Didik"}
+                {activeTab === "kegiatan" && "Dokumentasi Kegiatan"}
+                {activeTab === "spp" && "Monitoring SPP Siswa"}
+                {activeTab === "tabungan" && "Buku Tabungan Siswa"}
+                {activeTab === "laporan" && "Laporan & Ekspor Data"}
+                {activeTab === "audit" && "Log Aktivitas Petugas"}
               </h2>
             </div>
             
@@ -418,6 +507,164 @@ export default function DashboardClient() {
               <span>{isAdmin ? "Status: Administrator" : "Status: Wali Kelas"}</span>
             </div>
           </div>
+
+          {/* TAB CONTENT: Data Siswa */}
+          {activeTab === "siswa" && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              
+              {/* Form Input Siswa Baru */}
+              <div className="lg:col-span-4 bg-white p-6 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-4">
+                <h3 className="font-baloo text-lg font-bold text-neutral-dark flex items-center gap-1.5 border-b border-primary-green/10 pb-2">
+                  <svg className="w-5 h-5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                  <span>Daftarkan Siswa Baru</span>
+                </h3>
+                
+                <form onSubmit={handleAddStudent} className="space-y-4">
+                  <div>
+                    <label htmlFor="newStudentName" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Nama Lengkap Anak</label>
+                    <input
+                      type="text"
+                      id="newStudentName"
+                      value={newStudentName}
+                      onChange={(e) => setNewStudentName(e.target.value)}
+                      required
+                      suppressHydrationWarning
+                      className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                      placeholder="Nama Lengkap Anak"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="newStudentNisn" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">NISN (Administrasi Minimal)</label>
+                    <input
+                      type="text"
+                      maxLength={10}
+                      id="newStudentNisn"
+                      value={newStudentNisn}
+                      onChange={(e) => setNewStudentNisn(e.target.value)}
+                      required
+                      suppressHydrationWarning
+                      className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                      placeholder="Nomor NISN (10 Digit)"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label htmlFor="newStudentClass" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Kelas</label>
+                      <select
+                        id="newStudentClass"
+                        value={newStudentClass}
+                        onChange={(e) => setNewStudentClass(e.target.value)}
+                        suppressHydrationWarning
+                        className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white"
+                      >
+                        <option value="KB">KB</option>
+                        <option value="RA (A)">RA (A)</option>
+                        <option value="RA (B)">RA (B)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="newStudentYear" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Tahun Ajaran</label>
+                      <input
+                        type="text"
+                        id="newStudentYear"
+                        value={newStudentYear}
+                        onChange={(e) => setNewStudentYear(e.target.value)}
+                        required
+                        suppressHydrationWarning
+                        className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    suppressHydrationWarning
+                    className="w-full py-3 rounded-[12px_24px_12px_30px]/[30px_12px_24px_12px] bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs transition-all border border-primary-green shadow-xs cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                    </svg>
+                    <span>Daftarkan Siswa</span>
+                  </button>
+                </form>
+              </div>
+
+              {/* Table Data Siswa (CRUD Read, Update, Delete) */}
+              <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-primary-green/10 shadow-3xs space-y-4">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark border-b border-neutral-gray/10 pb-2">Tabel Rekapitulasi Data Siswa Aktif</h4>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs min-w-[800px]">
+                    <thead>
+                      <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10">
+                        <th className="py-3.5 px-4 w-[25%]">Nama Lengkap</th>
+                        <th className="py-3.5 px-4 w-[15%]">NISN</th>
+                        <th className="py-3.5 px-4 w-[15%]">Kelas</th>
+                        <th className="py-3.5 px-4 w-[15%]">Tahun Ajaran</th>
+                        <th className="py-3.5 px-4 text-center w-[18%]">Status Keaktifan</th>
+                        <th className="py-3.5 px-4 text-center w-[12%]">Tindakan</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-gray/5 font-semibold text-neutral-dark">
+                      {students.map((st) => (
+                        <tr key={st.id} className="hover:bg-soft-mint/30 transition-colors">
+                          <td className="py-3 px-4 font-bold text-xs max-w-[200px] break-words whitespace-normal" title={st.name}>
+                            {st.name}
+                          </td>
+                          <td className="py-3 px-4 text-neutral-gray font-mono">{st.nisn}</td>
+                          <td className="py-3 px-4">
+                            <span className="px-3 py-1 bg-primary-green/10 text-primary-green border border-primary-green/20 rounded-full text-[10px] font-extrabold whitespace-nowrap">
+                              {st.class}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-neutral-gray">{st.academicYear}</td>
+                          <td className="py-3 px-4 text-center">
+                            <select
+                              value={st.activeStatus}
+                              onChange={(e) => handleUpdateStudentStatus(st.id, e.target.value)}
+                              className={`px-2 py-1 rounded text-[10px] font-extrabold border focus:outline-none transition-colors cursor-pointer w-full max-w-[110px] text-center ${
+                                st.activeStatus === "Aktif"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                  : st.activeStatus === "Lulus"
+                                  ? "bg-blue-50 text-blue-700 border-blue-200"
+                                  : "bg-stone-100 text-stone-600 border-stone-300"
+                              }`}
+                            >
+                              <option value="Aktif">Aktif</option>
+                              <option value="Lulus">Lulus</option>
+                              <option value="Keluar">Keluar</option>
+                            </select>
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <button
+                              onClick={() => handleDeleteStudent(st.id)}
+                              className="px-3 py-1 rounded bg-accent/10 hover:bg-accent/20 text-accent font-extrabold text-[9px] cursor-pointer transition-colors border border-accent/20"
+                            >
+                              Hapus
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="p-4 bg-soft-mint border border-primary-green/20 rounded-xl flex items-center gap-3 mt-4">
+                  <svg className="w-5 h-5 text-primary-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <p className="text-[10px] font-semibold text-primary-dark leading-relaxed">
+                    <strong>Pemberitahuan Kepatuhan Data:</strong> Pengumpulan data dibatasi secara minimal hanya untuk NISN, Tahun Ajaran, dan Status Keaktifan guna menghindari penyimpanan data pribadi anak didik yang berlebihan dan melindungi privasi keluarga.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          )}
 
           {/* TAB CONTENT 1: Dokumentasi Kegiatan */}
           {activeTab === "kegiatan" && (
@@ -639,7 +886,7 @@ export default function DashboardClient() {
             </div>
           )}
 
-          {/* TAB CONTENT 3: Tabungan Anak (Modul 3.C) */}
+          {/* TAB CONTENT 3: Tabungan Anak */}
           {activeTab === "tabungan" && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               
@@ -782,7 +1029,7 @@ export default function DashboardClient() {
             </div>
           )}
 
-          {/* TAB CONTENT 4: Laporan & Ekspor (Modul 10) */}
+          {/* TAB CONTENT 4: Laporan & Ekspor */}
           {activeTab === "laporan" && (
             <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-6">
               <div>
@@ -824,7 +1071,7 @@ export default function DashboardClient() {
             </div>
           )}
 
-          {/* TAB CONTENT 5: Audit Logs (Modul 9) */}
+          {/* TAB CONTENT 5: Audit Logs */}
           {activeTab === "audit" && (
             <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-6">
               <div>
