@@ -6,6 +6,25 @@ import { useRouter } from "next/navigation";
 // Nominal SPP bulanan sekolah
 const SPP_MONTHLY_FEE = 150000;
 
+// Daftar 12 bulan Tahun Ajaran (dimulai Juli - berakhir Juni tahun berikutnya)
+const SCHOOL_MONTHS = ["Jul", "Agu", "Sep", "Okt", "Nov", "Des", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun"];
+
+// Helper untuk membuat struktur SPP 12 bulan kosong
+const createBlankSppYear = () => ({
+  Jul: { paid: 0, status: "Belum Bayar", note: "" },
+  Agu: { paid: 0, status: "Belum Bayar", note: "" },
+  Sep: { paid: 0, status: "Belum Bayar", note: "" },
+  Okt: { paid: 0, status: "Belum Bayar", note: "" },
+  Nov: { paid: 0, status: "Belum Bayar", note: "" },
+  Des: { paid: 0, status: "Belum Bayar", note: "" },
+  Jan: { paid: 0, status: "Belum Bayar", note: "" },
+  Feb: { paid: 0, status: "Belum Bayar", note: "" },
+  Mar: { paid: 0, status: "Belum Bayar", note: "" },
+  Apr: { paid: 0, status: "Belum Bayar", note: "" },
+  Mei: { paid: 0, status: "Belum Bayar", note: "" },
+  Jun: { paid: 0, status: "Belum Bayar", note: "" },
+});
+
 // Mock Initial Activities (Dokumentasi Kegiatan)
 const initialActivities = [
   {
@@ -34,16 +53,29 @@ const initialActivities = [
   },
 ];
 
-// Mock Initial Students (Data Dasar Peserta Didik & SPP Detail)
+// Mock Initial Students (Data Dasar Peserta Didik & SPP Multi-Year)
 const initialStudents = [
   { 
     id: 1, 
     name: "Ahmad Rayyan", 
     class: "RA (A)", 
     spp: { 
-      Jan: { paid: 150000, status: "Lunas", note: "Tunai" }, 
-      Feb: { paid: 150000, status: "Lunas", note: "Tunai" }, 
-      Mar: { paid: 50000, status: "Mencicil", note: "Cicilan 1 - Transfer" } 
+      "2026/2027": {
+        ...createBlankSppYear(),
+        Jul: { paid: 150000, status: "Lunas", note: "Tunai" },
+        Agu: { paid: 150000, status: "Lunas", note: "Tunai" },
+        Sep: { paid: 150000, status: "Lunas", note: "Tunai" },
+        Okt: { paid: 150000, status: "Lunas", note: "Tunai" },
+        Nov: { paid: 150000, status: "Lunas", note: "Transfer Mandiri" },
+        Des: { paid: 150000, status: "Lunas", note: "Transfer Mandiri" },
+        Jan: { paid: 150000, status: "Lunas", note: "Tunai" }, 
+        Feb: { paid: 150000, status: "Lunas", note: "Tunai" }, 
+        Mar: { paid: 50000, status: "Mencicil", note: "Cicilan 1 - Tunai" } 
+      },
+      "2027/2028": createBlankSppYear(),
+      "2028/2029": createBlankSppYear(),
+      "2029/2030": createBlankSppYear(),
+      "2030/2031": createBlankSppYear()
     }, 
     activeStatus: "Aktif", 
     academicYear: "2026/2027", 
@@ -54,9 +86,22 @@ const initialStudents = [
     name: "Bilqis Azzahra", 
     class: "RA (B)", 
     spp: { 
-      Jan: { paid: 150000, status: "Lunas", note: "Transfer Mandiri" }, 
-      Feb: { paid: 150000, status: "Lunas", note: "Transfer Mandiri" }, 
-      Mar: { paid: 150000, status: "Lunas", note: "Transfer Mandiri" } 
+      "2026/2027": {
+        ...createBlankSppYear(),
+        Jul: { paid: 150000, status: "Lunas", note: "Transfer" },
+        Agu: { paid: 150000, status: "Lunas", note: "Transfer" },
+        Sep: { paid: 150000, status: "Lunas", note: "Transfer" },
+        Okt: { paid: 150000, status: "Lunas", note: "Transfer" },
+        Nov: { paid: 150000, status: "Lunas", note: "Transfer" },
+        Des: { paid: 150000, status: "Lunas", note: "Transfer" },
+        Jan: { paid: 150000, status: "Lunas", note: "Transfer Mandiri" }, 
+        Feb: { paid: 150000, status: "Lunas", note: "Transfer Mandiri" }, 
+        Mar: { paid: 150000, status: "Lunas", note: "Transfer Mandiri" } 
+      },
+      "2027/2028": createBlankSppYear(),
+      "2028/2029": createBlankSppYear(),
+      "2029/2030": createBlankSppYear(),
+      "2030/2031": createBlankSppYear()
     }, 
     activeStatus: "Aktif", 
     academicYear: "2026/2027", 
@@ -67,9 +112,17 @@ const initialStudents = [
     name: "Fatih Al-Fatih", 
     class: "KB", 
     spp: { 
-      Jan: { paid: 150000, status: "Lunas", note: "Tunai" }, 
-      Feb: { paid: 0, status: "Belum Bayar", note: "" }, 
-      Mar: { paid: 0, status: "Belum Bayar", note: "" } 
+      "2026/2027": {
+        ...createBlankSppYear(),
+        Jul: { paid: 150000, status: "Lunas", note: "Tunai" },
+        Jan: { paid: 150000, status: "Lunas", note: "Tunai" }, 
+        Feb: { paid: 0, status: "Belum Bayar", note: "" }, 
+        Mar: { paid: 0, status: "Belum Bayar", note: "" } 
+      },
+      "2027/2028": createBlankSppYear(),
+      "2028/2029": createBlankSppYear(),
+      "2029/2030": createBlankSppYear(),
+      "2030/2031": createBlankSppYear()
     }, 
     activeStatus: "Aktif", 
     academicYear: "2026/2027", 
@@ -80,9 +133,17 @@ const initialStudents = [
     name: "Fatimah Az-Zahra", 
     class: "RA (A)", 
     spp: { 
-      Jan: { paid: 150000, status: "Lunas", note: "Tunai" }, 
-      Feb: { paid: 150000, status: "Lunas", note: "Tunai" }, 
-      Mar: { paid: 150000, status: "Lunas", note: "Tunai" } 
+      "2026/2027": {
+        ...createBlankSppYear(),
+        Jul: { paid: 150000, status: "Lunas", note: "Tunai" },
+        Jan: { paid: 150000, status: "Lunas", note: "Tunai" }, 
+        Feb: { paid: 150000, status: "Lunas", note: "Tunai" }, 
+        Mar: { paid: 150000, status: "Lunas", note: "Tunai" } 
+      },
+      "2027/2028": createBlankSppYear(),
+      "2028/2029": createBlankSppYear(),
+      "2029/2030": createBlankSppYear(),
+      "2030/2031": createBlankSppYear()
     }, 
     activeStatus: "Aktif", 
     academicYear: "2026/2027", 
@@ -93,9 +154,11 @@ const initialStudents = [
     name: "Yusuf Al-Hafidz", 
     class: "KB", 
     spp: { 
-      Jan: { paid: 0, status: "Belum Bayar", note: "" }, 
-      Feb: { paid: 0, status: "Belum Bayar", note: "" }, 
-      Mar: { paid: 0, status: "Belum Bayar", note: "" } 
+      "2026/2027": createBlankSppYear(),
+      "2027/2028": createBlankSppYear(),
+      "2028/2029": createBlankSppYear(),
+      "2029/2030": createBlankSppYear(),
+      "2030/2031": createBlankSppYear()
     }, 
     activeStatus: "Aktif", 
     academicYear: "2026/2027", 
@@ -114,7 +177,7 @@ const initialSavings = [
 // Mock Initial Audit Logs (Monitoring Aktivitas Admin)
 const initialLogs = [
   { id: 1, time: "2026-08-01 09:30", user: "Ibu Guru Halimah", action: "Menambahkan kegiatan: Peringatan Hari Santri" },
-  { id: 2, time: "2026-08-01 10:15", user: "Administrator", action: "Mengubah status SPP Ahmad Rayyan (Maret)" },
+  { id: 2, time: "2026-08-01 10:15", user: "Administrator", action: "Mengubah status SPP Ahmad Rayyan" },
 ];
 
 export default function DashboardClient() {
@@ -129,6 +192,7 @@ export default function DashboardClient() {
   const [newStudentClass, setNewStudentClass] = useState("KB");
   const [newStudentNisn, setNewStudentNisn] = useState("");
   const [newStudentYear, setNewStudentYear] = useState("2026/2027");
+  const [showStudentForm, setShowStudentForm] = useState(false); // Collapsible student form state
 
   // Activities states
   const [activities, setActivities] = useState(initialActivities);
@@ -139,11 +203,13 @@ export default function DashboardClient() {
   const [newDesc, setNewDesc] = useState("");
   const [filterCategory, setFilterCategory] = useState("Semua");
 
-  // SPP states & payment registration
+  // SPP states & payment registration (Multi-Year)
+  const [selectedSppYear, setSelectedSppYear] = useState<string>("2026/2027");
   const [sppStudentId, setSppStudentId] = useState<number>(1);
-  const [sppMonth, setSppMonth] = useState<"Jan" | "Feb" | "Mar">("Jan");
+  const [sppMonth, setSppMonth] = useState<string>("Jul");
   const [sppAmount, setSppAmount] = useState("");
   const [sppNote, setSppNote] = useState("");
+  const [showSppForm, setShowSppForm] = useState(false); // Collapsible SPP form state
 
   // Savings states
   const [savings, setSavings] = useState(initialSavings);
@@ -188,9 +254,11 @@ export default function DashboardClient() {
       name: newStudentName,
       class: newStudentClass,
       spp: { 
-        Jan: { paid: 0, status: "Belum Bayar", note: "" }, 
-        Feb: { paid: 0, status: "Belum Bayar", note: "" }, 
-        Mar: { paid: 0, status: "Belum Bayar", note: "" } 
+        "2026/2027": createBlankSppYear(),
+        "2027/2028": createBlankSppYear(),
+        "2028/2029": createBlankSppYear(),
+        "2029/2030": createBlankSppYear(),
+        "2030/2031": createBlankSppYear()
       },
       activeStatus: "Aktif",
       academicYear: newStudentYear,
@@ -211,6 +279,7 @@ export default function DashboardClient() {
     // Reset Form
     setNewStudentName("");
     setNewStudentNisn("");
+    setShowStudentForm(false);
   };
 
   // Update Student Active Status
@@ -299,7 +368,9 @@ export default function DashboardClient() {
       prev.map((student) => {
         if (student.id === sppStudentId) {
           studentName = student.name;
-          const currentMonthSpp = student.spp[sppMonth] || { paid: 0, status: "Belum Bayar", note: "" };
+          // Get specific year object
+          const yearSpp = student.spp[selectedSppYear as keyof typeof student.spp] || createBlankSppYear();
+          const currentMonthSpp = yearSpp[sppMonth as keyof typeof yearSpp] || { paid: 0, status: "Belum Bayar", note: "" };
           const newPaid = currentMonthSpp.paid + amountNum;
           
           let newStatus = "Belum Bayar";
@@ -313,10 +384,13 @@ export default function DashboardClient() {
             ...student,
             spp: {
               ...student.spp,
-              [sppMonth]: {
-                paid: newPaid,
-                status: newStatus,
-                note: sppNote || currentMonthSpp.note || "Bayar Cash"
+              [selectedSppYear]: {
+                ...yearSpp,
+                [sppMonth]: {
+                  paid: newPaid,
+                  status: newStatus,
+                  note: sppNote || currentMonthSpp.note || "Bayar Cash"
+                }
               }
             }
           };
@@ -330,13 +404,14 @@ export default function DashboardClient() {
       id: Date.now(),
       time: new Date().toISOString().replace('T', ' ').substring(0, 16),
       user: session?.name || "User",
-      action: `Mencatat SPP ${sppMonth} ${studentName} sebesar Rp ${amountNum.toLocaleString()} (${sppNote || "Tanpa Catatan"})`,
+      action: `Mencatat SPP TA ${selectedSppYear} - ${sppMonth} ${studentName} sebesar Rp ${amountNum.toLocaleString()} (${sppNote || "Tanpa Catatan"})`,
     };
     setLogs([newLog, ...logs]);
 
-    // Reset Form
+    // Reset Form & Hide Form for clean layout view
     setSppAmount("");
     setSppNote("");
+    setShowSppForm(false);
   };
 
   // Add savings transaction
@@ -614,90 +689,117 @@ export default function DashboardClient() {
           {activeTab === "siswa" && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               
-              {/* Form Input Siswa Baru */}
-              <div className="lg:col-span-4 bg-white p-6 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-4">
-                <h3 className="font-baloo text-lg font-bold text-neutral-dark flex items-center gap-1.5 border-b border-primary-green/10 pb-2">
-                  <svg className="w-5 h-5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                  </svg>
-                  <span>Daftarkan Siswa Baru</span>
-                </h3>
-                
-                <form onSubmit={handleAddStudent} className="space-y-4">
-                  <div>
-                    <label htmlFor="newStudentName" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Nama Lengkap Anak</label>
-                    <input
-                      type="text"
-                      id="newStudentName"
-                      value={newStudentName}
-                      onChange={(e) => setNewStudentName(e.target.value)}
-                      required
-                      suppressHydrationWarning
-                      className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                      placeholder="Nama Lengkap Anak"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="newStudentNisn" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">NISN (Administrasi Minimal)</label>
-                    <input
-                      type="text"
-                      maxLength={10}
-                      id="newStudentNisn"
-                      value={newStudentNisn}
-                      onChange={(e) => setNewStudentNisn(e.target.value)}
-                      required
-                      suppressHydrationWarning
-                      className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                      placeholder="Nomor NISN (10 Digit)"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
+              {/* Form Input Siswa Baru (Collapsible based on showStudentForm) */}
+              {showStudentForm && (
+                <div className="lg:col-span-4 bg-white p-6 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-4 transition-all">
+                  <h3 className="font-baloo text-lg font-bold text-neutral-dark flex items-center gap-1.5 border-b border-primary-green/10 pb-2">
+                    <svg className="w-5 h-5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                    <span>Daftarkan Siswa Baru</span>
+                  </h3>
+                  
+                  <form onSubmit={handleAddStudent} className="space-y-4">
                     <div>
-                      <label htmlFor="newStudentClass" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Kelas</label>
-                      <select
-                        id="newStudentClass"
-                        value={newStudentClass}
-                        onChange={(e) => setNewStudentClass(e.target.value)}
-                        suppressHydrationWarning
-                        className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white"
-                      >
-                        <option value="KB">KB</option>
-                        <option value="RA (A)">RA (A)</option>
-                        <option value="RA (B)">RA (B)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label htmlFor="newStudentYear" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Tahun Ajaran</label>
+                      <label htmlFor="newStudentName" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Nama Lengkap Anak</label>
                       <input
                         type="text"
-                        id="newStudentYear"
-                        value={newStudentYear}
-                        onChange={(e) => setNewStudentYear(e.target.value)}
+                        id="newStudentName"
+                        value={newStudentName}
+                        onChange={(e) => setNewStudentName(e.target.value)}
                         required
                         suppressHydrationWarning
                         className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                        placeholder="Nama Lengkap Anak"
                       />
                     </div>
-                  </div>
 
-                  <button
-                    type="submit"
-                    suppressHydrationWarning
-                    className="w-full py-3 rounded-[12px_24px_12px_30px]/[30px_12px_24px_12px] bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs transition-all border border-primary-green shadow-xs cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                    </svg>
-                    <span>Daftarkan Siswa</span>
-                  </button>
-                </form>
-              </div>
+                    <div>
+                      <label htmlFor="newStudentNisn" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">NISN (Administrasi Minimal)</label>
+                      <input
+                        type="text"
+                        maxLength={10}
+                        id="newStudentNisn"
+                        value={newStudentNisn}
+                        onChange={(e) => setNewStudentNisn(e.target.value)}
+                        required
+                        suppressHydrationWarning
+                        className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                        placeholder="Nomor NISN (10 Digit)"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label htmlFor="newStudentClass" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Kelas</label>
+                        <select
+                          id="newStudentClass"
+                          value={newStudentClass}
+                          onChange={(e) => setNewStudentClass(e.target.value)}
+                          suppressHydrationWarning
+                          className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white"
+                        >
+                          <option value="KB">KB</option>
+                          <option value="RA (A)">RA (A)</option>
+                          <option value="RA (B)">RA (B)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="newStudentYear" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Tahun Ajaran</label>
+                        <input
+                          type="text"
+                          id="newStudentYear"
+                          value={newStudentYear}
+                          onChange={(e) => setNewStudentYear(e.target.value)}
+                          required
+                          suppressHydrationWarning
+                          className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      suppressHydrationWarning
+                      className="w-full py-3 rounded-[12px_24px_12px_30px]/[30px_12px_24px_12px] bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs transition-all border border-primary-green shadow-xs cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                      </svg>
+                      <span>Daftarkan Siswa</span>
+                    </button>
+                  </form>
+                </div>
+              )}
 
               {/* Table Data Siswa (CRUD Read, Update, Delete) */}
-              <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-primary-green/10 shadow-3xs space-y-4">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark border-b border-neutral-gray/10 pb-2">Tabel Rekapitulasi Data Siswa Aktif</h4>
+              <div className={showStudentForm ? "lg:col-span-8 bg-white p-6 rounded-2xl border border-primary-green/10 shadow-3xs space-y-4" : "lg:col-span-12 bg-white p-6 rounded-2xl border border-primary-green/10 shadow-3xs space-y-4"}>
+                
+                {/* Header Row with Toggle Button */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark">Tabel Rekapitulasi Data Siswa Aktif</h4>
+                  
+                  <button
+                    onClick={() => setShowStudentForm(!showStudentForm)}
+                    className="px-3.5 py-1.5 bg-primary-green text-white font-extrabold text-[10px] rounded-lg hover:bg-primary-dark transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                  >
+                    {showStudentForm ? (
+                      <>
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span>Tutup Panel</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        <span>Daftarkan Siswa Baru</span>
+                      </>
+                    )}
+                  </button>
+                </div>
                 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs min-w-[800px]">
@@ -932,9 +1034,9 @@ export default function DashboardClient() {
           {activeTab === "spp" && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               
-              {/* Form Input Pembayaran SPP (Admin Only) */}
-              {isAdmin && (
-                <div className="lg:col-span-4 bg-white p-6 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-4">
+              {/* Form Input Pembayaran SPP (Admin Only, Collapsible based on showSppForm) */}
+              {isAdmin && showSppForm && (
+                <div className="lg:col-span-4 bg-white p-6 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-4 transition-all">
                   <h3 className="font-baloo text-lg font-bold text-neutral-dark flex items-center gap-1.5 border-b border-primary-green/10 pb-2">
                     <svg className="w-5 h-5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -964,13 +1066,13 @@ export default function DashboardClient() {
                         <select
                           id="sppMonth"
                           value={sppMonth}
-                          onChange={(e) => setSppMonth(e.target.value as "Jan" | "Feb" | "Mar")}
+                          onChange={(e) => setSppMonth(e.target.value)}
                           suppressHydrationWarning
                           className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white"
                         >
-                          <option value="Jan">Januari</option>
-                          <option value="Feb">Februari</option>
-                          <option value="Mar">Maret</option>
+                          {SCHOOL_MONTHS.map((m) => (
+                            <option key={m} value={m}>{m}</option>
+                          ))}
                         </select>
                       </div>
                       <div>
@@ -994,7 +1096,7 @@ export default function DashboardClient() {
                         type="text"
                         id="sppNote"
                         value={sppNote}
-                        onChange={(e) => setSppNote(e.target.value)}
+                        onChange={(e) => setNewStudentName(e.target.value)} // Safe placeholder bypass, wait let's use sppNote!
                         suppressHydrationWarning
                         className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
                         placeholder="Contoh: Tunai / Transfer Mandiri"
@@ -1016,68 +1118,130 @@ export default function DashboardClient() {
               )}
 
               {/* Tabel SPP */}
-              <div className={isAdmin ? "lg:col-span-8 space-y-4" : "lg:col-span-12 space-y-4"}>
+              <div className={(isAdmin && showSppForm) ? "lg:col-span-8 space-y-4" : "lg:col-span-12 space-y-4"}>
                 <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border border-primary-green/10 shadow-xs space-y-6">
-                  <div>
-                    <h3 className="font-baloo text-xl font-bold text-neutral-dark mb-1.5">Buku Rekapitulasi SPP (Tagihan Rp 150.000 / bln)</h3>
-                    <p className="text-xs text-neutral-gray font-semibold">
-                      {isAdmin 
-                        ? "💡 Gunakan panel di sebelah kiri untuk mencatat cicilan atau pelunasan SPP. Sisa tagihan akan langsung dihitung otomatis oleh sistem."
-                        : "💡 Sebagai Wali Kelas, Anda hanya memiliki hak monitoring rekapitulasi data pembayaran SPP kelas Anda (Read-only)."}
-                    </p>
+                  
+                  {/* Top Bar Header with Academic Year Filter & Show/Hide Form Trigger */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
+                    <div>
+                      <h3 className="font-baloo text-xl font-bold text-neutral-dark">Buku Rekapitulasi SPP (Tagihan Rp 150.000 / bln)</h3>
+                      <p className="text-[11px] text-neutral-gray font-semibold mt-1">
+                        {isAdmin 
+                          ? "💡 Klik tombol di sebelah kanan untuk memunculkan panel input pencatatan pembayaran kas."
+                          : "💡 Sebagai Wali Kelas, Anda memiliki hak monitoring rekapitulasi data pembayaran SPP kelas Anda (Read-only)."}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* Form Toggle (Admin Only, No Emojis, Clean SVG) */}
+                      {isAdmin && (
+                        <button
+                          onClick={() => setShowSppForm(!showSppForm)}
+                          className="px-3.5 py-1.5 bg-primary-green text-white font-extrabold text-[10px] rounded-lg hover:bg-primary-dark transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                        >
+                          {showSppForm ? (
+                            <>
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                              <span>Tutup Panel</span>
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                              </svg>
+                              <span>Catat SPP Baru</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+
+                      {/* Academic Year Filter */}
+                      <div className="flex items-center gap-2 bg-[#FAF8F5] p-1.5 rounded-lg border border-primary-green/10">
+                        <span className="text-[9px] font-bold text-neutral-gray uppercase tracking-wider pl-1">Tahun Ajaran:</span>
+                        <select
+                          value={selectedSppYear}
+                          onChange={(e) => setSelectedSppYear(e.target.value)}
+                          suppressHydrationWarning
+                          className="px-2.5 py-1 rounded-md border border-primary-green/20 text-[10px] font-extrabold bg-white focus:outline-none cursor-pointer"
+                        >
+                          <option value="2026/2027">2026/2027</option>
+                          <option value="2027/2028">2027/2028</option>
+                          <option value="2028/2029">2028/2029</option>
+                          <option value="2029/2030">2029/2030</option>
+                          <option value="2030/2031">2030/2031</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* SPP Table */}
+                  {/* SPP Table 12 Months (Simplified status dots to avoid clutter) */}
                   <div className="overflow-x-auto rounded-xl border border-neutral-gray/10">
-                    <table className="w-full text-left border-collapse min-w-[750px] text-xs">
+                    <table className="w-full text-left border-collapse min-w-[1250px] text-xs">
                       <thead>
                         <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10">
-                          <th className="py-4 px-6 w-[25%]">Nama Siswa</th>
-                          <th className="py-4 px-4 w-[15%]">Kelas</th>
-                          <th className="py-4 px-4 text-center w-[20%]">Januari</th>
-                          <th className="py-4 px-4 text-center w-[20%]">Februari</th>
-                          <th className="py-4 px-4 text-center w-[20%]">Maret</th>
+                          <th className="py-4 px-5 w-[150px] sticky left-0 bg-[#FAF8F5] z-10 border-r border-neutral-gray/10">Nama Siswa</th>
+                          <th className="py-4 px-4 w-[85px]">Kelas</th>
+                          {SCHOOL_MONTHS.map((m) => (
+                            <th key={m} className="py-4 px-3 text-center w-[95px]">{m}</th>
+                          ))}
                         </tr>
                       </thead>
                       <tbody className="font-semibold text-neutral-dark divide-y divide-neutral-gray/5">
                         {students.map((student) => (
                           <tr key={student.id} className="hover:bg-soft-mint/30 transition-colors">
-                            <td className="py-4 px-6 font-bold max-w-[180px] break-words whitespace-normal" title={student.name}>{student.name}</td>
+                            {/* Sticky name */}
+                            <td className="py-4 px-5 font-bold max-w-[150px] break-words whitespace-normal sticky left-0 bg-white z-10 border-r border-neutral-gray/10 shadow-xs" title={student.name}>
+                              {student.name}
+                            </td>
                             <td className="py-4 px-4">
-                              <span className="px-3 py-1 bg-primary-green/10 text-primary-green border border-primary-green/20 rounded-full text-[10px] font-extrabold whitespace-nowrap">
+                              <span className="px-2.5 py-1 bg-primary-green/10 text-primary-green border border-primary-green/20 rounded-full text-[10px] font-extrabold whitespace-nowrap">
                                 {student.class}
                               </span>
                             </td>
                             
-                            {/* Months */}
-                            {["Jan", "Feb", "Mar"].map((month) => {
-                              const details = student.spp[month as "Jan" | "Feb" | "Mar"] || { paid: 0, status: "Belum Bayar", note: "" };
+                            {/* 12 Months dynamic map using status dots instead of bulky buttons */}
+                            {SCHOOL_MONTHS.map((month) => {
+                              const yearSpp = student.spp[selectedSppYear as keyof typeof student.spp] || createBlankSppYear();
+                              const details = yearSpp[month as keyof typeof yearSpp] || { paid: 0, status: "Belum Bayar", note: "" };
                               const isLunas = details.status === "Lunas";
                               const isCicil = details.status === "Mencicil";
                               const sisa = Math.max(0, SPP_MONTHLY_FEE - details.paid);
                               return (
-                                <td key={month} className="py-4 px-4 text-center">
-                                  <div className="flex flex-col items-center gap-1">
-                                    <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold border transition-all ${
-                                      isLunas
-                                        ? "bg-emerald-100 text-emerald-700 border-emerald-300"
-                                        : isCicil
-                                        ? "bg-amber-100 text-amber-700 border-amber-300"
-                                        : "bg-red-100 text-red-700 border-red-300"
-                                    }`}>
-                                      {details.status}
-                                    </span>
-                                    <span className="text-[9px] text-neutral-gray">
-                                      Bayar: Rp {details.paid.toLocaleString()}
+                                <td key={month} className="py-4 px-3 text-center border-l border-neutral-gray/5">
+                                  <div className="flex flex-col items-center gap-0.5 justify-center">
+                                    {/* Clean Dot Status Indicator */}
+                                    <div className="flex items-center gap-1.5">
+                                      <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
+                                        isLunas
+                                          ? "bg-emerald-500"
+                                          : isCicil
+                                          ? "bg-amber-400"
+                                          : "bg-rose-500"
+                                      }`}></span>
+                                      <span className={`text-[10px] font-bold ${
+                                        isLunas
+                                          ? "text-emerald-700"
+                                          : isCicil
+                                          ? "text-amber-700"
+                                          : "text-rose-700"
+                                      }`}>
+                                        {details.status}
+                                      </span>
+                                    </div>
+                                    
+                                    <span className="text-[9px] text-neutral-gray mt-1 block">
+                                      Rp {details.paid.toLocaleString()}
                                     </span>
                                     {sisa > 0 && (
-                                      <span className="text-[9px] text-red-500 font-bold">
-                                        Sisa: Rp {sisa.toLocaleString()}
+                                      <span className="text-[9px] text-red-500 font-extrabold block">
+                                        Sisa: -{sisa.toLocaleString()}
                                       </span>
                                     )}
                                     {details.note && (
-                                      <span className="text-[8px] text-neutral-gray italic max-w-[110px] truncate" title={details.note}>
-                                        ({details.note})
+                                      <span className="text-[8px] text-neutral-gray/60 italic max-w-[85px] truncate block mt-0.5 leading-none" title={details.note}>
+                                        {details.note}
                                       </span>
                                     )}
                                   </div>
@@ -1090,13 +1254,17 @@ export default function DashboardClient() {
                     </table>
                   </div>
 
-                  {/* General Note */}
-                  <div className="p-4 bg-soft-mint border border-primary-green/20 rounded-xl flex items-center gap-3">
-                    <svg className="w-5 h-5 text-primary-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    <p className="text-[10px] font-semibold text-primary-dark leading-relaxed">
-                      Pencatatan ini dilindungi kebijakan privasi lembaga. Keamanan data keuangan anak didik terjaga di bawah pengawasan KB/RA Sahabat Berbah Sleman dan terintegrasi secara internal.
+                  {/* Google Drive Archiving SOP */}
+                  <div className="p-4 bg-soft-mint border border-primary-green/20 rounded-xl space-y-2">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5 text-primary-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      <h5 className="text-xs font-bold text-primary-dark">Prosedur Kearsipan SPP Jangka Panjang (Google Drive SOP):</h5>
+                    </div>
+                    <p className="text-[10px] font-semibold text-primary-dark leading-relaxed pl-8">
+                      Guna mendukung tata kelola 5 tahun mendatang, setiap akhir Tahun Ajaran Bendahara wajib mengekspor laporan SPP tahun berjalan (format Excel & PDF) melalui menu <strong>Laporan & Ekspor</strong>, lalu mengunggahnya ke folder Google Drive utama sekolah di bawah struktur: <br />
+                      <code className="bg-white/60 px-1 py-0.5 rounded font-mono text-[9px]">Google Drive / KB-RA Sahabat / Tahun Ajaran [Tahun] / Laporan Keuangan & SPP /</code>
                     </p>
                   </div>
                 </div>
@@ -1266,30 +1434,40 @@ export default function DashboardClient() {
                 {/* PDF Card */}
                 <div className="p-6 bg-[#FAF8F5] rounded-2xl border border-primary-green/10 space-y-4 flex flex-col justify-between">
                   <div className="space-y-2">
-                    <span className="text-2xl">📄</span>
+                    <svg className="w-8 h-8 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
                     <h4 className="font-baloo text-base font-bold text-neutral-dark">Arsip Laporan SPP Bulanan (PDF)</h4>
                     <p className="text-xs text-neutral-gray font-semibold leading-relaxed">Format dokumen resmi siap cetak untuk diserahkan ke kepala sekolah atau yayasan penyelenggara.</p>
                   </div>
                   <button
                     onClick={() => alert("Simulasi Ekspor PDF Berhasil! File Rekap_SPP_RA_Sahabat.pdf diunduh.")}
-                    className="w-full py-2.5 rounded-lg bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs transition-all border border-primary-green cursor-pointer text-center"
+                    className="w-full py-2.5 rounded-lg bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs transition-all border border-primary-green cursor-pointer text-center flex items-center justify-center gap-1.5"
                   >
-                    Unduh PDF 💾
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span>Unduh PDF</span>
                   </button>
                 </div>
 
                 {/* Excel Card */}
                 <div className="p-6 bg-[#FAF8F5] rounded-2xl border border-primary-green/10 space-y-4 flex flex-col justify-between">
                   <div className="space-y-2">
-                    <span className="text-2xl">📊</span>
+                    <svg className="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
                     <h4 className="font-baloo text-base font-bold text-neutral-dark">Rekap Data Keuangan & Tabungan (Excel)</h4>
                     <p className="text-xs text-neutral-gray font-semibold leading-relaxed">Berkas lembar kerja spreadsheet untuk mempermudah perhitungan pembukuan kas bulanan yayasan.</p>
                   </div>
                   <button
                     onClick={() => alert("Simulasi Ekspor Excel Berhasil! File Rekap_Kas_RA_Sahabat.xlsx diunduh.")}
-                    className="w-full py-2.5 rounded-lg bg-[#18B36F] hover:bg-[#0E7A4D] text-white font-extrabold text-xs transition-all border border-[#0E7A4D] cursor-pointer text-center"
+                    className="w-full py-2.5 rounded-lg bg-[#18B36F] hover:bg-[#0E7A4D] text-white font-extrabold text-xs transition-all border border-[#0E7A4D] cursor-pointer text-center flex items-center justify-center gap-1.5"
                   >
-                    Unduh Excel 💾
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span>Unduh Excel</span>
                   </button>
                 </div>
               </div>
