@@ -1,0 +1,155 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+export default function LoginClient() {
+  const router = useRouter();
+  const [role, setRole] = useState<"guru" | "wali">("wali");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Clear any existing session when returning to login page
+    localStorage.removeItem("user_session");
+  }, []);
+
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    setTimeout(() => {
+      // Mock validation
+      if (role === "guru" && username === "guru" && password === "guru123") {
+        localStorage.setItem(
+          "user_session",
+          JSON.stringify({ role: "guru", name: "Ibu Guru Halimah" })
+        );
+        router.push("/portal-belajar/dashboard");
+      } else if (role === "wali" && username === "wali" && password === "wali123") {
+        localStorage.setItem(
+          "user_session",
+          JSON.stringify({ role: "wali", name: "Orang Tua/Wali Murid" })
+        );
+        router.push("/portal-belajar/dashboard");
+      } else {
+        setError("Nama pengguna atau kata sandi salah. Silakan coba lagi!");
+        setLoading(false);
+      }
+    }, 800);
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen text-neutral-dark bg-[#FAF8F5] pt-24 pb-12 select-none justify-center items-center px-4">
+      {/* Background Chalkboard grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.015)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10"></div>
+      
+      {/* Decorative stars */}
+      <div className="absolute top-16 left-12 text-warm-yellow/20 text-5xl font-bold hidden md:block animate-pulse">★</div>
+      <div className="absolute bottom-20 right-16 text-primary-green/15 text-5xl font-bold hidden md:block">★</div>
+
+      <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-[35px_15px_30px_20px]/[20px_30px_15px_35px] border-2 border-dashed border-primary-green/30 shadow-md relative">
+        {/* Notebook grid watermark */}
+        <div className="absolute inset-x-0 top-0 h-full bg-[linear-gradient(rgba(44,178,74,0.01)_1px,transparent_1px)] bg-[size:100%_24px] pointer-events-none rounded-[35px_15px_30px_20px]/[20px_30px_15px_35px]"></div>
+        
+        {/* School Logo */}
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 rounded-full border-2 border-primary-green overflow-hidden bg-white shadow-xs">
+            <img src="/images/logo.jpg" alt="Logo RA Sahabat" className="w-full h-full object-cover" />
+          </div>
+        </div>
+
+        <h2 className="font-baloo text-2xl font-bold text-center text-neutral-dark mb-1 relative z-10">Portal RA Sahabat</h2>
+        <p className="text-xs text-neutral-gray font-bold text-center mb-8 relative z-10">Silakan masuk untuk mengakses sistem informasi sekolah.</p>
+
+        {/* Credentials hints */}
+        <div className="mb-6 p-4 rounded-xl bg-soft-mint border border-primary-green/20 text-[10px] font-bold text-primary-dark space-y-1 leading-relaxed">
+          <p>💡 Info Akun Simulasi:</p>
+          <p>• Peran Guru: Username <strong>guru</strong> & Sandi <strong>guru123</strong></p>
+          <p>• Peran Wali: Username <strong>wali</strong> & Sandi <strong>wali123</strong></p>
+        </div>
+
+        {error && (
+          <div className="mb-5 p-3 rounded-lg bg-accent/10 border border-accent/25 text-xs text-accent font-bold text-center">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleLoginSubmit} className="space-y-5 relative z-10">
+          {/* Role selector toggle */}
+          <div>
+            <label className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-2 tracking-wide">Pilih Peran Anda</label>
+            <div className="grid grid-cols-2 gap-2 bg-[#FAF8F5] p-1 rounded-xl border border-primary-green/10">
+              <button
+                type="button"
+                onClick={() => setRole("wali")}
+                className={`py-2 text-xs font-extrabold rounded-lg transition-colors cursor-pointer ${
+                  role === "wali"
+                    ? "bg-[#2CB24A] text-white shadow-xs"
+                    : "text-neutral-gray hover:text-neutral-dark"
+                }`}
+              >
+                Wali Murid
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole("guru")}
+                className={`py-2 text-xs font-extrabold rounded-lg transition-colors cursor-pointer ${
+                  role === "guru"
+                    ? "bg-[#2CB24A] text-white shadow-xs"
+                    : "text-neutral-gray hover:text-neutral-dark"
+                }`}
+              >
+                Guru / Admin
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="username" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">Nama Pengguna (Username)</label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              suppressHydrationWarning
+              className="w-full px-4 py-3 rounded-xl border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-xs transition-colors font-semibold select-text"
+              placeholder="Masukkan nama pengguna"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">Kata Sandi (Password)</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              suppressHydrationWarning
+              className="w-full px-4 py-3 rounded-xl border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-xs transition-colors font-semibold select-text"
+              placeholder="Masukkan kata sandi"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            suppressHydrationWarning
+            className={`w-full py-3.5 rounded-[15px_35px_15px_40px]/[40px_15px_35px_15px] font-extrabold text-xs transition-all border-2 border-primary-dark shadow-md cursor-pointer ${
+              loading
+                ? "bg-neutral-gray text-white cursor-not-allowed"
+                : "bg-accent hover:bg-accent-dark text-white hover:shadow-lg hover:-translate-y-0.5"
+            }`}
+          >
+            {loading ? "Menghubungkan..." : "Masuk ke Dashboard"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
