@@ -71,7 +71,7 @@ export default function HomePage() {
             </div>
 
             {/* Right Illustration Column */}
-            <div className="lg:col-span-5 relative w-full aspect-square max-w-[380px] mx-auto flex items-center justify-center p-4 lg:-mt-12 -mt-4">
+            <div className="lg:col-span-5 relative w-full aspect-square max-w-[380px] mx-auto flex items-center justify-center p-4 lg:-mt-12 mt-16">
               <style>{`
                 @keyframes slow-scale-pulse {
                   0%, 100% { transform: scale(0.96); }
@@ -96,11 +96,11 @@ export default function HomePage() {
                 }
               `}</style>
 
-              {/* Outer circle with chalkboard style dotted line - pulsing in scale, not fading */}
-              <div className="absolute inset-0 bg-[#E7F8EA] rounded-full border-4 border-dashed border-primary-green/30 pointer-events-none custom-pulse-bg"></div>
+              {/* Outer circle with chalkboard style dotted line - pulsing in scale, very subtle opacity */}
+              <div className="absolute inset-0 bg-[#E7F8EA]/30 rounded-full border-4 border-dashed border-primary-green/15 pointer-events-none custom-pulse-bg"></div>
               
               {/* Logo image container */}
-              <div className="w-[85%] aspect-square rounded-full border-4 border-primary-green overflow-hidden bg-white shadow-md z-10 relative">
+              <div className="w-[85%] aspect-square rounded-full border-4 border-primary-green/80 overflow-hidden bg-white shadow-md z-10 relative">
                 <img
                   src="/images/logo.jpg"
                   alt="Logo RA Sahabat"
@@ -108,30 +108,30 @@ export default function HomePage() {
                 />
               </div>
 
-              {/* Floating Doodles around logo */}
-              {/* Star on top right - soft warm yellow */}
-              <svg className="absolute -top-1 -right-1 w-10 h-10 text-warning/35 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#FAF8F5" stroke="#F5A623" strokeWidth="1.5" />
+              {/* Floating Doodles around logo - lowered transparency/watermark effect */}
+              {/* Star on top right - very soft warm yellow */}
+              <svg className="absolute -top-1 -right-1 w-10 h-10 text-warning/20 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#FAF8F5" stroke="#F5A623" opacity="0.6" />
               </svg>
 
-              {/* Cloud on top left - soft purple */}
-              <svg className="absolute -top-6 -left-6 w-14 h-10 text-secondary/25 z-20 pointer-events-none custom-float-x" viewBox="0 0 100 60" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <path d="M10,40 C10,25 30,20 40,25 C50,15 75,20 75,35 C85,35 95,45 85,55 H15 C5,55 5,45 10,40 Z" fill="#F2E6F5" stroke="#7A2E8F" strokeWidth="1.5" opacity="0.6" />
+              {/* Cloud on top left - very soft purple */}
+              <svg className="absolute -top-6 -left-6 w-14 h-10 text-secondary/15 z-20 pointer-events-none custom-float-x" viewBox="0 0 100 60" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M10,40 C10,25 30,20 40,25 C50,15 75,20 75,35 C85,35 95,45 85,55 H15 C5,55 5,45 10,40 Z" fill="#F2E6F5" stroke="#7A2E8F" opacity="0.4" />
               </svg>
 
-              {/* Flower on bottom left - soft pink (replaced the heart element) */}
-              <svg className="absolute -bottom-2 -left-2 w-10 h-10 text-accent/40 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <circle cx="12" cy="8" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1.2" />
-                <circle cx="12" cy="16" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1.2" />
-                <circle cx="8" cy="12" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1.2" />
-                <circle cx="16" cy="12" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1.2" />
-                <circle cx="12" cy="12" r="3" fill="#EC1E8C" opacity="0.7" />
+              {/* Flower on bottom left - very soft pink */}
+              <svg className="absolute -bottom-2 -left-2 w-10 h-10 text-accent/25 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <circle cx="12" cy="8" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1" opacity="0.7" />
+                <circle cx="12" cy="16" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1" opacity="0.7" />
+                <circle cx="8" cy="12" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1" opacity="0.7" />
+                <circle cx="16" cy="12" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1" opacity="0.7" />
+                <circle cx="12" cy="12" r="3" fill="#EC1E8C" opacity="0.4" />
               </svg>
 
-              {/* Paperplane on bottom right - soft green */}
-              <svg className="absolute -bottom-6 -right-6 w-12 h-12 text-primary-green/25 z-20 pointer-events-none custom-float-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path d="M22 2L2 8.66L11.5 12.5L16 21L22 2Z" fill="#E7F8EA" stroke="#2CB24A" strokeWidth="1.5" opacity="0.6" />
-                <path d="M11.5 12.5L22 2" stroke="#2CB24A" strokeDasharray="2 1" />
+              {/* Paperplane on bottom right - very soft green */}
+              <svg className="absolute -bottom-6 -right-6 w-12 h-12 text-primary-green/15 z-20 pointer-events-none custom-float-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M22 2L2 8.66L11.5 12.5L16 21L22 2Z" fill="#E7F8EA" stroke="#2CB24A" opacity="0.4" />
+                <path d="M11.5 12.5L22 2" stroke="#2CB24A" strokeDasharray="2 1" opacity="0.4" />
               </svg>
             </div>
 
