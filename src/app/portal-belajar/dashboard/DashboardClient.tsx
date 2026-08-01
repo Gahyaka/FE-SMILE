@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+// Nominal SPP bulanan sekolah
+const SPP_MONTHLY_FEE = 150000;
+
 // Mock Initial Activities (Dokumentasi Kegiatan)
 const initialActivities = [
   {
@@ -31,13 +34,73 @@ const initialActivities = [
   },
 ];
 
-// Mock Initial Students (Data Dasar Peserta Didik)
+// Mock Initial Students (Data Dasar Peserta Didik & SPP Detail)
 const initialStudents = [
-  { id: 1, name: "Ahmad Rayyan", class: "RA (A)", status: { Jan: "Lunas", Feb: "Lunas", Mar: "Belum Lunas" }, activeStatus: "Aktif", academicYear: "2026/2027", nisn: "1234567890" },
-  { id: 2, name: "Bilqis Azzahra", class: "RA (B)", status: { Jan: "Lunas", Feb: "Lunas", Mar: "Lunas" }, activeStatus: "Aktif", academicYear: "2026/2027", nisn: "1234567891" },
-  { id: 3, name: "Fatih Al-Fatih", class: "KB", status: { Jan: "Lunas", Feb: "Belum Lunas", Mar: "Belum Lunas" }, activeStatus: "Aktif", academicYear: "2026/2027", nisn: "1234567892" },
-  { id: 4, name: "Fatimah Az-Zahra", class: "RA (A)", status: { Jan: "Lunas", Feb: "Lunas", Mar: "Lunas" }, activeStatus: "Aktif", academicYear: "2026/2027", nisn: "1234567893" },
-  { id: 5, name: "Yusuf Al-Hafidz", class: "KB", status: { Jan: "Belum Lunas", Feb: "Belum Lunas", Mar: "Belum Lunas" }, activeStatus: "Aktif", academicYear: "2026/2027", nisn: "1234567894" },
+  { 
+    id: 1, 
+    name: "Ahmad Rayyan", 
+    class: "RA (A)", 
+    spp: { 
+      Jan: { paid: 150000, status: "Lunas", note: "Tunai" }, 
+      Feb: { paid: 150000, status: "Lunas", note: "Tunai" }, 
+      Mar: { paid: 50000, status: "Mencicil", note: "Cicilan 1 - Transfer" } 
+    }, 
+    activeStatus: "Aktif", 
+    academicYear: "2026/2027", 
+    nisn: "1234567890" 
+  },
+  { 
+    id: 2, 
+    name: "Bilqis Azzahra", 
+    class: "RA (B)", 
+    spp: { 
+      Jan: { paid: 150000, status: "Lunas", note: "Transfer Mandiri" }, 
+      Feb: { paid: 150000, status: "Lunas", note: "Transfer Mandiri" }, 
+      Mar: { paid: 150000, status: "Lunas", note: "Transfer Mandiri" } 
+    }, 
+    activeStatus: "Aktif", 
+    academicYear: "2026/2027", 
+    nisn: "1234567891" 
+  },
+  { 
+    id: 3, 
+    name: "Fatih Al-Fatih", 
+    class: "KB", 
+    spp: { 
+      Jan: { paid: 150000, status: "Lunas", note: "Tunai" }, 
+      Feb: { paid: 0, status: "Belum Bayar", note: "" }, 
+      Mar: { paid: 0, status: "Belum Bayar", note: "" } 
+    }, 
+    activeStatus: "Aktif", 
+    academicYear: "2026/2027", 
+    nisn: "1234567892" 
+  },
+  { 
+    id: 4, 
+    name: "Fatimah Az-Zahra", 
+    class: "RA (A)", 
+    spp: { 
+      Jan: { paid: 150000, status: "Lunas", note: "Tunai" }, 
+      Feb: { paid: 150000, status: "Lunas", note: "Tunai" }, 
+      Mar: { paid: 150000, status: "Lunas", note: "Tunai" } 
+    }, 
+    activeStatus: "Aktif", 
+    academicYear: "2026/2027", 
+    nisn: "1234567893" 
+  },
+  { 
+    id: 5, 
+    name: "Yusuf Al-Hafidz", 
+    class: "KB", 
+    spp: { 
+      Jan: { paid: 0, status: "Belum Bayar", note: "" }, 
+      Feb: { paid: 0, status: "Belum Bayar", note: "" }, 
+      Mar: { paid: 0, status: "Belum Bayar", note: "" } 
+    }, 
+    activeStatus: "Aktif", 
+    academicYear: "2026/2027", 
+    nisn: "1234567894" 
+  },
 ];
 
 // Mock Initial Savings Transactions (Tabungan Anak)
@@ -51,7 +114,7 @@ const initialSavings = [
 // Mock Initial Audit Logs (Monitoring Aktivitas Admin)
 const initialLogs = [
   { id: 1, time: "2026-08-01 09:30", user: "Ibu Guru Halimah", action: "Menambahkan kegiatan: Peringatan Hari Santri" },
-  { id: 2, time: "2026-08-01 10:15", user: "Administrator", action: "Mengubah status SPP Ahmad Rayyan (Maret) menjadi Lunas" },
+  { id: 2, time: "2026-08-01 10:15", user: "Administrator", action: "Mengubah status SPP Ahmad Rayyan (Maret)" },
 ];
 
 export default function DashboardClient() {
@@ -76,6 +139,12 @@ export default function DashboardClient() {
   const [newDesc, setNewDesc] = useState("");
   const [filterCategory, setFilterCategory] = useState("Semua");
 
+  // SPP states & payment registration
+  const [sppStudentId, setSppStudentId] = useState<number>(1);
+  const [sppMonth, setSppMonth] = useState<"Jan" | "Feb" | "Mar">("Jan");
+  const [sppAmount, setSppAmount] = useState("");
+  const [sppNote, setSppNote] = useState("");
+
   // Savings states
   const [savings, setSavings] = useState(initialSavings);
   const [selectedStudentId, setSelectedStudentId] = useState<number>(1);
@@ -96,6 +165,14 @@ export default function DashboardClient() {
     }
   }, [router]);
 
+  // Adjust default student selection when students list changes
+  useEffect(() => {
+    if (students.length > 0) {
+      setSelectedStudentId(students[0].id);
+      setSppStudentId(students[0].id);
+    }
+  }, [students]);
+
   const handleLogout = () => {
     localStorage.removeItem("user_session");
     router.push("/portal-belajar");
@@ -110,7 +187,11 @@ export default function DashboardClient() {
       id: Date.now(),
       name: newStudentName,
       class: newStudentClass,
-      status: { Jan: "Belum Lunas", Feb: "Belum Lunas", Mar: "Belum Lunas" },
+      spp: { 
+        Jan: { paid: 0, status: "Belum Bayar", note: "" }, 
+        Feb: { paid: 0, status: "Belum Bayar", note: "" }, 
+        Mar: { paid: 0, status: "Belum Bayar", note: "" } 
+      },
       activeStatus: "Aktif",
       academicYear: newStudentYear,
       nisn: newStudentNisn,
@@ -172,7 +253,7 @@ export default function DashboardClient() {
     }
   };
 
-  // Add new activity handler (Modul B)
+  // Add new activity handler
   const handleAddActivity = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle || !newDate || !newDesc) return;
@@ -205,22 +286,39 @@ export default function DashboardClient() {
     setNewDesc("");
   };
 
-  // Toggle student SPP payment status (Admin only)
-  const toggleSppStatus = (studentId: number, month: "Jan" | "Feb" | "Mar") => {
+  // Record SPP payment handler (Admin only)
+  const handleAddSppPayment = (e: React.FormEvent) => {
+    e.preventDefault();
     if (session?.role !== "admin") return;
-    
+    if (!sppAmount || isNaN(Number(sppAmount)) || Number(sppAmount) <= 0) return;
+
+    const amountNum = Number(sppAmount);
     let studentName = "";
+
     setStudents((prev) =>
       prev.map((student) => {
-        if (student.id === studentId) {
+        if (student.id === sppStudentId) {
           studentName = student.name;
-          const currentStatus = student.status[month];
+          const currentMonthSpp = student.spp[sppMonth] || { paid: 0, status: "Belum Bayar", note: "" };
+          const newPaid = currentMonthSpp.paid + amountNum;
+          
+          let newStatus = "Belum Bayar";
+          if (newPaid >= SPP_MONTHLY_FEE) {
+            newStatus = "Lunas";
+          } else if (newPaid > 0) {
+            newStatus = "Mencicil";
+          }
+
           return {
             ...student,
-            status: {
-              ...student.status,
-              [month]: currentStatus === "Lunas" ? "Belum Lunas" : "Lunas",
-            },
+            spp: {
+              ...student.spp,
+              [sppMonth]: {
+                paid: newPaid,
+                status: newStatus,
+                note: sppNote || currentMonthSpp.note || "Bayar Cash"
+              }
+            }
           };
         }
         return student;
@@ -232,9 +330,13 @@ export default function DashboardClient() {
       id: Date.now(),
       time: new Date().toISOString().replace('T', ' ').substring(0, 16),
       user: session?.name || "User",
-      action: `Mengubah status SPP ${studentName} (${month})`,
+      action: `Mencatat SPP ${sppMonth} ${studentName} sebesar Rp ${amountNum.toLocaleString()} (${sppNote || "Tanpa Catatan"})`,
     };
     setLogs([newLog, ...logs]);
+
+    // Reset Form
+    setSppAmount("");
+    setSppNote("");
   };
 
   // Add savings transaction
@@ -674,7 +776,10 @@ export default function DashboardClient() {
               {isWaliKelas && (
                 <div className="lg:col-span-4 bg-white p-6 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-4">
                   <h3 className="font-baloo text-lg font-bold text-neutral-dark flex items-center gap-1.5 border-b border-primary-green/10 pb-2">
-                    <span>📝</span> Tambah Kegiatan Baru
+                    <svg className="w-5 h-5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span>Tambah Kegiatan Baru</span>
                   </h3>
                   
                   <form onSubmit={handleAddActivity} className="space-y-4">
@@ -751,9 +856,12 @@ export default function DashboardClient() {
                     <button
                       type="submit"
                       suppressHydrationWarning
-                      className="w-full py-3.5 rounded-[12px_24px_12px_30px]/[30px_12px_24px_12px] bg-[#2CB24A] hover:bg-[#1C8A38] text-white font-extrabold text-xs transition-all border-2 border-[#1C8A38] shadow-xs cursor-pointer"
+                      className="w-full py-3 rounded-[12px_24px_12px_30px]/[30px_12px_24px_12px] bg-[#2CB24A] hover:bg-[#1C8A38] text-white font-extrabold text-xs transition-all border border-[#1C8A38] shadow-xs cursor-pointer flex items-center justify-center gap-2"
                     >
-                      Simpan Kegiatan 💾
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                      </svg>
+                      <span>Simpan Kegiatan</span>
                     </button>
                   </form>
                 </div>
@@ -788,7 +896,7 @@ export default function DashboardClient() {
                 {/* Activities Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {filteredActivities.map((act) => (
-                    <div key={act.id} className="bg-white p-5 rounded-2xl border-2 border-dashed border-primary-green/10 shadow-xs relative flex flex-col justify-between">
+                    <div key={act.id} className="bg-white p-5 rounded-2xl border border-primary-green/10 shadow-xs relative flex flex-col justify-between">
                       <div>
                         <div className="flex justify-between items-start">
                           <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
@@ -822,67 +930,178 @@ export default function DashboardClient() {
 
           {/* TAB CONTENT 2: Monitoring SPP */}
           {activeTab === "spp" && (
-            <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-6">
-              <div>
-                <h3 className="font-baloo text-xl font-bold text-neutral-dark mb-1.5">Daftar Status Keuangan SPP TA 2026/2027</h3>
-                <p className="text-xs text-neutral-gray font-semibold">
-                  {isAdmin 
-                    ? "💡 Sebagai Administrator Keuangan, Anda dapat mengeklik status pembayaran bulanan untuk mengubah statusnya (Lunas/Belum Lunas) secara langsung."
-                    : "💡 Sebagai Wali Kelas, Anda hanya memiliki izin membaca status keuangan SPP. Silakan hubungi bendahara sekolah untuk melakukan perubahan data."}
-                </p>
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              
+              {/* Form Input Pembayaran SPP (Admin Only) */}
+              {isAdmin && (
+                <div className="lg:col-span-4 bg-white p-6 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-4">
+                  <h3 className="font-baloo text-lg font-bold text-neutral-dark flex items-center gap-1.5 border-b border-primary-green/10 pb-2">
+                    <svg className="w-5 h-5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    <span>Catat Pembayaran SPP</span>
+                  </h3>
+                  
+                  <form onSubmit={handleAddSppPayment} className="space-y-4">
+                    <div>
+                      <label htmlFor="sppStudent" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Pilih Siswa</label>
+                      <select
+                        id="sppStudent"
+                        value={sppStudentId}
+                        onChange={(e) => setSppStudentId(Number(e.target.value))}
+                        suppressHydrationWarning
+                        className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white"
+                      >
+                        {students.map((st) => (
+                          <option key={st.id} value={st.id}>{st.name} ({st.class})</option>
+                        ))}
+                      </select>
+                    </div>
 
-              {/* SPP Table */}
-              <div className="overflow-x-auto rounded-xl border border-neutral-gray/10">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10">
-                      <th className="py-4 px-6">Nama Siswa</th>
-                      <th className="py-4 px-4">Kelas</th>
-                      <th className="py-4 px-4 text-center">Januari</th>
-                      <th className="py-4 px-4 text-center">Februari</th>
-                      <th className="py-4 px-4 text-center">Maret</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-xs font-semibold text-neutral-dark divide-y divide-neutral-gray/5">
-                    {students.map((student) => (
-                      <tr key={student.id} className="hover:bg-soft-mint/30 transition-colors">
-                        <td className="py-4 px-6 font-bold">{student.name}</td>
-                        <td className="py-4 px-4"><span className="px-2 py-0.5 bg-neutral-gray/10 rounded-md text-[10px] font-bold">{student.class}</span></td>
-                        
-                        {/* Months */}
-                        {["Jan", "Feb", "Mar"].map((month) => {
-                          const status = student.status[month as "Jan" | "Feb" | "Mar"];
-                          const isLunas = status === "Lunas";
-                          return (
-                            <td key={month} className="py-4 px-4 text-center">
-                              <button
-                                disabled={!isAdmin}
-                                onClick={() => toggleSppStatus(student.id, month as "Jan" | "Feb" | "Mar")}
-                                className={`px-3 py-1 rounded-full text-[10px] font-extrabold border transition-all ${
-                                  isLunas
-                                    ? "bg-emerald-100 text-emerald-700 border-emerald-300"
-                                    : "bg-amber-100 text-amber-700 border-amber-300"
-                                } ${isAdmin ? "cursor-pointer hover:scale-105" : "cursor-default"}`}
-                              >
-                                {status}
-                              </button>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label htmlFor="sppMonth" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Pilih Bulan</label>
+                        <select
+                          id="sppMonth"
+                          value={sppMonth}
+                          onChange={(e) => setSppMonth(e.target.value as "Jan" | "Feb" | "Mar")}
+                          suppressHydrationWarning
+                          className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white"
+                        >
+                          <option value="Jan">Januari</option>
+                          <option value="Feb">Februari</option>
+                          <option value="Mar">Maret</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="sppAmount" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Jumlah Bayar</label>
+                        <input
+                          type="number"
+                          id="sppAmount"
+                          value={sppAmount}
+                          onChange={(e) => setSppAmount(e.target.value)}
+                          required
+                          suppressHydrationWarning
+                          className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                          placeholder="Nominal (Rp)"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="sppNote" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Keterangan / Ref Bukti Transfer</label>
+                      <input
+                        type="text"
+                        id="sppNote"
+                        value={sppNote}
+                        onChange={(e) => setSppNote(e.target.value)}
+                        suppressHydrationWarning
+                        className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                        placeholder="Contoh: Tunai / Transfer Mandiri"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      suppressHydrationWarning
+                      className="w-full py-3 rounded-[12px_24px_12px_30px]/[30px_12px_24px_12px] bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs transition-all border border-primary-green shadow-xs cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                      </svg>
+                      <span>Simpan Pembayaran</span>
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {/* Tabel SPP */}
+              <div className={isAdmin ? "lg:col-span-8 space-y-4" : "lg:col-span-12 space-y-4"}>
+                <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border border-primary-green/10 shadow-xs space-y-6">
+                  <div>
+                    <h3 className="font-baloo text-xl font-bold text-neutral-dark mb-1.5">Buku Rekapitulasi SPP (Tagihan Rp 150.000 / bln)</h3>
+                    <p className="text-xs text-neutral-gray font-semibold">
+                      {isAdmin 
+                        ? "💡 Gunakan panel di sebelah kiri untuk mencatat cicilan atau pelunasan SPP. Sisa tagihan akan langsung dihitung otomatis oleh sistem."
+                        : "💡 Sebagai Wali Kelas, Anda hanya memiliki hak monitoring rekapitulasi data pembayaran SPP kelas Anda (Read-only)."}
+                    </p>
+                  </div>
+
+                  {/* SPP Table */}
+                  <div className="overflow-x-auto rounded-xl border border-neutral-gray/10">
+                    <table className="w-full text-left border-collapse min-w-[750px] text-xs">
+                      <thead>
+                        <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10">
+                          <th className="py-4 px-6 w-[25%]">Nama Siswa</th>
+                          <th className="py-4 px-4 w-[15%]">Kelas</th>
+                          <th className="py-4 px-4 text-center w-[20%]">Januari</th>
+                          <th className="py-4 px-4 text-center w-[20%]">Februari</th>
+                          <th className="py-4 px-4 text-center w-[20%]">Maret</th>
+                        </tr>
+                      </thead>
+                      <tbody className="font-semibold text-neutral-dark divide-y divide-neutral-gray/5">
+                        {students.map((student) => (
+                          <tr key={student.id} className="hover:bg-soft-mint/30 transition-colors">
+                            <td className="py-4 px-6 font-bold max-w-[180px] break-words whitespace-normal" title={student.name}>{student.name}</td>
+                            <td className="py-4 px-4">
+                              <span className="px-3 py-1 bg-primary-green/10 text-primary-green border border-primary-green/20 rounded-full text-[10px] font-extrabold whitespace-nowrap">
+                                {student.class}
+                              </span>
                             </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                            
+                            {/* Months */}
+                            {["Jan", "Feb", "Mar"].map((month) => {
+                              const details = student.spp[month as "Jan" | "Feb" | "Mar"] || { paid: 0, status: "Belum Bayar", note: "" };
+                              const isLunas = details.status === "Lunas";
+                              const isCicil = details.status === "Mencicil";
+                              const sisa = Math.max(0, SPP_MONTHLY_FEE - details.paid);
+                              return (
+                                <td key={month} className="py-4 px-4 text-center">
+                                  <div className="flex flex-col items-center gap-1">
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold border transition-all ${
+                                      isLunas
+                                        ? "bg-emerald-100 text-emerald-700 border-emerald-300"
+                                        : isCicil
+                                        ? "bg-amber-100 text-amber-700 border-amber-300"
+                                        : "bg-red-100 text-red-700 border-red-300"
+                                    }`}>
+                                      {details.status}
+                                    </span>
+                                    <span className="text-[9px] text-neutral-gray">
+                                      Bayar: Rp {details.paid.toLocaleString()}
+                                    </span>
+                                    {sisa > 0 && (
+                                      <span className="text-[9px] text-red-500 font-bold">
+                                        Sisa: Rp {sisa.toLocaleString()}
+                                      </span>
+                                    )}
+                                    {details.note && (
+                                      <span className="text-[8px] text-neutral-gray italic max-w-[110px] truncate" title={details.note}>
+                                        ({details.note})
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* General Note */}
+                  <div className="p-4 bg-soft-mint border border-primary-green/20 rounded-xl flex items-center gap-3">
+                    <svg className="w-5 h-5 text-primary-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <p className="text-[10px] font-semibold text-primary-dark leading-relaxed">
+                      Pencatatan ini dilindungi kebijakan privasi lembaga. Keamanan data keuangan anak didik terjaga di bawah pengawasan KB/RA Sahabat Berbah Sleman dan terintegrasi secara internal.
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              {/* General Note */}
-              <div className="p-4 bg-soft-mint border border-primary-green/20 rounded-xl flex items-center gap-3">
-                <span className="text-xl">🛡</span>
-                <p className="text-[10px] font-semibold text-primary-dark leading-relaxed">
-                  Pencatatan ini dilindungi kebijakan privasi lembaga. Keamanan data keuangan anak didik terjaga di bawah pengawasan KB/RA Sahabat Berbah Sleman dan terintegrasi secara internal.
-                </p>
-              </div>
             </div>
           )}
 
@@ -893,7 +1112,10 @@ export default function DashboardClient() {
               {/* Form Input Transaksi */}
               <div className="lg:col-span-4 bg-white p-6 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-4">
                 <h3 className="font-baloo text-lg font-bold text-neutral-dark flex items-center gap-1.5 border-b border-primary-green/10 pb-2">
-                  <span>💰</span> Catat Transaksi Baru
+                  <svg className="w-5 h-5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Catat Transaksi Baru</span>
                 </h3>
                 
                 <form onSubmit={handleAddTransaction} className="space-y-4">
@@ -958,9 +1180,12 @@ export default function DashboardClient() {
                   <button
                     type="submit"
                     suppressHydrationWarning
-                    className="w-full py-3.5 rounded-[12px_24px_12px_30px]/[30px_12px_24px_12px] bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs transition-all border border-primary-green shadow-xs cursor-pointer"
+                    className="w-full py-3 rounded-[12px_24px_12px_30px]/[30px_12px_24px_12px] bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs transition-all border border-primary-green shadow-xs cursor-pointer flex items-center justify-center gap-2"
                   >
-                    Simpan Transaksi 💾
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                    </svg>
+                    <span>Simpan Transaksi</span>
                   </button>
                 </form>
               </div>
