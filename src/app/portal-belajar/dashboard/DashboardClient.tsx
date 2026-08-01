@@ -42,7 +42,7 @@ const initialStudents = [
 
 export default function DashboardClient() {
   const router = useRouter();
-  const [session, setSession] = useState<{ role: "guru" | "wali"; name: string } | null>(null);
+  const [session, setSession] = useState<{ role: "admin" | "walikelas"; name: string } | null>(null);
   const [activeTab, setActiveTab] = useState<"kegiatan" | "spp">("kegiatan");
   
   // Activities states (Modul B)
@@ -72,7 +72,7 @@ export default function DashboardClient() {
     router.push("/portal-belajar");
   };
 
-  // Add new activity handler (Guru only)
+  // Add new activity handler (Wali Kelas & Admin can add)
   const handleAddActivity = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle || !newDate || !newDesc) return;
@@ -95,9 +95,9 @@ export default function DashboardClient() {
     setNewDesc("");
   };
 
-  // Toggle student SPP payment status (Guru only)
+  // Toggle student SPP payment status (Admin only)
   const toggleSppStatus = (studentId: number, month: "Jan" | "Feb" | "Mar") => {
-    if (session?.role !== "guru") return;
+    if (session?.role !== "admin") return;
     setStudents((prev) =>
       prev.map((student) => {
         if (student.id === studentId) {
@@ -125,7 +125,8 @@ export default function DashboardClient() {
     );
   }
 
-  const isGuru = session.role === "guru";
+  const isAdmin = session.role === "admin";
+  const isWaliKelas = session.role === "walikelas";
   const filteredActivities = filterCategory === "Semua" 
     ? activities 
     : activities.filter(act => act.category === filterCategory);
@@ -142,7 +143,7 @@ export default function DashboardClient() {
           <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.005)_1px,transparent_1px)] bg-[size:100%_20px] pointer-events-none"></div>
           <div>
             <span className="text-[10px] font-extrabold bg-soft-mint border border-primary-green/20 text-primary-dark px-3 py-1 rounded-md uppercase tracking-wider">
-              {isGuru ? "Akses Pendidik / Admin" : "Akses Wali Murid"}
+              {isAdmin ? "Akses Administrator (Pencatatan Keuangan)" : "Akses Wali Kelas (Pencatatan Kegiatan)"}
             </span>
             <h1 className="font-baloo text-2xl font-bold text-neutral-dark mt-2">Selamat Datang, {session.name}!</h1>
             <p className="text-xs text-neutral-gray font-bold">Portal Administrasi digital KB/RA Sahabat Berbah Sleman.</p>
@@ -183,8 +184,8 @@ export default function DashboardClient() {
         {activeTab === "kegiatan" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* Input Form (Guru only) */}
-            {isGuru && (
+            {/* Input Form (Wali Kelas only) */}
+            {isWaliKelas && (
               <div className="lg:col-span-4 bg-white p-6 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-4">
                 <h3 className="font-baloo text-lg font-bold text-neutral-dark flex items-center gap-1.5 border-b border-primary-green/10 pb-2">
                   <span>📝</span> Tambah Kegiatan Baru
@@ -273,7 +274,7 @@ export default function DashboardClient() {
             )}
 
             {/* List and Filter Column */}
-            <div className={isGuru ? "lg:col-span-8 space-y-4" : "lg:col-span-12 space-y-4"}>
+            <div className={isWaliKelas ? "lg:col-span-8 space-y-4" : "lg:col-span-12 space-y-4"}>
               
               {/* Filter Row */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-xl border border-primary-green/10 gap-3">
@@ -339,9 +340,9 @@ export default function DashboardClient() {
             <div>
               <h3 className="font-baloo text-xl font-bold text-neutral-dark mb-1.5">Daftar Status Keuangan SPP TA 2026/2027</h3>
               <p className="text-xs text-neutral-gray font-semibold">
-                {isGuru 
-                  ? "💡 Sebagai Guru/Admin, Anda dapat mengeklik status pembayaran bulanan untuk mengubah statusnya (Lunas/Belum Lunas) secara langsung."
-                  : "💡 Menampilkan data rekapitulasi pembayaran SPP siswa. Silakan hubungi bagian bendahara sekolah jika terjadi kesalahan pencatatan."}
+                {isAdmin 
+                  ? "💡 Sebagai Administrator Keuangan, Anda dapat mengeklik status pembayaran bulanan untuk mengubah statusnya (Lunas/Belum Lunas) secara langsung."
+                  : "💡 Sebagai Wali Kelas, Anda hanya memiliki izin membaca status keuangan SPP. Silakan hubungi bendahara sekolah untuk melakukan perubahan data."}
               </p>
             </div>
 
@@ -370,13 +371,13 @@ export default function DashboardClient() {
                         return (
                           <td key={month} className="py-4 px-4 text-center">
                             <button
-                              disabled={!isGuru}
+                              disabled={!isAdmin}
                               onClick={() => toggleSppStatus(student.id, month as "Jan" | "Feb" | "Mar")}
                               className={`px-3 py-1 rounded-full text-[10px] font-extrabold border transition-all ${
                                 isLunas
                                   ? "bg-emerald-100 text-emerald-700 border-emerald-300"
                                   : "bg-amber-100 text-amber-700 border-amber-300"
-                              } ${isGuru ? "cursor-pointer hover:scale-105" : "cursor-default"}`}
+                              } ${isAdmin ? "cursor-pointer hover:scale-105" : "cursor-default"}`}
                             >
                               {status}
                             </button>

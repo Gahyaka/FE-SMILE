@@ -2,9 +2,16 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { siteConfig } from "@/data/site";
 
 export default function Footer() {
+  const pathname = usePathname();
+  const isHiddenPage = pathname?.startsWith('/admin') || pathname?.startsWith('/dashboard') || pathname?.startsWith('/portal-belajar');
+  if (isHiddenPage) {
+    return null;
+  }
+
   // RA Sahabat logo component (matching Navbar)
   const RASahabatLogo = () => (
     <div className="w-10 h-10 rounded-full border-2 border-white flex-shrink-0 overflow-hidden bg-white shadow-md">
