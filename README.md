@@ -1,9 +1,7 @@
-# FE-SGW - Frontend G-SEE
+# FE-SGW - Frontend SMILE
 
-Frontend untuk project G-SEE (Gajahwong Smart Education Ecosystem).
+Frontend untuk project SMILE.
 
 ## Tech Stack
 - Next.js + TypeScript
 - Tailwind CSS  
-
-test testt
