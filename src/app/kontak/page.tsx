@@ -170,6 +170,7 @@ export default function KontakPage() {
                   value={formData.name}
                   onChange={handleFormChange}
                   required
+                  suppressHydrationWarning
                   className="w-full px-4 py-3.5 rounded-[12px_8px_15px_10px]/[10px_15px_8px_12px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors font-semibold select-text"
                   placeholder="Masukkan nama lengkap Anda"
                 />
@@ -184,6 +185,7 @@ export default function KontakPage() {
                   value={formData.email}
                   onChange={handleFormChange}
                   required
+                  suppressHydrationWarning
                   className="w-full px-4 py-3.5 rounded-[10px_15px_8px_12px]/[12px_8px_15px_10px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors font-semibold select-text"
                   placeholder="anda@contohmail.com"
                 />
@@ -196,6 +198,7 @@ export default function KontakPage() {
                   name="subject"
                   value={formData.subject}
                   onChange={handleFormChange}
+                  suppressHydrationWarning
                   className="w-full px-4 py-3.5 rounded-[12px_8px_15px_10px]/[10px_15px_8px_12px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm bg-white transition-colors font-semibold select-text"
                 >
                   <option value="PPDB">Informasi Pendaftaran Siswa Baru (PPDB)</option>
@@ -214,6 +217,7 @@ export default function KontakPage() {
                   value={formData.message}
                   onChange={handleFormChange}
                   required
+                  suppressHydrationWarning
                   className="w-full px-4 py-3.5 rounded-[10px_15px_8px_12px]/[12px_8px_15px_10px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors resize-none font-semibold select-text"
                   placeholder="Jelaskan detail pertanyaan atau maksud pesan Anda..."
                 ></textarea>
@@ -222,6 +226,7 @@ export default function KontakPage() {
               <button
                 type="submit"
                 disabled={formSubmitted}
+                suppressHydrationWarning
                 className={`w-full py-4 rounded-[30px_90px_30px_100px]/[100px_30px_90px_20px] font-extrabold text-base transition-all shadow-md cursor-pointer border-2 border-primary-dark ${
                   formSubmitted
                     ? "bg-neutral-gray text-white cursor-not-allowed"

@@ -557,6 +557,7 @@ export default function HomePage() {
                     value={formData.childName}
                     onChange={handleFormChange}
                     required
+                    suppressHydrationWarning
                     className="w-full px-4 py-3.5 rounded-[12px_8px_15px_10px]/[10px_15px_8px_12px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors font-semibold select-text"
                     placeholder="Masukkan nama lengkap anak"
                   />
@@ -572,6 +573,7 @@ export default function HomePage() {
                       value={formData.parentName}
                       onChange={handleFormChange}
                       required
+                      suppressHydrationWarning
                       className="w-full px-4 py-3.5 rounded-[10px_15px_8px_12px]/[12px_8px_15px_10px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors font-semibold select-text"
                       placeholder="Nama Ibu/Ayah/Wali"
                     />
@@ -585,6 +587,7 @@ export default function HomePage() {
                       value={formData.phone}
                       onChange={handleFormChange}
                       required
+                      suppressHydrationWarning
                       className="w-full px-4 py-3.5 rounded-[12px_8px_15px_10px]/[10px_15px_8px_12px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors font-semibold select-text"
                       placeholder="Contoh: 081234567890"
                     />
@@ -598,6 +601,7 @@ export default function HomePage() {
                     name="classType"
                     value={formData.classType}
                     onChange={handleFormChange}
+                    suppressHydrationWarning
                     className="w-full px-4 py-3.5 rounded-[10px_15px_8px_12px]/[12px_8px_15px_10px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm bg-white transition-colors font-semibold select-text"
                   >
                     <option value="KB">Kelompok Bermain (KB, Usia 3-4 Tahun)</option>
@@ -608,6 +612,7 @@ export default function HomePage() {
                 <button
                   type="submit"
                   disabled={formSubmitted}
+                  suppressHydrationWarning
                   className={`w-full py-4 rounded-[30px_90px_30px_100px]/[100px_30px_90px_20px] font-extrabold text-base transition-all border-2 border-primary-dark shadow-md cursor-pointer ${
                     formSubmitted
                       ? "bg-neutral-gray text-white cursor-not-allowed"
