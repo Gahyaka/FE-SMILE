@@ -44,6 +44,7 @@ export default function DashboardClient() {
   const router = useRouter();
   const [session, setSession] = useState<{ role: "admin" | "walikelas"; name: string } | null>(null);
   const [activeTab, setActiveTab] = useState<"kegiatan" | "spp">("kegiatan");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Activities states (Modul B)
   const [activities, setActivities] = useState(initialActivities);
@@ -132,274 +133,360 @@ export default function DashboardClient() {
     : activities.filter(act => act.category === filterCategory);
 
   return (
-    <div className="flex flex-col min-h-screen text-neutral-dark bg-[#FAF8F5] pt-24 pb-12 select-none px-4 md:px-8">
-      {/* Background Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.015)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10"></div>
+    <div className="min-h-screen bg-[#FAF8F5] text-neutral-dark flex flex-col md:flex-row relative">
+      {/* Background Chalkboard Grid Overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.012)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none -z-10"></div>
 
-      <div className="max-w-6xl mx-auto w-full space-y-6">
-        
-        {/* Welcome header widget */}
-        <div className="bg-white p-6 rounded-[20px_10px_25px_15px]/[15px_25px_10px_20px] border-2 border-dashed border-primary-green/30 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative">
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.005)_1px,transparent_1px)] bg-[size:100%_20px] pointer-events-none"></div>
-          <div>
-            <span className="text-[10px] font-extrabold bg-soft-mint border border-primary-green/20 text-primary-dark px-3 py-1 rounded-md uppercase tracking-wider">
-              {isAdmin ? "Akses Administrator (Pencatatan Keuangan)" : "Akses Wali Kelas (Pencatatan Kegiatan)"}
-            </span>
-            <h1 className="font-baloo text-2xl font-bold text-neutral-dark mt-2">Selamat Datang, {session.name}!</h1>
-            <p className="text-xs text-neutral-gray font-bold">Portal Administrasi digital KB/RA Sahabat Berbah Sleman.</p>
+      {/* Sidebar for Desktop & Mobile Toggle Drawer */}
+      <aside className={`w-64 bg-white text-neutral-dark flex flex-col justify-between p-5 border-r border-primary-green/10 z-40 fixed h-screen transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <div className="space-y-8">
+          
+          {/* Logo Brand Widget */}
+          <div className="flex items-center gap-3 border-b border-primary-green/10 pb-5">
+            <div className="w-10 h-10 rounded-full border border-primary-green/20 overflow-hidden bg-white shadow-xs">
+              <img src="/images/logo.jpg" alt="Logo RA Sahabat" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <h2 className="font-baloo text-sm font-bold tracking-wide leading-none text-neutral-dark">RA Sahabat</h2>
+              <span className="text-[9px] text-primary-green font-extrabold uppercase mt-1 block tracking-wider">Portal Administrasi</span>
+            </div>
           </div>
+
+          {/* Nav List */}
+          <nav className="space-y-2.5">
+            <span className="text-[9px] text-primary-green/60 font-extrabold uppercase tracking-widest block mb-3 px-3">Menu Utama</span>
+            
+            <button
+              onClick={() => {
+                setActiveTab("kegiatan");
+                setSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs transition-all cursor-pointer ${
+                activeTab === "kegiatan"
+                  ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
+                  : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
+              }`}
+            >
+              {/* Folder Icon */}
+              <svg className={`w-4 h-4 transition-colors ${activeTab === "kegiatan" ? "text-primary-green" : "text-neutral-gray"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+              </svg>
+              <span>Dokumentasi Kegiatan</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setActiveTab("spp");
+                setSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs transition-all cursor-pointer ${
+                activeTab === "spp"
+                  ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
+                  : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
+              }`}
+            >
+              {/* Credit Card Icon */}
+              <svg className={`w-4 h-4 transition-colors ${activeTab === "spp" ? "text-primary-green" : "text-neutral-gray"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+              <span>Monitoring SPP</span>
+            </button>
+          </nav>
+        </div>
+
+        {/* Sidebar Footer Account & Logout info */}
+        <div className="space-y-4 pt-5 border-t border-primary-green/10">
+          <div className="bg-[#FAF8F5] border border-primary-green/10 rounded-xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-primary-green text-white flex items-center justify-center font-extrabold text-[10px] flex-shrink-0">
+              {isAdmin ? "AD" : "WK"}
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-[10px] text-neutral-dark font-bold leading-tight truncate">{session.name}</p>
+              <span className="text-[8px] text-primary-green font-bold uppercase mt-1 block">
+                {isAdmin ? "Administrator" : "Wali Kelas"}
+              </span>
+            </div>
+          </div>
+
           <button
             onClick={handleLogout}
-            className="px-5 py-2.5 rounded-[12px_24px_12px_30px]/[30px_12px_24px_12px] bg-accent hover:bg-accent-dark text-white font-extrabold text-xs transition-all border-2 border-primary-dark shadow-xs cursor-pointer"
+            className="w-full py-2.5 rounded-lg bg-accent/5 hover:bg-accent/15 text-accent hover:text-accent-dark font-extrabold text-xs transition-all border border-accent/20 hover:border-accent/40 shadow-3xs cursor-pointer text-center flex items-center justify-center gap-2"
           >
-            Keluar Sistem 🚪
+            {/* Exit Icon */}
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span>Keluar Sistem</span>
           </button>
         </div>
+      </aside>
 
-        {/* Tab triggers */}
-        <div className="flex gap-2.5 border-b border-primary-green/10 pb-1">
-          <button
-            onClick={() => setActiveTab("kegiatan")}
-            className={`pb-2.5 px-4 font-baloo text-base font-extrabold transition-colors border-b-4 cursor-pointer ${
-              activeTab === "kegiatan"
-                ? "border-primary-green text-primary-green"
-                : "border-transparent text-neutral-gray hover:text-neutral-dark"
-            }`}
-          >
-            Dokumentasi Kegiatan (Modul B)
-          </button>
-          <button
-            onClick={() => setActiveTab("spp")}
-            className={`pb-2.5 px-4 font-baloo text-base font-extrabold transition-colors border-b-4 cursor-pointer ${
-              activeTab === "spp"
-                ? "border-primary-green text-primary-green"
-                : "border-transparent text-neutral-gray hover:text-neutral-dark"
-            }`}
-          >
-            Monitoring Pembayaran SPP (Modul C)
-          </button>
-        </div>
+      {/* Background Overlay when Sidebar is open on Mobile */}
+      {sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+        ></div>
+      )}
 
-        {/* Tab 1 content: Dokumentasi Kegiatan */}
-        {activeTab === "kegiatan" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* Main Content Area */}
+      <main className="flex-1 md:ml-64 p-6 md:p-10 min-h-screen flex flex-col justify-between">
+        
+        <div className="space-y-6">
+          
+          {/* Mobile Header Bar */}
+          <div className="flex md:hidden items-center justify-between bg-white p-3 rounded-xl border border-primary-green/10 shadow-3xs">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 border border-primary-green/20 rounded-lg text-neutral-dark bg-[#FAF8F5] cursor-pointer"
+            >
+              ☰ Menu
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-white border border-primary-green/10">
+                <img src="/images/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
+              </div>
+              <span className="font-baloo text-xs font-bold text-neutral-dark">RA Sahabat</span>
+            </div>
+          </div>
+
+          {/* Current Page Title and Path info */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-primary-green/10 pb-4">
+            <div>
+              <span className="text-[9px] text-neutral-gray font-bold uppercase tracking-wider">
+                Portal Belajar & Administrasi
+              </span>
+              <h2 className="font-baloo text-2xl font-bold text-neutral-dark mt-1">
+                {activeTab === "kegiatan" ? "Dokumentasi Kegiatan (Modul B)" : "Monitoring SPP (Modul C)"}
+              </h2>
+            </div>
             
-            {/* Input Form (Wali Kelas only) */}
-            {isWaliKelas && (
-              <div className="lg:col-span-4 bg-white p-6 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-4">
-                <h3 className="font-baloo text-lg font-bold text-neutral-dark flex items-center gap-1.5 border-b border-primary-green/10 pb-2">
-                  <span>📝</span> Tambah Kegiatan Baru
-                </h3>
-                
-                <form onSubmit={handleAddActivity} className="space-y-4">
-                  <div>
-                    <label htmlFor="newTitle" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Nama Kegiatan</label>
-                    <input
-                      type="text"
-                      id="newTitle"
-                      value={newTitle}
-                      onChange={(e) => setNewTitle(e.target.value)}
-                      required
-                      suppressHydrationWarning
-                      className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                      placeholder="Contoh: Senam PHBS Ceria"
-                    />
-                  </div>
+            <div className="text-[10px] bg-white border border-primary-green/10 px-3.5 py-1.5 rounded-lg font-bold text-neutral-gray flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              <span>{isAdmin ? "Status: Administrator" : "Status: Wali Kelas"}</span>
+            </div>
+          </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+          {/* TAB CONTENT panels */}
+          {activeTab === "kegiatan" && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              
+              {/* Input Form (Wali Kelas only) */}
+              {isWaliKelas && (
+                <div className="lg:col-span-4 bg-white p-6 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-4">
+                  <h3 className="font-baloo text-lg font-bold text-neutral-dark flex items-center gap-1.5 border-b border-primary-green/10 pb-2">
+                    <span>📝</span> Tambah Kegiatan Baru
+                  </h3>
+                  
+                  <form onSubmit={handleAddActivity} className="space-y-4">
                     <div>
-                      <label htmlFor="newDate" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Tanggal</label>
+                      <label htmlFor="newTitle" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Nama Kegiatan</label>
                       <input
-                        type="date"
-                        id="newDate"
-                        value={newDate}
-                        onChange={(e) => setNewDate(e.target.value)}
+                        type="text"
+                        id="newTitle"
+                        value={newTitle}
+                        onChange={(e) => setNewTitle(e.target.value)}
                         required
                         suppressHydrationWarning
                         className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                        placeholder="Contoh: Senam PHBS Ceria"
                       />
                     </div>
-                    <div>
-                      <label htmlFor="newCategory" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Kategori</label>
-                      <select
-                        id="newCategory"
-                        value={newCategory}
-                        onChange={(e) => setNewCategory(e.target.value)}
-                        suppressHydrationWarning
-                        className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white"
-                      >
-                        <option value="Akademik">Akademik</option>
-                        <option value="Keagamaan">Keagamaan / Ke-NU-an</option>
-                        <option value="Ekstrakurikuler">Ekstrakurikuler</option>
-                      </select>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label htmlFor="newDate" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Tanggal</label>
+                        <input
+                          type="date"
+                          id="newDate"
+                          value={newDate}
+                          onChange={(e) => setNewDate(e.target.value)}
+                          required
+                          suppressHydrationWarning
+                          className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="newCategory" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Kategori</label>
+                        <select
+                          id="newCategory"
+                          value={newCategory}
+                          onChange={(e) => setNewCategory(e.target.value)}
+                          suppressHydrationWarning
+                          className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white"
+                        >
+                          <option value="Akademik">Akademik</option>
+                          <option value="Keagamaan">Keagamaan / Ke-NU-an</option>
+                          <option value="Ekstrakurikuler">Ekstrakurikuler</option>
+                        </select>
+                      </div>
                     </div>
-                  </div>
 
-                  <div>
-                    <label htmlFor="newDrive" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Tautan Folder Google Drive (Bukti)</label>
-                    <input
-                      type="url"
-                      id="newDrive"
-                      value={newDrive}
-                      onChange={(e) => setNewDrive(e.target.value)}
+                    <div>
+                      <label htmlFor="newDrive" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Tautan Folder Google Drive (Bukti)</label>
+                      <input
+                        type="url"
+                        id="newDrive"
+                        value={newDrive}
+                        onChange={(e) => setNewDrive(e.target.value)}
+                        suppressHydrationWarning
+                        className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                        placeholder="https://drive.google.com/..."
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="newDesc" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Deskripsi Singkat</label>
+                      <textarea
+                        id="newDesc"
+                        value={newDesc}
+                        onChange={(e) => setNewDesc(e.target.value)}
+                        required
+                        rows={3}
+                        suppressHydrationWarning
+                        className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold resize-none"
+                        placeholder="Jelaskan tujuan atau luaran kegiatan..."
+                      ></textarea>
+                    </div>
+
+                    <button
+                      type="submit"
                       suppressHydrationWarning
-                      className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                      placeholder="https://drive.google.com/..."
-                    />
-                  </div>
+                      className="w-full py-3.5 rounded-[12px_24px_12px_30px]/[30px_12px_24px_12px] bg-[#2CB24A] hover:bg-[#1C8A38] text-white font-extrabold text-xs transition-all border-2 border-[#1C8A38] shadow-xs cursor-pointer"
+                    >
+                      Simpan Kegiatan 💾
+                    </button>
+                  </form>
+                </div>
+              )}
 
-                  <div>
-                    <label htmlFor="newDesc" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Deskripsi Singkat</label>
-                    <textarea
-                      id="newDesc"
-                      value={newDesc}
-                      onChange={(e) => setNewDesc(e.target.value)}
-                      required
-                      rows={3}
-                      suppressHydrationWarning
-                      className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold resize-none"
-                      placeholder="Jelaskan tujuan atau luaran kegiatan..."
-                    ></textarea>
-                  </div>
-
-                  <button
-                    type="submit"
-                    suppressHydrationWarning
-                    className="w-full py-3.5 rounded-[12px_24px_12px_30px]/[30px_12px_24px_12px] bg-[#2CB24A] hover:bg-[#1C8A38] text-white font-extrabold text-xs transition-all border-2 border-[#1C8A38] shadow-xs cursor-pointer"
-                  >
-                    Simpan Kegiatan 💾
-                  </button>
-                </form>
-              </div>
-            )}
-
-            {/* List and Filter Column */}
-            <div className={isWaliKelas ? "lg:col-span-8 space-y-4" : "lg:col-span-12 space-y-4"}>
-              
-              {/* Filter Row */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-xl border border-primary-green/10 gap-3">
-                <span className="text-xs font-extrabold text-neutral-dark">Daftar Kegiatan Terarsip</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold text-neutral-gray uppercase">Saring:</span>
-                  <div className="flex gap-1.5">
-                    {["Semua", "Akademik", "Keagamaan", "Ekstrakurikuler"].map((cat) => (
-                      <button
-                        key={cat}
-                        onClick={() => setFilterCategory(cat)}
-                        className={`px-3 py-1 rounded-md text-[10px] font-extrabold border transition-colors cursor-pointer ${
-                          filterCategory === cat
-                            ? "bg-primary-green text-white border-primary-green"
-                            : "bg-[#FAF8F5] text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
+              {/* List and Filter Column */}
+              <div className={isWaliKelas ? "lg:col-span-8 space-y-4" : "lg:col-span-12 space-y-4"}>
+                
+                {/* Filter Row */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-xl border border-primary-green/10 gap-3">
+                  <span className="text-xs font-extrabold text-neutral-dark">Daftar Kegiatan Terarsip</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-neutral-gray uppercase">Saring:</span>
+                    <div className="flex gap-1.5">
+                      {["Semua", "Akademik", "Keagamaan", "Ekstrakurikuler"].map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => setFilterCategory(cat)}
+                          className={`px-3 py-1 rounded-md text-[10px] font-extrabold border transition-colors cursor-pointer ${
+                            filterCategory === cat
+                              ? "bg-primary-green text-white border-primary-green"
+                              : "bg-[#FAF8F5] text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Activities Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredActivities.map((act) => (
-                  <div key={act.id} className="bg-white p-5 rounded-2xl border-2 border-dashed border-primary-green/10 shadow-xs relative flex flex-col justify-between">
-                    <div>
-                      <div className="flex justify-between items-start">
-                        <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
-                          act.category === "Keagamaan" ? "bg-purple-100 text-purple-700" : "bg-emerald-100 text-emerald-700"
-                        }`}>
-                          {act.category}
-                        </span>
-                        <span className="text-[9px] text-neutral-gray font-bold">{act.date}</span>
+                {/* Activities Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredActivities.map((act) => (
+                    <div key={act.id} className="bg-white p-5 rounded-2xl border-2 border-dashed border-primary-green/10 shadow-xs relative flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
+                            act.category === "Keagamaan" ? "bg-purple-100 text-purple-700" : "bg-emerald-100 text-emerald-700"
+                          }`}>
+                            {act.category}
+                          </span>
+                          <span className="text-[9px] text-neutral-gray font-bold">{act.date}</span>
+                        </div>
+                        <h4 className="font-baloo text-base font-bold text-neutral-dark mt-2">{act.title}</h4>
+                        <p className="text-xs text-neutral-gray font-semibold mt-1.5 leading-relaxed">{act.description}</p>
                       </div>
-                      <h4 className="font-baloo text-base font-bold text-neutral-dark mt-2">{act.title}</h4>
-                      <p className="text-xs text-neutral-gray font-semibold mt-1.5 leading-relaxed">{act.description}</p>
-                    </div>
 
-                    <div className="mt-4 pt-3 border-t border-neutral-gray/5 flex justify-between items-center">
-                      <a
-                        href={act.driveLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[10px] font-extrabold text-primary-green hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        📁 Buka Folder Drive ↗
-                      </a>
-                      <span className="text-[9px] text-neutral-gray italic">Akreditasi BAN-PDM Ready</span>
+                      <div className="mt-4 pt-3 border-t border-neutral-gray/5 flex justify-between items-center">
+                        <a
+                          href={act.driveLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] font-extrabold text-primary-green hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          📁 Buka Folder Drive ↗
+                        </a>
+                        <span className="text-[9px] text-neutral-gray italic">Akreditasi Ready</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Tab 2 content: Monitoring SPP */}
-        {activeTab === "spp" && (
-          <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-6">
-            <div>
-              <h3 className="font-baloo text-xl font-bold text-neutral-dark mb-1.5">Daftar Status Keuangan SPP TA 2026/2027</h3>
-              <p className="text-xs text-neutral-gray font-semibold">
-                {isAdmin 
-                  ? "💡 Sebagai Administrator Keuangan, Anda dapat mengeklik status pembayaran bulanan untuk mengubah statusnya (Lunas/Belum Lunas) secara langsung."
-                  : "💡 Sebagai Wali Kelas, Anda hanya memiliki izin membaca status keuangan SPP. Silakan hubungi bendahara sekolah untuk melakukan perubahan data."}
-              </p>
-            </div>
+          {activeTab === "spp" && (
+            <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-6">
+              <div>
+                <h3 className="font-baloo text-xl font-bold text-neutral-dark mb-1.5">Daftar Status Keuangan SPP TA 2026/2027</h3>
+                <p className="text-xs text-neutral-gray font-semibold">
+                  {isAdmin 
+                    ? "💡 Sebagai Administrator Keuangan, Anda dapat mengeklik status pembayaran bulanan untuk mengubah statusnya (Lunas/Belum Lunas) secara langsung."
+                    : "💡 Sebagai Wali Kelas, Anda hanya memiliki izin membaca status keuangan SPP. Silakan hubungi bendahara sekolah untuk melakukan perubahan data."}
+                </p>
+              </div>
 
-            {/* SPP Table */}
-            <div className="overflow-x-auto rounded-xl border border-neutral-gray/10">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10">
-                    <th className="py-4 px-6">Nama Siswa</th>
-                    <th className="py-4 px-4">Kelas</th>
-                    <th className="py-4 px-4 text-center">Januari</th>
-                    <th className="py-4 px-4 text-center">Februari</th>
-                    <th className="py-4 px-4 text-center">Maret</th>
-                  </tr>
-                </thead>
-                <tbody className="text-xs font-semibold text-neutral-dark divide-y divide-neutral-gray/5">
-                  {students.map((student) => (
-                    <tr key={student.id} className="hover:bg-soft-mint/30 transition-colors">
-                      <td className="py-4 px-6 font-bold">{student.name}</td>
-                      <td className="py-4 px-4"><span className="px-2 py-0.5 bg-neutral-gray/10 rounded-md text-[10px] font-bold">{student.class}</span></td>
-                      
-                      {/* Months */}
-                      {["Jan", "Feb", "Mar"].map((month) => {
-                        const status = student.status[month as "Jan" | "Feb" | "Mar"];
-                        const isLunas = status === "Lunas";
-                        return (
-                          <td key={month} className="py-4 px-4 text-center">
-                            <button
-                              disabled={!isAdmin}
-                              onClick={() => toggleSppStatus(student.id, month as "Jan" | "Feb" | "Mar")}
-                              className={`px-3 py-1 rounded-full text-[10px] font-extrabold border transition-all ${
-                                isLunas
-                                  ? "bg-emerald-100 text-emerald-700 border-emerald-300"
-                                  : "bg-amber-100 text-amber-700 border-amber-300"
-                              } ${isAdmin ? "cursor-pointer hover:scale-105" : "cursor-default"}`}
-                            >
-                              {status}
-                            </button>
-                          </td>
-                        );
-                      })}
+              {/* SPP Table */}
+              <div className="overflow-x-auto rounded-xl border border-neutral-gray/10">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10">
+                      <th className="py-4 px-6">Nama Siswa</th>
+                      <th className="py-4 px-4">Kelas</th>
+                      <th className="py-4 px-4 text-center">Januari</th>
+                      <th className="py-4 px-4 text-center">Februari</th>
+                      <th className="py-4 px-4 text-center">Maret</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="text-xs font-semibold text-neutral-dark divide-y divide-neutral-gray/5">
+                    {students.map((student) => (
+                      <tr key={student.id} className="hover:bg-soft-mint/30 transition-colors">
+                        <td className="py-4 px-6 font-bold">{student.name}</td>
+                        <td className="py-4 px-4"><span className="px-2 py-0.5 bg-neutral-gray/10 rounded-md text-[10px] font-bold">{student.class}</span></td>
+                        
+                        {/* Months */}
+                        {["Jan", "Feb", "Mar"].map((month) => {
+                          const status = student.status[month as "Jan" | "Feb" | "Mar"];
+                          const isLunas = status === "Lunas";
+                          return (
+                            <td key={month} className="py-4 px-4 text-center">
+                              <button
+                                disabled={!isAdmin}
+                                onClick={() => toggleSppStatus(student.id, month as "Jan" | "Feb" | "Mar")}
+                                className={`px-3 py-1 rounded-full text-[10px] font-extrabold border transition-all ${
+                                  isLunas
+                                    ? "bg-emerald-100 text-emerald-700 border-emerald-300"
+                                    : "bg-amber-100 text-amber-700 border-amber-300"
+                                } ${isAdmin ? "cursor-pointer hover:scale-105" : "cursor-default"}`}
+                              >
+                                {status}
+                              </button>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-            {/* General Note */}
-            <div className="p-4 bg-soft-mint border border-primary-green/20 rounded-xl flex items-center gap-3">
-              <span className="text-xl">🛡</span>
-              <p className="text-[10px] font-semibold text-primary-dark leading-relaxed">
-                Pencatatan ini dilindungi kebijakan privasi lembaga. Keamanan data keuangan anak didik terjaga di bawah pengawasan KB/RA Sahabat Berbah Sleman dan terintegrasi secara internal.
-              </p>
+              {/* General Note */}
+              <div className="p-4 bg-soft-mint border border-primary-green/20 rounded-xl flex items-center gap-3">
+                <span className="text-xl">🛡</span>
+                <p className="text-[10px] font-semibold text-primary-dark leading-relaxed">
+                  Pencatatan ini dilindungi kebijakan privasi lembaga. Keamanan data keuangan anak didik terjaga di bawah pengawasan KB/RA Sahabat Berbah Sleman dan terintegrasi secara internal.
+                </p>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
