@@ -109,30 +109,31 @@ export default function KontakPage() {
               </div>
             </div>
 
-            {/* Sketched Map Frame */}
+            {/* Google Maps Interactive Frame */}
             <div className="bg-[#FAF8F5] p-5 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/30 shadow-xs space-y-3">
               <span className="text-xs font-extrabold text-primary-dark uppercase tracking-widest block">Lokasi RA Sahabat Berbah</span>
               
-              {/* Creative Map Doodle Illustration inside map container */}
-              <div className="w-full aspect-video bg-white rounded-2xl border-2 border-neutral-dark relative overflow-hidden flex items-center justify-center p-3">
-                {/* Chalkboard grid overlay background */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.015)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
-                
-                {/* Sketched River/Road Wave Doodle */}
-                <svg className="absolute w-full h-full inset-0 text-primary-green/15 pointer-events-none" viewBox="0 0 200 100" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M10 50 Q100 20 190 50" strokeDasharray="4 3" />
-                  <path d="M60 10 L60 90" strokeDasharray="4 3" />
-                  
-                  {/* School House Marker */}
-                  <rect x="85" y="35" width="30" height="20" rx="3" fill="#FAF8F5" stroke="#2B2B2B" strokeWidth="2" />
-                  <polygon points="80,35 100,20 120,35" fill="#7A2E8F" stroke="#2B2B2B" strokeWidth="2" />
-                  <circle cx="100" cy="45" r="2" fill="#EC1E8C" />
-                </svg>
-                
-                <div className="relative z-10 bg-white/95 backdrop-blur-xs py-2 px-4 rounded-[12px_6px_10px_8px]/[8px_10px_6px_12px] border-2 border-primary-green/30 text-center shadow-xs rotate-[-1.5deg]">
-                  <p className="text-[10px] font-extrabold text-primary-dark uppercase">KB/RA Sahabat Berbah</p>
-                  <p className="text-[9px] text-neutral-gray mt-0.5 font-bold">Sleman, Yogyakarta</p>
-                </div>
+              <div className="w-full aspect-video bg-white rounded-2xl border-2 border-neutral-dark relative overflow-hidden shadow-sm group">
+                {/* Google Maps Interactive Iframe */}
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3952.883731174987!2d110.441871!3d-7.7936473!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a5190c48cf0b5%3A0x7186938de1643136!2sKB%20RA%20SAHABAT!5e0!3m2!1sen!2sid!4v1722420000000!5m2!1sen!2sid"
+                  className="w-full h-full border-none absolute inset-0"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Peta Lokasi KB RA Sahabat"
+                ></iframe>
+
+                {/* Floating Directions Action Button */}
+                <a
+                  href="https://www.google.com/maps/place/KB+RA+SAHABAT/@-7.7936473,110.441871,15z"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-3 right-3 z-20 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#2CB24A] hover:bg-[#1C8A38] text-white font-extrabold text-xs transition-colors border border-[#1C8A38] shadow-md cursor-pointer"
+                >
+                  <span>Petunjuk Rute</span>
+                  <span className="text-[9px]">↗</span>
+                </a>
               </div>
             </div>
             
@@ -170,6 +171,7 @@ export default function KontakPage() {
                   value={formData.name}
                   onChange={handleFormChange}
                   required
+                  suppressHydrationWarning
                   className="w-full px-4 py-3.5 rounded-[12px_8px_15px_10px]/[10px_15px_8px_12px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors font-semibold select-text"
                   placeholder="Masukkan nama lengkap Anda"
                 />
@@ -184,6 +186,7 @@ export default function KontakPage() {
                   value={formData.email}
                   onChange={handleFormChange}
                   required
+                  suppressHydrationWarning
                   className="w-full px-4 py-3.5 rounded-[10px_15px_8px_12px]/[12px_8px_15px_10px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors font-semibold select-text"
                   placeholder="anda@contohmail.com"
                 />
@@ -196,6 +199,7 @@ export default function KontakPage() {
                   name="subject"
                   value={formData.subject}
                   onChange={handleFormChange}
+                  suppressHydrationWarning
                   className="w-full px-4 py-3.5 rounded-[12px_8px_15px_10px]/[10px_15px_8px_12px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm bg-white transition-colors font-semibold select-text"
                 >
                   <option value="PPDB">Informasi Pendaftaran Siswa Baru (PPDB)</option>
@@ -214,6 +218,7 @@ export default function KontakPage() {
                   value={formData.message}
                   onChange={handleFormChange}
                   required
+                  suppressHydrationWarning
                   className="w-full px-4 py-3.5 rounded-[10px_15px_8px_12px]/[12px_8px_15px_10px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors resize-none font-semibold select-text"
                   placeholder="Jelaskan detail pertanyaan atau maksud pesan Anda..."
                 ></textarea>
@@ -222,6 +227,7 @@ export default function KontakPage() {
               <button
                 type="submit"
                 disabled={formSubmitted}
+                suppressHydrationWarning
                 className={`w-full py-4 rounded-[30px_90px_30px_100px]/[100px_30px_90px_20px] font-extrabold text-base transition-all shadow-md cursor-pointer border-2 border-primary-dark ${
                   formSubmitted
                     ? "bg-neutral-gray text-white cursor-not-allowed"
