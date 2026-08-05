@@ -21,17 +21,23 @@ export default function LoginClient() {
     setLoading(true);
 
     setTimeout(() => {
-      // Mock validation
-      if (username === "admin" && password === "admin123") {
+      // Mock validation matching PRD v3 roles
+      if (username === "admin_adm" && password === "admin123") {
         localStorage.setItem(
           "user_session",
-          JSON.stringify({ role: "admin", name: "Administrator" })
+          JSON.stringify({ role: "admin_adm", name: "Admin Administrasi (Bunda Nisa)" })
         );
         router.push("/portal-belajar/dashboard");
-      } else if (username === "walikelas" && password === "walikelas123") {
+      } else if (username === "admin_trx" && password === "admin123") {
         localStorage.setItem(
           "user_session",
-          JSON.stringify({ role: "walikelas", name: "Ibu Guru Halimah (Wali Kelas)" })
+          JSON.stringify({ role: "admin_trx", name: "Admin Transaksi (Bunda Ajeng)" })
+        );
+        router.push("/portal-belajar/dashboard");
+      } else if (username === "guru" && password === "guru123") {
+        localStorage.setItem(
+          "user_session",
+          JSON.stringify({ role: "guru", name: "Guru Kelas (Bunda Rahma)" })
         );
         router.push("/portal-belajar/dashboard");
       } else {
