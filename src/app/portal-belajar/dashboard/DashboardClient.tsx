@@ -199,6 +199,7 @@ export default function DashboardClient() {
   const [newDrive, setNewDrive] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [filterCategory, setFilterCategory] = useState("Semua");
+  const [showActivityForm, setShowActivityForm] = useState(false);
 
   // SPP & Les Transaksi States
   const [sppTransactions, setSppTransactions] = useState(initialSppTransactions);
@@ -484,6 +485,7 @@ export default function DashboardClient() {
     setNewCategory("Akademik");
     setNewDrive("");
     setNewDesc("");
+    setShowActivityForm(false);
   };
 
   // Record SPP & Les payment (Admin Transaksi only)
@@ -637,18 +639,39 @@ export default function DashboardClient() {
       {/* Background Chalkboard Grid Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.012)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none -z-10"></div>
 
+      {/* Mobile Sidebar Backdrop Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar Navigation */}
       <aside className={`w-64 bg-white text-neutral-dark flex flex-col justify-between p-5 border-r border-primary-green/10 z-40 fixed h-screen transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="space-y-6">
           
-          <div className="flex items-center gap-3 border-b border-primary-green/10 pb-5">
-            <div className="w-10 h-10 rounded-full border border-primary-green/20 overflow-hidden bg-white shadow-xs">
-              <img src="/images/logo.jpg" alt="Logo RA Sahabat" className="w-full h-full object-cover" />
+          <div className="flex items-center justify-between border-b border-primary-green/10 pb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full border border-primary-green/20 overflow-hidden bg-white shadow-xs">
+                <img src="/images/logo.jpg" alt="Logo RA Sahabat" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <h2 className="font-baloo text-sm font-bold tracking-wide leading-none text-neutral-dark">RA Sahabat</h2>
+                <span className="text-[9px] text-primary-green font-extrabold uppercase mt-1 block tracking-wider">Portal Administrasi</span>
+              </div>
             </div>
-            <div>
-              <h2 className="font-baloo text-sm font-bold tracking-wide leading-none text-neutral-dark">RA Sahabat</h2>
-              <span className="text-[9px] text-primary-green font-extrabold uppercase mt-1 block tracking-wider">Portal Administrasi</span>
-            </div>
+            
+            {/* Close Button for Mobile Sidebar */}
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden p-1.5 rounded-lg text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 cursor-pointer flex items-center justify-center"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
           <nav className="space-y-1.5">
@@ -785,12 +808,12 @@ export default function DashboardClient() {
         
         <div className="space-y-6">
           {/* Path Header info */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-primary-green/10 pb-4">
+          <div className="flex flex-row justify-between items-center gap-4 border-b border-primary-green/10 pb-4">
             <div>
-              <span className="text-[9px] text-neutral-gray font-bold uppercase tracking-wider">
+              <span className="text-[9px] text-neutral-gray font-bold uppercase tracking-wider block">
                 Portal Belajar & Administrasi KB/RA Sahabat
               </span>
-              <h2 className="font-baloo text-2xl font-bold text-neutral-dark mt-1">
+              <h2 className="font-baloo text-xl sm:text-2xl font-bold text-neutral-dark mt-0.5">
                 {activeTab === "siswa" && "Manajemen Data Peserta Didik"}
                 {activeTab === "kegiatan" && "Dokumentasi Kegiatan"}
                 {activeTab === "spp" && "Pencatatan SPP & Les Terpadu"}
@@ -801,11 +824,27 @@ export default function DashboardClient() {
               </h2>
             </div>
             
-            <div className="text-[10px] bg-white border border-primary-green/10 px-3.5 py-1.5 rounded-lg font-bold text-neutral-gray flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-              <span>
-                {isAdminAdministrasi ? "Status: Admin Adm" : isAdminTransaksi ? "Status: Admin Trx" : "Status: Guru"}
-              </span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="text-[10px] bg-white border border-primary-green/10 px-3.5 py-1.5 rounded-lg font-bold text-neutral-gray flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <span className="hidden sm:inline">
+                  {isAdminAdministrasi ? "Status: Admin Adm" : isAdminTransaksi ? "Status: Admin Trx" : "Status: Guru"}
+                </span>
+                <span className="sm:hidden">
+                  {isAdminAdministrasi ? "Adm" : isAdminTransaksi ? "Trx" : "Guru"}
+                </span>
+              </div>
+              
+              {/* Hamburger Button for Mobile - Placed in the right corner */}
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(true)}
+                className="md:hidden p-2 rounded-lg bg-white border border-primary-green/10 text-primary-green hover:bg-soft-mint/10 cursor-pointer shadow-3xs flex items-center justify-center"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
             </div>
           </div>
 
@@ -1559,134 +1598,72 @@ export default function DashboardClient() {
 
           {/* TAB CONTENT: Dokumentasi Kegiatan */}
           {activeTab === "kegiatan" && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="w-full space-y-6">
               
-              {/* Input Form (Admin Administrasi & Guru only) */}
-              {(isAdminAdministrasi || isGuru) && (
-                <div className="lg:col-span-4 bg-white p-6 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs space-y-4">
-                  <h3 className="font-baloo text-lg font-bold text-neutral-dark flex items-center gap-1.5 border-b border-primary-green/10 pb-2">
-                    <svg className="w-5 h-5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              {/* Header Tab & Action Button */}
+              <div className="bg-white p-5 rounded-2xl border border-primary-green/10 shadow-3xs flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+                <div>
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark">Arsip Dokumentasi Kegiatan & Media Pembelajaran</h4>
+                  <p className="text-[11px] text-neutral-gray font-semibold">Media integrasi bukti fisik kegiatan belajar mengajar guna pemenuhan akreditasi madrasah.</p>
+                </div>
+                
+                {(isAdminAdministrasi || isGuru) && (
+                  <button
+                    type="button"
+                    onClick={() => setShowActivityForm(true)}
+                    className="py-2.5 px-4 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center justify-center gap-2 cursor-pointer shadow-3xs"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
-                    <span>Tambah Kegiatan Baru</span>
-                  </h3>
-                  
-                  <form onSubmit={handleAddActivity} className="space-y-4">
-                    <div>
-                      <label htmlFor="newTitle" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Nama Kegiatan</label>
-                      <input
-                        type="text"
-                        id="newTitle"
-                        value={newTitle}
-                        onChange={(e) => setNewTitle(e.target.value)}
-                        required
-                        className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                        placeholder="Contoh: Senam Ceria"
-                      />
-                    </div>
+                    <span>Unggah Dokumentasi Baru</span>
+                  </button>
+                )}
+              </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label htmlFor="newDate" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Tanggal</label>
-                        <input
-                          type="date"
-                          id="newDate"
-                          value={newDate}
-                          onChange={(e) => setNewDate(e.target.value)}
-                          required
-                          className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="newCategory" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Kategori</label>
-                        <select
-                          id="newCategory"
-                          value={newCategory}
-                          onChange={(e) => setNewCategory(e.target.value)}
-                          className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white"
-                        >
-                          <option value="Akademik">Akademik</option>
-                          <option value="Keagamaan">Keagamaan / Ke-NU-an</option>
-                          <option value="Ekstrakurikuler">Ekstrakurikuler</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label htmlFor="newDrive" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Tautan Folder Google Drive (Bukti)</label>
-                      <input
-                        type="url"
-                        id="newDrive"
-                        value={newDrive}
-                        onChange={(e) => setNewDrive(e.target.value)}
-                        className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                        placeholder="https://drive.google.com/..."
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="newDesc" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Deskripsi Singkat</label>
-                      <textarea
-                        id="newDesc"
-                        value={newDesc}
-                        onChange={(e) => setNewDesc(e.target.value)}
-                        required
-                        rows={3}
-                        className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold resize-none"
-                        placeholder="Tujuan kegiatan..."
-                      ></textarea>
-                    </div>
-
+              {/* Filter Category Bar */}
+              <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-xl border border-primary-green/10">
+                <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Saring Kategori:</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {["Semua", "Akademik", "Keagamaan", "Ekstrakurikuler"].map((cat) => (
                     <button
-                      type="submit"
-                      className="w-full py-3 rounded-[12px_24px_12px_30px]/[30px_12px_24px_12px] bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs transition-all border border-primary-green shadow-xs cursor-pointer flex items-center justify-center gap-2"
+                      key={cat}
+                      onClick={() => setFilterCategory(cat)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-extrabold border transition-all cursor-pointer ${
+                        filterCategory === cat
+                          ? "bg-primary-green text-white border-primary-green shadow-3xs"
+                          : "bg-[#FAF8F5] text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
+                      }`}
                     >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                      </svg>
-                      <span>Simpan Kegiatan</span>
+                      {cat}
                     </button>
-                  </form>
+                  ))}
                 </div>
-              )}
+              </div>
 
-              {/* List and Filter Column */}
-              <div className={(isAdminAdministrasi || isGuru) ? "lg:col-span-8 space-y-4" : "lg:col-span-12 space-y-4"}>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-xl border border-primary-green/10 gap-3">
-                  <span className="text-xs font-extrabold text-neutral-dark">Daftar Kegiatan Terarsip</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-neutral-gray uppercase">Saring:</span>
-                    <div className="flex gap-1.5">
-                      {["Semua", "Akademik", "Keagamaan", "Ekstrakurikuler"].map((cat) => (
-                        <button
-                          key={cat}
-                          onClick={() => setFilterCategory(cat)}
-                          className={`px-3 py-1 rounded-md text-[10px] font-extrabold border transition-colors cursor-pointer ${
-                            filterCategory === cat
-                              ? "bg-primary-green text-white border-primary-green"
-                              : "bg-[#FAF8F5] text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
-                          }`}
-                        >
-                          {cat}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              {/* Grid of Activity Cards */}
+              {filteredActivities.length === 0 ? (
+                <div className="bg-white p-12 text-center rounded-2xl border border-primary-green/10">
+                  <p className="text-xs text-neutral-gray font-bold">Belum ada dokumentasi kegiatan terunggah untuk kategori ini.</p>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredActivities.map((act) => (
-                    <div key={act.id} className="bg-white p-5 rounded-2xl border border-primary-green/10 shadow-xs relative flex flex-col justify-between">
+                    <div key={act.id} className="bg-white p-5 rounded-2xl border border-primary-green/10 shadow-3xs relative flex flex-col justify-between hover:shadow-xs transition-all min-h-[190px]">
                       <div>
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start gap-2">
                           <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
-                            act.category === "Keagamaan" ? "bg-purple-100 text-purple-700" : "bg-emerald-100 text-emerald-700"
+                            act.category === "Keagamaan" 
+                              ? "bg-purple-50 text-purple-700 border border-purple-200" 
+                              : act.category === "Akademik"
+                              ? "bg-blue-50 text-blue-700 border border-blue-200"
+                              : "bg-emerald-50 text-emerald-700 border border-emerald-200"
                           }`}>
                             {act.category}
                           </span>
-                          <span className="text-[9px] text-neutral-gray font-bold">{act.date}</span>
+                          <span className="text-[9.5px] text-neutral-gray font-mono font-semibold">{act.date}</span>
                         </div>
-                        <h4 className="font-baloo text-base font-bold text-neutral-dark mt-2">{act.title}</h4>
+                        <h4 className="font-baloo text-base font-bold text-neutral-dark mt-2.5 leading-snug">{act.title}</h4>
                         <p className="text-xs text-neutral-gray font-semibold mt-1.5 leading-relaxed">{act.description}</p>
                       </div>
 
@@ -1695,16 +1672,125 @@ export default function DashboardClient() {
                           href={act.driveLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[10px] font-extrabold text-primary-green hover:underline flex items-center gap-1 cursor-pointer"
+                          className="text-[10px] font-extrabold text-primary-green hover:text-primary-dark hover:underline flex items-center gap-1.5 cursor-pointer"
                         >
-                          📁 Buka Folder Drive ↗
+                          <svg className="w-4 h-4 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                          </svg>
+                          <span>Buka Folder Drive</span>
                         </a>
-                        <span className="text-[9px] text-neutral-gray italic">Akreditasi Ready</span>
+                        <span className="text-[9px] text-primary-green/80 font-bold bg-soft-mint px-2 py-0.5 rounded border border-primary-green/10">
+                          Akreditasi Ready
+                        </span>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              )}
+
+              {/* Upload Activity Modal Pop-up (Daftarkan Kegiatan Offline/Online) */}
+              {showActivityForm && (isAdminAdministrasi || isGuru) && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                  <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-md p-6 relative shadow-lg space-y-4 max-h-[90vh] overflow-y-auto animate-fade-in">
+                    <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-3">
+                      <h4 className="font-baloo text-base font-bold text-neutral-dark">Unggah Dokumentasi Kegiatan</h4>
+                      <button
+                        type="button"
+                        onClick={() => setShowActivityForm(false)}
+                        className="w-6 h-6 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors hover:bg-neutral-gray/5"
+                      >
+                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <form onSubmit={handleAddActivity} className="space-y-3.5 text-xs font-semibold text-neutral-dark">
+                      <div>
+                        <label htmlFor="newTitle" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Kegiatan</label>
+                        <input
+                          type="text"
+                          id="newTitle"
+                          required
+                          value={newTitle}
+                          onChange={(e) => setNewTitle(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-bold text-neutral-dark"
+                          placeholder="Contoh: Senam Sehat Pagi NU"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label htmlFor="newDate" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tanggal Pelaksanaan</label>
+                          <input
+                            type="date"
+                            id="newDate"
+                            required
+                            value={newDate}
+                            onChange={(e) => setNewDate(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-semibold text-neutral-dark"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="newCategory" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kategori Kegiatan</label>
+                          <select
+                            id="newCategory"
+                            value={newCategory}
+                            onChange={(e) => setNewCategory(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                          >
+                            <option value="Akademik">Akademik</option>
+                            <option value="Keagamaan">Keagamaan / Ke-NU-an</option>
+                            <option value="Ekstrakurikuler">Ekstrakurikuler</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label htmlFor="newDrive" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tautan Google Drive Dokumentasi</label>
+                        <input
+                          type="url"
+                          id="newDrive"
+                          required
+                          value={newDrive}
+                          onChange={(e) => setNewDrive(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono"
+                          placeholder="https://drive.google.com/..."
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="newDesc" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Deskripsi Singkat Kegiatan</label>
+                        <textarea
+                          id="newDesc"
+                          required
+                          rows={3}
+                          value={newDesc}
+                          onChange={(e) => setNewDesc(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark resize-none leading-relaxed"
+                          placeholder="Tujuan kegiatan dan ringkasan jalannya acara..."
+                        ></textarea>
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          type="submit"
+                          className="flex-1 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                        >
+                          Simpan Kegiatan
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowActivityForm(false)}
+                          className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                        >
+                          Batal
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
