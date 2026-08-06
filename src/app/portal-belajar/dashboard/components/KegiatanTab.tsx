@@ -24,7 +24,16 @@ export default function KegiatanTab({
   isGuru,
   onAddActivity,
 }: KegiatanTabProps) {
+  // Dynamic year extraction
+  const uniqueYears = Array.from(new Set(activities.map((act) => act.date.substring(0, 4))));
+  if (uniqueYears.length === 0) {
+    uniqueYears.push(new Date().getFullYear().toString());
+  }
+  uniqueYears.sort().reverse();
+
   const [filterCategory, setFilterCategory] = useState("Semua");
+  const [selectedYear, setSelectedYear] = useState(uniqueYears[0]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [showActivityForm, setShowActivityForm] = useState(false);
 
   // Form states
@@ -34,9 +43,14 @@ export default function KegiatanTab({
   const [newDrive, setNewDrive] = useState("");
   const [newDesc, setNewDesc] = useState("");
 
-  const filteredActivities = filterCategory === "Semua"
-    ? activities
-    : activities.filter((act) => act.category === filterCategory);
+  const filteredActivities = activities.filter((act) => {
+    const matchesCategory = filterCategory === "Semua" || act.category === filterCategory;
+    const matchesYear = act.date.startsWith(selectedYear);
+    const matchesSearch =
+      act.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      act.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesYear && matchesSearch;
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,15 +97,15 @@ export default function KegiatanTab({
         )}
       </div>
 
-      {/* Filter Category Bar */}
-      <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-xl border border-primary-green/10">
-        <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Saring Kategori:</span>
-        <div className="flex flex-wrap gap-1.5">
+      {/* Filter Category & Year Bar */}
+      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white p-3 rounded-2xl border border-primary-green/10">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Saring Kategori:</span>
           {["Semua", "Akademik", "Keagamaan", "Ekstrakurikuler"].map((cat) => (
             <button
               key={cat}
               onClick={() => setFilterCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-extrabold border transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-[10px] font-extrabold border transition-all cursor-pointer ${
                 filterCategory === cat
                   ? "bg-primary-green text-white border-primary-green shadow-3xs"
                   : "bg-[#FAF8F5] text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
@@ -101,6 +115,49 @@ export default function KegiatanTab({
             </button>
           ))}
         </div>
+
+        <div className="flex items-center gap-2 border-t md:border-t-0 pt-2 md:pt-0 border-neutral-gray/10">
+          <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Tahun Pelaksanaan:</span>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            className="px-3 py-1.5 rounded-xl text-[10px] font-extrabold bg-[#FAF8F5] border border-neutral-gray/10 text-neutral-dark focus:outline-none cursor-pointer"
+          >
+            {uniqueYears.map((yr) => (
+              <option key={yr} value={yr}>{yr}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Search Bar Bar */}
+      <div className="bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs flex items-center gap-3">
+        <div className="relative flex-1">
+          <svg className="w-4 h-4 text-neutral-gray absolute left-3.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Cari kata kunci kegiatan atau deskripsi..."
+            className="w-full pl-10 pr-4 py-2 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-semibold"
+          />
+        </div>
+        
+        {(searchQuery !== "" || filterCategory !== "Semua" || selectedYear !== uniqueYears[0]) && (
+          <button
+            type="button"
+            onClick={() => {
+              setSearchQuery("");
+              setFilterCategory("Semua");
+              setSelectedYear(uniqueYears[0]);
+            }}
+            className="px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-[10px] uppercase rounded-xl transition-colors cursor-pointer whitespace-nowrap shadow-3xs"
+          >
+            Reset Filter
+          </button>
+        )}
       </div>
 
       {/* Grid of Activity Cards */}

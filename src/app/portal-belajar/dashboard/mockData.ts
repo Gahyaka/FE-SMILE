@@ -24,6 +24,22 @@ export const initialActivities = [
     driveLink: "https://drive.google.com/drive/folders/mock-santri",
     description: "Kegiatan rutin melafalkan sholawat nabi dan penguatan nilai Aswaja NU.",
   },
+  {
+    id: 4,
+    title: "Pentas Seni Akhir Tahun (Pentas Akhirussanah)",
+    date: "2025-06-15",
+    category: "Ekstrakurikuler",
+    driveLink: "https://drive.google.com/drive/folders/mock-pentas-2025",
+    description: "Pertunjukan tari tradisional, hafalan surat pendek, dan drama pendek oleh santri kelas B.",
+  },
+  {
+    id: 5,
+    title: "Lomba Mewarnai Se-Kecamatan Berbah",
+    date: "2024-11-10",
+    category: "Akademik",
+    driveLink: "https://drive.google.com/drive/folders/mock-lomba-2024",
+    description: "Meraih Juara 2 dalam festival kreativitas anak usia dini tingkat kecamatan.",
+  }
 ];
 
 // Mock Initial Students (Identitas Lengkap sesuai PRD DataFinal)
@@ -40,7 +56,8 @@ export const initialStudents = [
     height: 105,
     weight: 18,
     academicYear: "2026/2027",
-    activeStatus: "Aktif"
+    activeStatus: "Aktif",
+    portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-rayyan"
   },
   { 
     id: 2, 
@@ -54,7 +71,8 @@ export const initialStudents = [
     height: 110,
     weight: 19,
     academicYear: "2026/2027",
-    activeStatus: "Aktif"
+    activeStatus: "Aktif",
+    portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-bilqis"
   },
   { 
     id: 3, 
@@ -68,7 +86,8 @@ export const initialStudents = [
     height: 98,
     weight: 15,
     academicYear: "2026/2027",
-    activeStatus: "Aktif"
+    activeStatus: "Aktif",
+    portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-fatih"
   },
   { 
     id: 4, 
@@ -82,7 +101,8 @@ export const initialStudents = [
     height: 112,
     weight: 20,
     academicYear: "2025/2026",
-    activeStatus: "Lulus"
+    activeStatus: "Lulus",
+    portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-rania"
   },
   { 
     id: 5, 
@@ -96,7 +116,8 @@ export const initialStudents = [
     height: 115,
     weight: 22,
     academicYear: "2024/2025",
-    activeStatus: "Lulus"
+    activeStatus: "Lulus",
+    portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-yusuf"
   }
 ];
 
@@ -157,7 +178,8 @@ export const initialPpdbApplicants = [
     fase: "Fase Fondasi",
     height: 102,
     weight: 17,
-    academicYear: "2026/2027"
+    academicYear: "2026/2027",
+    portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-humaira"
   },
   {
     id: 102,
@@ -170,7 +192,8 @@ export const initialPpdbApplicants = [
     fase: "Fase Fondasi",
     height: 95,
     weight: 14,
-    academicYear: "2026/2027"
+    academicYear: "2026/2027",
+    portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-gibran"
   }
 ];
 

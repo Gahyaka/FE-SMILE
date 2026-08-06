@@ -15,6 +15,7 @@ interface Student {
   weight: number;
   academicYear: string;
   activeStatus: string;
+  portfolioLink: string;
 }
 
 interface PpdbApplicant {
@@ -29,6 +30,7 @@ interface PpdbApplicant {
   height: number;
   weight: number;
   academicYear: string;
+  portfolioLink: string;
 }
 
 interface StudentTabProps {
@@ -75,6 +77,7 @@ export default function StudentTab({
   const [newStudentHeight, setNewStudentHeight] = useState("100");
   const [newStudentWeight, setNewStudentWeight] = useState("16");
   const [newStudentYear, setNewStudentYear] = useState("2026/2027");
+  const [newStudentPortfolio, setNewStudentPortfolio] = useState("");
 
   // Get unique years dynamically
   const uniqueYears = Array.from(new Set(students.map((s) => s.academicYear)));
@@ -112,12 +115,14 @@ export default function StudentTab({
       height: Number(newStudentHeight) || 100,
       weight: Number(newStudentWeight) || 16,
       academicYear: newStudentYear,
+      portfolioLink: newStudentPortfolio || `https://drive.google.com/drive/folders/mock-portfolio-${newStudentNisn}`
     });
 
     // Reset Form
     setNewStudentName("");
     setNewStudentNisn("");
     setNewStudentAddress("");
+    setNewStudentPortfolio("");
     setShowStudentForm(false);
   };
 
@@ -504,6 +509,24 @@ export default function StudentTab({
                 <span className="block text-[8px] text-neutral-gray/60 uppercase">Alamat Rumah</span>
                 <span className="text-neutral-gray font-normal">{activeDetailStudent.address}</span>
               </div>
+              <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
+                <span className="block text-[8px] text-neutral-gray/60 uppercase">Tautan Portofolio Foto Raport (Google Drive)</span>
+                {activeDetailStudent.portfolioLink ? (
+                  <a
+                    href={activeDetailStudent.portfolioLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-green hover:underline font-bold flex items-center gap-1 mt-0.5 cursor-pointer"
+                  >
+                    <svg className="w-3.5 h-3.5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                    <span>Buka Portofolio Drive</span>
+                  </a>
+                ) : (
+                  <span className="text-neutral-gray/70 italic font-normal">Belum diisi</span>
+                )}
+              </div>
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="bg-[#FAF8F5] p-2.5 rounded-xl border border-neutral-gray/5">
                   <span className="block text-[8px] text-neutral-gray/60 uppercase">TB</span>
@@ -605,6 +628,17 @@ export default function StudentTab({
                   value={editingStudent.address}
                   onChange={(e) => setEditingStudent({ ...editingStudent, address: e.target.value })}
                   className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tautan Portofolio Foto Raport (Google Drive)</label>
+                <input
+                  type="url"
+                  value={editingStudent.portfolioLink || ""}
+                  onChange={(e) => setEditingStudent({ ...editingStudent, portfolioLink: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono"
+                  placeholder="https://drive.google.com/..."
                 />
               </div>
 
@@ -763,6 +797,18 @@ export default function StudentTab({
                   onChange={(e) => setNewStudentAddress(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
                   placeholder="Alamat rumah tinggal"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="newStudentPortfolio" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tautan Portofolio Foto Raport (Google Drive)</label>
+                <input
+                  type="url"
+                  id="newStudentPortfolio"
+                  value={newStudentPortfolio}
+                  onChange={(e) => setNewStudentPortfolio(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono"
+                  placeholder="https://drive.google.com/..."
                 />
               </div>
 
