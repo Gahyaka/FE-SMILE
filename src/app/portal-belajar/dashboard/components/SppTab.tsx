@@ -46,7 +46,17 @@ export default function SppTab({
       "Januari", "Februari", "Maret", "April", "Mei", "Juni",
       "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     ];
-    const currentMonthName = monthNames[new Date().getMonth()] + " " + new Date().getFullYear();
+    
+    // Parse payDate dynamically from YYYY-MM-DD
+    const dateParts = payDate.split("-");
+    let currentMonthName = "";
+    if (dateParts.length === 3) {
+      const monthIdx = parseInt(dateParts[1], 10) - 1;
+      const year = dateParts[0];
+      currentMonthName = (monthNames[monthIdx] || "Agustus") + " " + year;
+    } else {
+      currentMonthName = monthNames[new Date().getMonth()] + " " + new Date().getFullYear();
+    }
 
     const sppNum = Number(paySpp || 0);
     const lesNum = Number(payLes || 0);
@@ -62,7 +72,7 @@ export default function SppTab({
     }
 
     setPayDesc(`Pembayaran ${typeText} - ${student.name} - ${currentMonthName}`);
-  }, [payStudentId, paySpp, payLes, students]);
+  }, [payStudentId, paySpp, payLes, payDate, students]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,10 +102,15 @@ export default function SppTab({
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
             <div>
               <h3 className="font-baloo text-xl font-bold text-neutral-dark">Buku Kas Pembayaran SPP & Les</h3>
-              <p className="text-[11px] text-neutral-gray font-semibold mt-1">
-                {isAdminTransaksi 
-                  ? "💡 Masukkan transaksi SPP & Les dengan nilai dasar otomatis (SPP: 75.000, Les: 40.000)."
-                  : "💡 Hanya Admin Transaksi (Bunda Keuangan) yang memiliki hak mencatat pembayaran."}
+              <p className="text-[11px] text-neutral-gray font-semibold mt-1 flex items-center gap-1">
+                <svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <span>
+                  {isAdminTransaksi 
+                    ? "Masukkan transaksi SPP & Les dengan nilai dasar otomatis (SPP: 75.000, Les: 40.000)."
+                    : "Hanya Admin Transaksi (Bunda Keuangan) yang memiliki hak mencatat pembayaran."}
+                </span>
               </p>
             </div>
 
@@ -112,7 +127,8 @@ export default function SppTab({
             )}
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-neutral-gray/10">
+          {/* Tampilan Desktop/Tablet: Tabel Buku Kas */}
+          <div className="hidden sm:block overflow-x-auto rounded-xl border border-neutral-gray/10">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10">
@@ -142,6 +158,47 @@ export default function SppTab({
                 })}
               </tbody>
             </table>
+          </div>
+
+          {/* Tampilan Mobile: Card List (Ditampilkan di Layar Kecil) */}
+          <div className="block sm:hidden space-y-4">
+            {sppTransactions.map((tx) => {
+              const student = students.find((s) => s.id === tx.studentId);
+              return (
+                <div key={tx.id} className="bg-[#FAF8F5] p-4 rounded-2xl border border-primary-green/10 shadow-3xs space-y-3">
+                  <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-2 gap-2">
+                    <span className="text-[10px] text-neutral-gray font-mono font-bold flex-shrink-0">{tx.date}</span>
+                    <span className="text-[9px] font-black px-2 py-0.5 bg-primary-green/15 text-primary-green rounded-full border border-primary-green/20">
+                      {student ? student.class : "N/A"}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h4 className="font-baloo text-sm font-bold text-neutral-dark leading-tight break-words">
+                      {student ? student.name : "Siswa dihapus"}
+                    </h4>
+                    <p className="text-[11px] text-neutral-gray font-medium leading-relaxed break-words">
+                      {tx.description}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-neutral-gray/5 text-center text-[10px] font-bold">
+                    <div className="bg-white p-2 rounded-lg border border-neutral-gray/5 flex flex-col justify-center">
+                      <span className="block text-[8px] text-neutral-gray/60 uppercase">SPP</span>
+                      <span className="text-emerald-600 font-mono mt-0.5">Rp {tx.spp.toLocaleString()}</span>
+                    </div>
+                    <div className="bg-white p-2 rounded-lg border border-neutral-gray/5 flex flex-col justify-center">
+                      <span className="block text-[8px] text-neutral-gray/60 uppercase">Les</span>
+                      <span className="text-emerald-600 font-mono mt-0.5">Rp {tx.les.toLocaleString()}</span>
+                    </div>
+                    <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20 flex flex-col justify-center">
+                      <span className="block text-[8px] text-primary-green uppercase">Total</span>
+                      <span className="text-primary-green font-mono font-black mt-0.5">Rp {tx.total.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -229,7 +286,7 @@ export default function SppTab({
 
               {/* Tombol Pintasan Preset Nominal */}
               <div>
-                <span className="block text-[8px] text-neutral-gray/60 uppercase mb-1.5">Pilih Pintasan Nominal (Hemat Waktu)</span>
+                <span className="block text-[8px] text-neutral-gray/60 uppercase mb-1.5 font-bold tracking-wide">Pilih Pintasan Nominal (Hemat Waktu)</span>
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
@@ -237,7 +294,7 @@ export default function SppTab({
                       setPaySpp("75000");
                       setPayLes("40000");
                     }}
-                    className="py-1.5 px-2 bg-primary-green/5 hover:bg-primary-green/10 text-primary-green text-[9px] font-extrabold rounded-lg border border-primary-green/20 transition-all cursor-pointer text-center whitespace-nowrap"
+                    className="py-2 px-2.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-[9px] font-black rounded-xl border-2 border-emerald-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center whitespace-nowrap"
                   >
                     SPP + Les (115rb)
                   </button>
@@ -247,7 +304,7 @@ export default function SppTab({
                       setPaySpp("75000");
                       setPayLes("0");
                     }}
-                    className="py-1.5 px-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[9px] font-extrabold rounded-lg border border-blue-200 transition-all cursor-pointer text-center whitespace-nowrap"
+                    className="py-2 px-2.5 bg-sky-50 hover:bg-sky-600 hover:text-white text-sky-700 text-[9px] font-black rounded-xl border-2 border-sky-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center whitespace-nowrap"
                   >
                     Hanya SPP (75rb)
                   </button>
@@ -257,7 +314,7 @@ export default function SppTab({
                       setPaySpp("0");
                       setPayLes("40000");
                     }}
-                    className="py-1.5 px-2 bg-purple-50 hover:bg-purple-100 text-purple-700 text-[9px] font-extrabold rounded-lg border border-purple-200 transition-all cursor-pointer text-center whitespace-nowrap"
+                    className="py-2 px-2.5 bg-fuchsia-50 hover:bg-fuchsia-600 hover:text-white text-fuchsia-700 text-[9px] font-black rounded-xl border-2 border-fuchsia-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center whitespace-nowrap"
                   >
                     Hanya Les (40rb)
                   </button>
