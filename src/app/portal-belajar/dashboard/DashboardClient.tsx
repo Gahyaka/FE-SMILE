@@ -12,159 +12,16 @@ import MurajaahTab from "./components/MurajaahTab";
 import LaporanTab from "./components/LaporanTab";
 import AuditTab from "./components/AuditTab";
 
-// Mock Initial Activities (Dokumentasi Kegiatan)
-const initialActivities = [
-  {
-    id: 1,
-    title: "Latihan Manasik Haji Cilik",
-    date: "2026-07-22",
-    category: "Keagamaan",
-    driveLink: "https://drive.google.com/drive/folders/mock-manasik",
-    description: "Latihan pengenalan tawaf dan sai untuk mengenalkan rukun Islam kelima.",
-  },
-  {
-    id: 2,
-    title: "Berkebun Ceria di Halaman Sekolah",
-    date: "2026-07-25",
-    category: "Akademik",
-    driveLink: "https://drive.google.com/drive/folders/mock-gardening",
-    description: "Edukasi sains praktis mengenal jenis tanaman dan cara menyiram sayur.",
-  },
-  {
-    id: 3,
-    title: "Peringatan Hari Santri & Sholawat",
-    date: "2026-07-28",
-    category: "Keagamaan",
-    driveLink: "https://drive.google.com/drive/folders/mock-santri",
-    description: "Kegiatan rutin melafalkan sholawat nabi dan penguatan nilai Aswaja NU.",
-  },
-];
-
-// Mock Initial Students (Identitas Lengkap sesuai PRD DataFinal)
-const initialStudents = [
-  { 
-    id: 1, 
-    name: "Ahmad Rayyan", 
-    nisn: "1234567890",
-    madrasahName: "RA Sahabat Berbah Sleman",
-    address: "Jl. Kaliurang KM 10, Sleman, Yogyakarta",
-    semester: "Semester 1",
-    class: "RA (A)",
-    fase: "Fase Fondasi",
-    height: 105,
-    weight: 18,
-    academicYear: "2026/2027",
-    activeStatus: "Aktif"
-  },
-  { 
-    id: 2, 
-    name: "Bilqis Azzahra", 
-    nisn: "1234567891",
-    madrasahName: "RA Sahabat Berbah Sleman",
-    address: "Berbah, Sleman, Yogyakarta",
-    semester: "Semester 1",
-    class: "RA (B)",
-    fase: "Fase Fondasi",
-    height: 110,
-    weight: 19,
-    academicYear: "2026/2027",
-    activeStatus: "Aktif"
-  },
-  { 
-    id: 3, 
-    name: "Fatih Al-Fatih", 
-    nisn: "1234567892",
-    madrasahName: "RA Sahabat Berbah Sleman",
-    address: "Kalasan, Sleman, Yogyakarta",
-    semester: "Semester 1",
-    class: "KB",
-    fase: "Fase Fondasi",
-    height: 98,
-    weight: 15,
-    academicYear: "2026/2027",
-    activeStatus: "Aktif"
-  }
-];
-
-// Mock Initial Transaksi SPP & Les
-const initialSppTransactions = [
-  { id: 1, studentId: 1, date: "2026-08-01", description: "Pembayaran SPP + Les Agustus", spp: 75000, les: 40000, total: 115000 },
-  { id: 2, studentId: 2, date: "2026-08-02", description: "Lunas SPP & Les Agustus", spp: 75000, les: 40000, total: 115000 },
-  { id: 3, studentId: 1, date: "2026-08-03", description: "Uang Les Tambahan", spp: 0, les: 40000, total: 40000 }
-];
-
-// Mock Initial Tabungan
-const initialSavings = [
-  { id: 1, studentId: 1, date: "2026-08-01", description: "Setoran awal rutin", debet: 50000, kredit: 0, admin: "Bunda Nisa" },
-  { id: 2, studentId: 1, date: "2026-08-03", description: "Setoran mingguan", debet: 30000, kredit: 0, admin: "Bunda Ajeng" },
-  { id: 3, studentId: 1, date: "2026-08-04", description: "Penarikan buku tulis", debet: 0, kredit: 15000, admin: "Bunda Ajeng" },
-  { id: 4, studentId: 2, date: "2026-08-02", description: "Setoran tabungan Agustus", debet: 100000, kredit: 0, admin: "Bunda Ajeng" }
-];
-
-// Mock Initial Laporan Hasil Murajaah
-const initialMurajaah = {
-  1: {
-    "Al-Fatihah": "sb",
-    "Al-Ikhlas": "b",
-    "Al-Falaq": "sb",
-    "An-Nas": "b",
-    "Al-Asr": "c",
-    "Kedua orang tua": "sb",
-    "Keselamatan dunia akhirat": "sb",
-    "Sebelum belajar": "b",
-    "Niat": "b",
-    "Jangan marah": "c",
-    "Drumband": "sb",
-    "Rukun iman": "sb",
-    "Takbiratul ihram": "sb",
-    "Ruku": "b"
-  },
-  2: {
-    "Al-Fatihah": "sb",
-    "Al-Ikhlas": "sb",
-    "Keselamatan dunia akhirat": "b",
-    "Sebelum belajar": "b",
-    "Jangan marah": "sb",
-    "Calistung": "b",
-    "Rukun islam": "sb"
-  }
-};
-
-// Mock Initial PPDB Applicants (Calon Siswa Baru Online)
-const initialPpdbApplicants = [
-  {
-    id: 101,
-    name: "Siti Humaira",
-    nisn: "9876543210",
-    madrasahName: "KB RA Sahabat",
-    address: "Berbah, Sleman, Yogyakarta",
-    semester: "Semester 1",
-    class: "RA (A)",
-    fase: "Fase Fondasi",
-    height: 102,
-    weight: 17,
-    academicYear: "2026/2027"
-  },
-  {
-    id: 102,
-    name: "Muhammad Gibran",
-    nisn: "9876543211",
-    madrasahName: "SPS Sleman",
-    address: "Kalasan, Sleman, Yogyakarta",
-    semester: "Semester 1",
-    class: "KB",
-    fase: "Fase Fondasi",
-    height: 95,
-    weight: 14,
-    academicYear: "2026/2027"
-  }
-];
-
-// Mock Initial Audit Logs
-const initialLogs = [
-  { id: 1, time: "2026-08-05 09:30", user: "Admin Administrasi (Bunda Nisa)", action: "Menyelaraskan data master siswa baru" },
-  { id: 2, time: "2026-08-05 10:15", user: "Admin Transaksi (Bunda Ajeng)", action: "Mencatat setoran tabungan Ahmad Rayyan" },
-];
+// Import initial mock data
+import {
+  initialActivities,
+  initialStudents,
+  initialSppTransactions,
+  initialSavings,
+  initialMurajaah,
+  initialPpdbApplicants,
+  initialLogs,
+} from "./mockData";
 
 export default function DashboardClient() {
   const router = useRouter();

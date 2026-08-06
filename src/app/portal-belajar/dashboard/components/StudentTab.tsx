@@ -57,6 +57,7 @@ export default function StudentTab({
   // Local UI States
   const [studentSubTab, setStudentSubTab] = useState<"aktif" | "ppdb">("aktif");
   const [selectedFilterClass, setSelectedFilterClass] = useState("Semua");
+  const [selectedYear, setSelectedYear] = useState("2026/2027");
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
   const [activeDropdownId, setActiveDropdownId] = useState<number | null>(null);
   const [activeDetailStudent, setActiveDetailStudent] = useState<Student | null>(null);
@@ -75,17 +76,25 @@ export default function StudentTab({
   const [newStudentWeight, setNewStudentWeight] = useState("16");
   const [newStudentYear, setNewStudentYear] = useState("2026/2027");
 
+  // Get unique years dynamically
+  const uniqueYears = Array.from(new Set(students.map((s) => s.academicYear)));
+  if (!uniqueYears.includes("2026/2027")) {
+    uniqueYears.push("2026/2027");
+  }
+  uniqueYears.sort().reverse();
+
   const filteredStudents = students.filter((st) => {
     const matchesClass = selectedFilterClass === "Semua" || st.class === selectedFilterClass;
+    const matchesYear = st.academicYear === selectedYear;
     const matchesSearch =
       st.name.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
       st.nisn.includes(studentSearchQuery);
-    return matchesClass && matchesSearch;
+    return matchesClass && matchesYear && matchesSearch;
   });
 
   const getStudentCount = (cls: string) => {
-    if (cls === "Semua") return students.length;
-    return students.filter((s) => s.class === cls).length;
+    if (cls === "Semua") return students.filter((s) => s.academicYear === selectedYear).length;
+    return students.filter((s) => s.class === cls && s.academicYear === selectedYear).length;
   };
 
   const handleAddSubmit = (e: React.FormEvent) => {
@@ -157,23 +166,38 @@ export default function StudentTab({
       {studentSubTab === "aktif" && (
         <div className="space-y-6">
           
-          {/* Kelas filter badges */}
-          <div className="flex flex-wrap items-center gap-2 bg-white p-3 rounded-2xl border border-primary-green/10">
-            <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Kategori Kelas:</span>
-            {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => (
-              <button
-                key={cls}
-                type="button"
-                onClick={() => setSelectedFilterClass(cls)}
-                className={`px-3.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer ${
-                  selectedFilterClass === cls
-                    ? "bg-primary-green text-white border-primary-green shadow-3xs"
-                    : "bg-[#FAF8F5] text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
-                }`}
+          {/* Kelas & Tahun Ajaran filter badges */}
+          <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white p-3 rounded-2xl border border-primary-green/10">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Kategori Kelas:</span>
+              {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => (
+                <button
+                  key={cls}
+                  type="button"
+                  onClick={() => setSelectedFilterClass(cls)}
+                  className={`px-3.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer ${
+                    selectedFilterClass === cls
+                      ? "bg-primary-green text-white border-primary-green shadow-3xs"
+                      : "bg-[#FAF8F5] text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
+                  }`}
+                >
+                  {cls} ({getStudentCount(cls)})
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 border-t md:border-t-0 pt-2 md:pt-0 border-neutral-gray/10">
+              <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Tahun Ajaran:</span>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="px-3 py-1.5 rounded-xl text-[10px] font-extrabold bg-[#FAF8F5] border border-neutral-gray/10 text-neutral-dark focus:outline-none cursor-pointer"
               >
-                {cls} ({getStudentCount(cls)})
-              </button>
-            ))}
+                {uniqueYears.map((yr) => (
+                  <option key={yr} value={yr}>{yr}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Search Bar & Registration Trigger */}
@@ -192,12 +216,13 @@ export default function StudentTab({
                 />
               </div>
               
-              {(studentSearchQuery !== "" || selectedFilterClass !== "Semua") && (
+              {(studentSearchQuery !== "" || selectedFilterClass !== "Semua" || selectedYear !== "2026/2027") && (
                 <button
                   type="button"
                   onClick={() => {
                     setStudentSearchQuery("");
                     setSelectedFilterClass("Semua");
+                    setSelectedYear("2026/2027");
                   }}
                   className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-[10px] uppercase rounded-xl transition-colors cursor-pointer whitespace-nowrap shadow-3xs"
                 >
