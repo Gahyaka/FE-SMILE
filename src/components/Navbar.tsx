@@ -43,8 +43,8 @@ export default function Navbar() {
   const logoColor = "text-primary-dark";
   const btnClass = "bg-accent text-white hover:bg-accent-dark border-2 border-accent-dark";
 
-  const isAdminPage = pathname?.startsWith('/admin') || pathname?.startsWith('/dashboard');
-  if (isAdminPage) {
+  const isHiddenPage = pathname?.startsWith('/admin') || pathname?.startsWith('/dashboard') || pathname?.startsWith('/portal-belajar');
+  if (isHiddenPage) {
     return null;
   }
 
