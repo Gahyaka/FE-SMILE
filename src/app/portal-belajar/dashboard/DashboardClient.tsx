@@ -261,6 +261,36 @@ export default function DashboardClient() {
     setLogs([newLog, ...logs]);
   };
 
+  const handleUpdateSppPayment = (updatedTx: any) => {
+    if (!isAdminTransaksi) return;
+    setSppTransactions(prev => prev.map(t => t.id === updatedTx.id ? updatedTx : t));
+
+    const studentName = students.find(s => s.id === updatedTx.studentId)?.name || "Siswa";
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session.name,
+      action: `Memperbarui transaksi kas SPP ${studentName}: SPP Rp ${updatedTx.spp.toLocaleString()}, Les Rp ${updatedTx.les.toLocaleString()} (${updatedTx.depositStatus})`,
+    };
+    setLogs([newLog, ...logs]);
+  };
+
+  const handleDeleteSppPayment = (txId: number) => {
+    if (!isAdminTransaksi) return;
+    const tx = sppTransactions.find(t => t.id === txId);
+    if (!tx) return;
+    const studentName = students.find(s => s.id === tx.studentId)?.name || "Siswa";
+    setSppTransactions(prev => prev.filter(t => t.id !== txId));
+
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session.name,
+      action: `Menghapus transaksi kas SPP ${studentName} senilai Rp ${tx.total.toLocaleString()}`,
+    };
+    setLogs([newLog, ...logs]);
+  };
+
   const handleAddSavingsTransaction = (data: {
     studentId: number;
     description: string;
@@ -560,6 +590,8 @@ export default function DashboardClient() {
               sppTransactions={sppTransactions}
               isAdminTransaksi={isAdminTransaksi}
               onAddSppLesPayment={handleAddSppLesPayment}
+              onUpdateSppLesPayment={handleUpdateSppPayment}
+              onDeleteSppLesPayment={handleDeleteSppPayment}
             />
           )}
 
