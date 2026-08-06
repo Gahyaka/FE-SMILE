@@ -176,20 +176,26 @@ export default function MurajaahTab({
             <button
               type="button"
               onClick={() => setActiveWorkTab("input")}
-              className={`px-3 py-1 rounded cursor-pointer transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded cursor-pointer transition-colors ${
                 activeWorkTab === "input" ? "bg-primary-green text-white" : "hover:text-neutral-dark"
               }`}
             >
-              ✍️ Berikan Nilai
+              <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Berikan Nilai
             </button>
             <button
               type="button"
               onClick={() => setActiveWorkTab("summary")}
-              className={`px-3 py-1 rounded cursor-pointer transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded cursor-pointer transition-colors ${
                 activeWorkTab === "summary" ? "bg-primary-green text-white" : "hover:text-neutral-dark"
               }`}
             >
-              📖 Lihat Rekapan
+              <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              Lihat Rekapan
             </button>
           </div>
         </div>
@@ -232,9 +238,12 @@ export default function MurajaahTab({
               </div>
             </div>
           ) : (
-            <div className="bg-stone-50 p-6 rounded-2xl border border-neutral-gray/10 text-center">
+            <div className="bg-stone-50 p-6 rounded-2xl border border-neutral-gray/10 text-center flex flex-col items-center gap-2">
+              <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               <p className="text-xs text-neutral-gray font-semibold leading-relaxed">
-                💡 Akun Anda (Admin Transaksi) tidak memiliki hak akses mengubah Laporan Murajaah. Silakan klik tab "Lihat Rekapan" untuk memantau data.
+                Akun Anda (Admin Transaksi) tidak memiliki hak akses mengubah Laporan Murajaah. Silakan klik tab &quot;Lihat Rekapan&quot; untuk memantau data.
               </p>
             </div>
           )
