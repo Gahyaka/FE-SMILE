@@ -57,67 +57,82 @@ export default function MurajaahTab({
 
       {/* 1. Pilih Santri Panel */}
       <div className="bg-white p-5 rounded-2xl border border-primary-green/10 shadow-3xs space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
           <h4 className="font-baloo text-base font-bold text-neutral-dark">1. Pilih Santri</h4>
-          
-          <div className="flex items-center gap-3.5 flex-wrap w-full sm:w-auto justify-end">
-            {/* Class filters */}
-            <div className="flex flex-wrap items-center gap-1.5 bg-[#FAF8F5] p-1 rounded-xl border border-primary-green/10">
-              {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => (
-                <button
-                  key={cls}
-                  type="button"
-                  onClick={() => setClassFilter(cls)}
-                  className={`px-2.5 py-1 rounded-lg text-[9px] font-extrabold border transition-all cursor-pointer ${
-                    classFilter === cls
-                      ? "bg-primary-green text-white border-primary-green shadow-3xs"
-                      : "bg-white text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
-                  }`}
-                >
-                  {cls}
-                </button>
-              ))}
-            </div>
-
-            {/* Search input */}
-            <div className="relative w-full sm:w-48">
-              <svg className="w-3.5 h-3.5 text-neutral-gray absolute left-3 top-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari nama murid..."
-                className="w-full pl-9 pr-4 py-1.5 rounded-lg border border-primary-green/15 focus:border-primary-green focus:outline-none text-[11px] font-semibold"
-              />
-            </div>
-          </div>
         </div>
 
-        {/* Horizontal scrollable / wrap grid of students */}
-        <div className="flex flex-wrap gap-2 max-h-[110px] overflow-y-auto pr-1">
-          {filteredStudents.map((st) => {
-            const isActive = murajaahStudentId === st.id;
-            return (
-              <button
-                key={st.id}
-                type="button"
-                onClick={() => setMurajaahStudentId(st.id)}
-                className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-primary-green text-white border-primary-green shadow-3xs scale-[1.02]"
-                    : "bg-[#FAF8F5] text-neutral-dark border-neutral-gray/10 hover:border-primary-green/30"
-                }`}
-              >
-                {st.name} ({st.class})
-              </button>
-            );
-          })}
-          {filteredStudents.length === 0 && (
-            <p className="text-[11px] text-neutral-gray italic py-2">Tidak ada murid yang cocok dengan filter pencarian.</p>
-          )}
+        {/* Filter Kategori Kelas — sama persis dengan TabunganTab */}
+        <div className="flex flex-wrap items-center gap-2 bg-[#FAF8F5] p-3 rounded-2xl border border-primary-green/10">
+          <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Kategori Kelas:</span>
+          {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => (
+            <button
+              key={cls}
+              type="button"
+              onClick={() => setClassFilter(cls)}
+              className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer ${
+                classFilter === cls
+                  ? "bg-primary-green text-white border-primary-green shadow-3xs"
+                  : "bg-white text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
+              }`}
+            >
+              {cls}
+            </button>
+          ))}
         </div>
+
+        {/* Search input — lebar penuh, sama persis dengan TabunganTab */}
+        <div className="relative">
+          <svg className="w-3.5 h-3.5 text-neutral-gray absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Cari nama murid..."
+            className="w-full pl-9 pr-4 py-1.5 rounded-lg border border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+          />
+        </div>
+
+        {/* Tabel Murid Bergulir — sama persis dengan TabunganTab */}
+        <div className="overflow-x-auto rounded-xl border border-neutral-gray/10 max-h-[200px] overflow-y-auto pr-1">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10 sticky top-0 z-10">
+                <th className="py-2.5 px-4">Nama Santri</th>
+                <th className="py-2.5 px-4 w-[30%]">Kelas</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-gray/5 font-semibold text-neutral-dark">
+              {filteredStudents.map((st) => {
+                const isActive = murajaahStudentId === st.id;
+                return (
+                  <tr
+                    key={st.id}
+                    onClick={() => setMurajaahStudentId(st.id)}
+                    className={`cursor-pointer transition-colors ${
+                      isActive
+                        ? "bg-primary-green/10 text-primary-green font-black"
+                        : "hover:bg-soft-mint/30"
+                    }`}
+                  >
+                    <td className="py-2.5 px-4 flex items-center gap-2">
+                      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-primary-green" : "bg-neutral-gray/30"}`} />
+                      <span>{st.name}</span>
+                    </td>
+                    <td className="py-2.5 px-4 text-neutral-gray">{st.class}</td>
+                  </tr>
+                );
+              })}
+              {filteredStudents.length === 0 && (
+                <tr>
+                  <td colSpan={2} className="text-center py-6 text-neutral-gray italic">Tidak ada murid yang ditemukan.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
       </div>
 
       {/* 2. Pilih Kategori Penilaian Panel */}
