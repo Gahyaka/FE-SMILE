@@ -6,6 +6,7 @@ interface Student {
   id: number;
   name: string;
   class: string;
+  nisn: string;
   academicYear: string;
 }
 
@@ -40,6 +41,7 @@ export default function KelasTab({
 }: KelasTabProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingClass, setEditingClass] = useState<ClassData | null>(null);
+  const [selectedClassForStudents, setSelectedClassForStudents] = useState<string | null>(null);
 
   // Form states
   const [newClassName, setNewClassName] = useState("");
@@ -312,28 +314,41 @@ export default function KelasTab({
                 </div>
               </div>
 
-              {isAdminAdministrasi && (
-                <div className="flex gap-2 pt-2 border-t border-neutral-gray/5">
-                  <button
-                    onClick={() => {
-                      setShowAddForm(false);
-                      setEditingClass({ ...cls });
-                    }}
-                    className="flex-1 py-1.5 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-extrabold text-[10px] uppercase rounded-lg border border-yellow-200 transition-all cursor-pointer flex items-center justify-center gap-1"
-                  >
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    <span>Edit</span>
-                  </button>
-                  <button
-                    onClick={() => onDeleteClass(cls.id)}
-                    className="py-1.5 px-3 bg-accent/5 hover:bg-accent/15 text-accent font-extrabold text-[10px] uppercase rounded-lg border border-accent/20 transition-all cursor-pointer flex items-center justify-center"
-                  >
-                    Hapus
-                  </button>
-                </div>
-              )}
+              <div className="space-y-2 pt-2 border-t border-neutral-gray/5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedClassForStudents(cls.className)}
+                  className="w-full py-2 bg-soft-mint/40 hover:bg-soft-mint/80 text-primary-green font-extrabold text-[10px] uppercase rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <svg className="w-3.5 h-3.5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  <span>Lihat Daftar Siswa</span>
+                </button>
+
+                {isAdminAdministrasi && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setShowAddForm(false);
+                        setEditingClass({ ...cls });
+                      }}
+                      className="flex-1 py-1.5 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-extrabold text-[10px] uppercase rounded-lg border border-yellow-200 transition-all cursor-pointer flex items-center justify-center gap-1"
+                    >
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => onDeleteClass(cls.id)}
+                      className="py-1.5 px-3 bg-accent/5 hover:bg-accent/15 text-accent font-extrabold text-[10px] uppercase rounded-lg border border-accent/20 transition-all cursor-pointer flex items-center justify-center"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}
@@ -344,6 +359,64 @@ export default function KelasTab({
           </div>
         )}
       </div>
+
+      {/* 4. Modal List Siswa */}
+      {selectedClassForStudents && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-md p-6 relative shadow-lg space-y-4">
+            <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-3">
+              <div>
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Daftar Santri Kelas</h4>
+                <p className="text-[10px] text-primary-green font-bold uppercase tracking-wide">Kelas: {selectedClassForStudents}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedClassForStudents(null)}
+                className="w-6 h-6 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors hover:bg-neutral-gray/5"
+              >
+                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="max-h-[300px] overflow-y-auto pr-1 space-y-2">
+              {students.filter(s => s.class === selectedClassForStudents).length === 0 ? (
+                <p className="text-xs text-neutral-gray italic text-center py-6">Belum ada murid yang terdaftar di kelas ini.</p>
+              ) : (
+                students
+                  .filter(s => s.class === selectedClassForStudents)
+                  .map((st, idx) => (
+                    <div key={st.id} className="flex justify-between items-center p-3 bg-[#FAF8F5] rounded-xl border border-neutral-gray/5">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-[10px] font-black text-primary-green w-5 h-5 bg-primary-green/10 rounded-full flex items-center justify-center">
+                          {idx + 1}
+                        </span>
+                        <div>
+                          <p className="text-xs font-bold text-neutral-dark">{st.name}</p>
+                          <span className="text-[9px] text-neutral-gray font-mono block">NISN: {st.nisn}</span>
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-extrabold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded border border-emerald-200">
+                        {st.academicYear}
+                      </span>
+                    </div>
+                  ))
+              )}
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setSelectedClassForStudents(null)}
+                className="w-full py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer text-center"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
