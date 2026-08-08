@@ -118,24 +118,26 @@ export default function StudentTab({
 
         <div className="space-y-6">
           
-          {/* Kelas & Tahun Ajaran filter badges */}
-          <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white p-3 rounded-2xl border border-primary-green/10">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Kategori Kelas:</span>
-              {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => (
-                <button
-                  key={cls}
-                  type="button"
-                  onClick={() => setSelectedFilterClass(cls)}
-                  className={`px-3.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer ${
-                    selectedFilterClass === cls
-                      ? "bg-primary-green text-white border-primary-green shadow-3xs"
-                      : "bg-[#FAF8F5] text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
-                  }`}
-                >
-                  {cls} ({getStudentCount(cls)})
-                </button>
-              ))}
+          {/* Kelas & Tahun Ajaran filter badges — Startup Segmented Control Style */}
+          <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs">
+            <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-fit">
+              {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => {
+                const isActive = selectedFilterClass === cls;
+                return (
+                  <button
+                    key={cls}
+                    type="button"
+                    onClick={() => setSelectedFilterClass(cls)}
+                    className={`px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all duration-200 cursor-pointer ${
+                      isActive
+                        ? "bg-white text-primary-green shadow-xs border border-primary-green/5"
+                        : "text-neutral-gray hover:text-neutral-dark"
+                    }`}
+                  >
+                    {cls} <span className={`ml-1 px-1.5 py-0.5 rounded text-[8px] font-black ${isActive ? "bg-primary-green/10 text-primary-green" : "bg-neutral-gray/10 text-neutral-gray"}`}>{getStudentCount(cls)}</span>
+                  </button>
+                );
+              })}
             </div>
 
             <div className="flex items-center gap-2 border-t md:border-t-0 pt-2 md:pt-0 border-neutral-gray/10">
