@@ -61,23 +61,26 @@ export default function MurajaahTab({
           <h4 className="font-baloo text-base font-bold text-neutral-dark">1. Pilih Santri</h4>
         </div>
 
-        {/* Filter Kategori Kelas — sama persis dengan TabunganTab */}
-        <div className="flex flex-wrap items-center gap-2 bg-[#FAF8F5] p-3 rounded-2xl border border-primary-green/10">
-          <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Kategori Kelas:</span>
-          {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => (
-            <button
-              key={cls}
-              type="button"
-              onClick={() => setClassFilter(cls)}
-              className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer ${
-                classFilter === cls
-                  ? "bg-primary-green text-white border-primary-green shadow-3xs"
-                  : "bg-white text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
-              }`}
-            >
-              {cls}
-            </button>
-          ))}
+        {/* Filter Kategori Kelas — Startup Segmented Control Style */}
+        <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-fit">
+          {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => {
+            const isActive = classFilter === cls;
+            const classCount = cls === "Semua" ? students.length : students.filter((s) => s.class === cls).length;
+            return (
+              <button
+                key={cls}
+                type="button"
+                onClick={() => setClassFilter(cls)}
+                className={`px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all duration-200 cursor-pointer ${
+                  isActive
+                    ? "bg-primary-green text-white shadow-xs"
+                    : "text-neutral-gray hover:text-neutral-dark"
+                }`}
+              >
+                {cls} <span className={`ml-1 px-1.5 py-0.5 rounded text-[8px] font-black ${isActive ? "bg-white/20 text-white" : "bg-neutral-gray/10 text-neutral-gray"}`}>{classCount}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Search input — lebar penuh, sama persis dengan TabunganTab */}

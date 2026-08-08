@@ -130,11 +130,11 @@ export default function StudentTab({
                     onClick={() => setSelectedFilterClass(cls)}
                     className={`px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all duration-200 cursor-pointer ${
                       isActive
-                        ? "bg-white text-primary-green shadow-xs border border-primary-green/5"
+                        ? "bg-primary-green text-white shadow-xs"
                         : "text-neutral-gray hover:text-neutral-dark"
                     }`}
                   >
-                    {cls} <span className={`ml-1 px-1.5 py-0.5 rounded text-[8px] font-black ${isActive ? "bg-primary-green/10 text-primary-green" : "bg-neutral-gray/10 text-neutral-gray"}`}>{getStudentCount(cls)}</span>
+                    {cls} <span className={`ml-1 px-1.5 py-0.5 rounded text-[8px] font-black ${isActive ? "bg-white/20 text-white" : "bg-neutral-gray/10 text-neutral-gray"}`}>{getStudentCount(cls)}</span>
                   </button>
                 );
               })}
