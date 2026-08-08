@@ -51,7 +51,7 @@ export default function DashboardClient() {
     isOpen: boolean;
     title: string;
     message: string;
-    actionType: "delete_student" | null;
+    actionType: "delete_student" | "delete_class" | "delete_spp" | null;
     targetId: number | null;
   }>({
     isOpen: false,
@@ -192,15 +192,13 @@ const handleUpdateClass = (updatedCls: any) => {
 const handleDeleteClass = (classId: number) => {
   if (!isAdminAdministrasi) return;
   const clsName = classes.find(c => c.id === classId)?.className || "Kelas";
-  setClasses(classes.filter(c => c.id !== classId));
-
-  const newLog = {
-    id: Date.now(),
-    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-    user: session.name,
-    action: `Menghapus kelas: ${clsName}`,
-  };
-  setLogs([newLog, ...logs]);
+  setConfirmModal({
+    isOpen: true,
+    title: "Konfirmasi Hapus Kelas",
+    message: `Apakah Anda yakin ingin menghapus kelas "${clsName}" secara permanen? Seluruh data yang berkaitan dengan kelas ini akan terhapus.`,
+    actionType: "delete_class",
+    targetId: classId
+  });
 };
 
   const handleExecuteConfirmAction = () => {
@@ -218,6 +216,31 @@ const handleDeleteClass = (classId: number) => {
         action: `Menghapus data master siswa: ${studentName}`,
       };
       setLogs([newLog, ...logs]);
+    } else if (actionType === "delete_class") {
+      const clsName = classes.find(c => c.id === targetId)?.className || "Kelas";
+      setClasses(classes.filter(c => c.id !== targetId));
+
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Menghapus kelas: ${clsName}`,
+      };
+      setLogs([newLog, ...logs]);
+    } else if (actionType === "delete_spp") {
+      const tx = sppTransactions.find(t => t.id === targetId);
+      if (tx) {
+        const studentName = students.find(s => s.id === tx.studentId)?.name || "Siswa";
+        setSppTransactions(prev => prev.filter(t => t.id !== targetId));
+
+        const newLog = {
+          id: Date.now(),
+          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          user: session.name,
+          action: `Menghapus transaksi kas SPP ${studentName} senilai Rp ${tx.total.toLocaleString()}`,
+        };
+        setLogs([newLog, ...logs]);
+      }
     }
 
     setConfirmModal({
@@ -285,15 +308,13 @@ const handleDeleteClass = (classId: number) => {
     const tx = sppTransactions.find(t => t.id === txId);
     if (!tx) return;
     const studentName = students.find(s => s.id === tx.studentId)?.name || "Siswa";
-    setSppTransactions(prev => prev.filter(t => t.id !== txId));
-
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Menghapus transaksi kas SPP ${studentName} senilai Rp ${tx.total.toLocaleString()}`,
-    };
-    setLogs([newLog, ...logs]);
+    setConfirmModal({
+      isOpen: true,
+      title: "Konfirmasi Hapus Transaksi",
+      message: `Apakah Anda yakin ingin menghapus transaksi pembayaran SPP/Les untuk "${studentName}" sebesar Rp ${tx.total.toLocaleString()} secara permanen?`,
+      actionType: "delete_spp",
+      targetId: txId
+    });
   };
 
   const handleAddSavingsTransaction = (data: {
