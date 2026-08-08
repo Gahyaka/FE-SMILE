@@ -323,47 +323,45 @@ export default function MurajaahTab({
           <h4 className="font-baloo text-base font-bold text-neutral-dark flex items-center gap-2 flex-wrap">
             <span>3. Lembar Kerja Murajaah:</span>
             <span className="text-primary-green font-black underline">{students.find(s => s.id === murajaahStudentId)?.name || "Santri"}</span>
-          </h4>
-          
-          {/* Work tab toggler & PDF Action */}
-          <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
               onClick={handleDownloadPDF}
-              className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 font-extrabold text-[10px] rounded-lg border border-amber-200 transition-all cursor-pointer shadow-3xs"
+              className="ml-2 flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 font-extrabold text-[9px] uppercase rounded-lg border border-amber-200 transition-all cursor-pointer shadow-3xs"
+              title="Unduh Laporan Lengkap (PDF)"
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span>Unduh PDF</span>
             </button>
-
-            <div className="flex bg-[#FAF8F5] border border-primary-green/10 rounded-lg p-0.5 text-[10px] font-extrabold text-neutral-gray">
-              <button
-                type="button"
-                onClick={() => setActiveWorkTab("input")}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded cursor-pointer transition-colors ${
-                  activeWorkTab === "input" ? "bg-primary-green text-white" : "hover:text-neutral-dark"
-                }`}
-              >
-                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-                <span>Berikan Nilai</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveWorkTab("summary")}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded cursor-pointer transition-colors ${
-                  activeWorkTab === "summary" ? "bg-primary-green text-white" : "hover:text-neutral-dark"
-                }`}
-              >
-                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span>Lihat Rekapan</span>
-              </button>
-            </div>
+          </h4>
+          
+          {/* Work tab toggler */}
+          <div className="flex bg-[#FAF8F5] border border-primary-green/10 rounded-lg p-0.5 text-[10px] font-extrabold text-neutral-gray">
+            <button
+              type="button"
+              onClick={() => setActiveWorkTab("input")}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded cursor-pointer transition-colors ${
+                activeWorkTab === "input" ? "bg-primary-green text-white" : "hover:text-neutral-dark"
+              }`}
+            >
+              <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              <span>Berikan Nilai</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveWorkTab("summary")}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded cursor-pointer transition-colors ${
+                activeWorkTab === "summary" ? "bg-primary-green text-white" : "hover:text-neutral-dark"
+              }`}
+            >
+              <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <span>Lihat Rekapan</span>
+            </button>
           </div>
         </div>
 
