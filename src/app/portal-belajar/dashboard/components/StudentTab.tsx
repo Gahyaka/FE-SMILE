@@ -335,7 +335,7 @@ export default function StudentTab({
               })}
             </div>
           )}
-}
+        </div>
 
       {/* Detail Student Modal Pop-up */}
       {activeDetailStudent && (

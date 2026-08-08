@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 // Modular tab components
 import StudentTab from "./components/StudentTab";
+import KelasTab from "./components/KelasTab";
 import KegiatanTab from "./components/KegiatanTab";
 import SppTab from "./components/SppTab";
 import TabunganTab from "./components/TabunganTab";
@@ -18,11 +19,11 @@ import {
   initialSppTransactions,
   initialSavings,
   initialMurajaah,
-  initialPpdbApplicants,
   initialLogs,
+  initialClasses,
 } from "./mockData";
 
-type TabKey = "siswa" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "audit";
+type TabKey = "siswa" | "kelas" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "audit";
 
 function getDefaultTab(role: "admin_adm" | "admin_trx" | "guru"): TabKey {
   if (role === "admin_trx") return "spp";
@@ -38,11 +39,11 @@ export default function DashboardClient() {
   
   // Shared database states
   const [students, setStudents] = useState(initialStudents);
+  const [classes, setClasses] = useState(initialClasses);
   const [activities, setActivities] = useState(initialActivities);
   const [sppTransactions, setSppTransactions] = useState(initialSppTransactions);
   const [savings, setSavings] = useState(initialSavings);
   const [murajaahData, setMurajaahData] = useState<{[studentId: number]: {[param: string]: string}}>(initialMurajaah);
-  const [ppdbApplicants, setPpdbApplicants] = useState(initialPpdbApplicants);
   const [logs, setLogs] = useState(initialLogs);
 
   // Custom confirmation modal state
@@ -50,7 +51,7 @@ export default function DashboardClient() {
     isOpen: boolean;
     title: string;
     message: string;
-    actionType: "delete_student" | "reject_ppdb" | null;
+    actionType: "delete_student" | null;
     targetId: number | null;
   }>({
     isOpen: false,
@@ -158,42 +159,49 @@ export default function DashboardClient() {
     });
   };
 
-  const handleRejectPpdb = (applicantId: number) => {
-    if (!isAdminAdministrasi) return;
-    const applicant = ppdbApplicants.find(a => a.id === applicantId);
-    if (!applicant) return;
-
-    setConfirmModal({
-      isOpen: true,
-      title: "Konfirmasi Tolak Berkas",
-      message: `Apakah Anda yakin ingin menolak berkas PPDB atas nama "${applicant.name}"?`,
-      actionType: "reject_ppdb",
-      targetId: applicantId
-    });
+const handleAddClass = (newClsData: any) => {
+  if (!isAdminAdministrasi) return;
+  const newCls = {
+    ...newClsData,
+    id: Date.now()
   };
+  setClasses([...classes, newCls]);
 
-  const handleApprovePpdb = (applicantId: number) => {
-    if (!isAdminAdministrasi) return;
-    const applicant = ppdbApplicants.find(a => a.id === applicantId);
-    if (!applicant) return;
-
-    const newSt = {
-      ...applicant,
-      id: Date.now(),
-      activeStatus: "Aktif"
-    };
-
-    setStudents([...students, newSt]);
-    setPpdbApplicants(ppdbApplicants.filter(a => a.id !== applicantId));
-
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Menyetujui pendaftaran PPDB: ${applicant.name} (NISN: ${applicant.nisn})`,
-    };
-    setLogs([newLog, ...logs]);
+  const newLog = {
+    id: Date.now(),
+    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+    user: session.name,
+    action: `Menambahkan kelas baru: ${newCls.className}`,
   };
+  setLogs([newLog, ...logs]);
+};
+
+const handleUpdateClass = (updatedCls: any) => {
+  if (!isAdminAdministrasi) return;
+  setClasses(prev => prev.map(c => c.id === updatedCls.id ? updatedCls : c));
+
+  const newLog = {
+    id: Date.now(),
+    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+    user: session.name,
+    action: `Memperbarui data kelas: ${updatedCls.className}`,
+  };
+  setLogs([newLog, ...logs]);
+};
+
+const handleDeleteClass = (classId: number) => {
+  if (!isAdminAdministrasi) return;
+  const clsName = classes.find(c => c.id === classId)?.className || "Kelas";
+  setClasses(classes.filter(c => c.id !== classId));
+
+  const newLog = {
+    id: Date.now(),
+    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+    user: session.name,
+    action: `Menghapus kelas: ${clsName}`,
+  };
+  setLogs([newLog, ...logs]);
+};
 
   const handleExecuteConfirmAction = () => {
     const { actionType, targetId } = confirmModal;
@@ -210,19 +218,6 @@ export default function DashboardClient() {
         action: `Menghapus data master siswa: ${studentName}`,
       };
       setLogs([newLog, ...logs]);
-    } else if (actionType === "reject_ppdb") {
-      const applicant = ppdbApplicants.find(a => a.id === targetId);
-      if (applicant) {
-        setPpdbApplicants(ppdbApplicants.filter(a => a.id !== targetId));
-
-        const newLog = {
-          id: Date.now(),
-          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-          user: session.name,
-          action: `Menolak pendaftaran PPDB: ${applicant.name}`,
-        };
-        setLogs([newLog, ...logs]);
-      }
     }
 
     setConfirmModal({
@@ -417,6 +412,23 @@ export default function DashboardClient() {
               </button>
             )}
 
+            {/* Data Kelas — Admin Administrasi & Guru */}
+            {(isAdminAdministrasi || isGuru) && (
+              <button
+                onClick={() => { setActiveTab("kelas"); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
+                  activeTab === "kelas"
+                    ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
+                    : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                <span>Data Kelas</span>
+              </button>
+            )}
+
             {/* Dokumentasi Kegiatan — Admin Administrasi & Guru */}
             {(isAdminAdministrasi || isGuru) && (
               <button
@@ -541,6 +553,7 @@ export default function DashboardClient() {
               </span>
               <h2 className="font-baloo text-xl sm:text-2xl font-bold text-neutral-dark mt-0.5">
                 {activeTab === "siswa" && "Manajemen Data Peserta Didik"}
+                {activeTab === "kelas" && "Manajemen Data Kelas RA Sahabat"}
                 {activeTab === "kegiatan" && "Dokumentasi Kegiatan"}
                 {activeTab === "spp" && "Pencatatan SPP & Les Terpadu"}
                 {activeTab === "tabungan" && "Buku Tabungan Digital"}
@@ -577,14 +590,24 @@ export default function DashboardClient() {
           {activeTab === "siswa" && (
             <StudentTab
               students={students}
-              ppdbApplicants={ppdbApplicants}
               isAdminAdministrasi={isAdminAdministrasi}
               onAddStudent={handleAddStudent}
               onUpdateStudent={handleUpdateStudent}
               onDeleteStudent={handleDeleteStudent}
               onUpdateStudentStatus={handleUpdateStudentStatus}
-              onApprovePpdb={handleApprovePpdb}
-              onRejectPpdb={handleRejectPpdb}
+            />
+          )}
+
+          {activeTab === "kelas" && (
+            <KelasTab
+              students={students}
+              classes={classes}
+              isAdminAdministrasi={isAdminAdministrasi}
+              isGuru={isGuru}
+              currentUserDisplayName={session.name}
+              onAddClass={handleAddClass}
+              onUpdateClass={handleUpdateClass}
+              onDeleteClass={handleDeleteClass}
             />
           )}
 
