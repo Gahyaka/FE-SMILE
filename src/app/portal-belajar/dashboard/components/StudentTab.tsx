@@ -18,46 +18,24 @@ interface Student {
   portfolioLink: string;
 }
 
-interface PpdbApplicant {
-  id: number;
-  name: string;
-  nisn: string;
-  madrasahName: string;
-  address: string;
-  semester: string;
-  class: string;
-  fase: string;
-  height: number;
-  weight: number;
-  academicYear: string;
-  portfolioLink: string;
-}
-
 interface StudentTabProps {
   students: Student[];
-  ppdbApplicants: PpdbApplicant[];
   isAdminAdministrasi: boolean;
   onAddStudent: (newStudent: Omit<Student, "id" | "activeStatus">) => void;
   onUpdateStudent: (updatedStudent: Student) => void;
   onDeleteStudent: (studentId: number) => void;
   onUpdateStudentStatus: (studentId: number, status: string) => void;
-  onApprovePpdb: (applicantId: number) => void;
-  onRejectPpdb: (applicantId: number) => void;
 }
 
 export default function StudentTab({
   students,
-  ppdbApplicants,
   isAdminAdministrasi,
   onAddStudent,
   onUpdateStudent,
   onDeleteStudent,
   onUpdateStudentStatus,
-  onApprovePpdb,
-  onRejectPpdb,
 }: StudentTabProps) {
   // Local UI States
-  const [studentSubTab, setStudentSubTab] = useState<"aktif" | "ppdb">("aktif");
   const [selectedFilterClass, setSelectedFilterClass] = useState("Semua");
   const [selectedYear, setSelectedYear] = useState("2026/2027");
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
@@ -136,39 +114,8 @@ export default function StudentTab({
   return (
     <div className="w-full space-y-6">
       
-      {/* Sub-tab Switcher (Siswa Aktif vs PPDB) */}
-      <div className="flex border-b border-primary-green/10 pb-2 mb-4 gap-4">
-        <button
-          type="button"
-          onClick={() => setStudentSubTab("aktif")}
-          className={`pb-2 text-xs font-extrabold uppercase tracking-wide border-b-2 transition-all cursor-pointer ${
-            studentSubTab === "aktif"
-              ? "border-primary-green text-primary-green font-black"
-              : "border-transparent text-neutral-gray hover:text-neutral-dark"
-          }`}
-        >
-          Siswa Aktif ({students.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setStudentSubTab("ppdb")}
-          className={`pb-2 text-xs font-extrabold uppercase tracking-wide border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
-            studentSubTab === "ppdb"
-              ? "border-primary-green text-primary-green font-black"
-              : "border-transparent text-neutral-gray hover:text-neutral-dark"
-          }`}
-        >
-          <span>Persetujuan PPDB</span>
-          {ppdbApplicants.length > 0 && (
-            <span className="bg-accent text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center animate-pulse">
-              {ppdbApplicants.length}
-            </span>
-          )}
-        </button>
-      </div>
 
-      {/* Sub-tab: SISWA AKTIF */}
-      {studentSubTab === "aktif" && (
+
         <div className="space-y-6">
           
           {/* Kelas & Tahun Ajaran filter badges */}
@@ -388,86 +335,7 @@ export default function StudentTab({
               })}
             </div>
           )}
-        </div>
-      )}
-
-      {/* Sub-tab: PERSETUJUAN PPDB */}
-      {studentSubTab === "ppdb" && (
-        <div className="space-y-6">
-          <div className="bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs">
-            <h4 className="font-baloo text-sm font-bold text-neutral-dark mb-1">Verifikasi Pendaftar Baru (PPDB Online)</h4>
-            <p className="text-[11px] text-neutral-gray font-semibold">Tinjau berkas pendaftaran calon santri yang disubmit secara online oleh wali murid sebelum memindahkannya to data aktif madrasah.</p>
-          </div>
-
-          {ppdbApplicants.length === 0 ? (
-            <div className="bg-white p-12 text-center rounded-2xl border border-primary-green/10">
-              <p className="text-xs text-neutral-gray font-bold">Tidak ada pendaftar baru PPDB yang memerlukan persetujuan.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {ppdbApplicants.map((ap) => (
-                <div key={ap.id} className="bg-white p-5 rounded-2xl border border-primary-green/10 shadow-3xs flex flex-col justify-between gap-4">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-start">
-                      <span className="text-[9px] font-extrabold px-2 py-0.5 bg-accent/10 text-accent rounded-full border border-accent/25">PPDB Online</span>
-                      <span className="text-[9px] text-neutral-gray font-mono font-semibold">TA: {ap.academicYear}</span>
-                    </div>
-                    <div>
-                      <h4 className="font-baloo text-base font-bold text-neutral-dark">{ap.name}</h4>
-                      <span className="text-[10px] text-neutral-gray font-mono block">NISN: {ap.nisn}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-[10px] font-semibold text-neutral-gray bg-[#FAF8F5] p-2.5 rounded-xl border border-neutral-gray/5">
-                      <div>
-                        <span className="block text-[8px] text-neutral-gray/60 uppercase">Kelas</span>
-                        <span className="font-bold text-neutral-dark">{ap.class} ({ap.fase})</span>
-                      </div>
-                      <div>
-                        <span className="block text-[8px] text-neutral-gray/60 uppercase">TB / BB</span>
-                        <span className="font-bold text-neutral-dark">{ap.height}cm / {ap.weight}kg</span>
-                      </div>
-                    </div>
-                    <div className="bg-[#FAF8F5] p-2.5 rounded-xl border border-neutral-gray/5 text-[10px] font-semibold">
-                      <span className="block text-[8px] text-neutral-gray/60 uppercase">Alamat</span>
-                      <p className="text-neutral-gray mt-0.5 font-normal leading-relaxed">{ap.address}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 pt-2 border-t border-neutral-gray/5">
-                    {isAdminAdministrasi ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => onApprovePpdb(ap.id)}
-                          className="flex-1 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer flex items-center justify-center gap-1 shadow-3xs"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span>Setujui Berkas</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onRejectPpdb(ap.id)}
-                          className="py-2 px-3.5 bg-accent/5 hover:bg-accent/15 text-accent font-extrabold text-xs rounded-xl border border-accent/20 hover:border-accent/40 transition-all cursor-pointer flex items-center justify-center gap-1"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                          <span>Tolak</span>
-                        </button>
-                      </>
-                    ) : (
-                      <p className="text-[9px] text-neutral-gray italic text-center w-full pt-1.5">
-                        Hanya Admin Administrasi yang berhak memberikan persetujuan berkas pendaftaran PPDB.
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+}
 
       {/* Detail Student Modal Pop-up */}
       {activeDetailStudent && (
