@@ -9,7 +9,6 @@ import KegiatanTab from "./components/KegiatanTab";
 import SppTab from "./components/SppTab";
 import TabunganTab from "./components/TabunganTab";
 import MurajaahTab from "./components/MurajaahTab";
-import LaporanTab from "./components/LaporanTab";
 import AuditTab from "./components/AuditTab";
 
 // Import initial mock data
@@ -23,10 +22,18 @@ import {
   initialLogs,
 } from "./mockData";
 
+type TabKey = "siswa" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "audit";
+
+function getDefaultTab(role: "admin_adm" | "admin_trx" | "guru"): TabKey {
+  if (role === "admin_trx") return "spp";
+  if (role === "guru") return "kegiatan";
+  return "siswa"; // admin_adm
+}
+
 export default function DashboardClient() {
   const router = useRouter();
   const [session, setSession] = useState<{ role: "admin_adm" | "admin_trx" | "guru"; name: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<"siswa" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "laporan" | "audit">("siswa");
+  const [activeTab, setActiveTab] = useState<TabKey>("siswa");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Shared database states
@@ -59,7 +66,10 @@ export default function DashboardClient() {
     if (!cachedSession) {
       router.push("/portal-belajar");
     } else {
-      setSession(JSON.parse(cachedSession));
+      const parsed = JSON.parse(cachedSession);
+      setSession(parsed);
+      // Set default landing tab based on role (PRD v3 Section 4)
+      setActiveTab(getDefaultTab(parsed.role));
     }
   }, [router]);
 
@@ -389,104 +399,108 @@ export default function DashboardClient() {
 
           <nav className="space-y-1.5">
             <span className="text-[9px] text-primary-green/60 font-extrabold uppercase tracking-widest block mb-2 px-3">Menu Utama</span>
-            
-            <button
-              onClick={() => { setActiveTab("siswa"); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
-                activeTab === "siswa"
-                  ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
-                  : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <span>Data Siswa</span>
-            </button>
 
-            <button
-              onClick={() => { setActiveTab("kegiatan"); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
-                activeTab === "kegiatan"
-                  ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
-                  : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-              </svg>
-              <span>Dokumentasi Kegiatan</span>
-            </button>
+            {/* Data Siswa — Admin Administrasi only */}
+            {isAdminAdministrasi && (
+              <button
+                onClick={() => { setActiveTab("siswa"); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
+                  activeTab === "siswa"
+                    ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
+                    : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <span>Data Siswa</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => { setActiveTab("spp"); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
-                activeTab === "spp"
-                  ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
-                  : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-              </svg>
-              <span>Pencatatan SPP & Les</span>
-            </button>
+            {/* Dokumentasi Kegiatan — Admin Administrasi & Guru */}
+            {(isAdminAdministrasi || isGuru) && (
+              <button
+                onClick={() => { setActiveTab("kegiatan"); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
+                  activeTab === "kegiatan"
+                    ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
+                    : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+                <span>Dokumentasi Kegiatan</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => { setActiveTab("tabungan"); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
-                activeTab === "tabungan"
-                  ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
-                  : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>Tabungan Siswa</span>
-            </button>
+            {/* Pencatatan SPP & Les — Admin Transaksi only */}
+            {isAdminTransaksi && (
+              <button
+                onClick={() => { setActiveTab("spp"); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
+                  activeTab === "spp"
+                    ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
+                    : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                <span>Pencatatan SPP & Les</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => { setActiveTab("murajaah"); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
-                activeTab === "murajaah"
-                  ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
-                  : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              <span>Laporan Murajaah</span>
-            </button>
+            {/* Tabungan Siswa — Admin Transaksi only */}
+            {isAdminTransaksi && (
+              <button
+                onClick={() => { setActiveTab("tabungan"); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
+                  activeTab === "tabungan"
+                    ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
+                    : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Tabungan Siswa</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => { setActiveTab("laporan"); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
-                activeTab === "laporan"
-                  ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
-                  : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span>Laporan & Ekspor</span>
-            </button>
+            {/* Laporan Murajaah — Admin Administrasi & Guru */}
+            {(isAdminAdministrasi || isGuru) && (
+              <button
+                onClick={() => { setActiveTab("murajaah"); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
+                  activeTab === "murajaah"
+                    ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
+                    : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span>Laporan Murajaah</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => { setActiveTab("audit"); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
-                activeTab === "audit"
-                  ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
-                  : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>Log Aktivitas</span>
-            </button>
+            {/* Log Aktivitas — Admin Administrasi only */}
+            {isAdminAdministrasi && (
+              <button
+                onClick={() => { setActiveTab("audit"); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
+                  activeTab === "audit"
+                    ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
+                    : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Log Aktivitas</span>
+              </button>
+            )}
           </nav>
         </div>
 
@@ -531,7 +545,6 @@ export default function DashboardClient() {
                 {activeTab === "spp" && "Pencatatan SPP & Les Terpadu"}
                 {activeTab === "tabungan" && "Buku Tabungan Digital"}
                 {activeTab === "murajaah" && "Laporan Hasil Murajaah Santri"}
-                {activeTab === "laporan" && "Laporan & Ekspor Data"}
                 {activeTab === "audit" && "Log Aktivitas Petugas"}
               </h2>
             </div>
@@ -615,9 +628,6 @@ export default function DashboardClient() {
             />
           )}
 
-          {activeTab === "laporan" && (
-            <LaporanTab />
-          )}
 
           {activeTab === "audit" && (
             <AuditTab logs={logs} />

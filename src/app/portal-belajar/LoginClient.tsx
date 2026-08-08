@@ -108,6 +108,7 @@ export default function LoginClient() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                suppressHydrationWarning
                 className="absolute right-3 top-3.5 text-neutral-gray hover:text-neutral-dark focus:outline-none cursor-pointer flex items-center justify-center"
               >
                 {showPassword ? (
