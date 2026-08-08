@@ -682,15 +682,6 @@ const handleDeleteUser = (userId: number) => {
             </div>
             
             <div className="flex items-center gap-2 flex-shrink-0">
-              <div className="text-[10px] bg-white border border-primary-green/10 px-3.5 py-1.5 rounded-lg font-bold text-neutral-gray flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                <span className="hidden sm:inline">
-                  {isAdminAdministrasi ? "Status: Admin Adm" : isAdminTransaksi ? "Status: Admin Trx" : "Status: Guru"}
-                </span>
-                <span className="sm:hidden">
-                  {isAdminAdministrasi ? "Adm" : isAdminTransaksi ? "Trx" : "Guru"}
-                </span>
-              </div>
               
               {/* Hamburger Button for Mobile */}
               <button
