@@ -212,3 +212,11 @@ export const initialClasses = [
   { id: 3, className: "RA (B)", fase: "Fase Fondasi", teacherName: "Bunda Echa", description: "Raudhatul Athfal Kelompok B usia 5-6 tahun" },
 ];
 
+// Mock Initial Users
+export const initialUsers = [
+  { id: 1, name: "Admin Administrasi (Bunda Nisa)", username: "admin_adm", password: "admin123", role: "admin_adm" },
+  { id: 2, name: "Admin Transaksi (Bunda Ajeng)", username: "admin_trx", password: "admin123", role: "admin_trx" },
+  { id: 3, name: "Guru Kelas (Bunda Rahma)", username: "guru", password: "guru123", role: "guru" }
+];
+
+

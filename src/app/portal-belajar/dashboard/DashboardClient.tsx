@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 // Modular tab components
 import StudentTab from "./components/StudentTab";
 import KelasTab from "./components/KelasTab";
+import UserTab from "./components/UserTab";
 import KegiatanTab from "./components/KegiatanTab";
 import SppTab from "./components/SppTab";
 import TabunganTab from "./components/TabunganTab";
@@ -21,9 +22,10 @@ import {
   initialMurajaah,
   initialLogs,
   initialClasses,
+  initialUsers,
 } from "./mockData";
 
-type TabKey = "siswa" | "kelas" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "audit";
+type TabKey = "siswa" | "kelas" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "users" | "audit";
 
 function getDefaultTab(role: "admin_adm" | "admin_trx" | "guru"): TabKey {
   if (role === "admin_trx") return "spp";
@@ -40,6 +42,7 @@ export default function DashboardClient() {
   // Shared database states
   const [students, setStudents] = useState(initialStudents);
   const [classes, setClasses] = useState(initialClasses);
+  const [users, setUsers] = useState<any[]>([]);
   const [activities, setActivities] = useState(initialActivities);
   const [sppTransactions, setSppTransactions] = useState(initialSppTransactions);
   const [savings, setSavings] = useState(initialSavings);
@@ -51,7 +54,7 @@ export default function DashboardClient() {
     isOpen: boolean;
     title: string;
     message: string;
-    actionType: "delete_student" | "delete_class" | "delete_spp" | null;
+    actionType: "delete_student" | "delete_class" | "delete_spp" | "delete_user" | null;
     targetId: number | null;
   }>({
     isOpen: false,
@@ -71,6 +74,15 @@ export default function DashboardClient() {
       setSession(parsed);
       // Set default landing tab based on role (PRD v3 Section 4)
       setActiveTab(getDefaultTab(parsed.role));
+
+      // Load users from localStorage (with fallback to mock initialUsers)
+      const storedUsers = localStorage.getItem("system_users");
+      if (storedUsers) {
+        setUsers(JSON.parse(storedUsers));
+      } else {
+        setUsers(initialUsers);
+        localStorage.setItem("system_users", JSON.stringify(initialUsers));
+      }
     }
   }, [router]);
 
@@ -201,6 +213,59 @@ const handleDeleteClass = (classId: number) => {
   });
 };
 
+const handleAddUser = (newUsrData: any) => {
+  if (!isAdminAdministrasi) return;
+  const newUsr = {
+    ...newUsrData,
+    id: Date.now()
+  };
+  const updated = [...users, newUsr];
+  setUsers(updated);
+  localStorage.setItem("system_users", JSON.stringify(updated));
+
+  const newLog = {
+    id: Date.now(),
+    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+    user: session.name,
+    action: `Mendaftarkan akun pengguna baru: ${newUsr.name} (${newUsr.role})`,
+  };
+  setLogs([newLog, ...logs]);
+};
+
+const handleUpdateUser = (updatedUsr: any) => {
+  if (!isAdminAdministrasi) return;
+  const updated = users.map(u => u.id === updatedUsr.id ? updatedUsr : u);
+  setUsers(updated);
+  localStorage.setItem("system_users", JSON.stringify(updated));
+
+  const newLog = {
+    id: Date.now(),
+    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+    user: session.name,
+    action: `Memperbarui data akun pengguna: ${updatedUsr.name}`,
+  };
+  setLogs([newLog, ...logs]);
+};
+
+const handleDeleteUser = (userId: number) => {
+  if (!isAdminAdministrasi) return;
+  const targetUser = users.find(u => u.id === userId);
+  if (!targetUser) return;
+  
+  if (targetUser.username === "admin_adm") {
+    alert("Akun Super Admin utama tidak dapat dihapus!");
+    return;
+  }
+
+  setConfirmModal({
+    isOpen: true,
+    title: "Konfirmasi Hapus Pengguna",
+    message: `Apakah Anda yakin ingin menghapus akun petugas "${targetUser.name}" secara permanen?`,
+    actionType: "delete_user",
+    targetId: userId
+  });
+};
+
   const handleExecuteConfirmAction = () => {
     const { actionType, targetId } = confirmModal;
     if (!targetId || !actionType) return;
@@ -238,6 +303,21 @@ const handleDeleteClass = (classId: number) => {
           time: new Date().toISOString().replace('T', ' ').substring(0, 16),
           user: session.name,
           action: `Menghapus transaksi kas SPP ${studentName} senilai Rp ${tx.total.toLocaleString()}`,
+        };
+        setLogs([newLog, ...logs]);
+      }
+    } else if (actionType === "delete_user") {
+      const targetUser = users.find(u => u.id === targetId);
+      if (targetUser) {
+        const updated = users.filter(u => u.id !== targetId);
+        setUsers(updated);
+        localStorage.setItem("system_users", JSON.stringify(updated));
+
+        const newLog = {
+          id: Date.now(),
+          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          user: session.name,
+          action: `Menghapus akun pengguna: ${targetUser.name}`,
         };
         setLogs([newLog, ...logs]);
       }
@@ -450,6 +530,23 @@ const handleDeleteClass = (classId: number) => {
               </button>
             )}
 
+            {/* Kelola Pengguna — Admin Administrasi only */}
+            {isAdminAdministrasi && (
+              <button
+                onClick={() => { setActiveTab("users"); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
+                  activeTab === "users"
+                    ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
+                    : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <span>Kelola Pengguna</span>
+              </button>
+            )}
+
             {/* Dokumentasi Kegiatan — Admin Administrasi & Guru */}
             {(isAdminAdministrasi || isGuru) && (
               <button
@@ -575,6 +672,7 @@ const handleDeleteClass = (classId: number) => {
               <h2 className="font-baloo text-xl sm:text-2xl font-bold text-neutral-dark mt-0.5">
                 {activeTab === "siswa" && "Manajemen Data Peserta Didik"}
                 {activeTab === "kelas" && "Manajemen Data Kelas RA Sahabat"}
+                {activeTab === "users" && "Kelola Akses Pengguna & Akun Petugas"}
                 {activeTab === "kegiatan" && "Dokumentasi Kegiatan"}
                 {activeTab === "spp" && "Pencatatan SPP & Les Terpadu"}
                 {activeTab === "tabungan" && "Buku Tabungan Digital"}
@@ -629,6 +727,15 @@ const handleDeleteClass = (classId: number) => {
               onAddClass={handleAddClass}
               onUpdateClass={handleUpdateClass}
               onDeleteClass={handleDeleteClass}
+            />
+          )}
+
+          {activeTab === "users" && (
+            <UserTab
+              users={users}
+              onAddUser={handleAddUser}
+              onUpdateUser={handleUpdateUser}
+              onDeleteUser={handleDeleteUser}
             />
           )}
 
