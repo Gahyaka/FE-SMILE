@@ -15,6 +15,11 @@ interface Student {
   id: number;
   name: string;
   class: string;
+  nisn: string;
+  academicYear: string;
+  semester: string;
+  fase: string;
+  madrasahName: string;
 }
 
 interface MurajaahTabProps {
@@ -38,11 +43,157 @@ export default function MurajaahTab({
   const [searchQuery, setSearchQuery] = useState("");
   const [activeWorkTab, setActiveWorkTab] = useState<"input" | "summary">("input");
 
+  const currentStudent = students.find(s => s.id === murajaahStudentId);
+
   const filteredStudents = students.filter((st) => {
     const matchesClass = classFilter === "Semua" || st.class === classFilter;
     const matchesSearch = st.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesClass && matchesSearch;
   });
+
+  const handleDownloadPDF = () => {
+    if (!currentStudent) return;
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+
+    const studentScores = murajaahData[currentStudent.id] || {};
+
+    let tablesHtml = "";
+
+    Object.keys(MURAJAAH_PARAMS).forEach((catKey) => {
+      const catLabel = catKey === "suratPendek" ? "Surat Pendek" :
+                       catKey === "doaSehariHari" ? "Doa Harian" :
+                       catKey === "haditsPilihan" ? "Hadits Pilihan" :
+                       catKey === "ekskul" ? "Ekstrakurikuler" :
+                       catKey === "pai" ? "Pendidikan Agama Islam (PAI)" : "Sholat Dhuha";
+
+      const params = MURAJAAH_PARAMS[catKey as keyof typeof MURAJAAH_PARAMS];
+      let rowsHtml = "";
+
+      params.forEach((param, idx) => {
+        const rawScore = studentScores[param] || "-";
+        const scoreLabel = rawScore.toUpperCase();
+
+        rowsHtml += `
+          <tr style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 5px 8px; text-align: center; width: 10%;">${idx + 1}</td>
+            <td style="padding: 5px 8px; width: 65%;">${param}</td>
+            <td style="padding: 5px 8px; text-align: center; font-weight: bold; width: 25%;">${scoreLabel}</td>
+          </tr>
+        `;
+      });
+
+      tablesHtml += `
+        <div style="margin-top: 15px; page-break-inside: avoid;">
+          <h4 style="margin: 0 0 6px 0; font-size: 11px; text-transform: uppercase; color: #15803d; border-left: 3px solid #15803d; padding-left: 6px;">
+            ${catLabel}
+          </h4>
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
+            <thead>
+              <tr style="background-color: #FAF8F5;">
+                <th style="width: 10%; text-align: center; padding: 6px 8px; font-size: 10px;">No</th>
+                <th style="width: 65%; padding: 6px 8px; font-size: 10px;">Materi Hafalan</th>
+                <th style="width: 25%; text-align: center; padding: 6px 8px; font-size: 10px;">Predikat</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      `;
+    });
+
+    const docHtml = `
+      <html>
+        <head>
+          <title>Laporan Murajaah - ${currentStudent.name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; font-size: 11px; margin: 30px; color: #333; line-height: 1.3; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; }
+            th { font-weight: bold; }
+            .header-table td { border: none; padding: 3px 0; }
+            .kop { text-align: center; border-bottom: 3px double #000; padding-bottom: 8px; margin-bottom: 15px; }
+            .kop h2 { margin: 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+            .kop p { margin: 2px 0; font-size: 10px; }
+            .sig-table { width: 100%; margin-top: 30px; page-break-inside: avoid; }
+            .sig-table td { border: none; text-align: center; width: 50%; }
+            @media print {
+              body { margin: 1cm; font-size: 10px; }
+              th, td { padding: 4px 6px; }
+              .kop h2 { font-size: 14px; }
+              .sig-table { margin-top: 20px; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="kop">
+            <h2>KB / RA SAHABAT BERBAH SLEMAN</h2>
+            <p>Alamat: Berbah, Sleman, Daerah Istimewa Yogyakarta</p>
+            <p>Email: rasahabatberbah@gmail.com | Telp: (0274) 1234567</p>
+          </div>
+
+          <h3 style="text-align: center; margin-top: 0; margin-bottom: 15px; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px;">Laporan Hasil Perkembangan Murajaah Santri</h3>
+
+          <table class="header-table" style="width: 100%; margin-bottom: 10px;">
+            <tr>
+              <td style="width: 15%; font-weight: bold;">Nama Santri</td>
+              <td style="width: 35%;">: ${currentStudent.name}</td>
+              <td style="width: 15%; font-weight: bold;">Semester</td>
+              <td style="width: 35%;">: ${currentStudent.semester || "Semester 1"}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">NISN</td>
+              <td>: ${currentStudent.nisn || "-"}</td>
+              <td style="font-weight: bold;">Tahun Ajaran</td>
+              <td>: ${currentStudent.academicYear || "2026/2027"}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">Kelas (Fase)</td>
+              <td>: ${currentStudent.class} (${currentStudent.fase || "Fase Fondasi"})</td>
+              <td style="font-weight: bold;">Madrasah</td>
+              <td>: ${currentStudent.madrasahName || "RA Sahabat Berbah Sleman"}</td>
+            </tr>
+          </table>
+
+          <div style="display: grid; grid-template-cols: 1fr; gap: 10px;">
+            ${tablesHtml}
+          </div>
+
+          <div style="margin-top: 15px; font-size: 9px; font-style: italic; color: #555; page-break-inside: avoid;">
+            <strong>Keterangan Predikat Nilai:</strong> SB = Sangat Baik | B = Baik | C = Cukup | K = Kurang | - = Belum Mulai
+          </div>
+
+          <table class="sig-table">
+            <tr>
+              <td>
+                <p>Mengetahui,</p>
+                <p style="margin-top: 45px; font-weight: bold; text-decoration: underline;">Bunda Nisa</p>
+                <p style="margin-top: 2px; font-size: 9px; color: #555;">Kepala Madrasah</p>
+              </td>
+              <td>
+                <p>Yogyakarta, ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</p>
+                <p style="margin-top: 45px; font-weight: bold; text-decoration: underline;">Bunda Rahma</p>
+                <p style="margin-top: 2px; font-size: 9px; color: #555;">Guru Kelas</p>
+              </td>
+            </tr>
+          </table>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            }
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(docHtml);
+    printWindow.document.close();
+  };
+
 
   return (
     <div className="space-y-6">
@@ -173,33 +324,46 @@ export default function MurajaahTab({
             <span>3. Lembar Kerja Murajaah:</span>
             <span className="text-primary-green font-black underline">{students.find(s => s.id === murajaahStudentId)?.name || "Santri"}</span>
           </h4>
+          
+          {/* Work tab toggler & PDF Action */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={handleDownloadPDF}
+              className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 font-extrabold text-[10px] rounded-lg border border-amber-200 transition-all cursor-pointer shadow-3xs"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>Unduh PDF</span>
+            </button>
 
-          {/* Work tab toggler */}
-          <div className="flex bg-[#FAF8F5] border border-primary-green/10 rounded-lg p-0.5 text-[10px] font-extrabold text-neutral-gray">
-            <button
-              type="button"
-              onClick={() => setActiveWorkTab("input")}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded cursor-pointer transition-colors ${
-                activeWorkTab === "input" ? "bg-primary-green text-white" : "hover:text-neutral-dark"
-              }`}
-            >
-              <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-              Berikan Nilai
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveWorkTab("summary")}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded cursor-pointer transition-colors ${
-                activeWorkTab === "summary" ? "bg-primary-green text-white" : "hover:text-neutral-dark"
-              }`}
-            >
-              <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              Lihat Rekapan
-            </button>
+            <div className="flex bg-[#FAF8F5] border border-primary-green/10 rounded-lg p-0.5 text-[10px] font-extrabold text-neutral-gray">
+              <button
+                type="button"
+                onClick={() => setActiveWorkTab("input")}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded cursor-pointer transition-colors ${
+                  activeWorkTab === "input" ? "bg-primary-green text-white" : "hover:text-neutral-dark"
+                }`}
+              >
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                <span>Berikan Nilai</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveWorkTab("summary")}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded cursor-pointer transition-colors ${
+                  activeWorkTab === "summary" ? "bg-primary-green text-white" : "hover:text-neutral-dark"
+                }`}
+              >
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span>Lihat Rekapan</span>
+              </button>
+            </div>
           </div>
         </div>
 
