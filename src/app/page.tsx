@@ -57,7 +57,7 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
                 <a
                   href="#ppdb"
-                  className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-accent hover:bg-accent-dark text-white font-extrabold text-base transition-all shadow-md hover:-translate-y-0.5 border-2 border-primary-dark"
+                  className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-accent hover:bg-accent-dark text-white font-extrabold text-base transition-all shadow-md hover:-translate-y-0.5 border-2 border-accent-dark"
                 >
                   Daftar PPDB Online
                 </a>
@@ -71,7 +71,7 @@ export default function HomePage() {
             </div>
 
             {/* Right Illustration Column */}
-            <div className="lg:col-span-5 relative w-full aspect-square max-w-[380px] mx-auto flex items-center justify-center p-4 lg:-mt-12 mt-16">
+            <div className="lg:col-span-5 relative w-full aspect-square max-w-[330px] mx-auto flex items-center justify-center p-4 lg:-mt-12 mt-16">
               <style>{`
                 @keyframes slow-scale-pulse {
                   0%, 100% { transform: scale(0.96); }
@@ -108,19 +108,19 @@ export default function HomePage() {
                 />
               </div>
 
-              {/* Floating Doodles around logo - lowered transparency/watermark effect */}
+              {/* Floating Doodles around logo - pushed further outward to avoid crowding */}
               {/* Star on top right - very soft warm yellow */}
-              <svg className="absolute -top-1 -right-1 w-10 h-10 text-warning/20 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <svg className="absolute -top-4 -right-4 w-7 h-7 text-warning/20 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#FAF8F5" stroke="#F5A623" opacity="0.6" />
               </svg>
 
               {/* Cloud on top left - very soft purple */}
-              <svg className="absolute -top-6 -left-6 w-14 h-10 text-secondary/15 z-20 pointer-events-none custom-float-x" viewBox="0 0 100 60" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <svg className="absolute -top-8 -left-8 w-10 h-7 text-secondary/15 z-20 pointer-events-none custom-float-x" viewBox="0 0 100 60" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <path d="M10,40 C10,25 30,20 40,25 C50,15 75,20 75,35 C85,35 95,45 85,55 H15 C5,55 5,45 10,40 Z" fill="#F2E6F5" stroke="#7A2E8F" opacity="0.4" />
               </svg>
 
               {/* Flower on bottom left - very soft pink */}
-              <svg className="absolute -bottom-2 -left-2 w-10 h-10 text-accent/25 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <svg className="absolute -bottom-6 -left-6 w-7 h-7 text-accent/25 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <circle cx="12" cy="8" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1" opacity="0.7" />
                 <circle cx="12" cy="16" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1" opacity="0.7" />
                 <circle cx="8" cy="12" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1" opacity="0.7" />
@@ -129,7 +129,7 @@ export default function HomePage() {
               </svg>
 
               {/* Paperplane on bottom right - very soft green */}
-              <svg className="absolute -bottom-6 -right-6 w-12 h-12 text-primary-green/15 z-20 pointer-events-none custom-float-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <svg className="absolute -bottom-8 -right-8 w-8 h-8 text-primary-green/15 z-20 pointer-events-none custom-float-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M22 2L2 8.66L11.5 12.5L16 21L22 2Z" fill="#E7F8EA" stroke="#2CB24A" opacity="0.4" />
                 <path d="M11.5 12.5L22 2" stroke="#2CB24A" strokeDasharray="2 1" opacity="0.4" />
               </svg>
@@ -402,38 +402,59 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Prestasi 1 */}
-            <div className="bg-white p-8 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs flex items-start gap-4">
-              <div className="w-12 h-12 bg-warning/10 rounded-full flex items-center justify-center text-warning flex-shrink-0">
-                🏆
+            <div className="group bg-white rounded-2xl border border-primary-green/10 shadow-3xs overflow-hidden hover:shadow-sm transition-all duration-300 flex flex-col">
+              <div className="relative aspect-[16/9] w-full flex items-center justify-center bg-soft-mint/70 border-b border-primary-green/5">
+                <svg className="w-10 h-10 text-primary-green/40 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span className="absolute top-3 left-3 text-[9px] font-extrabold px-2.5 py-1 bg-warning text-white rounded-full shadow-3xs">
+                  Tingkat Kecamatan
+                </span>
               </div>
-              <div>
-                <span className="text-[10px] font-extrabold text-primary-green uppercase tracking-wide">Tingkat Kecamatan Berbah</span>
-                <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1">Juara 1 Lomba Mewarnai & Menggambar</h4>
-                <p className="text-[11px] text-neutral-gray font-semibold mt-1">Meraih Juara Pertama pada Festival Kreasi Anak Usia Dini tingkat Kecamatan Berbah Sleman.</p>
+              <div className="p-6 flex-1 flex flex-col justify-between gap-1">
+                <div>
+                  <span className="text-[9px] font-extrabold text-primary-green uppercase tracking-wider block">Festival Anak Ceria</span>
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1 group-hover:text-primary-green transition-colors leading-snug">Juara 1 Lomba Mewarnai & Menggambar</h4>
+                  <p className="text-[11px] text-neutral-gray font-semibold mt-2 leading-relaxed">Meraih Juara Pertama pada Festival Kreasi Anak Usia Dini tingkat Kecamatan Berbah Sleman.</p>
+                </div>
               </div>
             </div>
 
             {/* Prestasi 2 */}
-            <div className="bg-white p-8 rounded-[15px_30px_20px_25px]/[25px_20px_30px_15px] border-2 border-dashed border-primary-green/20 shadow-xs flex items-start gap-4">
-              <div className="w-12 h-12 bg-secondary-soft rounded-full flex items-center justify-center text-secondary flex-shrink-0">
-                🥇
+            <div className="group bg-white rounded-2xl border border-primary-green/10 shadow-3xs overflow-hidden hover:shadow-sm transition-all duration-300 flex flex-col">
+              <div className="relative aspect-[16/9] w-full flex items-center justify-center bg-secondary-soft/70 border-b border-secondary/5">
+                <svg className="w-10 h-10 text-secondary/40 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+                <span className="absolute top-3 left-3 text-[9px] font-extrabold px-2.5 py-1 bg-secondary text-white rounded-full shadow-3xs">
+                  Tingkat Kabupaten
+                </span>
               </div>
-              <div>
-                <span className="text-[10px] font-extrabold text-secondary uppercase tracking-wide">Tingkat Kabupaten Sleman</span>
-                <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1">Juara 2 Lomba Adzan & Surat Pendek</h4>
-                <p className="text-[11px] text-neutral-gray font-semibold mt-1">Meraih juara kedua hafalan Juz Amma dan ketepatan lafadz adzan cilik se-Kabupaten Sleman.</p>
+              <div className="p-6 flex-1 flex flex-col justify-between gap-1">
+                <div>
+                  <span className="text-[9px] font-extrabold text-secondary uppercase tracking-wider block">Festival Syiar Anak Sholeh</span>
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1 group-hover:text-secondary transition-colors leading-snug">Juara 2 Lomba Adzan & Surat Pendek</h4>
+                  <p className="text-[11px] text-neutral-gray font-semibold mt-2 leading-relaxed">Meraih juara kedua hafalan Juz Amma dan ketepatan lafadz adzan cilik se-Kabupaten Sleman.</p>
+                </div>
               </div>
             </div>
 
             {/* Prestasi 3 */}
-            <div className="bg-white p-8 rounded-[30px_20px_25px_15px]/[15px_25px_20px_30px] border-2 border-dashed border-primary-green/20 shadow-xs flex items-start gap-4">
-              <div className="w-12 h-12 bg-accent-soft rounded-full flex items-center justify-center text-accent flex-shrink-0">
-                🛡
+            <div className="group bg-white rounded-2xl border border-primary-green/10 shadow-3xs overflow-hidden hover:shadow-sm transition-all duration-300 flex flex-col">
+              <div className="relative aspect-[16/9] w-full flex items-center justify-center bg-accent-soft/70 border-b border-accent/5">
+                <svg className="w-10 h-10 text-accent/40 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span className="absolute top-3 left-3 text-[9px] font-extrabold px-2.5 py-1 bg-accent text-white rounded-full shadow-3xs">
+                  Program Gizi Terpadu
+                </span>
               </div>
-              <div>
-                <span className="text-[10px] font-extrabold text-accent uppercase tracking-wide">Program Gizi Puskesmas</span>
-                <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1">Penghargaan PAUD Peduli PHBS</h4>
-                <p className="text-[11px] text-neutral-gray font-semibold mt-1">Penghargaan tertinggi atas konsistensi program sanitasi bersih serta monitoring berat & tinggi rutin.</p>
+              <div className="p-6 flex-1 flex flex-col justify-between gap-1">
+                <div>
+                  <span className="text-[9px] font-extrabold text-accent uppercase tracking-wider block">Kemitraan Puskesmas Berbah</span>
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1 group-hover:text-accent transition-colors leading-snug">Penghargaan PAUD Peduli PHBS</h4>
+                  <p className="text-[11px] text-neutral-gray font-semibold mt-2 leading-relaxed">Penghargaan tertinggi atas konsistensi program sanitasi bersih serta monitoring berat & tinggi rutin.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -505,125 +526,32 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* PPDB REGISTER FORM SECTION */}
+      {/* PPDB REGISTER INFO SECTION — REDESIGNED TO WHATSAPP DIRECT */}
       <section id="ppdb" className="py-20 bg-[#FAF8F5] relative overflow-hidden border-b border-soft-mint">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch">
-            
-            {/* Left side PPDB Info */}
-            <div className="lg:col-span-5 space-y-6 flex flex-col justify-between">
-              <div className="space-y-4">
-                <span className="inline-block text-xs font-accent font-semibold uppercase tracking-wider text-accent bg-accent-soft px-4 py-2 rounded-lg border-2 border-dashed border-accent/30">
-                  PPDB TA 2026/2027
-                </span>
-                <h2 className="font-baloo text-3xl font-bold text-neutral-dark">Mari Bergabung Menjadi Sahabat Cilik Kami!</h2>
-                <p className="text-xs sm:text-sm text-neutral-gray leading-relaxed font-semibold">
-                  Menerima pendaftaran baru untuk Kelompok Bermain (KB, Usia 3-4 Tahun) dan Raudhatul Athfal (RA, Usia 4-6 Tahun). 
-                </p>
-                <div className="p-5 bg-white rounded-lg border-2 border-dashed border-primary-green/20 space-y-3 font-semibold text-xs text-neutral-gray">
-                  <p className="flex items-center gap-2"><span className="text-primary-green">★</span> Fotokopi Akta Kelahiran Anak (1 Lembar)</p>
-                  <p className="flex items-center gap-2"><span className="text-primary-green">★</span> Fotokopi Kartu Keluarga (1 Lembar)</p>
-                  <p className="flex items-center gap-2"><span className="text-primary-green">★</span> Mengisi Formulir PPDB Online/Manual</p>
-                </div>
-              </div>
-              
-              <div>
-                <a
-                  href="https://wa.me/6281234567890?text=Halo%20Admin%20RA%20Sahabat,%20saya%20tertarik%20tanya%20PPDB..."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-[30px_90px_30px_100px]/[100px_30px_90px_20px] bg-[#18B36F] hover:bg-[#0E7A4D] text-white font-extrabold transition-all border-2 border-primary-dark shadow-md"
-                >
-                  Hubungi Admin PPDB (WhatsApp)
-                </a>
-              </div>
-            </div>
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.01)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none -z-10"></div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 relative z-10">
+          <div className="space-y-3">
+            <span className="inline-block text-xs font-accent font-semibold uppercase tracking-wider text-accent bg-accent-soft px-4 py-2 rounded-lg border-2 border-dashed border-accent/30">
+              Pendaftaran PPDB TA 2026/2027
+            </span>
+            <h2 className="font-baloo text-3xl sm:text-4xl font-bold text-neutral-dark">Mari Bergabung Menjadi Sahabat Cilik Kami!</h2>
+            <p className="text-xs sm:text-sm text-neutral-gray leading-relaxed font-semibold max-w-xl mx-auto">
+              Saat ini pendaftaran dilakukan secara langsung/offline. Silakan hubungi admin kami melalui WhatsApp untuk informasi kuota kelas, alur pendaftaran, serta jadwal kunjungan sekolah.
+            </p>
+          </div>
 
-            {/* Right side PPDB Form */}
-            <div className="lg:col-span-7 bg-white p-8 sm:p-12 rounded-[40px_15px_30px_25px]/[25px_30px_15px_40px] shadow-sm border-2 border-dashed border-primary-green/30 relative">
-              {/* Notebook grid watermark */}
-              <div className="absolute inset-x-0 top-0 h-full bg-[linear-gradient(rgba(44,178,74,0.01)_1px,transparent_1px)] bg-[size:100%_24px] pointer-events-none rounded-[40px_15px_30px_25px]/[25px_30px_15px_40px]"></div>
-              
-              <h3 className="font-baloo text-2xl font-bold text-neutral-dark mb-2 relative z-10">Formulir Pendaftaran PPDB Awal</h3>
-              <p className="text-xs text-neutral-gray mb-8 font-semibold relative z-10">Isi biodata anak dan orang tua dengan lengkap. Tim admin RA Sahabat akan menghubungi Anda via WhatsApp untuk verifikasi berkas.</p>
-              
-              <form onSubmit={handleFormSubmit} className="space-y-5 relative z-10">
-                <div>
-                  <label htmlFor="childName" className="block text-xs font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">Nama Lengkap Anak</label>
-                  <input
-                    type="text"
-                    id="childName"
-                    name="childName"
-                    value={formData.childName}
-                    onChange={handleFormChange}
-                    required
-                    suppressHydrationWarning
-                    className="w-full px-4 py-3.5 rounded-[12px_8px_15px_10px]/[10px_15px_8px_12px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors font-semibold select-text"
-                    placeholder="Masukkan nama lengkap anak"
-                  />
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label htmlFor="parentName" className="block text-xs font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">Nama Orang Tua / Wali</label>
-                    <input
-                      type="text"
-                      id="parentName"
-                      name="parentName"
-                      value={formData.parentName}
-                      onChange={handleFormChange}
-                      required
-                      suppressHydrationWarning
-                      className="w-full px-4 py-3.5 rounded-[10px_15px_8px_12px]/[12px_8px_15px_10px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors font-semibold select-text"
-                      placeholder="Nama Ibu/Ayah/Wali"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="phone" className="block text-xs font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">No. WhatsApp Aktif</label>
-                    <input
-                      type="text"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleFormChange}
-                      required
-                      suppressHydrationWarning
-                      className="w-full px-4 py-3.5 rounded-[12px_8px_15px_10px]/[10px_15px_8px_12px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors font-semibold select-text"
-                      placeholder="Contoh: 081234567890"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="classType" className="block text-xs font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">Pilihan Jenjang Kelas</label>
-                  <select
-                    id="classType"
-                    name="classType"
-                    value={formData.classType}
-                    onChange={handleFormChange}
-                    suppressHydrationWarning
-                    className="w-full px-4 py-3.5 rounded-[10px_15px_8px_12px]/[12px_8px_15px_10px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm bg-white transition-colors font-semibold select-text"
-                  >
-                    <option value="KB">Kelompok Bermain (KB, Usia 3-4 Tahun)</option>
-                    <option value="RA">Raudhatul Athfal (RA, Usia 4-6 Tahun)</option>
-                  </select>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={formSubmitted}
-                  suppressHydrationWarning
-                  className={`w-full py-4 rounded-[30px_90px_30px_100px]/[100px_30px_90px_20px] font-extrabold text-base transition-all border-2 border-primary-dark shadow-md cursor-pointer ${
-                    formSubmitted
-                      ? "bg-neutral-gray text-white cursor-not-allowed"
-                      : "bg-accent hover:bg-accent-dark text-white hover:shadow-lg hover:-translate-y-0.5"
-                  }`}
-                >
-                  {formSubmitted ? "Mengirim Data..." : "Kirim Formulir PPDB"}
-                </button>
-              </form>
-            </div>
-
+          <div className="pt-2">
+            <a
+              href="https://wa.me/6281234567890?text=Halo%20Admin%20RA%20Sahabat,%20saya%20ingin%20mendaftarkan%20anak%20saya%20di%20KB/RA%20Sahabat%20Sleman..."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 px-10 py-4.5 rounded-xl bg-[#18B36F] hover:bg-[#0E7A4D] text-white font-extrabold text-base transition-all border-2 border-primary-dark shadow-md hover:-translate-y-0.5"
+            >
+              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.73-1.45L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.965C16.588 3.977 14.128 2.95 11.5 2.95c-5.437 0-9.863 4.373-9.867 9.803-.001 1.73.457 3.416 1.328 4.937l-.988 3.597 3.674-.952zM17.7 14.542c-.3-.15-1.77-.874-2.046-.974-.276-.1-.477-.15-.677.15-.2.3-.777.974-.95 1.174-.173.2-.347.225-.648.075-.3-.15-1.266-.467-2.41-1.484-.89-.791-1.49-1.77-1.665-2.07-.173-.3-.018-.462.13-.61.135-.135.3-.349.45-.524.15-.175.2-.299.3-.5.1-.2.05-.374-.025-.524-.075-.15-.677-1.63-.927-2.23-.244-.587-.493-.507-.677-.517-.174-.008-.375-.01-.576-.01-.2 0-.527.075-.802.374-.276.3-1.053 1.028-1.053 2.507 0 1.48 1.079 2.906 1.228 3.106.15.2 2.122 3.24 5.14 4.547.717.31 1.278.496 1.716.635.722.23 1.38.197 1.9.12.58-.087 1.77-.723 2.02-1.388.25-.665.25-1.233.175-1.353-.075-.12-.275-.22-.575-.37z"/>
+              </svg>
+              <span>Hubungi Admin PPDB via WhatsApp</span>
+            </a>
           </div>
         </div>
       </section>
