@@ -123,11 +123,18 @@ export const initialStudents = [
 
 // Mock Initial Transaksi SPP & Les
 export const initialSppTransactions = [
-  { id: 1, studentId: 1, date: "2026-08-01", description: "Pembayaran SPP + Les Agustus", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" },
-  { id: 2, studentId: 2, date: "2026-08-02", description: "Lunas SPP & Les Agustus", spp: 75000, les: 40000, total: 115000, depositStatus: "Belum Disetor" },
-  { id: 3, studentId: 1, date: "2026-08-03", description: "Uang Les Tambahan", spp: 0, les: 40000, total: 40000, depositStatus: "Sudah Disetor" },
-  { id: 4, studentId: 4, date: "2025-05-12", description: "Lunas SPP Mei", spp: 75000, les: 0, total: 75000, depositStatus: "Sudah Disetor" },
-  { id: 5, studentId: 5, date: "2024-10-05", description: "Pembayaran SPP + Les Oktober", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" }
+  { id: 1,  studentId: 1, date: "2026-08-01", description: "Pembayaran SPP + Les Agustus", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" },
+  { id: 2,  studentId: 2, date: "2026-08-02", description: "Lunas SPP & Les Agustus", spp: 75000, les: 40000, total: 115000, depositStatus: "Belum Disetor" },
+  { id: 3,  studentId: 3, date: "2026-08-03", description: "Pembayaran SPP + Les Agustus", spp: 75000, les: 40000, total: 115000, depositStatus: "Belum Disetor" },
+  { id: 4,  studentId: 1, date: "2026-08-05", description: "Uang Les Tambahan Agustus", spp: 0, les: 40000, total: 40000, depositStatus: "Sudah Disetor" },
+  { id: 5,  studentId: 2, date: "2026-08-07", description: "Pembayaran SPP Agustus", spp: 75000, les: 0, total: 75000, depositStatus: "Belum Disetor" },
+  { id: 6,  studentId: 3, date: "2026-08-08", description: "Lunas Les Agustus", spp: 0, les: 40000, total: 40000, depositStatus: "Sudah Disetor" },
+  { id: 7,  studentId: 1, date: "2026-07-02", description: "Pembayaran SPP + Les Juli", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" },
+  { id: 8,  studentId: 2, date: "2026-07-05", description: "Pembayaran SPP + Les Juli", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" },
+  { id: 9,  studentId: 3, date: "2026-07-08", description: "Pembayaran SPP + Les Juli", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" },
+  { id: 10, studentId: 1, date: "2026-06-03", description: "Pembayaran SPP + Les Juni", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" },
+  { id: 11, studentId: 2, date: "2026-06-05", description: "Pembayaran SPP + Les Juni", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" },
+  { id: 12, studentId: 4, date: "2025-05-12", description: "Lunas SPP Mei", spp: 75000, les: 0, total: 75000, depositStatus: "Sudah Disetor" },
 ];
 
 // Mock Initial Tabungan
