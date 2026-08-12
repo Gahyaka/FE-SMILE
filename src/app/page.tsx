@@ -57,7 +57,7 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
                 <a
                   href="#ppdb"
-                  className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-accent hover:bg-accent-dark text-white font-extrabold text-base transition-all shadow-md hover:-translate-y-0.5 border-2 border-primary-dark"
+                  className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-accent hover:bg-accent-dark text-white font-extrabold text-base transition-all shadow-md hover:-translate-y-0.5 border-2 border-accent-dark"
                 >
                   Daftar PPDB Online
                 </a>
@@ -71,7 +71,7 @@ export default function HomePage() {
             </div>
 
             {/* Right Illustration Column */}
-            <div className="lg:col-span-5 relative w-full aspect-square max-w-[380px] mx-auto flex items-center justify-center p-4 lg:-mt-12 mt-16">
+            <div className="lg:col-span-5 relative w-full aspect-square max-w-[330px] mx-auto flex items-center justify-center p-4 lg:-mt-12 mt-16">
               <style>{`
                 @keyframes slow-scale-pulse {
                   0%, 100% { transform: scale(0.96); }
@@ -108,19 +108,19 @@ export default function HomePage() {
                 />
               </div>
 
-              {/* Floating Doodles around logo - lowered transparency/watermark effect */}
+              {/* Floating Doodles around logo - pushed further outward to avoid crowding */}
               {/* Star on top right - very soft warm yellow */}
-              <svg className="absolute -top-1 -right-1 w-10 h-10 text-warning/20 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <svg className="absolute -top-4 -right-4 w-7 h-7 text-warning/20 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#FAF8F5" stroke="#F5A623" opacity="0.6" />
               </svg>
 
               {/* Cloud on top left - very soft purple */}
-              <svg className="absolute -top-6 -left-6 w-14 h-10 text-secondary/15 z-20 pointer-events-none custom-float-x" viewBox="0 0 100 60" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <svg className="absolute -top-8 -left-8 w-10 h-7 text-secondary/15 z-20 pointer-events-none custom-float-x" viewBox="0 0 100 60" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <path d="M10,40 C10,25 30,20 40,25 C50,15 75,20 75,35 C85,35 95,45 85,55 H15 C5,55 5,45 10,40 Z" fill="#F2E6F5" stroke="#7A2E8F" opacity="0.4" />
               </svg>
 
               {/* Flower on bottom left - very soft pink */}
-              <svg className="absolute -bottom-2 -left-2 w-10 h-10 text-accent/25 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <svg className="absolute -bottom-6 -left-6 w-7 h-7 text-accent/25 z-20 pointer-events-none custom-float-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <circle cx="12" cy="8" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1" opacity="0.7" />
                 <circle cx="12" cy="16" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1" opacity="0.7" />
                 <circle cx="8" cy="12" r="2.8" fill="#FCE4F1" stroke="#EC1E8C" strokeWidth="1" opacity="0.7" />
@@ -129,7 +129,7 @@ export default function HomePage() {
               </svg>
 
               {/* Paperplane on bottom right - very soft green */}
-              <svg className="absolute -bottom-6 -right-6 w-12 h-12 text-primary-green/15 z-20 pointer-events-none custom-float-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <svg className="absolute -bottom-8 -right-8 w-8 h-8 text-primary-green/15 z-20 pointer-events-none custom-float-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M22 2L2 8.66L11.5 12.5L16 21L22 2Z" fill="#E7F8EA" stroke="#2CB24A" opacity="0.4" />
                 <path d="M11.5 12.5L22 2" stroke="#2CB24A" strokeDasharray="2 1" opacity="0.4" />
               </svg>
