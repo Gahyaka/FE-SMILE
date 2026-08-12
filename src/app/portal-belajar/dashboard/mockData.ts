@@ -204,3 +204,19 @@ export const initialLogs = [
   { id: 1, time: "2026-08-05 09:30", user: "Admin Administrasi (Bunda Nisa)", action: "Menyelaraskan data master siswa baru" },
   { id: 2, time: "2026-08-05 10:15", user: "Admin Transaksi (Bunda Ajeng)", action: "Mencatat setoran tabungan Ahmad Rayyan" },
 ];
+
+// Mock Initial Classes
+export const initialClasses = [
+  { id: 1, className: "KB", fase: "Fase Fondasi", teacherName: "Bunda Yuli", description: "Kelompok Bermain usia 3-4 tahun" },
+  { id: 2, className: "RA (A)", fase: "Fase Fondasi", teacherName: "Guru Kelas (Bunda Rahma)", description: "Raudhatul Athfal Kelompok A usia 4-5 tahun" },
+  { id: 3, className: "RA (B)", fase: "Fase Fondasi", teacherName: "Bunda Echa", description: "Raudhatul Athfal Kelompok B usia 5-6 tahun" },
+];
+
+// Mock Initial Users
+export const initialUsers = [
+  { id: 1, name: "Admin Administrasi (Bunda Nisa)", username: "admin_adm", password: "admin123", role: "admin_adm" },
+  { id: 2, name: "Admin Transaksi (Bunda Ajeng)", username: "admin_trx", password: "admin123", role: "admin_trx" },
+  { id: 3, name: "Guru Kelas (Bunda Rahma)", username: "guru", password: "guru123", role: "guru" }
+];
+
+

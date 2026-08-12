@@ -14,6 +14,17 @@ export default function LoginClient() {
   useEffect(() => {
     // Clear any existing session when returning to login page
     localStorage.removeItem("user_session");
+
+    // Initialize mock users into localStorage if they don't exist yet
+    const existingUsers = localStorage.getItem("system_users");
+    if (!existingUsers) {
+      const defaultUsers = [
+        { id: 1, name: "Admin Administrasi (Bunda Nisa)", username: "admin_adm", password: "admin123", role: "admin_adm" },
+        { id: 2, name: "Admin Transaksi (Bunda Ajeng)", username: "admin_trx", password: "admin123", role: "admin_trx" },
+        { id: 3, name: "Guru Kelas (Bunda Rahma)", username: "guru", password: "guru123", role: "guru" }
+      ];
+      localStorage.setItem("system_users", JSON.stringify(defaultUsers));
+    }
   }, []);
 
   const handleLoginSubmit = (e: React.FormEvent) => {
@@ -22,23 +33,17 @@ export default function LoginClient() {
     setLoading(true);
 
     setTimeout(() => {
-      // Mock validation matching PRD v3 roles
-      if (username === "admin_adm" && password === "admin123") {
+      const stored = localStorage.getItem("system_users");
+      const currentUsers = stored ? JSON.parse(stored) : [];
+      
+      const matched = currentUsers.find(
+        (u: any) => u.username === username && u.password === password
+      );
+
+      if (matched) {
         localStorage.setItem(
           "user_session",
-          JSON.stringify({ role: "admin_adm", name: "Admin Administrasi (Bunda Nisa)" })
-        );
-        router.push("/portal-belajar/dashboard");
-      } else if (username === "admin_trx" && password === "admin123") {
-        localStorage.setItem(
-          "user_session",
-          JSON.stringify({ role: "admin_trx", name: "Admin Transaksi (Bunda Ajeng)" })
-        );
-        router.push("/portal-belajar/dashboard");
-      } else if (username === "guru" && password === "guru123") {
-        localStorage.setItem(
-          "user_session",
-          JSON.stringify({ role: "guru", name: "Guru Kelas (Bunda Rahma)" })
+          JSON.stringify({ role: matched.role, name: matched.name })
         );
         router.push("/portal-belajar/dashboard");
       } else {
@@ -108,6 +113,7 @@ export default function LoginClient() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                suppressHydrationWarning
                 className="absolute right-3 top-3.5 text-neutral-gray hover:text-neutral-dark focus:outline-none cursor-pointer flex items-center justify-center"
               >
                 {showPassword ? (

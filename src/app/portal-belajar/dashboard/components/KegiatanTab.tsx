@@ -97,23 +97,27 @@ export default function KegiatanTab({
         )}
       </div>
 
-      {/* Filter Category & Year Bar */}
-      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white p-3 rounded-2xl border border-primary-green/10">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Saring Kategori:</span>
-          {["Semua", "Akademik", "Keagamaan", "Ekstrakurikuler"].map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setFilterCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-lg text-[10px] font-extrabold border transition-all cursor-pointer ${
-                filterCategory === cat
-                  ? "bg-primary-green text-white border-primary-green shadow-3xs"
-                  : "bg-[#FAF8F5] text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+      {/* Filter Category & Year Bar — Startup Segmented Control Style */}
+      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs">
+        <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-fit">
+          {["Semua", "Akademik", "Keagamaan", "Ekstrakurikuler"].map((cat) => {
+            const isActive = filterCategory === cat;
+            const catCount = cat === "Semua" ? activities.length : activities.filter((a) => a.category === cat).length;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setFilterCategory(cat)}
+                className={`px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all duration-200 cursor-pointer ${
+                  isActive
+                    ? "bg-primary-green text-white shadow-xs"
+                    : "text-neutral-gray hover:text-neutral-dark"
+                }`}
+              >
+                {cat} <span className={`ml-1 px-1.5 py-0.5 rounded text-[8px] font-black ${isActive ? "bg-white/20 text-white" : "bg-neutral-gray/10 text-neutral-gray"}`}>{catCount}</span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="flex items-center gap-2 border-t md:border-t-0 pt-2 md:pt-0 border-neutral-gray/10">
