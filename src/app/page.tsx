@@ -402,38 +402,59 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Prestasi 1 */}
-            <div className="bg-white p-8 rounded-[25px_15px_30px_20px]/[20px_30px_15px_25px] border-2 border-dashed border-primary-green/20 shadow-xs flex items-start gap-4">
-              <div className="w-12 h-12 bg-warning/10 rounded-full flex items-center justify-center text-warning flex-shrink-0">
-                🏆
+            <div className="group bg-white rounded-2xl border border-primary-green/10 shadow-3xs overflow-hidden hover:shadow-sm transition-all duration-300 flex flex-col">
+              <div className="relative aspect-[16/9] w-full flex items-center justify-center bg-soft-mint/70 border-b border-primary-green/5">
+                <svg className="w-10 h-10 text-primary-green/40 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span className="absolute top-3 left-3 text-[9px] font-extrabold px-2.5 py-1 bg-warning text-white rounded-full shadow-3xs">
+                  Tingkat Kecamatan
+                </span>
               </div>
-              <div>
-                <span className="text-[10px] font-extrabold text-primary-green uppercase tracking-wide">Tingkat Kecamatan Berbah</span>
-                <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1">Juara 1 Lomba Mewarnai & Menggambar</h4>
-                <p className="text-[11px] text-neutral-gray font-semibold mt-1">Meraih Juara Pertama pada Festival Kreasi Anak Usia Dini tingkat Kecamatan Berbah Sleman.</p>
+              <div className="p-6 flex-1 flex flex-col justify-between gap-1">
+                <div>
+                  <span className="text-[9px] font-extrabold text-primary-green uppercase tracking-wider block">Festival Anak Ceria</span>
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1 group-hover:text-primary-green transition-colors leading-snug">Juara 1 Lomba Mewarnai & Menggambar</h4>
+                  <p className="text-[11px] text-neutral-gray font-semibold mt-2 leading-relaxed">Meraih Juara Pertama pada Festival Kreasi Anak Usia Dini tingkat Kecamatan Berbah Sleman.</p>
+                </div>
               </div>
             </div>
 
             {/* Prestasi 2 */}
-            <div className="bg-white p-8 rounded-[15px_30px_20px_25px]/[25px_20px_30px_15px] border-2 border-dashed border-primary-green/20 shadow-xs flex items-start gap-4">
-              <div className="w-12 h-12 bg-secondary-soft rounded-full flex items-center justify-center text-secondary flex-shrink-0">
-                🥇
+            <div className="group bg-white rounded-2xl border border-primary-green/10 shadow-3xs overflow-hidden hover:shadow-sm transition-all duration-300 flex flex-col">
+              <div className="relative aspect-[16/9] w-full flex items-center justify-center bg-secondary-soft/70 border-b border-secondary/5">
+                <svg className="w-10 h-10 text-secondary/40 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+                <span className="absolute top-3 left-3 text-[9px] font-extrabold px-2.5 py-1 bg-secondary text-white rounded-full shadow-3xs">
+                  Tingkat Kabupaten
+                </span>
               </div>
-              <div>
-                <span className="text-[10px] font-extrabold text-secondary uppercase tracking-wide">Tingkat Kabupaten Sleman</span>
-                <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1">Juara 2 Lomba Adzan & Surat Pendek</h4>
-                <p className="text-[11px] text-neutral-gray font-semibold mt-1">Meraih juara kedua hafalan Juz Amma dan ketepatan lafadz adzan cilik se-Kabupaten Sleman.</p>
+              <div className="p-6 flex-1 flex flex-col justify-between gap-1">
+                <div>
+                  <span className="text-[9px] font-extrabold text-secondary uppercase tracking-wider block">Festival Syiar Anak Sholeh</span>
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1 group-hover:text-secondary transition-colors leading-snug">Juara 2 Lomba Adzan & Surat Pendek</h4>
+                  <p className="text-[11px] text-neutral-gray font-semibold mt-2 leading-relaxed">Meraih juara kedua hafalan Juz Amma dan ketepatan lafadz adzan cilik se-Kabupaten Sleman.</p>
+                </div>
               </div>
             </div>
 
             {/* Prestasi 3 */}
-            <div className="bg-white p-8 rounded-[30px_20px_25px_15px]/[15px_25px_20px_30px] border-2 border-dashed border-primary-green/20 shadow-xs flex items-start gap-4">
-              <div className="w-12 h-12 bg-accent-soft rounded-full flex items-center justify-center text-accent flex-shrink-0">
-                🛡
+            <div className="group bg-white rounded-2xl border border-primary-green/10 shadow-3xs overflow-hidden hover:shadow-sm transition-all duration-300 flex flex-col">
+              <div className="relative aspect-[16/9] w-full flex items-center justify-center bg-accent-soft/70 border-b border-accent/5">
+                <svg className="w-10 h-10 text-accent/40 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span className="absolute top-3 left-3 text-[9px] font-extrabold px-2.5 py-1 bg-accent text-white rounded-full shadow-3xs">
+                  Program Gizi Terpadu
+                </span>
               </div>
-              <div>
-                <span className="text-[10px] font-extrabold text-accent uppercase tracking-wide">Program Gizi Puskesmas</span>
-                <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1">Penghargaan PAUD Peduli PHBS</h4>
-                <p className="text-[11px] text-neutral-gray font-semibold mt-1">Penghargaan tertinggi atas konsistensi program sanitasi bersih serta monitoring berat & tinggi rutin.</p>
+              <div className="p-6 flex-1 flex flex-col justify-between gap-1">
+                <div>
+                  <span className="text-[9px] font-extrabold text-accent uppercase tracking-wider block">Kemitraan Puskesmas Berbah</span>
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark mt-1 group-hover:text-accent transition-colors leading-snug">Penghargaan PAUD Peduli PHBS</h4>
+                  <p className="text-[11px] text-neutral-gray font-semibold mt-2 leading-relaxed">Penghargaan tertinggi atas konsistensi program sanitasi bersih serta monitoring berat & tinggi rutin.</p>
+                </div>
               </div>
             </div>
           </div>
