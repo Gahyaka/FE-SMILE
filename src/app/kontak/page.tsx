@@ -7,8 +7,7 @@ export default function KontakPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
-    subject: "PPDB",
+    subject: "Program",
     message: "",
   });
 
@@ -20,11 +19,26 @@ export default function KontakPage() {
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormSubmitted(true);
+
+    const subjectLabel = formData.subject === "Program" ? "Tanya Program Belajar & Kurikulum" :
+                         formData.subject === "PPDB" ? "Tanya Pendaftaran (PPDB) & Kunjungan" :
+                         formData.subject === "Fasilitas" ? "Tanya Fasilitas & Ekstrakurikuler" :
+                         formData.subject === "Saran" ? "Kritik, Saran, & Masukan Sekolah" : "Lainnya";
+
+    const waMessage = `Halo Admin KB/RA Sahabat Berbah Sleman,
+
+Saya ingin bertanya mengenai sekolah:
+• Nama: ${formData.name}
+• Kategori: ${subjectLabel}
+• Pesan: ${formData.message}`;
+
+    const waUrl = `https://wa.me/6281234567890?text=${encodeURIComponent(waMessage)}`;
+
     setTimeout(() => {
       setFormSubmitted(false);
-      setFormData({ name: "", email: "", subject: "PPDB", message: "" });
-      alert("Terima kasih! Pesan/Pertanyaan Anda berhasil terkirim. Admin RA Sahabat akan segera menghubungi Anda.");
-    }, 1500);
+      setFormData({ name: "", subject: "Program", message: "" });
+      window.open(waUrl, "_blank");
+    }, 800);
   };
 
   return (
@@ -176,21 +190,6 @@ export default function KontakPage() {
                   placeholder="Masukkan nama lengkap Anda"
                 />
               </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-xs font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">Alamat Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleFormChange}
-                  required
-                  suppressHydrationWarning
-                  className="w-full px-4 py-3.5 rounded-[10px_15px_8px_12px]/[12px_8px_15px_10px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm transition-colors font-semibold select-text"
-                  placeholder="anda@contohmail.com"
-                />
-              </div>
 
               <div>
                 <label htmlFor="subject" className="block text-xs font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">Kategori Pertanyaan</label>
@@ -202,9 +201,10 @@ export default function KontakPage() {
                   suppressHydrationWarning
                   className="w-full px-4 py-3.5 rounded-[12px_8px_15px_10px]/[10px_15px_8px_12px] border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-sm bg-white transition-colors font-semibold select-text"
                 >
-                  <option value="PPDB">Informasi Pendaftaran Siswa Baru (PPDB)</option>
-                  <option value="SPP">Informasi Keuangan / SPP</option>
-                  <option value="Kemitraan">Kemitraan Yayasan / Donatur</option>
+                  <option value="Program">Tanya Program Belajar & Kurikulum</option>
+                  <option value="PPDB">Tanya Pendaftaran (PPDB) & Kunjungan</option>
+                  <option value="Fasilitas">Tanya Fasilitas & Ekstrakurikuler</option>
+                  <option value="Saran">Kritik, Saran, & Masukan Sekolah</option>
                   <option value="Lainnya">Lainnya</option>
                 </select>
               </div>
@@ -234,7 +234,7 @@ export default function KontakPage() {
                     : "bg-primary-green hover:bg-primary-dark text-white hover:shadow-lg hover:-translate-y-0.5"
                 }`}
               >
-                {formSubmitted ? "Mengirim..." : "Kirim Formulir"}
+                {formSubmitted ? "Membuka WhatsApp..." : "Kirim via WhatsApp"}
               </button>
             </form>
           </div>
