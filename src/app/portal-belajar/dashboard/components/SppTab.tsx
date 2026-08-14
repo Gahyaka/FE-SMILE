@@ -17,6 +17,7 @@ interface SppTransaction {
   les: number;
   total: number;
   depositStatus: string;
+  paidMonths?: string[];
 }
 
 interface SppTabProps {
@@ -58,6 +59,28 @@ export default function SppTab({
   const [activeMobileKebabId, setActiveMobileKebabId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
+  
+  // Sub-tab state
+  const [activeSubTab, setActiveSubTab] = useState<"buku-kas" | "matriks-monitoring">("buku-kas");
+  
+  // Paid months state for form
+  const [payPaidMonths, setPayPaidMonths] = useState<string[]>([]);
+  
+  // Standard Academic Months (Juli - Juni)
+  const academicMonths = [
+    { value: "07", name: "Juli" },
+    { value: "08", name: "Agustus" },
+    { value: "09", name: "September" },
+    { value: "10", name: "Oktober" },
+    { value: "11", name: "November" },
+    { value: "12", name: "Desember" },
+    { value: "01", name: "Januari" },
+    { value: "02", name: "Februari" },
+    { value: "03", name: "Maret" },
+    { value: "04", name: "April" },
+    { value: "05", name: "Mei" },
+    { value: "06", name: "Juni" },
+  ];
 
   // Helper: check if a date string (YYYY-MM-DD) falls within the selected period
   const isInPeriod = (dateStr: string): boolean => {
@@ -191,11 +214,13 @@ export default function SppTab({
       spp: Number(paySpp),
       les: Number(payLes),
       depositStatus: newDepositStatus,
+      paidMonths: payPaidMonths,
     });
 
     // Reset Form to defaults
     setPaySpp("75000");
     setPayLes("40000");
+    setPayPaidMonths([]);
     setNewDepositStatus("Belum Disetor");
     setShowSppForm(false);
   };
@@ -254,13 +279,46 @@ export default function SppTab({
         </span>
       </div>
 
-      {/* Tabel SPP & Les */}
-      <div className="w-full space-y-4">
-        <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border border-primary-green/10 shadow-xs space-y-6">
-          
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
-            <div>
-              <h3 className="font-baloo text-xl font-bold text-neutral-dark">Buku Kas Pembayaran SPP & Les</h3>
+      {/* Sub-tab Selector */}
+      <div className="flex border-b border-neutral-gray/10 pb-px gap-6">
+        <button
+          onClick={() => setActiveSubTab("buku-kas")}
+          className={`pb-3 text-xs font-black uppercase transition-all relative cursor-pointer ${
+            activeSubTab === "buku-kas"
+              ? "text-primary-green"
+              : "text-neutral-gray hover:text-neutral-dark"
+          }`}
+        >
+          <span>Jurnal Buku Kas SPP & Les</span>
+          {activeSubTab === "buku-kas" && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-green rounded-full animate-fade-in" />
+          )}
+        </button>
+        <button
+          onClick={() => setActiveSubTab("matriks-monitoring")}
+          className={`pb-3 text-xs font-black uppercase transition-all relative cursor-pointer ${
+            activeSubTab === "matriks-monitoring"
+              ? "text-primary-green"
+              : "text-neutral-gray hover:text-neutral-dark"
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <span>Matriks Monitoring SPP</span>
+            <span className="bg-rose-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">Baru</span>
+          </span>
+          {activeSubTab === "matriks-monitoring" && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-green rounded-full animate-fade-in" />
+          )}
+        </button>
+      </div>
+
+      {activeSubTab === "buku-kas" ? (
+        <div className="w-full space-y-4">
+          <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border border-primary-green/10 shadow-xs space-y-6">
+            
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
+              <div>
+                <h3 className="font-baloo text-xl font-bold text-neutral-dark">Buku Kas Pembayaran SPP & Les</h3>
               <p className="text-[11px] text-neutral-gray font-semibold mt-1 flex items-center gap-1">
                 <svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -693,6 +751,78 @@ export default function SppTab({
           )}
         </div>
       </div>
+      ) : (
+        /* Matriks Monitoring SPP */
+        <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border border-primary-green/10 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
+            <div>
+              <h3 className="font-baloo text-xl font-bold text-neutral-dark">Matriks Monitoring SPP</h3>
+              <p className="text-[11px] text-neutral-gray font-semibold mt-1">
+                Melacak lunas/tidaknya SPP tiap murid berdasarkan tahun pembukuan yang dipilih.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 text-[10px] font-bold">
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span> Lunas</span>
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-rose-500 inline-block"></span> Belum Bayar</span>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl border border-neutral-gray/10">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10">
+                  <th className="py-3 px-4 min-w-[150px]">Nama Murid (Kelas)</th>
+                  {academicMonths.map(m => {
+                    // Adjust year dynamically based on Semester. Semester 1 (Juli-Des) uses current year, Semester 2 (Jan-Jun) uses year+1 (if school year shifts, but let's map simply)
+                    const labelYear = Number(m.value) >= 7 ? selectedYear : String(Number(selectedYear) + 1);
+                    return (
+                      <th key={m.value} className="py-3 px-2 text-center whitespace-nowrap">
+                        {m.name} <span className="block text-[8px] text-neutral-gray/50">{labelYear}</span>
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-gray/5 font-semibold text-neutral-dark">
+                {students
+                  .filter(s => selectedClass === "Semua" || s.class === selectedClass)
+                  .map(student => {
+                    return (
+                      <tr key={student.id} className="hover:bg-soft-mint/30 transition-colors">
+                        <td className="py-2.5 px-4 font-bold">
+                          {student.name}
+                          <span className="block text-[9px] font-bold text-neutral-gray">{student.class}</span>
+                        </td>
+                        {academicMonths.map(m => {
+                          const labelYear = Number(m.value) >= 7 ? selectedYear : String(Number(selectedYear) + 1);
+                          const monthKey = `${labelYear}-${m.value}`;
+                          
+                          // Check if student has a transaction with paidMonths containing this monthKey
+                          const studentTxs = sppTransactions.filter(tx => tx.studentId === student.id);
+                          const isPaid = studentTxs.some(tx => tx.paidMonths?.includes(monthKey));
+
+                          return (
+                            <td key={m.value} className="py-2.5 px-2 text-center">
+                              {isPaid ? (
+                                <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 font-extrabold text-[10px]" title={`Lunas SPP ${m.name} ${labelYear}`}>
+                                  🟢
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-rose-500/10 text-rose-600 font-extrabold text-[10px]" title={`Belum Bayar SPP ${m.name} ${labelYear}`}>
+                                  🔴
+                                </span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Form Input Pembayaran SPP & Les Pop-up Modal */}
       {showSppForm && isAdminTransaksi && (
@@ -813,6 +943,36 @@ export default function SppTab({
               </div>
 
               <div>
+                <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Pilih Bulan Pembayaran SPP (Bisa Rapel)</label>
+                <div className="grid grid-cols-4 gap-2 bg-[#FAF8F5] p-3 rounded-lg border border-primary-green/10 max-h-[120px] overflow-y-auto">
+                  {academicMonths.map((m) => {
+                    const labelYear = Number(m.value) >= 7 ? selectedYear : String(Number(selectedYear) + 1);
+                    const monthKey = `${labelYear}-${m.value}`;
+                    const isChecked = payPaidMonths.includes(monthKey);
+                    return (
+                      <label key={monthKey} className="flex items-center gap-1.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setPayPaidMonths([...payPaidMonths, monthKey]);
+                            } else {
+                              setPayPaidMonths(payPaidMonths.filter(x => x !== monthKey));
+                            }
+                          }}
+                          className="rounded text-primary-green focus:ring-primary-green"
+                        />
+                        <span className="text-[10px] font-bold text-neutral-dark">
+                          {m.name} <span className="text-[8px] text-neutral-gray">'{labelYear.substring(2)}</span>
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
                 <label htmlFor="payDesc" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Keterangan / Uraian</label>
                 <input
                   type="text"
@@ -904,9 +1064,39 @@ export default function SppTab({
                     className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
                   />
                 </div>
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Total</label>
-                  <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
+              <div>
+                <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1 font-bold">Bulan Pembayaran SPP</label>
+                <div className="grid grid-cols-4 gap-2 bg-[#FAF8F5] p-3 rounded-lg border border-primary-green/10 max-h-[120px] overflow-y-auto">
+                  {academicMonths.map((m) => {
+                    const labelYear = Number(m.value) >= 7 ? selectedYear : String(Number(selectedYear) + 1);
+                    const monthKey = `${labelYear}-${m.value}`;
+                    const isChecked = editingTx.paidMonths?.includes(monthKey) || false;
+                    return (
+                      <label key={monthKey} className="flex items-center gap-1.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            const currentPaid = editingTx.paidMonths || [];
+                            const updatedPaid = e.target.checked
+                              ? [...currentPaid, monthKey]
+                              : currentPaid.filter(x => x !== monthKey);
+                            setEditingTx({ ...editingTx, paidMonths: updatedPaid });
+                          }}
+                          className="rounded text-primary-green focus:ring-primary-green"
+                        />
+                        <span className="text-[10px] font-bold text-neutral-dark">
+                          {m.name} <span className="text-[8px] text-neutral-gray">'{labelYear.substring(2)}</span>
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Total</label>
+                <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
                     Rp {(Number(editingTx.spp) + Number(editingTx.les)).toLocaleString()}
                   </div>
                 </div>
