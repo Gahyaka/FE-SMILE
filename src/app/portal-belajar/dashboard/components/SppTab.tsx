@@ -388,10 +388,7 @@ export default function SppTab({
               : "text-neutral-gray hover:text-neutral-dark"
           }`}
         >
-          <span className="flex items-center gap-1.5">
-            <span>Matriks Monitoring SPP</span>
-            <span className="bg-rose-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">Baru</span>
-          </span>
+          <span>Matriks Monitoring SPP</span>
           {activeSubTab === "matriks-monitoring" && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-green rounded-full animate-fade-in" />
           )}
