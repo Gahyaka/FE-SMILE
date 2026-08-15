@@ -62,10 +62,10 @@ export default function HomePage() {
                   Daftar PPDB Online
                 </a>
                 <Link
-                  href="/tim"
+                  href="/galeri"
                   className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-white hover:bg-primary-soft text-primary-green font-extrabold text-base transition-all shadow-xs border-2 border-dashed border-primary-green/40"
                 >
-                  Kenali Profil Guru
+                  Lihat Dokumentasi Kegiatan
                 </Link>
               </div>
             </div>

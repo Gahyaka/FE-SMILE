@@ -98,25 +98,36 @@ export default function GaleriPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF8F5] pt-28 pb-20 px-4 md:px-8 relative overflow-hidden">
-      {/* Background shape */}
-      <div className="absolute top-10 left-10 w-48 h-48 bg-[#E7F8EA]/30 rounded-full blur-2xl -z-10" />
+    <div className="w-full min-h-screen bg-[#FAF8F5] select-none flex flex-col">
+      
+      {/* HEADER SECTION (Consistent with other public pages) */}
+      <section className="relative bg-gradient-to-b from-[#FAF8F5] to-white py-16 text-center overflow-hidden border-b border-soft-mint pt-32">
+        {/* Chalkboard grid overlay background */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.015)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none -z-10"></div>
+        {/* Swirly background doodles */}
+        <div className="absolute top-28 left-10 text-warm-yellow/30 text-5xl select-none font-bold hidden md:block">★</div>
+        <div className="absolute bottom-6 right-12 text-primary-green/20 text-5xl select-none font-bold hidden md:block">★</div>
 
-      <div className="max-w-6xl mx-auto space-y-12">
-        {/* Page Header */}
-        <div className="text-center max-w-2xl mx-auto space-y-4">
-          <div>
-            <span className="inline-block bg-primary-green/10 text-primary-green text-[10px] font-extrabold uppercase tracking-widest px-4 py-1.5 rounded-full border border-primary-green/20 mb-3.5">
-              Dokumentasi Kegiatan
+        <div className="max-w-4xl mx-auto px-4 space-y-5 relative z-10">
+          <span className="inline-block text-xs uppercase font-extrabold text-primary-dark tracking-widest bg-soft-mint px-4 py-2 rounded-[99px_15px_99px_15px]/[15px_99px_15px_99px] border-2 border-dashed border-primary-green/30">
+            Dokumentasi Kegiatan
+          </span>
+          <h1 className="font-baloo text-4xl sm:text-5xl font-bold text-neutral-dark leading-tight">
+            Galeri Foto <span className="text-primary-green relative">KB/RA Sahabat
+              {/* Underline sketch */}
+              <svg className="absolute -bottom-2 left-0 w-full h-2.5 text-warm-yellow" viewBox="0 0 100 10" preserveAspectRatio="none" fill="none">
+                <path d="M0,5 Q50,9 100,5" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+              </svg>
             </span>
-            <h1 className="font-baloo text-3xl md:text-5xl font-bold text-neutral-dark tracking-tight leading-tight">
-              Galeri Foto <span className="text-primary-green">KB/RA Sahabat</span>
-            </h1>
-            <p className="text-xs sm:text-sm font-semibold text-neutral-gray leading-relaxed mt-2.5">
-              Eksplorasi visual aktivitas harian anak-anak didik kami. Klik foto untuk melihat slideshow layar penuh.
-            </p>
-          </div>
+          </h1>
+          <p className="text-sm sm:text-base text-neutral-gray max-w-2xl mx-auto leading-relaxed font-medium">
+            Eksplorasi visual aktivitas harian anak-anak didik kami. Klik foto untuk melihat slideshow layar penuh.
+          </p>
         </div>
+      </section>
+
+      {/* GALLERY GRID SECTION */}
+      <div className="max-w-6xl mx-auto w-full px-4 md:px-8 py-16 space-y-12">
 
         {/* Category Filters */}
         <div className="flex flex-wrap justify-center gap-2 border-b border-stone-200/40 pb-6 max-w-xl mx-auto">
