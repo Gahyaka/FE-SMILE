@@ -6,6 +6,7 @@ interface Student {
   id: number;
   name: string;
   class: string;
+  activeStatus?: string;
 }
 
 interface SppTransaction {
@@ -833,7 +834,7 @@ export default function SppTab({
               <div className="text-center border-r border-neutral-gray/10 pr-3">
                 <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold">Total Murid</span>
                 <span className="font-mono text-xs font-black text-neutral-dark">
-                  {students.filter(s => selectedClass === "Semua" || s.class === selectedClass).length}
+                  {students.filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif").length}
                 </span>
               </div>
               <div className="text-center pr-3 border-r border-neutral-gray/10">
@@ -841,7 +842,7 @@ export default function SppTab({
                 <span className="font-mono text-xs font-black text-emerald-600">
                   {
                     students
-                      .filter(s => selectedClass === "Semua" || s.class === selectedClass)
+                      .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
                       .filter(student => {
                         const studentTxs = sppTransactions.filter(tx => tx.studentId === student.id);
                         return studentTxs.some(tx => (tx.paidMonths || []).some(m => getAcademicYearFromDate(tx.date) === selectedAcademicYear));
@@ -854,7 +855,7 @@ export default function SppTab({
                 <span className="font-mono text-xs font-black text-rose-600">
                   {
                     students
-                      .filter(s => selectedClass === "Semua" || s.class === selectedClass)
+                      .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
                       .filter(student => {
                         const studentTxs = sppTransactions.filter(tx => tx.studentId === student.id);
                         return !studentTxs.some(tx => (tx.paidMonths || []).some(m => getAcademicYearFromDate(tx.date) === selectedAcademicYear));
@@ -883,7 +884,7 @@ export default function SppTab({
               </thead>
               <tbody className="divide-y divide-neutral-gray/5 font-semibold text-neutral-dark">
                 {students
-                  .filter(s => selectedClass === "Semua" || s.class === selectedClass)
+                  .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
                   .map(student => {
                     return (
                       <tr key={student.id} className="hover:bg-soft-mint/30 transition-colors">
@@ -901,16 +902,28 @@ export default function SppTab({
                           const isPaid = studentTxs.some(tx => tx.paidMonths?.includes(monthKey));
 
                           return (
-                            <td key={m.value} className="py-2.5 px-2 text-center">
-                              {isPaid ? (
-                                <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 font-extrabold text-[10px]" title={`Lunas SPP ${m.name} ${labelYear}`}>
-                                  🟢
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-rose-500/10 text-rose-600 font-extrabold text-[10px]" title={`Belum Bayar SPP ${m.name} ${labelYear}`}>
-                                  🔴
-                                </span>
-                              )}
+                            <td key={m.value} className="py-2 px-1 text-center">
+                              <div className="flex justify-center">
+                                {isPaid ? (
+                                  <span 
+                                    className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200/50 shadow-3xs" 
+                                    title={`Lunas SPP ${m.name} ${labelYear}`}
+                                  >
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  </span>
+                                ) : (
+                                  <span 
+                                    className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-rose-50 text-rose-400 border border-rose-100 shadow-3xs" 
+                                    title={`Belum Bayar SPP ${m.name} ${labelYear}`}
+                                  >
+                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </span>
+                                )}
+                              </div>
                             </td>
                           );
                         })}
@@ -959,7 +972,7 @@ export default function SppTab({
                     onChange={(e) => setPayStudentId(Number(e.target.value))}
                     className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
                   >
-                    {students.map((st) => (
+                    {students.filter(st => st.activeStatus === "Aktif").map((st) => (
                       <option key={st.id} value={st.id}>{st.name} ({st.class})</option>
                     ))}
                   </select>
