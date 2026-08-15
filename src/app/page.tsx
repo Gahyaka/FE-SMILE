@@ -526,6 +526,92 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* PREVIEW GALERI SECTION */}
+      <section className="py-20 bg-white relative overflow-hidden border-b border-soft-mint">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div className="space-y-3 max-w-xl text-center md:text-left">
+              <span className="inline-block text-xs font-accent font-semibold uppercase tracking-wider text-primary-dark bg-soft-mint px-4 py-2 rounded-lg border-2 border-dashed border-primary-green/30">
+                Dokumentasi Kegiatan
+              </span>
+              <h2 className="font-baloo text-3xl font-bold text-neutral-dark">Keseruan Sahabat Cilik</h2>
+              <p className="text-sm text-neutral-gray leading-relaxed font-semibold">
+                Intip sekilas keceriaan anak-anak dalam mengikuti berbagai aktivitas edukatif, keagamaan, dan petualangan outbound kami.
+              </p>
+            </div>
+            <div className="flex justify-center md:justify-end flex-shrink-0">
+              <Link
+                href="/galeri"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent hover:bg-accent-dark text-white font-extrabold text-xs transition-all shadow-3xs border border-accent-dark active:scale-95 duration-200 cursor-pointer"
+              >
+                <span>Lihat Seluruh Galeri</span>
+                <span className="text-xs">➔</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Grid Preview 3 Foto */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-[#FAF8F5] rounded-3xl overflow-hidden border border-primary-green/10 p-4 space-y-4 hover:shadow-sm transition-all duration-300">
+              <div className="relative h-48 rounded-2xl overflow-hidden bg-stone-100">
+                <img
+                  src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800"
+                  alt="Belajar Al-Qur'an"
+                  className="w-full h-full object-cover"
+                />
+                <span className="absolute top-3 left-3 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark">
+                  Keagamaan
+                </span>
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-baloo text-sm font-bold text-neutral-dark">Belajar Membaca Al-Qur'an</h4>
+                <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
+                  Kegiatan membaca Iqro bersama guru pendamping setiap pagi hari.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-[#FAF8F5] rounded-3xl overflow-hidden border border-primary-green/10 p-4 space-y-4 hover:shadow-sm transition-all duration-300">
+              <div className="relative h-48 rounded-2xl overflow-hidden bg-stone-100">
+                <img
+                  src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800"
+                  alt="Outbound"
+                  className="w-full h-full object-cover"
+                />
+                <span className="absolute top-3 left-3 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark">
+                  Outbound
+                </span>
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-baloo text-sm font-bold text-neutral-dark">Outbound Kebun Binatang</h4>
+                <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
+                  Pengenalan satwa dan edukasi lapangan untuk melatih kemandirian anak.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-[#FAF8F5] rounded-3xl overflow-hidden border border-primary-green/10 p-4 space-y-4 hover:shadow-sm transition-all duration-300">
+              <div className="relative h-48 rounded-2xl overflow-hidden bg-stone-100">
+                <img
+                  src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=800"
+                  alt="Pentas Seni"
+                  className="w-full h-full object-cover"
+                />
+                <span className="absolute top-3 left-3 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark">
+                  Pentas Seni
+                </span>
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-baloo text-sm font-bold text-neutral-dark">Pentas Seni Akhir Tahun</h4>
+                <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
+                  Menampilkan bakat kreativitas, tarian, dan hafalan surah pendek.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* PPDB REGISTER INFO SECTION — REDESIGNED TO WHATSAPP DIRECT */}
       <section id="ppdb" className="py-20 bg-[#FAF8F5] relative overflow-hidden border-b border-soft-mint">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.01)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none -z-10"></div>
