@@ -134,7 +134,7 @@ export const initialSppTransactions = [
   { id: 9,  studentId: 3, date: "2026-07-08", description: "Pembayaran SPP + Les Juli", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor", paidMonths: ["2026-07"] },
   { id: 10, studentId: 1, date: "2026-06-03", description: "Pembayaran SPP + Les Juni", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor", paidMonths: ["2026-06"] },
   { id: 11, studentId: 2, date: "2026-06-05", description: "Pembayaran SPP + Les Juni", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor", paidMonths: ["2026-06"] },
-  { id: 12, studentId: 4, date: "2025-05-12", description: "Lunas SPP Mei", spp: 75000, les: 0, total: 75000, depositStatus: "Sudah Disetor", paidMonths: ["2025-05"] },
+  { id: 12, studentId: 4, date: "2026-05-12", description: "Lunas SPP Mei", spp: 75000, les: 0, total: 75000, depositStatus: "Sudah Disetor", paidMonths: ["2026-05"] },
 ];
 
 // Mock Initial Tabungan
