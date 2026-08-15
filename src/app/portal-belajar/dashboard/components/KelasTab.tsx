@@ -137,145 +137,197 @@ export default function KelasTab({
         )}
       </div>
 
-      {/* 2. Add / Edit Forms */}
+      {/* 2. Add / Edit Sliding Side Drawers */}
       {showAddForm && isAdminAdministrasi && (
-        <div className="bg-white p-6 rounded-2xl border border-primary-green/15 shadow-3xs space-y-4 animate-fade-in">
-          <h4 className="font-baloo text-sm font-bold text-neutral-dark border-b border-neutral-gray/10 pb-2">
-            Form Tambah Kelas Baru
-          </h4>
-          <form onSubmit={handleAddSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="className" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Kelas</label>
-              <input
-                type="text"
-                id="className"
-                required
-                value={newClassName}
-                onChange={(e) => setNewClassName(e.target.value)}
-                placeholder="Contoh: RA (C), SPS"
-                className="w-full px-3.5 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-              />
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => setShowAddForm(false)}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Tambah Kelas Baru</h4>
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                >
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Form Content (Scrollable) */}
+              <form onSubmit={handleAddSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                <div>
+                  <label htmlFor="className" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Kelas</label>
+                  <input
+                    type="text"
+                    id="className"
+                    required
+                    value={newClassName}
+                    onChange={(e) => setNewClassName(e.target.value)}
+                    placeholder="Contoh: RA (C), SPS"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="teacherName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Guru Pengampu</label>
+                  <input
+                    type="text"
+                    id="teacherName"
+                    required
+                    value={newTeacherName}
+                    onChange={(e) => setNewTeacherName(e.target.value)}
+                    placeholder="Contoh: Bunda Rahma"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="fase" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Fase Pembelajaran</label>
+                  <select
+                    id="fase"
+                    value={newFase}
+                    onChange={(e) => setNewFase(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer bg-white"
+                  >
+                    <option value="Fase Fondasi">Fase Fondasi</option>
+                    <option value="Fase A">Fase A</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="description" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Deskripsi Singkat</label>
+                  <input
+                    type="text"
+                    id="description"
+                    value={newDescription}
+                    onChange={(e) => setNewDescription(e.target.value)}
+                    placeholder="Deskripsi tingkat umur atau detail kelas"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+
+                {/* Sticky buttons at bottom */}
+                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Simpan Kelas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddForm(false)}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
             </div>
-            <div>
-              <label htmlFor="teacherName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Guru Pengampu</label>
-              <input
-                type="text"
-                id="teacherName"
-                required
-                value={newTeacherName}
-                onChange={(e) => setNewTeacherName(e.target.value)}
-                placeholder="Contoh: Bunda Rahma"
-                className="w-full px-3.5 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-              />
-            </div>
-            <div>
-              <label htmlFor="fase" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Fase Pembelajaran</label>
-              <select
-                id="fase"
-                value={newFase}
-                onChange={(e) => setNewFase(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer"
-              >
-                <option value="Fase Fondasi">Fase Fondasi</option>
-                <option value="Fase A">Fase A</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="description" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Deskripsi Singkat</label>
-              <input
-                type="text"
-                id="description"
-                value={newDescription}
-                onChange={(e) => setNewDescription(e.target.value)}
-                placeholder="Deskripsi tingkat umur atau detail kelas"
-                className="w-full px-3.5 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-              />
-            </div>
-            <div className="md:col-span-2 flex gap-2 pt-2 justify-end">
-              <button
-                type="submit"
-                className="py-2 px-5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
-              >
-                Simpan Kelas
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAddForm(false)}
-                className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
-              >
-                Batal
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
       )}
 
       {editingClass && isAdminAdministrasi && (
-        <div className="bg-white p-6 rounded-2xl border border-yellow-200 shadow-3xs space-y-4 animate-fade-in">
-          <h4 className="font-baloo text-sm font-bold text-neutral-dark border-b border-neutral-gray/10 pb-2">
-            Edit Data Kelas: <span className="text-primary-green">{editingClass.className}</span>
-          </h4>
-          <form onSubmit={handleEditSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="editClassName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Kelas</label>
-              <input
-                type="text"
-                id="editClassName"
-                required
-                value={editingClass.className}
-                onChange={(e) => setEditingClass({ ...editingClass, className: e.target.value })}
-                className="w-full px-3.5 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-              />
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => setEditingClass(null)}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">
+                  Edit Data Kelas: <span className="text-primary-green">{editingClass.className}</span>
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setEditingClass(null)}
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                >
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Form Content (Scrollable) */}
+              <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                <div>
+                  <label htmlFor="editClassName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Kelas</label>
+                  <input
+                    type="text"
+                    id="editClassName"
+                    required
+                    value={editingClass.className}
+                    onChange={(e) => setEditingClass({ ...editingClass, className: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="editTeacherName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Guru Pengampu</label>
+                  <input
+                    type="text"
+                    id="editTeacherName"
+                    required
+                    value={editingClass.teacherName}
+                    onChange={(e) => setEditingClass({ ...editingClass, teacherName: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="editFase" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Fase Pembelajaran</label>
+                  <select
+                    id="editFase"
+                    value={editingClass.fase}
+                    onChange={(e) => setEditingClass({ ...editingClass, fase: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer bg-white"
+                  >
+                    <option value="Fase Fondasi">Fase Fondasi</option>
+                    <option value="Fase A">Fase A</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="editDescription" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Deskripsi Singkat</label>
+                  <input
+                    type="text"
+                    id="editDescription"
+                    value={editingClass.description}
+                    onChange={(e) => setEditingClass({ ...editingClass, description: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+
+                {/* Sticky buttons at bottom */}
+                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Simpan Perubahan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingClass(null)}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
             </div>
-            <div>
-              <label htmlFor="editTeacherName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Guru Pengampu</label>
-              <input
-                type="text"
-                id="editTeacherName"
-                required
-                value={editingClass.teacherName}
-                onChange={(e) => setEditingClass({ ...editingClass, teacherName: e.target.value })}
-                className="w-full px-3.5 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-              />
-            </div>
-            <div>
-              <label htmlFor="editFase" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Fase Pembelajaran</label>
-              <select
-                id="editFase"
-                value={editingClass.fase}
-                onChange={(e) => setEditingClass({ ...editingClass, fase: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer"
-              >
-                <option value="Fase Fondasi">Fase Fondasi</option>
-                <option value="Fase A">Fase A</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="editDescription" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Deskripsi Singkat</label>
-              <input
-                type="text"
-                id="editDescription"
-                value={editingClass.description}
-                onChange={(e) => setEditingClass({ ...editingClass, description: e.target.value })}
-                className="w-full px-3.5 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-              />
-            </div>
-            <div className="md:col-span-2 flex gap-2 pt-2 justify-end">
-              <button
-                type="submit"
-                className="py-2 px-5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
-              >
-                Simpan Perubahan
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditingClass(null)}
-                className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
-              >
-                Batal
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
       )}
 
@@ -411,59 +463,71 @@ export default function KelasTab({
         )}
       </div>
 
-      {/* 4. Modal List Siswa */}
+      {/* 4. Sliding Side Drawer List Siswa */}
       {selectedClassForStudents && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-md p-6 relative shadow-lg space-y-4">
-            <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-3">
-              <div>
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Daftar Santri Kelas</h4>
-                <p className="text-[10px] text-primary-green font-bold uppercase tracking-wide">Kelas: {selectedClassForStudents}</p>
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => setSelectedClassForStudents(null)}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <div>
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark">Daftar Santri Kelas</h4>
+                  <p className="text-[10px] text-primary-green font-bold uppercase tracking-wide">Kelas: {selectedClassForStudents}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedClassForStudents(null)}
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                >
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setSelectedClassForStudents(null)}
-                className="w-6 h-6 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors hover:bg-neutral-gray/5"
-              >
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
 
-            <div className="max-h-[300px] overflow-y-auto pr-1 space-y-2">
-              {students.filter(s => s.class === selectedClassForStudents).length === 0 ? (
-                <p className="text-xs text-neutral-gray italic text-center py-6">Belum ada murid yang terdaftar di kelas ini.</p>
-              ) : (
-                students
-                  .filter(s => s.class === selectedClassForStudents)
-                  .map((st, idx) => (
-                    <div key={st.id} className="flex justify-between items-center p-3 bg-[#FAF8F5] rounded-xl border border-neutral-gray/5">
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-[10px] font-black text-primary-green w-5 h-5 bg-primary-green/10 rounded-full flex items-center justify-center">
-                          {idx + 1}
-                        </span>
-                        <div>
-                          <p className="text-xs font-bold text-neutral-dark">{st.name}</p>
-                          <span className="text-[9px] text-neutral-gray font-mono block">NISN: {st.nisn}</span>
+              {/* Content (Scrollable) */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-3">
+                {students.filter(s => s.class === selectedClassForStudents).length === 0 ? (
+                  <p className="text-xs text-neutral-gray italic text-center py-6">Belum ada murid yang terdaftar di kelas ini.</p>
+                ) : (
+                  students
+                    .filter(s => s.class === selectedClassForStudents)
+                    .map((st, idx) => (
+                      <div key={st.id} className="flex justify-between items-center p-3 bg-[#FAF8F5] rounded-xl border border-neutral-gray/5">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-[10px] font-black text-primary-green w-5 h-5 bg-primary-green/10 rounded-full flex items-center justify-center">
+                            {idx + 1}
+                          </span>
+                          <div>
+                            <p className="text-xs font-bold text-neutral-dark">{st.name}</p>
+                            <span className="text-[9px] text-neutral-gray font-mono block">NISN: {st.nisn}</span>
+                          </div>
                         </div>
+                        <span className="text-[9px] font-extrabold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded border border-emerald-200">
+                          {st.academicYear}
+                        </span>
                       </div>
-                      <span className="text-[9px] font-extrabold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded border border-emerald-200">
-                        {st.academicYear}
-                      </span>
-                    </div>
-                  ))
-              )}
-            </div>
+                    ))
+                )}
+              </div>
 
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => setSelectedClassForStudents(null)}
-                className="w-full py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer text-center"
-              >
-                Tutup
-              </button>
+              {/* Sticky bottom close button */}
+              <div className="p-6 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                <button
+                  type="button"
+                  onClick={() => setSelectedClassForStudents(null)}
+                  className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer text-center"
+                >
+                  Tutup
+                </button>
+              </div>
             </div>
           </div>
         </div>
