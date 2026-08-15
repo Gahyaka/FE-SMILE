@@ -7,6 +7,8 @@ export const initialActivities = [
     category: "Keagamaan",
     driveLink: "https://drive.google.com/drive/folders/mock-manasik",
     description: "Latihan pengenalan tawaf dan sai untuk mengenalkan rukun Islam kelima.",
+    featuredImage: "https://images.unsplash.com/photo-1590076214561-2679be15bb56?auto=format&fit=crop&q=80&w=800",
+    isPublishedToGallery: true
   },
   {
     id: 2,
@@ -15,6 +17,8 @@ export const initialActivities = [
     category: "Akademik",
     driveLink: "https://drive.google.com/drive/folders/mock-gardening",
     description: "Edukasi sains praktis mengenal jenis tanaman dan cara menyiram sayur.",
+    featuredImage: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800",
+    isPublishedToGallery: true
   },
   {
     id: 3,
@@ -23,6 +27,8 @@ export const initialActivities = [
     category: "Keagamaan",
     driveLink: "https://drive.google.com/drive/folders/mock-santri",
     description: "Kegiatan rutin melafalkan sholawat nabi dan penguatan nilai Aswaja NU.",
+    featuredImage: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800",
+    isPublishedToGallery: true
   },
   {
     id: 4,
@@ -31,6 +37,8 @@ export const initialActivities = [
     category: "Ekstrakurikuler",
     driveLink: "https://drive.google.com/drive/folders/mock-pentas-2025",
     description: "Pertunjukan tari tradisional, hafalan surat pendek, dan drama pendek oleh santri kelas B.",
+    featuredImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=800",
+    isPublishedToGallery: true
   },
   {
     id: 5,
@@ -39,6 +47,8 @@ export const initialActivities = [
     category: "Akademik",
     driveLink: "https://drive.google.com/drive/folders/mock-lomba-2024",
     description: "Meraih Juara 2 dalam festival kreativitas anak usia dini tingkat kecamatan.",
+    featuredImage: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800",
+    isPublishedToGallery: true
   }
 ];
 

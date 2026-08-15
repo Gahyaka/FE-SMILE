@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { initialActivities } from "@/app/portal-belajar/dashboard/mockData";
+
 interface GalleryItem {
   id: number;
   title: string;
@@ -12,59 +14,19 @@ interface GalleryItem {
   date: string;
 }
 
-// Data dummy galeri awal yang mewakili kegiatan KB/RA Sahabat
-export const initialGalleryItems: GalleryItem[] = [
-  {
-    id: 1,
-    title: "Belajar Membaca Al-Qur'an",
-    category: "Keagamaan",
-    image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800",
-    description: "Kegiatan rutin mengaji pagi hari dengan metode Iqro yang interaktif.",
-    date: "12 Agustus 2026",
-  },
-  {
-    id: 2,
-    title: "Kegiatan Outbound Kebun Binatang",
-    category: "Outbound",
-    image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800",
-    description: "Mengenal satwa secara langsung dan melatih ketangkasan motorik kasar anak.",
-    date: "5 Juli 2026",
-  },
-  {
-    id: 3,
-    title: "Pentas Seni Akhir Tahun",
-    category: "Pentas Seni",
-    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=800",
-    description: "Penampilan tarian daerah dan hafalan surah pendek oleh murid kelas RA (B).",
-    date: "20 Juni 2026",
-  },
-  {
-    id: 4,
-    title: "Praktik Melukis dengan Jari",
-    category: "Pembelajaran",
-    image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800",
-    description: "Mengasah kreativitas dan motorik halus melalui kreasi lukisan cat air.",
-    date: "1 Agustus 2026",
-  },
-  {
-    id: 5,
-    title: "Peringatan Hari Kemerdekaan",
-    category: "Pentas Seni",
-    image: "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&q=80&w=800",
-    description: "Keseruan lomba membawa kelereng dengan sendok antar murid KB dan RA.",
-    date: "15 Agustus 2026",
-  },
-  {
-    id: 6,
-    title: "Manasik Haji Cilik",
-    category: "Keagamaan",
-    image: "https://images.unsplash.com/photo-1590076214561-2679be15bb56?auto=format&fit=crop&q=80&w=800",
-    description: "Edukasi nilai-nilai keagamaan sejak dini dengan simulasi ibadah haji lengkap.",
-    date: "18 Mei 2026",
-  },
-];
+// Convert dynamic curated activities into Gallery items format
+const initialGalleryItems: GalleryItem[] = initialActivities
+  .filter(act => act.isPublishedToGallery && act.featuredImage)
+  .map(act => ({
+    id: act.id,
+    title: act.title,
+    category: act.category,
+    image: act.featuredImage || "",
+    description: act.description,
+    date: act.date
+  }));
 
-const categories = ["Semua", "Pembelajaran", "Outbound", "Keagamaan", "Pentas Seni"];
+const categories = ["Semua", "Akademik", "Keagamaan", "Ekstrakurikuler"];
 
 export default function GaleriPage() {
   const [selectedCategory, setSelectedCategory] = useState("Semua");
