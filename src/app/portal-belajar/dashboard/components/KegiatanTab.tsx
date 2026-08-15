@@ -9,6 +9,8 @@ interface Activity {
   category: string;
   driveLink: string;
   description: string;
+  featuredImage?: string;
+  isPublishedToGallery?: boolean;
 }
 
 interface KegiatanTabProps {
@@ -16,6 +18,7 @@ interface KegiatanTabProps {
   isAdminAdministrasi: boolean;
   isGuru: boolean;
   onAddActivity: (newActivity: Omit<Activity, "id">) => void;
+  onUpdateActivityGallery?: (id: number, featuredImage: string, isPublished: boolean) => void;
 }
 
 export default function KegiatanTab({
@@ -23,6 +26,7 @@ export default function KegiatanTab({
   isAdminAdministrasi,
   isGuru,
   onAddActivity,
+  onUpdateActivityGallery,
 }: KegiatanTabProps) {
   // Dynamic year extraction
   const uniqueYears = Array.from(new Set(activities.map((act) => act.date.substring(0, 4))));
@@ -35,8 +39,14 @@ export default function KegiatanTab({
   const [selectedYear, setSelectedYear] = useState(uniqueYears[0]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showActivityForm, setShowActivityForm] = useState(false);
+  const [showCurationDrawer, setShowCurationDrawer] = useState(false);
 
-  // Form states
+  // States for Curation Curation Form
+  const [curatingAct, setCuratingAct] = useState<Activity | null>(null);
+  const [tempFeaturedImage, setTempFeaturedImage] = useState("");
+  const [tempIsPublished, setTempIsPublished] = useState(false);
+
+  // Form states for creating new activity
   const [newTitle, setNewTitle] = useState("");
   const [newDate, setNewDate] = useState("");
   const [newCategory, setNewCategory] = useState("Akademik");
@@ -73,6 +83,14 @@ export default function KegiatanTab({
     setShowActivityForm(false);
   };
 
+  const handleSaveCuration = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!curatingAct || !onUpdateActivityGallery) return;
+
+    onUpdateActivityGallery(curatingAct.id, tempFeaturedImage, tempIsPublished);
+    setCuratingAct(null);
+  };
+
   return (
     <div className="w-full space-y-6">
       
@@ -83,18 +101,33 @@ export default function KegiatanTab({
           <p className="text-[11px] text-neutral-gray font-semibold">Media integrasi bukti fisik kegiatan belajar mengajar guna pemenuhan akreditasi madrasah.</p>
         </div>
         
-        {(isAdminAdministrasi || isGuru) && (
-          <button
-            type="button"
-            onClick={() => setShowActivityForm(true)}
-            className="py-2.5 px-4 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center justify-center gap-2 cursor-pointer shadow-3xs"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            <span>Unggah Dokumentasi Baru</span>
-          </button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {isAdminAdministrasi && (
+            <button
+              type="button"
+              onClick={() => setShowCurationDrawer(true)}
+              className="py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-3xs"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span>Kurasi Galeri Publik</span>
+            </button>
+          )}
+
+          {(isAdminAdministrasi || isGuru) && (
+            <button
+              type="button"
+              onClick={() => setShowActivityForm(true)}
+              className="py-2.5 px-4 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center justify-center gap-2 cursor-pointer shadow-3xs"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              <span>Unggah Dokumentasi Baru</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filter Category & Year Bar — Startup Segmented Control Style */}
@@ -211,106 +244,314 @@ export default function KegiatanTab({
         </div>
       )}
 
-      {/* Upload Activity Modal Pop-up */}
+      {/* Upload Activity Sliding Side Drawer */}
       {showActivityForm && (isAdminAdministrasi || isGuru) && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-md p-6 relative shadow-lg space-y-4 max-h-[90vh] overflow-y-auto animate-fade-in">
-            <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-3">
-              <h4 className="font-baloo text-base font-bold text-neutral-dark">Unggah Dokumentasi Kegiatan</h4>
-              <button
-                type="button"
-                onClick={() => setShowActivityForm(false)}
-                className="w-6 h-6 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors hover:bg-neutral-gray/5"
-              >
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3.5 text-xs font-semibold text-neutral-dark">
-              <div>
-                <label htmlFor="newTitle" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Kegiatan</label>
-                <input
-                  type="text"
-                  id="newTitle"
-                  required
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-bold text-neutral-dark"
-                  placeholder="Contoh: Senam Sehat Pagi NU"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="newDate" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tanggal Pelaksanaan</label>
-                  <input
-                    type="date"
-                    id="newDate"
-                    required
-                    value={newDate}
-                    onChange={(e) => setNewDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-semibold text-neutral-dark"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="newCategory" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kategori Kegiatan</label>
-                  <select
-                    id="newCategory"
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
-                  >
-                    <option value="Akademik">Akademik</option>
-                    <option value="Keagamaan">Keagamaan / Ke-NU-an</option>
-                    <option value="Ekstrakurikuler">Ekstrakurikuler</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="newDrive" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tautan Google Drive Dokumentasi</label>
-                <input
-                  type="url"
-                  id="newDrive"
-                  required
-                  value={newDrive}
-                  onChange={(e) => setNewDrive(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono"
-                  placeholder="https://drive.google.com/..."
-                />
-              </div>
-
-              <div>
-                <label htmlFor="newDesc" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Deskripsi Singkat Kegiatan</label>
-                <textarea
-                  id="newDesc"
-                  required
-                  rows={3}
-                  value={newDesc}
-                  onChange={(e) => setNewDesc(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark resize-none leading-relaxed"
-                  placeholder="Tujuan kegiatan dan ringkasan jalannya acara..."
-                ></textarea>
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="submit"
-                  className="flex-1 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
-                >
-                  Simpan Kegiatan
-                </button>
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => setShowActivityForm(false)}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Unggah Dokumentasi Kegiatan</h4>
                 <button
                   type="button"
                   onClick={() => setShowActivityForm(false)}
-                  className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
                 >
-                  Batal
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
-            </form>
+
+              {/* Form Content (Scrollable) */}
+              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                <div>
+                  <label htmlFor="newTitle" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Kegiatan</label>
+                  <input
+                    type="text"
+                    id="newTitle"
+                    required
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-bold text-neutral-dark"
+                    placeholder="Contoh: Senam Sehat Pagi NU"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="newDate" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tanggal Pelaksanaan</label>
+                    <input
+                      type="date"
+                      id="newDate"
+                      required
+                      value={newDate}
+                      onChange={(e) => setNewDate(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-semibold text-neutral-dark"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="newCategory" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kategori Kegiatan</label>
+                    <select
+                      id="newCategory"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                    >
+                      <option value="Akademik">Akademik</option>
+                      <option value="Keagamaan">Keagamaan / Ke-NU-an</option>
+                      <option value="Ekstrakurikuler">Ekstrakurikuler</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="newDrive" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tautan Google Drive Dokumentasi</label>
+                  <input
+                    type="url"
+                    id="newDrive"
+                    required
+                    value={newDrive}
+                    onChange={(e) => setNewDrive(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono"
+                    placeholder="https://drive.google.com/..."
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="newDesc" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Deskripsi Singkat Kegiatan</label>
+                  <textarea
+                    id="newDesc"
+                    required
+                    rows={3}
+                    value={newDesc}
+                    onChange={(e) => setNewDesc(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark resize-none leading-relaxed"
+                    placeholder="Tujuan kegiatan dan ringkasan jalannya acara..."
+                  ></textarea>
+                </div>
+
+                {/* Sticky buttons at bottom */}
+                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Simpan Kegiatan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowActivityForm(false)}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Curation Drawer (Admin Administrasi Only) */}
+      {showCurationDrawer && isAdminAdministrasi && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => {
+              setShowCurationDrawer(false);
+              setCuratingAct(null);
+            }}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <div>
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark">Kurasi Galeri Publik</h4>
+                  <p className="text-[10px] text-amber-600 font-bold uppercase tracking-wide">Pilih 1 foto terbaik per kegiatan</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCurationDrawer(false);
+                    setCuratingAct(null);
+                  }}
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                >
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Drawer Content (Scrollable List of Activities) */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {activities.map((act) => {
+                  const isCurated = act.isPublishedToGallery;
+                  return (
+                    <div 
+                      key={act.id} 
+                      className="p-3.5 bg-[#FAF8F5] rounded-xl border border-neutral-gray/10 flex flex-col justify-between gap-3 shadow-3xs hover:border-amber-300 transition-colors"
+                    >
+                      <div className="flex justify-between items-start gap-2">
+                        <div>
+                          <h5 className="text-xs font-black text-neutral-dark leading-snug">{act.title}</h5>
+                          <span className="text-[9px] text-neutral-gray/80 block mt-0.5">{act.date} • {act.category}</span>
+                        </div>
+                        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${
+                          isCurated ? "bg-emerald-100 text-emerald-800" : "bg-stone-100 text-stone-500"
+                        }`}>
+                          {isCurated ? "Tayang" : "Draft"}
+                        </span>
+                      </div>
+
+                      {/* Display small preview if available */}
+                      {act.featuredImage && (
+                        <div className="w-full aspect-[2/1] rounded-lg overflow-hidden border border-neutral-gray/10 bg-white">
+                          <img 
+                            src={act.featuredImage} 
+                            alt={act.title} 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex justify-end pt-1 border-t border-neutral-gray/5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCuratingAct(act);
+                            setTempFeaturedImage(act.featuredImage || "");
+                            setTempIsPublished(!!act.isPublishedToGallery);
+                          }}
+                          className="py-1 px-3 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[10px] rounded-lg transition-all cursor-pointer flex items-center gap-1 shadow-3xs"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                          <span>Atur Foto Unggahan</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Close Button */}
+              <div className="p-6 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                <button
+                  type="button"
+                  onClick={() => setShowCurationDrawer(false)}
+                  className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer text-center"
+                >
+                  Tutup Kurator
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Curation Form Layer (Drawer level 2) */}
+      {curatingAct && (
+        <div className="fixed inset-0 z-[60] overflow-hidden animate-fade-in">
+          {/* Dark overlay backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/60 transition-opacity"
+            onClick={() => setCuratingAct(null)}
+          />
+          
+          {/* Form Modal Layer */}
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-md p-6 relative shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-3">
+                <div>
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark">Atur Foto Unggulan</h4>
+                  <p className="text-[10px] text-neutral-gray truncate max-w-[280px]">Kegiatan: {curatingAct.title}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCuratingAct(null)}
+                  className="w-6 h-6 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveCuration} className="space-y-4 text-xs font-semibold text-neutral-dark">
+                <div>
+                  <label htmlFor="tempFeaturedImage" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1.5">Tautan URL Foto Unggulan</label>
+                  <input
+                    type="url"
+                    id="tempFeaturedImage"
+                    required
+                    value={tempFeaturedImage}
+                    onChange={(e) => setTempFeaturedImage(e.target.value)}
+                    placeholder="https://images.unsplash.com/... atau tautan foto lainnya"
+                    className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none font-mono"
+                  />
+                </div>
+
+                {/* Live Image URL Preview */}
+                {tempFeaturedImage && tempFeaturedImage.startsWith("http") && (
+                  <div className="space-y-1">
+                    <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold tracking-wide">Pratinjau Foto Publik</span>
+                    <div className="w-full aspect-[4/3] bg-[#FAF8F5] rounded-xl overflow-hidden border border-neutral-gray/10 flex items-center justify-center">
+                      <img 
+                        src={tempFeaturedImage} 
+                        alt="Preview curation highlight"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "https://placehold.co/600x400/png?text=Link+Gambar+Tidak+Valid";
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Toggle Curation */}
+                <div className="flex items-center justify-between p-3 bg-emerald-50/50 rounded-xl border border-emerald-500/10">
+                  <div>
+                    <label htmlFor="tempIsPublished" className="block font-baloo text-xs font-bold text-neutral-dark">Tampilkan di Galeri Utama</label>
+                    <p className="text-[9px] text-neutral-gray/80 mt-0.5">Ijinkan foto kegiatan ini tayang di halaman depan galeri sekolah.</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    id="tempIsPublished"
+                    checked={tempIsPublished}
+                    onChange={(e) => setTempIsPublished(e.target.checked)}
+                    className="w-4.5 h-4.5 text-primary-green border-neutral-gray/20 rounded focus:ring-primary-green cursor-pointer"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-2 border-t border-neutral-gray/10">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Simpan Kurasi
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCuratingAct(null)}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

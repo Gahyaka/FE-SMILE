@@ -422,337 +422,361 @@ export default function StudentTab({
         </div>
       )}
 
-      {/* Edit Student Modal Pop-up */}
+      {/* Edit Student Sliding Side Drawer */}
       {editingStudent && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-md p-6 relative shadow-lg space-y-4">
-            <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-3">
-              <h4 className="font-baloo text-base font-bold text-neutral-dark">Ubah Profil Santri</h4>
-              <button
-                type="button"
-                onClick={() => setEditingStudent(null)}
-                className="w-6 h-6 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors hover:bg-neutral-gray/5"
-              >
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <form onSubmit={handleEditSubmit} className="space-y-3.5 text-xs font-semibold text-neutral-dark">
-              <div>
-                <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Lengkap</label>
-                <input
-                  type="text"
-                  required
-                  value={editingStudent.name}
-                  onChange={(e) => setEditingStudent({ ...editingStudent, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-bold text-neutral-dark"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NISN (10 Digit)</label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={10}
-                    pattern="[0-9]{10}"
-                    title="NISN harus berisi 10 digit angka murni"
-                    value={editingStudent.nisn}
-                    onChange={(e) => setEditingStudent({ ...editingStudent, nisn: e.target.value.replace(/[^0-9]/g, "") })}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-mono text-neutral-dark"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kelas</label>
-                  <select
-                    value={editingStudent.class}
-                    onChange={(e) => setEditingStudent({ ...editingStudent, class: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
-                  >
-                    <option value="KB">KB</option>
-                    <option value="RA (A)">RA (A)</option>
-                    <option value="RA (B)">RA (B)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Madrasah</label>
-                <input
-                  type="text"
-                  required
-                  value={editingStudent.madrasahName}
-                  onChange={(e) => setEditingStudent({ ...editingStudent, madrasahName: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Alamat Rumah</label>
-                <input
-                  type="text"
-                  required
-                  value={editingStudent.address}
-                  onChange={(e) => setEditingStudent({ ...editingStudent, address: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tautan Portofolio Foto Raport (Google Drive)</label>
-                <input
-                  type="url"
-                  value={editingStudent.portfolioLink || ""}
-                  onChange={(e) => setEditingStudent({ ...editingStudent, portfolioLink: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono"
-                  placeholder="https://drive.google.com/..."
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tinggi (cm)</label>
-                  <input
-                    type="number"
-                    required
-                    min="30"
-                    max="200"
-                    value={editingStudent.height}
-                    onChange={(e) => setEditingStudent({ ...editingStudent, height: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Berat (kg)</label>
-                  <input
-                    type="number"
-                    required
-                    min="5"
-                    max="100"
-                    value={editingStudent.weight}
-                    onChange={(e) => setEditingStudent({ ...editingStudent, weight: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Semester</label>
-                  <select
-                    value={editingStudent.semester}
-                    onChange={(e) => setEditingStudent({ ...editingStudent, semester: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white text-neutral-dark"
-                  >
-                    <option value="Semester 1">Semester 1</option>
-                    <option value="Semester 2">Semester 2</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tahun Ajaran</label>
-                  <input
-                    type="text"
-                    required
-                    value={editingStudent.academicYear}
-                    onChange={(e) => setEditingStudent({ ...editingStudent, academicYear: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="submit"
-                  className="flex-1 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
-                >
-                  Simpan Perubahan
-                </button>
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => setEditingStudent(null)}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Ubah Profil Santri</h4>
                 <button
                   type="button"
                   onClick={() => setEditingStudent(null)}
-                  className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
                 >
-                  Batal
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
-            </form>
+
+              {/* Form Content (Scrollable) */}
+              <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                <div>
+                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Lengkap</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingStudent.name}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-bold text-neutral-dark"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NISN (10 Digit)</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={10}
+                      pattern="[0-9]{10}"
+                      title="NISN harus berisi 10 digit angka murni"
+                      value={editingStudent.nisn}
+                      onChange={(e) => setEditingStudent({ ...editingStudent, nisn: e.target.value.replace(/[^0-9]/g, "") })}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-mono text-neutral-dark"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kelas</label>
+                    <select
+                      value={editingStudent.class}
+                      onChange={(e) => setEditingStudent({ ...editingStudent, class: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                    >
+                      <option value="KB">KB</option>
+                      <option value="RA (A)">RA (A)</option>
+                      <option value="RA (B)">RA (B)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Madrasah</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingStudent.madrasahName}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, madrasahName: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Alamat Rumah</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingStudent.address}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, address: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tautan Portofolio Foto Raport (Google Drive)</label>
+                  <input
+                    type="url"
+                    value={editingStudent.portfolioLink || ""}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, portfolioLink: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono"
+                    placeholder="https://drive.google.com/..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tinggi (cm)</label>
+                    <input
+                      type="number"
+                      required
+                      min="30"
+                      max="200"
+                      value={editingStudent.height}
+                      onChange={(e) => setEditingStudent({ ...editingStudent, height: Number(e.target.value) })}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Berat (kg)</label>
+                    <input
+                      type="number"
+                      required
+                      min="5"
+                      max="100"
+                      value={editingStudent.weight}
+                      onChange={(e) => setEditingStudent({ ...editingStudent, weight: Number(e.target.value) })}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Semester</label>
+                    <select
+                      value={editingStudent.semester}
+                      onChange={(e) => setEditingStudent({ ...editingStudent, semester: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white text-neutral-dark"
+                    >
+                      <option value="Semester 1">Semester 1</option>
+                      <option value="Semester 2">Semester 2</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tahun Ajaran</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingStudent.academicYear}
+                      onChange={(e) => setEditingStudent({ ...editingStudent, academicYear: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    />
+                  </div>
+                </div>
+
+                {/* Sticky buttons at bottom */}
+                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Simpan Perubahan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingStudent(null)}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Offline Registration Modal Pop-up */}
+      {/* Offline Registration Sliding Side Drawer */}
       {isAdminAdministrasi && showStudentForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-md p-6 relative shadow-lg space-y-4 max-h-[90vh] overflow-y-auto animate-fade-in">
-            <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-3">
-              <h4 className="font-baloo text-base font-bold text-neutral-dark">Daftarkan Murid Baru (Offline)</h4>
-              <button
-                type="button"
-                onClick={() => setShowStudentForm(false)}
-                className="w-6 h-6 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors hover:bg-neutral-gray/5"
-              >
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <form onSubmit={handleAddSubmit} className="space-y-3.5 text-xs font-semibold text-neutral-dark">
-              <div>
-                <label htmlFor="newStudentName" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Lengkap Murid</label>
-                <input
-                  type="text"
-                  id="newStudentName"
-                  required
-                  value={newStudentName}
-                  onChange={(e) => setNewStudentName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-bold text-neutral-dark"
-                  placeholder="Nama Lengkap Murid"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="newStudentNisn" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NISN (10 Digit)</label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={10}
-                    pattern="[0-9]{10}"
-                    title="NISN harus berisi 10 digit angka murni"
-                    id="newStudentNisn"
-                    value={newStudentNisn}
-                    onChange={(e) => setNewStudentNisn(e.target.value.replace(/[^0-9]/g, ""))}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-mono text-neutral-dark"
-                    placeholder="10 digit NISN"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="newStudentClass" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kelas</label>
-                  <select
-                    id="newStudentClass"
-                    value={newStudentClass}
-                    onChange={(e) => setNewStudentClass(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
-                  >
-                    <option value="KB">KB</option>
-                    <option value="RA (A)">RA (A)</option>
-                    <option value="RA (B)">RA (B)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="newStudentMadrasah" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Madrasah Asal</label>
-                <input
-                  type="text"
-                  required
-                  id="newStudentMadrasah"
-                  value={newStudentMadrasah}
-                  onChange={(e) => setNewStudentMadrasah(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="newStudentAddress" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Alamat Rumah</label>
-                <input
-                  type="text"
-                  required
-                  id="newStudentAddress"
-                  value={newStudentAddress}
-                  onChange={(e) => setNewStudentAddress(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                  placeholder="Alamat rumah tinggal"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="newStudentPortfolio" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tautan Portofolio Foto Raport (Google Drive)</label>
-                <input
-                  type="url"
-                  id="newStudentPortfolio"
-                  value={newStudentPortfolio}
-                  onChange={(e) => setNewStudentPortfolio(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono"
-                  placeholder="https://drive.google.com/..."
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="newStudentHeight" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tinggi (cm)</label>
-                  <input
-                    type="number"
-                    required
-                    min="30"
-                    max="200"
-                    id="newStudentHeight"
-                    value={newStudentHeight}
-                    onChange={(e) => setNewStudentHeight(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="newStudentWeight" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Berat (kg)</label>
-                  <input
-                    type="number"
-                    required
-                    min="5"
-                    max="100"
-                    id="newStudentWeight"
-                    value={newStudentWeight}
-                    onChange={(e) => setNewStudentWeight(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="newStudentSemester" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Semester</label>
-                  <select
-                    id="newStudentSemester"
-                    value={newStudentSemester}
-                    onChange={(e) => setNewStudentSemester(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white text-neutral-dark"
-                  >
-                    <option value="Semester 1">Semester 1 (Ganjil)</option>
-                    <option value="Semester 2">Semester 2 (Genap)</option>
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="newStudentYear" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tahun Ajaran</label>
-                  <input
-                    type="text"
-                    required
-                    id="newStudentYear"
-                    value={newStudentYear}
-                    onChange={(e) => setNewStudentYear(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="submit"
-                  className="flex-1 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
-                >
-                  Daftarkan Murid
-                </button>
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => setShowStudentForm(false)}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Daftarkan Murid Baru (Offline)</h4>
                 <button
                   type="button"
                   onClick={() => setShowStudentForm(false)}
-                  className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
                 >
-                  Batal
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
-            </form>
+
+              {/* Form Content (Scrollable) */}
+              <form onSubmit={handleAddSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                <div>
+                  <label htmlFor="newStudentName" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Lengkap Murid</label>
+                  <input
+                    type="text"
+                    id="newStudentName"
+                    required
+                    value={newStudentName}
+                    onChange={(e) => setNewStudentName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-bold text-neutral-dark"
+                    placeholder="Nama Lengkap Murid"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="newStudentNisn" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NISN (10 Digit)</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={10}
+                      pattern="[0-9]{10}"
+                      title="NISN harus berisi 10 digit angka murni"
+                      id="newStudentNisn"
+                      value={newStudentNisn}
+                      onChange={(e) => setNewStudentNisn(e.target.value.replace(/[^0-9]/g, ""))}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-mono text-neutral-dark"
+                      placeholder="10 digit NISN"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="newStudentClass" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kelas</label>
+                    <select
+                      id="newStudentClass"
+                      value={newStudentClass}
+                      onChange={(e) => setNewStudentClass(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                    >
+                      <option value="KB">KB</option>
+                      <option value="RA (A)">RA (A)</option>
+                      <option value="RA (B)">RA (B)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="newStudentMadrasah" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Madrasah Asal</label>
+                  <input
+                    type="text"
+                    required
+                    id="newStudentMadrasah"
+                    value={newStudentMadrasah}
+                    onChange={(e) => setNewStudentMadrasah(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="newStudentAddress" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Alamat Rumah</label>
+                  <input
+                    type="text"
+                    required
+                    id="newStudentAddress"
+                    value={newStudentAddress}
+                    onChange={(e) => setNewStudentAddress(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    placeholder="Alamat rumah tinggal"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="newStudentPortfolio" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tautan Portofolio Foto Raport (Google Drive)</label>
+                  <input
+                    type="url"
+                    id="newStudentPortfolio"
+                    value={newStudentPortfolio}
+                    onChange={(e) => setNewStudentPortfolio(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono"
+                    placeholder="https://drive.google.com/..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="newStudentHeight" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tinggi (cm)</label>
+                    <input
+                      type="number"
+                      required
+                      min="30"
+                      max="200"
+                      id="newStudentHeight"
+                      value={newStudentHeight}
+                      onChange={(e) => setNewStudentHeight(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="newStudentWeight" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Berat (kg)</label>
+                    <input
+                      type="number"
+                      required
+                      min="5"
+                      max="100"
+                      id="newStudentWeight"
+                      value={newStudentWeight}
+                      onChange={(e) => setNewStudentWeight(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="newStudentSemester" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Semester</label>
+                    <select
+                      id="newStudentSemester"
+                      value={newStudentSemester}
+                      onChange={(e) => setNewStudentSemester(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white text-neutral-dark"
+                    >
+                      <option value="Semester 1">Semester 1 (Ganjil)</option>
+                      <option value="Semester 2">Semester 2 (Genap)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="newStudentYear" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tahun Ajaran</label>
+                    <input
+                      type="text"
+                      required
+                      id="newStudentYear"
+                      value={newStudentYear}
+                      onChange={(e) => setNewStudentYear(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    />
+                  </div>
+                </div>
+
+                {/* Sticky buttons at bottom */}
+                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Daftarkan Murid
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowStudentForm(false)}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

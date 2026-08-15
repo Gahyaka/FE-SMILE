@@ -101,149 +101,201 @@ export default function UserTab({
         </button>
       </div>
 
-      {/* 2. Add / Edit Forms */}
+      {/* 2. Add / Edit Sliding Side Drawers */}
       {showAddForm && (
-        <div className="bg-white p-6 rounded-2xl border border-primary-green/15 shadow-3xs space-y-4 animate-fade-in">
-          <h4 className="font-baloo text-sm font-bold text-neutral-dark border-b border-neutral-gray/10 pb-2">
-            Registrasi Akun Petugas Baru
-          </h4>
-          <form onSubmit={handleAddSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="name" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Lengkap (Gelar)</label>
-              <input
-                type="text"
-                id="name"
-                required
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="Contoh: Bunda Fitri, S.Pd."
-                className="w-full px-3.5 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-              />
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => setShowAddForm(false)}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Registrasi Akun Petugas Baru</h4>
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                >
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Form Content (Scrollable) */}
+              <form onSubmit={handleAddSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                <div>
+                  <label htmlFor="name" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Lengkap (Gelar)</label>
+                  <input
+                    type="text"
+                    id="name"
+                    required
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="Contoh: Bunda Fitri, S.Pd."
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="username" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Username Login</label>
+                  <input
+                    type="text"
+                    id="username"
+                    required
+                    value={newUsername}
+                    onChange={(e) => setNewUsername(e.target.value)}
+                    placeholder="Contoh: bundafitri"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="role" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Peran Akses (Role)</label>
+                  <select
+                    id="role"
+                    value={newRole}
+                    onChange={(e) => setNewRole(e.target.value as any)}
+                    className="w-full px-3 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer bg-white"
+                  >
+                    <option value="guru">Guru (Pendidik Kelas)</option>
+                    <option value="admin_trx">Admin Transaksi (Bendahara Keuangan)</option>
+                    <option value="admin_adm">Admin Administrasi (Kepala Sekolah/Pengelola)</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="pass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi (Password)</label>
+                  <input
+                    type="password"
+                    id="pass"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Buat sandi minimal 6 karakter"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+
+                {/* Sticky buttons at bottom */}
+                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Simpan Akun
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddForm(false)}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
             </div>
-            <div>
-              <label htmlFor="username" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Username Login</label>
-              <input
-                type="text"
-                id="username"
-                required
-                value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value)}
-                placeholder="Contoh: bundafitri (huruf kecil & tanpa spasi)"
-                className="w-full px-3.5 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-              />
-            </div>
-            <div>
-              <label htmlFor="role" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Peran Akses (Role)</label>
-              <select
-                id="role"
-                value={newRole}
-                onChange={(e) => setNewRole(e.target.value as any)}
-                className="w-full px-3 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer"
-              >
-                <option value="guru">Guru (Pendidik Kelas)</option>
-                <option value="admin_trx">Admin Transaksi (Bendahara Keuangan)</option>
-                <option value="admin_adm">Admin Administrasi (Kepala Sekolah/Pengelola)</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="pass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi (Password)</label>
-              <input
-                type="password"
-                id="pass"
-                required
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Buat sandi minimal 6 karakter"
-                className="w-full px-3.5 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-              />
-            </div>
-            <div className="md:col-span-2 flex gap-2 pt-2 justify-end">
-              <button
-                type="submit"
-                className="py-2 px-5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
-              >
-                Simpan & Daftarkan Akun
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAddForm(false)}
-                className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
-              >
-                Batal
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
       )}
 
       {editingUser && (
-        <div className="bg-white p-6 rounded-2xl border border-yellow-200 shadow-3xs space-y-4 animate-fade-in">
-          <h4 className="font-baloo text-sm font-bold text-neutral-dark border-b border-neutral-gray/10 pb-2">
-            Ubah Data Akun: <span className="text-primary-green">{editingUser.name}</span>
-          </h4>
-          <form onSubmit={handleEditSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="editName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Lengkap</label>
-              <input
-                type="text"
-                id="editName"
-                required
-                value={editingUser.name}
-                onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                className="w-full px-3.5 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-              />
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => setEditingUser(null)}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">
+                  Ubah Akun: <span className="text-primary-green">{editingUser.name}</span>
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setEditingUser(null)}
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                >
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Form Content (Scrollable) */}
+              <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                <div>
+                  <label htmlFor="editName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Lengkap</label>
+                  <input
+                    type="text"
+                    id="editName"
+                    required
+                    value={editingUser.name}
+                    onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="editUsername" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Username Login</label>
+                  <input
+                    type="text"
+                    id="editUsername"
+                    required
+                    value={editingUser.username}
+                    onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="editRole" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Peran Akses (Role)</label>
+                  <select
+                    id="editRole"
+                    value={editingUser.role}
+                    onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as any })}
+                    className="w-full px-3 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer bg-white"
+                  >
+                    <option value="guru">Guru (Pendidik Kelas)</option>
+                    <option value="admin_trx">Admin Transaksi (Bendahara Keuangan)</option>
+                    <option value="admin_adm">Admin Administrasi (Kepala Sekolah/Pengelola)</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="editPass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Ubah Sandi Baru (Opsional)</label>
+                  <input
+                    type="text"
+                    id="editPass"
+                    value={editingUser.password || ""}
+                    onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
+                    placeholder="Kosongkan jika tidak ingin mengubah password"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+
+                {/* Sticky buttons at bottom */}
+                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Simpan Perubahan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingUser(null)}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
             </div>
-            <div>
-              <label htmlFor="editUsername" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Username Login</label>
-              <input
-                type="text"
-                id="editUsername"
-                required
-                value={editingUser.username}
-                onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value })}
-                className="w-full px-3.5 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-              />
-            </div>
-            <div>
-              <label htmlFor="editRole" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Peran Akses (Role)</label>
-              <select
-                id="editRole"
-                value={editingUser.role}
-                onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as any })}
-                className="w-full px-3 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer"
-              >
-                <option value="guru">Guru (Pendidik Kelas)</option>
-                <option value="admin_trx">Admin Transaksi (Bendahara Keuangan)</option>
-                <option value="admin_adm">Admin Administrasi (Kepala Sekolah/Pengelola)</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="editPass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Ubah Sandi Baru (Opsional)</label>
-              <input
-                type="text"
-                id="editPass"
-                value={editingUser.password || ""}
-                onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
-                placeholder="Kosongkan jika tidak ingin mengubah password"
-                className="w-full px-3.5 py-2 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-              />
-            </div>
-            <div className="md:col-span-2 flex gap-2 pt-2 justify-end">
-              <button
-                type="submit"
-                className="py-2 px-5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
-              >
-                Simpan Perubahan
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditingUser(null)}
-                className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
-              >
-                Batal
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
       )}
 

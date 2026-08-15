@@ -349,6 +349,29 @@ const handleDeleteUser = (userId: number) => {
     setLogs([newLog, ...logs]);
   };
 
+  const handleUpdateActivityGallery = (id: number, featuredImage: string, isPublished: boolean) => {
+    if (!isAdminAdministrasi) return;
+    setActivities(prev => prev.map(act => {
+      if (act.id === id) {
+        return {
+          ...act,
+          featuredImage,
+          isPublishedToGallery: isPublished
+        };
+      }
+      return act;
+    }));
+
+    const targetAct = activities.find(a => a.id === id);
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session.name,
+      action: `Mengubah kurasi galeri untuk kegiatan: ${targetAct?.title || id}`,
+    };
+    setLogs([newLog, ...logs]);
+  };
+
   const handleAddSppLesPayment = (newTxData: any) => {
     if (!isAdminTransaksi) return;
     const totalNum = newTxData.spp + newTxData.les;
@@ -736,6 +759,7 @@ const handleDeleteUser = (userId: number) => {
               isAdminAdministrasi={isAdminAdministrasi}
               isGuru={isGuru}
               onAddActivity={handleAddActivity}
+              onUpdateActivityGallery={handleUpdateActivityGallery}
             />
           )}
 
