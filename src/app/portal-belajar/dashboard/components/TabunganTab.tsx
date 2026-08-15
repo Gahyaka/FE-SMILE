@@ -6,6 +6,7 @@ interface Student {
   id: number;
   name: string;
   class: string;
+  activeStatus?: string;
 }
 
 interface SavingTransaction {
@@ -34,11 +35,11 @@ export default function TabunganTab({
   onAddTransaction,
 }: TabunganTabProps) {
   // Form states
-  const [selectedStudentId, setSelectedStudentId] = useState<number>(students[0]?.id || 1);
+  const [selectedStudentId, setSelectedStudentId] = useState<number>(students.filter(s => s.activeStatus === "Aktif")[0]?.id || 1);
   const [transDesc, setTransDesc] = useState("Setoran rutin");
   const [transType, setTransType] = useState<"Setoran" | "Penarikan">("Setoran");
   const [transAmount, setTransAmount] = useState("");
-  const [savingFilterStudentId, setSavingFilterStudentId] = useState<number>(students[0]?.id || 1);
+  const [savingFilterStudentId, setSavingFilterStudentId] = useState<number>(students.filter(s => s.activeStatus === "Aktif")[0]?.id || 1);
   const [showMutasiForm, setShowMutasiForm] = useState(false);
 
   // Filters for summary lists
@@ -48,7 +49,8 @@ export default function TabunganTab({
   const filteredStudents = students.filter((st) => {
     const matchesClass = classFilter === "Semua" || st.class === classFilter;
     const matchesSearch = st.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesClass && matchesSearch;
+    const isAktif = st.activeStatus === "Aktif";
+    return matchesClass && matchesSearch && isAktif;
   });
 
   // Helper: Calculate total saldo for a student dynamically (Debet - Kredit)
@@ -119,111 +121,123 @@ export default function TabunganTab({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* Form Input Transaksi Tabungan Modal Pop-up (Admin Transaksi Only) */}
+        {/* Form Input Transaksi Tabungan Sliding Side Drawer (Admin Transaksi Only) */}
         {showMutasiForm && isAdminTransaksi && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-md p-6 relative shadow-lg space-y-4 max-h-[90vh] overflow-y-auto animate-fade-in">
-              <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-3">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Catat Mutasi Tabungan</h4>
-                <button
-                  type="button"
-                  onClick={() => setShowMutasiForm(false)}
-                  className="w-6 h-6 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors hover:bg-neutral-gray/5"
-                >
-                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              <form onSubmit={handleSubmit} className="space-y-4 text-xs font-semibold text-neutral-dark">
-                <div>
-                  <label htmlFor="selectedStudent" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1">Pilih Siswa</label>
-                  <select
-                    id="selectedStudent"
-                    value={selectedStudentId}
-                    onChange={(e) => setSelectedStudentId(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none bg-white cursor-pointer"
-                  >
-                    {students.map((st) => (
-                      <option key={st.id} value={st.id}>{st.name} ({st.class})</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="transType" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1">Tipe Transaksi</label>
-                    <select
-                      id="transType"
-                      value={transType}
-                      onChange={(e) => setTransType(e.target.value as "Setoran" | "Penarikan")}
-                      className="w-full px-3 py-2 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none bg-white cursor-pointer"
-                    >
-                      <option value="Setoran">Setoran (Debet)</option>
-                      <option value="Penarikan">Penarikan (Kredit)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="transAmount" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1">Nominal (Rupiah)</label>
-                    <input
-                      type="number"
-                      id="transAmount"
-                      value={transAmount}
-                      onChange={(e) => setTransAmount(e.target.value)}
-                      required
-                      className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none font-bold"
-                      placeholder="Jumlah uang"
-                    />
-                  </div>
-                </div>
-
-                {/* Tombol Pintasan Nominal Tabungan */}
-                <div>
-                  <span className="block text-[8px] text-neutral-gray/60 uppercase mb-1.5 font-bold tracking-wide">Pintasan Nominal Harian</span>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {[5000, 10000, 20000, 50000].map((amt) => (
-                      <button
-                        key={amt}
-                        type="button"
-                        onClick={() => setTransAmount(amt.toString())}
-                        className="py-2 px-1 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-[9px] font-black rounded-xl border-2 border-emerald-200/60 shadow-3xs transition-all active:scale-95 duration-150 cursor-pointer text-center whitespace-nowrap"
-                      >
-                        Rp {(amt / 1000).toString()}rb
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="transDesc" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1">Keterangan / Uraian</label>
-                  <input
-                    type="text"
-                    id="transDesc"
-                    value={transDesc}
-                    onChange={(e) => setTransDesc(e.target.value)}
-                    required
-                    className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none"
-                    placeholder="Contoh: Setoran rutin, Penarikan alat tulis"
-                  />
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <button
-                    type="submit"
-                    className="flex-1 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
-                  >
-                    Simpan Transaksi
-                  </button>
+          <div className="fixed inset-0 z-50 overflow-hidden">
+            {/* Backdrop Overlay */}
+            <div 
+              className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+              onClick={() => setShowMutasiForm(false)}
+            />
+            
+            {/* Drawer Container */}
+            <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+              <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+                {/* Header */}
+                <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark">Catat Mutasi Tabungan</h4>
                   <button
                     type="button"
                     onClick={() => setShowMutasiForm(false)}
-                    className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                    className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
                   >
-                    Batal
+                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
-              </form>
+
+                {/* Form Content (Scrollable) */}
+                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                  <div>
+                    <label htmlFor="selectedStudent" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1">Pilih Siswa</label>
+                    <select
+                      id="selectedStudent"
+                      value={selectedStudentId}
+                      onChange={(e) => setSelectedStudentId(Number(e.target.value))}
+                      className="w-full px-3 py-2 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none bg-white cursor-pointer"
+                    >
+                      {students.filter(st => st.activeStatus === "Aktif").map((st) => (
+                        <option key={st.id} value={st.id}>{st.name} ({st.class})</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label htmlFor="transType" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1">Tipe Transaksi</label>
+                      <select
+                        id="transType"
+                        value={transType}
+                        onChange={(e) => setTransType(e.target.value as "Setoran" | "Penarikan")}
+                        className="w-full px-3 py-2 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none bg-white cursor-pointer"
+                      >
+                        <option value="Setoran">Setoran (Debet)</option>
+                        <option value="Penarikan">Penarikan (Kredit)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="transAmount" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1">Nominal (Rupiah)</label>
+                      <input
+                        type="number"
+                        id="transAmount"
+                        value={transAmount}
+                        onChange={(e) => setTransAmount(e.target.value)}
+                        required
+                        className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none font-bold"
+                        placeholder="Jumlah uang"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Tombol Pintasan Nominal Tabungan */}
+                  <div>
+                    <span className="block text-[8px] text-neutral-gray/60 uppercase mb-1.5 font-bold tracking-wide">Pintasan Nominal Harian</span>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {[5000, 10000, 20000, 50000].map((amt) => (
+                        <button
+                          key={amt}
+                          type="button"
+                          onClick={() => setTransAmount(amt.toString())}
+                          className="py-2 px-1 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-[9px] font-black rounded-xl border-2 border-emerald-200/60 shadow-3xs transition-all active:scale-95 duration-150 cursor-pointer text-center"
+                        >
+                          Rp {(amt / 1000).toString()}rb
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="transDesc" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1">Keterangan / Uraian</label>
+                    <input
+                      type="text"
+                      id="transDesc"
+                      value={transDesc}
+                      onChange={(e) => setTransDesc(e.target.value)}
+                      required
+                      className="w-full px-3 py-2.5 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none"
+                      placeholder="Contoh: Setoran rutin, Penarikan alat tulis"
+                    />
+                  </div>
+
+                  {/* Sticky buttons at bottom */}
+                  <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                    <button
+                      type="submit"
+                      className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                    >
+                      Simpan Transaksi
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowMutasiForm(false)}
+                      className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                    >
+                      Batal
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         )}
