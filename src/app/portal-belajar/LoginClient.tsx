@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { authService } from "@/services/auth";
 
 export default function LoginClient() {
   const router = useRouter();
@@ -14,43 +15,66 @@ export default function LoginClient() {
   useEffect(() => {
     // Clear any existing session when returning to login page
     localStorage.removeItem("user_session");
-
-    // Initialize mock users into localStorage if they don't exist yet
-    const existingUsers = localStorage.getItem("system_users");
-    if (!existingUsers) {
-      const defaultUsers = [
-        { id: 1, name: "Admin Administrasi (Bunda Nisa)", username: "admin_adm", password: "admin123", role: "admin_adm" },
-        { id: 2, name: "Admin Transaksi (Bunda Ajeng)", username: "admin_trx", password: "admin123", role: "admin_trx" },
-        { id: 3, name: "Guru Kelas (Bunda Rahma)", username: "guru", password: "guru123", role: "guru" }
-      ];
-      localStorage.setItem("system_users", JSON.stringify(defaultUsers));
-    }
+    localStorage.removeItem("auth_token");
   }, []);
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    setTimeout(() => {
-      const stored = localStorage.getItem("system_users");
-      const currentUsers = stored ? JSON.parse(stored) : [];
+    try {
+      // 1. Kirim request login ke backend Railway
+      const loginRes = await authService.login({ username, password });
       
-      const matched = currentUsers.find(
-        (u: any) => u.username === username && u.password === password
+      // Ambil token dari respon (menyesuaikan format umum backend: token / data.token)
+      const token = loginRes?.token || loginRes?.data?.token || loginRes?.accessToken;
+      if (!token) {
+        throw new Error("Token autentikasi tidak ditemukan dari server.");
+      }
+
+      // 2. Simpan token JWT di localStorage
+      localStorage.setItem("auth_token", token);
+
+      // 3. Ambil data identitas profil riil dari token JWT
+      const profileRes = await authService.getMe();
+      const user = profileRes?.data || profileRes; // Sesuaikan jika data bersarang
+
+      if (!user) {
+        throw new Error("Gagal memuat profil pengguna dari server.");
+      }
+
+      // 4. Map Peran (Role) backend ke format state frontend
+      // Backend: ADMIN_ADMINISTRASI / ADMIN / ADMIN_TRANSAKSI / GURU
+      // Frontend: admin_adm / admin_trx / guru
+      const rawRole = (user.role || "").toUpperCase();
+      let mappedRole: "admin_adm" | "admin_trx" | "guru" = "guru";
+
+      if (rawRole === "ADMIN_ADMINISTRASI" || rawRole === "ADMIN") {
+        mappedRole = "admin_adm";
+      } else if (rawRole === "ADMIN_TRANSAKSI") {
+        mappedRole = "admin_trx";
+      } else if (rawRole === "GURU") {
+        mappedRole = "guru";
+      }
+
+      // 5. Simpan session user yang sudah dimapping
+      localStorage.setItem(
+        "user_session",
+        JSON.stringify({ 
+          role: mappedRole, 
+          name: user.nama || user.name || "Petugas Madrasah" 
+        })
       );
 
-      if (matched) {
-        localStorage.setItem(
-          "user_session",
-          JSON.stringify({ role: matched.role, name: matched.name })
-        );
-        router.push("/portal-belajar/dashboard");
-      } else {
-        setError("Nama pengguna atau kata sandi salah. Silakan coba lagi!");
-        setLoading(false);
-      }
-    }, 800);
+      // 6. Alihkan ke dashboard utama
+      router.push("/portal-belajar/dashboard");
+    } catch (err: any) {
+      console.error("Login API Error:", err);
+      const errMsg = err.response?.data?.message || err.message || "Gagal menghubungi server. Silakan hubungi admin.";
+      setError(errMsg === "Network Error" ? "Gagal terhubung ke server backend API." : errMsg);
+      setLoading(false);
+    }
   };
 
   return (
