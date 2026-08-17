@@ -701,7 +701,16 @@ const handleDeleteUser = (userId: number) => {
 
         {/* Sidebar Footer */}
         <div className="space-y-4 pt-5 border-t border-primary-green/10">
-          <div className="bg-[#FAF8F5] border border-primary-green/10 rounded-xl p-3 flex items-center gap-3">
+          {/* Clickable Sidebar User Profile Card */}
+          <div 
+            onClick={() => {
+              setProfileName(session.name);
+              setProfilePassword("");
+              setShowProfileDrawer(true);
+            }}
+            className="bg-[#FAF8F5] border border-primary-green/10 hover:border-primary-green rounded-xl p-3 flex items-center gap-3 cursor-pointer hover:bg-soft-mint/20 transition-all"
+            title="Klik untuk ubah nama atau kata sandi profil"
+          >
             <div className="w-8 h-8 rounded-full bg-primary-green text-white flex items-center justify-center font-extrabold text-[10px] flex-shrink-0">
               {isAdminAdministrasi ? "AA" : isAdminTransaksi ? "AT" : "GR"}
             </div>
@@ -748,24 +757,6 @@ const handleDeleteUser = (userId: number) => {
             
             <div className="flex items-center gap-2 flex-shrink-0">
               
-              {/* Profile Saya Button */}
-              {session && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setProfileName(session.name);
-                    setProfilePassword("");
-                    setShowProfileDrawer(true);
-                  }}
-                  className="py-1.5 px-3 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 font-extrabold text-[10px] uppercase border border-amber-200 transition-all cursor-pointer shadow-3xs flex items-center gap-1.5"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  <span className="hidden sm:inline">Profil Saya</span>
-                </button>
-              )}
-
               {/* Hamburger Button for Mobile */}
               <button
                 type="button"
