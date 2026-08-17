@@ -339,9 +339,13 @@ const handleDeleteUser = (userId: number) => {
 
   const handleAddActivity = (newActData: any) => {
     if (!isAdminAdministrasi && !isGuru) return;
+    
+    // Auto-generate drive folder link based on activity title
+    const sanitizedTitle = (newActData.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const newAct = {
       ...newActData,
-      id: Date.now()
+      id: Date.now(),
+      driveLink: `https://drive.google.com/drive/folders/mock-${sanitizedTitle}-${Date.now()}`
     };
     setActivities([newAct, ...activities]);
 
@@ -349,7 +353,7 @@ const handleDeleteUser = (userId: number) => {
       id: Date.now(),
       time: new Date().toISOString().replace('T', ' ').substring(0, 16),
       user: session.name,
-      action: `Menambahkan kegiatan: ${newAct.title}`,
+      action: `Menambahkan kegiatan: ${newAct.title} (Folder Google Drive terbuat otomatis)`,
     };
     setLogs([newLog, ...logs]);
   };
@@ -391,28 +395,7 @@ const handleDeleteUser = (userId: number) => {
     setProfilePassword("");
   };
 
-  const handleUpdateActivityGallery = (id: number, featuredImage: string, isPublished: boolean) => {
-    if (!isAdminAdministrasi) return;
-    setActivities(prev => prev.map(act => {
-      if (act.id === id) {
-        return {
-          ...act,
-          featuredImage,
-          isPublishedToGallery: isPublished
-        };
-      }
-      return act;
-    }));
 
-    const targetAct = activities.find(a => a.id === id);
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Mengubah kurasi galeri untuk kegiatan: ${targetAct?.title || id}`,
-    };
-    setLogs([newLog, ...logs]);
-  };
 
   const handleAddSppLesPayment = (newTxData: any) => {
     if (!isAdminTransaksi) return;
@@ -810,7 +793,6 @@ const handleDeleteUser = (userId: number) => {
               isAdminAdministrasi={isAdminAdministrasi}
               isGuru={isGuru}
               onAddActivity={handleAddActivity}
-              onUpdateActivityGallery={handleUpdateActivityGallery}
             />
           )}
 
