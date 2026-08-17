@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { authService } from "@/services/auth";
 
 export default function LoginClient() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function LoginClient() {
   useEffect(() => {
     // Clear any existing session when returning to login page
     localStorage.removeItem("user_session");
+    localStorage.removeItem("auth_token");
 
     // Initialize mock users into localStorage if they don't exist yet
     const existingUsers = localStorage.getItem("system_users");
@@ -27,11 +29,70 @@ export default function LoginClient() {
     }
   }, []);
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
+    /* 
+    // ==========================================
+    // KONEKSI API BACKEND NON-AKTIF SEMENTARA
+    // ==========================================
+    try {
+      // 1. Kirim request login ke backend Railway
+      const loginRes = await authService.login({ username, password });
+      
+      // Ambil token dari respon (menyesuaikan format umum backend: token / data.token)
+      const token = loginRes?.token || loginRes?.data?.token || loginRes?.accessToken;
+      if (!token) {
+        throw new Error("Token autentikasi tidak ditemukan dari server.");
+      }
+
+      // 2. Simpan token JWT di localStorage
+      localStorage.setItem("auth_token", token);
+
+      // 3. Ambil data identitas profil riil dari token JWT
+      const profileRes = await authService.getMe();
+      const user = profileRes?.data || profileRes; // Sesuaikan jika data bersarang
+
+      if (!user) {
+        throw new Error("Gagal memuat profil pengguna dari server.");
+      }
+
+      // 4. Map Peran (Role) backend ke format state frontend
+      const rawRole = (user.role || "").toUpperCase();
+      let mappedRole: "admin_adm" | "admin_trx" | "guru" = "guru";
+
+      if (rawRole === "ADMIN_ADMINISTRASI" || rawRole === "ADMIN") {
+        mappedRole = "admin_adm";
+      } else if (rawRole === "ADMIN_TRANSAKSI") {
+        mappedRole = "admin_trx";
+      } else if (rawRole === "GURU") {
+        mappedRole = "guru";
+      }
+
+      // 5. Simpan session user yang sudah dimapping
+      localStorage.setItem(
+        "user_session",
+        JSON.stringify({ 
+          role: mappedRole, 
+          name: user.nama || user.name || "Petugas Madrasah" 
+        })
+      );
+
+      // 6. Alihkan ke dashboard utama
+      router.push("/portal-belajar/dashboard");
+    } catch (err: any) {
+      console.error("Login API Error:", err);
+      const errMsg = err.response?.data?.message || err.message || "Gagal menghubungi server. Silakan hubungi admin.";
+      setError(errMsg === "Network Error" ? "Gagal terhubung ke server backend API." : errMsg);
+      setLoading(false);
+    }
+    */
+
+    // ==========================================
+    // MOCK LOGIN AKTIF SEMENTARA UNTUK EKSPLORASI UI
+    // ==========================================
     setTimeout(() => {
       const stored = localStorage.getItem("system_users");
       const currentUsers = stored ? JSON.parse(stored) : [];
@@ -50,7 +111,7 @@ export default function LoginClient() {
         setError("Nama pengguna atau kata sandi salah. Silakan coba lagi!");
         setLoading(false);
       }
-    }, 800);
+    }, 600);
   };
 
   return (

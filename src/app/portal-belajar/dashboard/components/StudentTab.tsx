@@ -13,6 +13,7 @@ interface Student {
   fase: string;
   height: number;
   weight: number;
+  headCircumference: number;
   academicYear: string;
   activeStatus: string;
   portfolioLink: string;
@@ -54,6 +55,7 @@ export default function StudentTab({
   const [newStudentFase, setNewStudentFase] = useState("Fase Fondasi");
   const [newStudentHeight, setNewStudentHeight] = useState("100");
   const [newStudentWeight, setNewStudentWeight] = useState("16");
+  const [newStudentHead, setNewStudentHead] = useState("48");
   const [newStudentYear, setNewStudentYear] = useState("2026/2027");
   const [newStudentPortfolio, setNewStudentPortfolio] = useState("");
 
@@ -92,6 +94,7 @@ export default function StudentTab({
       fase: newStudentFase,
       height: Number(newStudentHeight) || 100,
       weight: Number(newStudentWeight) || 16,
+      headCircumference: Number(newStudentHead) || 48,
       academicYear: newStudentYear,
       portfolioLink: newStudentPortfolio || `https://drive.google.com/drive/folders/mock-portfolio-${newStudentNisn}`
     });
@@ -397,18 +400,22 @@ export default function StudentTab({
                   <span className="text-neutral-gray/70 italic font-normal">Belum diisi</span>
                 )}
               </div>
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="bg-[#FAF8F5] p-2.5 rounded-xl border border-neutral-gray/5">
-                  <span className="block text-[8px] text-neutral-gray/60 uppercase">TB</span>
-                  <span className="font-bold text-neutral-dark">{activeDetailStudent.height} cm</span>
+              <div className="grid grid-cols-4 gap-2 text-center">
+                <div className="bg-[#FAF8F5] p-2 rounded-lg border border-neutral-gray/5">
+                  <span className="block text-[7px] text-neutral-gray/60 uppercase">TB</span>
+                  <span className="font-bold text-[10px] text-neutral-dark">{activeDetailStudent.height} cm</span>
                 </div>
-                <div className="bg-[#FAF8F5] p-2.5 rounded-xl border border-neutral-gray/5">
-                  <span className="block text-[8px] text-neutral-gray/60 uppercase">BB</span>
-                  <span className="font-bold text-neutral-dark">{activeDetailStudent.weight} kg</span>
+                <div className="bg-[#FAF8F5] p-2 rounded-lg border border-neutral-gray/5">
+                  <span className="block text-[7px] text-neutral-gray/60 uppercase">BB</span>
+                  <span className="font-bold text-[10px] text-neutral-dark">{activeDetailStudent.weight} kg</span>
                 </div>
-                <div className="bg-[#FAF8F5] p-2.5 rounded-xl border border-neutral-gray/5">
-                  <span className="block text-[8px] text-neutral-gray/60 uppercase">Status</span>
-                  <span className="font-bold text-emerald-600">{activeDetailStudent.activeStatus}</span>
+                <div className="bg-[#FAF8F5] p-2 rounded-lg border border-neutral-gray/5">
+                  <span className="block text-[7px] text-neutral-gray/60 uppercase">LK</span>
+                  <span className="font-bold text-[10px] text-neutral-dark">{activeDetailStudent.headCircumference || 48} cm</span>
+                </div>
+                <div className="bg-[#FAF8F5] p-2 rounded-lg border border-neutral-gray/5">
+                  <span className="block text-[7px] text-neutral-gray/60 uppercase">Status</span>
+                  <span className="font-bold text-[10px] text-emerald-600">{activeDetailStudent.activeStatus}</span>
                 </div>
               </div>
             </div>
@@ -522,7 +529,7 @@ export default function StudentTab({
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-2.5">
                   <div>
                     <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tinggi (cm)</label>
                     <input
@@ -545,6 +552,18 @@ export default function StudentTab({
                       value={editingStudent.weight}
                       onChange={(e) => setEditingStudent({ ...editingStudent, weight: Number(e.target.value) })}
                       className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">LK (cm)</label>
+                    <input
+                      type="number"
+                      required
+                      min="20"
+                      max="100"
+                      value={editingStudent.headCircumference || 48}
+                      onChange={(e) => setEditingStudent({ ...editingStudent, headCircumference: Number(e.target.value) })}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-semibold"
                     />
                   </div>
                 </div>
@@ -704,7 +723,7 @@ export default function StudentTab({
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-2.5">
                   <div>
                     <label htmlFor="newStudentHeight" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tinggi (cm)</label>
                     <input
@@ -729,6 +748,19 @@ export default function StudentTab({
                       value={newStudentWeight}
                       onChange={(e) => setNewStudentWeight(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="newStudentHead" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">LK (cm)</label>
+                    <input
+                      type="number"
+                      required
+                      min="20"
+                      max="100"
+                      id="newStudentHead"
+                      value={newStudentHead}
+                      onChange={(e) => setNewStudentHead(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-semibold"
                     />
                   </div>
                 </div>

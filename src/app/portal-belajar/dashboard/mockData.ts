@@ -65,6 +65,7 @@ export const initialStudents = [
     fase: "Fase Fondasi",
     height: 105,
     weight: 18,
+    headCircumference: 50,
     academicYear: "2026/2027",
     activeStatus: "Aktif",
     portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-rayyan"
@@ -80,6 +81,7 @@ export const initialStudents = [
     fase: "Fase Fondasi",
     height: 110,
     weight: 19,
+    headCircumference: 51,
     academicYear: "2026/2027",
     activeStatus: "Aktif",
     portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-bilqis"
@@ -95,6 +97,7 @@ export const initialStudents = [
     fase: "Fase Fondasi",
     height: 98,
     weight: 15,
+    headCircumference: 48,
     academicYear: "2026/2027",
     activeStatus: "Aktif",
     portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-fatih"
@@ -110,6 +113,7 @@ export const initialStudents = [
     fase: "Fase Fondasi",
     height: 112,
     weight: 20,
+    headCircumference: 52,
     academicYear: "2025/2026",
     activeStatus: "Lulus",
     portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-rania"
@@ -125,6 +129,7 @@ export const initialStudents = [
     fase: "Fase Fondasi",
     height: 115,
     weight: 22,
+    headCircumference: 53,
     academicYear: "2024/2025",
     activeStatus: "Lulus",
     portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-yusuf"

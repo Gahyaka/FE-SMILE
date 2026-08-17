@@ -64,6 +64,11 @@ export default function DashboardClient() {
     targetId: null
   });
 
+  // State edit profil saya
+  const [showProfileDrawer, setShowProfileDrawer] = useState(false);
+  const [profileName, setProfileName] = useState("");
+  const [profilePassword, setProfilePassword] = useState("");
+
   useEffect(() => {
     // Authenticate session on client side
     const cachedSession = localStorage.getItem("user_session");
@@ -82,6 +87,14 @@ export default function DashboardClient() {
       } else {
         setUsers(initialUsers);
         localStorage.setItem("system_users", JSON.stringify(initialUsers));
+      }
+
+      // Sync activities with localStorage for landing page dynamic galeri
+      const storedActivities = localStorage.getItem("sgw_activities");
+      if (storedActivities) {
+        setActivities(JSON.parse(storedActivities));
+      } else {
+        localStorage.setItem("sgw_activities", JSON.stringify(initialActivities));
       }
     }
   }, [router]);
@@ -334,43 +347,66 @@ const handleDeleteUser = (userId: number) => {
 
   const handleAddActivity = (newActData: any) => {
     if (!isAdminAdministrasi && !isGuru) return;
+    
+    // Auto-generate drive folder link based on activity title
+    const sanitizedTitle = (newActData.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const newAct = {
       ...newActData,
-      id: Date.now()
+      id: Date.now(),
+      driveLink: `https://drive.google.com/drive/folders/mock-${sanitizedTitle}-${Date.now()}`
     };
-    setActivities([newAct, ...activities]);
+    
+    const updated = [newAct, ...activities];
+    setActivities(updated);
+    localStorage.setItem("sgw_activities", JSON.stringify(updated));
 
     const newLog = {
       id: Date.now(),
       time: new Date().toISOString().replace('T', ' ').substring(0, 16),
       user: session.name,
-      action: `Menambahkan kegiatan: ${newAct.title}`,
+      action: `Menambahkan kegiatan: ${newAct.title} (Folder Google Drive terbuat otomatis)`,
     };
     setLogs([newLog, ...logs]);
   };
 
-  const handleUpdateActivityGallery = (id: number, featuredImage: string, isPublished: boolean) => {
-    if (!isAdminAdministrasi) return;
-    setActivities(prev => prev.map(act => {
-      if (act.id === id) {
-        return {
-          ...act,
-          featuredImage,
-          isPublishedToGallery: isPublished
-        };
+  const handleUpdateProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session || !profileName) return;
+
+    // Cari user bersangkutan berdasarkan username login yang aktif
+    const activeUsername = session.role === "admin_adm" ? "admin_adm" : session.role === "admin_trx" ? "admin_trx" : "guru";
+    
+    // Perbarui password jika input password tidak kosong
+    setUsers(prev => prev.map(u => {
+      if (u.username === activeUsername) {
+        const updated = { ...u, name: profileName };
+        if (profilePassword) {
+          updated.password = profilePassword;
+        }
+        return updated;
       }
-      return act;
+      return u;
     }));
 
-    const targetAct = activities.find(a => a.id === id);
+    // Perbarui session aktif
+    setSession({
+      ...session,
+      name: profileName
+    });
+
     const newLog = {
       id: Date.now(),
       time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Mengubah kurasi galeri untuk kegiatan: ${targetAct?.title || id}`,
+      user: profileName,
+      action: `Memperbarui profil mandiri (Nama lengkap${profilePassword ? " & kata sandi" : ""})`,
     };
     setLogs([newLog, ...logs]);
+    
+    setShowProfileDrawer(false);
+    setProfilePassword("");
   };
+
+
 
   const handleAddSppLesPayment = (newTxData: any) => {
     if (!isAdminTransaksi) return;
@@ -659,7 +695,16 @@ const handleDeleteUser = (userId: number) => {
 
         {/* Sidebar Footer */}
         <div className="space-y-4 pt-5 border-t border-primary-green/10">
-          <div className="bg-[#FAF8F5] border border-primary-green/10 rounded-xl p-3 flex items-center gap-3">
+          {/* Clickable Sidebar User Profile Card */}
+          <div 
+            onClick={() => {
+              setProfileName(session.name);
+              setProfilePassword("");
+              setShowProfileDrawer(true);
+            }}
+            className="bg-[#FAF8F5] border border-primary-green/10 hover:border-primary-green rounded-xl p-3 flex items-center gap-3 cursor-pointer hover:bg-soft-mint/20 transition-all"
+            title="Klik untuk ubah nama atau kata sandi profil"
+          >
             <div className="w-8 h-8 rounded-full bg-primary-green text-white flex items-center justify-center font-extrabold text-[10px] flex-shrink-0">
               {isAdminAdministrasi ? "AA" : isAdminTransaksi ? "AT" : "GR"}
             </div>
@@ -759,7 +804,6 @@ const handleDeleteUser = (userId: number) => {
               isAdminAdministrasi={isAdminAdministrasi}
               isGuru={isGuru}
               onAddActivity={handleAddActivity}
-              onUpdateActivityGallery={handleUpdateActivityGallery}
             />
           )}
 
@@ -837,6 +881,136 @@ const handleDeleteUser = (userId: number) => {
           </div>
         )}
       </main>
+
+      {/* Profil Akun Saya - Sliding Side Drawer */}
+      {showProfileDrawer && session && (
+        <div className="fixed inset-0 z-50 overflow-hidden select-none">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => {
+              setShowProfileDrawer(false);
+              setProfilePassword("");
+            }}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <div>
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark">Profil Akun Saya</h4>
+                  <p className="text-[10px] text-amber-600 font-bold uppercase tracking-wide">Kelola nama lengkap & kata sandi</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfileDrawer(false);
+                    setProfilePassword("");
+                  }}
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Form Content */}
+              <form onSubmit={handleUpdateProfile} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                
+                {/* Visual Avatar Card */}
+                <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-neutral-gray/10 flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-primary-green text-white flex items-center justify-center font-extrabold text-xs flex-shrink-0">
+                    {session.role === "admin_adm" ? "AA" : session.role === "admin_trx" ? "AT" : "GR"}
+                  </div>
+                  <div>
+                    <h5 className="font-baloo text-sm font-bold text-neutral-dark">{session.name}</h5>
+                    <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 bg-amber-50 text-amber-700 rounded border border-amber-200 mt-1 inline-block">
+                      {session.role === "admin_adm" ? "Admin Administrasi" : session.role === "admin_trx" ? "Admin Transaksi" : "Guru Kelas"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Input Nama Lengkap */}
+                <div>
+                  <label htmlFor="profName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Lengkap (Gelar)</label>
+                  <input
+                    type="text"
+                    id="profName"
+                    required
+                    value={profileName}
+                    onChange={(e) => setProfileName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+
+                {/* Read-Only Username */}
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Username Login</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={session.role === "admin_adm" ? "admin_adm" : session.role === "admin_trx" ? "admin_trx" : "guru"}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-neutral-gray/10 bg-neutral-gray/5 text-neutral-gray text-xs font-mono focus:outline-none cursor-not-allowed"
+                    title="Username login tidak dapat diubah demi alasan keamanan"
+                  />
+                  <span className="text-[8px] text-neutral-gray font-normal block mt-1 leading-normal">
+                    *Username login dikunci demi integritas sistem.
+                  </span>
+                </div>
+
+                {/* Read-Only Peran Akses */}
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Hak Akses Sistem (Role)</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={session.role === "admin_adm" ? "Admin Administrasi" : session.role === "admin_trx" ? "Admin Transaksi" : "Guru Kelas"}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-neutral-gray/10 bg-neutral-gray/5 text-neutral-gray text-xs font-semibold focus:outline-none cursor-not-allowed"
+                    title="Hak akses hanya bisa diubah oleh Admin Administrasi utama"
+                  />
+                  <span className="text-[8px] text-neutral-gray font-normal block mt-1 leading-normal">
+                    *Hanya Admin Administrasi yang berwenang mengganti hak akses.
+                  </span>
+                </div>
+
+                {/* Input Password Baru */}
+                <div>
+                  <label htmlFor="profPass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi Baru</label>
+                  <input
+                    type="password"
+                    id="profPass"
+                    value={profilePassword}
+                    onChange={(e) => setProfilePassword(e.target.value)}
+                    placeholder="Kosongkan jika tidak ingin mengubah kata sandi saat ini"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+
+                {/* Sticky buttons at bottom */}
+                <div className="flex gap-2 pt-4 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Simpan Profil
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowProfileDrawer(false);
+                      setProfilePassword("");
+                    }}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
