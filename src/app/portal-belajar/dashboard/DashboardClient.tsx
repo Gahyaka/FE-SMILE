@@ -64,6 +64,11 @@ export default function DashboardClient() {
     targetId: null
   });
 
+  // State edit profil saya
+  const [showProfileDrawer, setShowProfileDrawer] = useState(false);
+  const [profileName, setProfileName] = useState("");
+  const [profilePassword, setProfilePassword] = useState("");
+
   useEffect(() => {
     // Authenticate session on client side
     const cachedSession = localStorage.getItem("user_session");
@@ -347,6 +352,43 @@ const handleDeleteUser = (userId: number) => {
       action: `Menambahkan kegiatan: ${newAct.title}`,
     };
     setLogs([newLog, ...logs]);
+  };
+
+  const handleUpdateProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session || !profileName) return;
+
+    // Cari user bersangkutan berdasarkan username login yang aktif
+    const activeUsername = session.role === "admin_adm" ? "admin_adm" : session.role === "admin_trx" ? "admin_trx" : "guru";
+    
+    // Perbarui password jika input password tidak kosong
+    setUsers(prev => prev.map(u => {
+      if (u.username === activeUsername) {
+        const updated = { ...u, name: profileName };
+        if (profilePassword) {
+          updated.password = profilePassword;
+        }
+        return updated;
+      }
+      return u;
+    }));
+
+    // Perbarui session aktif
+    setSession({
+      ...session,
+      name: profileName
+    });
+
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: profileName,
+      action: `Memperbarui profil mandiri (Nama lengkap${profilePassword ? " & kata sandi" : ""})`,
+    };
+    setLogs([newLog, ...logs]);
+    
+    setShowProfileDrawer(false);
+    setProfilePassword("");
   };
 
   const handleUpdateActivityGallery = (id: number, featuredImage: string, isPublished: boolean) => {
@@ -706,6 +748,24 @@ const handleDeleteUser = (userId: number) => {
             
             <div className="flex items-center gap-2 flex-shrink-0">
               
+              {/* Profile Saya Button */}
+              {session && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileName(session.name);
+                    setProfilePassword("");
+                    setShowProfileDrawer(true);
+                  }}
+                  className="py-1.5 px-3 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 font-extrabold text-[10px] uppercase border border-amber-200 transition-all cursor-pointer shadow-3xs flex items-center gap-1.5"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span className="hidden sm:inline">Profil Saya</span>
+                </button>
+              )}
+
               {/* Hamburger Button for Mobile */}
               <button
                 type="button"
@@ -837,6 +897,136 @@ const handleDeleteUser = (userId: number) => {
           </div>
         )}
       </main>
+
+      {/* Profil Akun Saya - Sliding Side Drawer */}
+      {showProfileDrawer && session && (
+        <div className="fixed inset-0 z-50 overflow-hidden select-none">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => {
+              setShowProfileDrawer(false);
+              setProfilePassword("");
+            }}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <div>
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark">Profil Akun Saya</h4>
+                  <p className="text-[10px] text-amber-600 font-bold uppercase tracking-wide">Kelola nama lengkap & kata sandi</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfileDrawer(false);
+                    setProfilePassword("");
+                  }}
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Form Content */}
+              <form onSubmit={handleUpdateProfile} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                
+                {/* Visual Avatar Card */}
+                <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-neutral-gray/10 flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center font-baloo font-bold text-base flex-shrink-0 border border-amber-500/20">
+                    👤
+                  </div>
+                  <div>
+                    <h5 className="font-baloo text-sm font-bold text-neutral-dark">{session.name}</h5>
+                    <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 bg-amber-50 text-amber-700 rounded border border-amber-200 mt-1 inline-block">
+                      {session.role === "admin_adm" ? "Admin Administrasi" : session.role === "admin_trx" ? "Admin Transaksi" : "Guru Kelas"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Input Nama Lengkap */}
+                <div>
+                  <label htmlFor="profName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Lengkap (Gelar)</label>
+                  <input
+                    type="text"
+                    id="profName"
+                    required
+                    value={profileName}
+                    onChange={(e) => setProfileName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+
+                {/* Read-Only Username */}
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Username Login</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={session.role === "admin_adm" ? "admin_adm" : session.role === "admin_trx" ? "admin_trx" : "guru"}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-neutral-gray/10 bg-neutral-gray/5 text-neutral-gray text-xs font-mono focus:outline-none cursor-not-allowed"
+                    title="Username login tidak dapat diubah demi alasan keamanan"
+                  />
+                  <span className="text-[8px] text-neutral-gray font-normal block mt-1 leading-normal">
+                    *Username login dikunci demi integritas sistem.
+                  </span>
+                </div>
+
+                {/* Read-Only Peran Akses */}
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Hak Akses Sistem (Role)</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={session.role === "admin_adm" ? "Admin Administrasi" : session.role === "admin_trx" ? "Admin Transaksi" : "Guru Kelas"}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-neutral-gray/10 bg-neutral-gray/5 text-neutral-gray text-xs font-semibold focus:outline-none cursor-not-allowed"
+                    title="Hak akses hanya bisa diubah oleh Admin Administrasi utama"
+                  />
+                  <span className="text-[8px] text-neutral-gray font-normal block mt-1 leading-normal">
+                    *Hanya Admin Administrasi yang berwenang mengganti hak akses.
+                  </span>
+                </div>
+
+                {/* Input Password Baru */}
+                <div>
+                  <label htmlFor="profPass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Ubah Sandi Baru (Opsional)</label>
+                  <input
+                    type="password"
+                    id="profPass"
+                    value={profilePassword}
+                    onChange={(e) => setProfilePassword(e.target.value)}
+                    placeholder="Kosongkan jika tidak ingin mengganti kata sandi"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+
+                {/* Sticky buttons at bottom */}
+                <div className="flex gap-2 pt-4 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Simpan Profil
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowProfileDrawer(false);
+                      setProfilePassword("");
+                    }}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
