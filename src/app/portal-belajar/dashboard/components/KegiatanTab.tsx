@@ -360,7 +360,7 @@ export default function KegiatanTab({
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center">
                       <span className="block text-[8px] text-neutral-gray/60 uppercase tracking-wider font-bold">Pratinjau Foto ({previewUrls.length})</span>
-                      <span className="text-[8.5px] text-primary-green font-bold italic">💡 Klik foto untuk menjadikannya Sampul Galeri</span>
+                      <span className="text-[8.5px] text-primary-green font-bold uppercase tracking-wider">Klik foto untuk menjadikannya sampul galeri</span>
                     </div>
                     
                     <div className="flex gap-2.5 overflow-x-auto pb-2 pr-1 max-w-full">
@@ -379,8 +379,8 @@ export default function KegiatanTab({
                             <img src={url} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
                             
                             {isCover && (
-                              <div className="absolute inset-x-0 bottom-0 bg-primary-green/90 text-white text-[7px] font-black py-0.5 text-center flex items-center justify-center gap-0.5">
-                                <span>🌟 Sampul</span>
+                              <div className="absolute inset-x-0 bottom-0 bg-primary-green text-white text-[7px] font-black py-0.5 text-center tracking-wider uppercase">
+                                <span>Sampul</span>
                               </div>
                             )}
 

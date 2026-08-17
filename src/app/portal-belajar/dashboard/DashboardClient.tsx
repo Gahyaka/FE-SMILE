@@ -88,6 +88,14 @@ export default function DashboardClient() {
         setUsers(initialUsers);
         localStorage.setItem("system_users", JSON.stringify(initialUsers));
       }
+
+      // Sync activities with localStorage for landing page dynamic galeri
+      const storedActivities = localStorage.getItem("sgw_activities");
+      if (storedActivities) {
+        setActivities(JSON.parse(storedActivities));
+      } else {
+        localStorage.setItem("sgw_activities", JSON.stringify(initialActivities));
+      }
     }
   }, [router]);
 
@@ -347,7 +355,10 @@ const handleDeleteUser = (userId: number) => {
       id: Date.now(),
       driveLink: `https://drive.google.com/drive/folders/mock-${sanitizedTitle}-${Date.now()}`
     };
-    setActivities([newAct, ...activities]);
+    
+    const updated = [newAct, ...activities];
+    setActivities(updated);
+    localStorage.setItem("sgw_activities", JSON.stringify(updated));
 
     const newLog = {
       id: Date.now(),

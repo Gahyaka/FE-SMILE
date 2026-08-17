@@ -14,27 +14,36 @@ interface GalleryItem {
   date: string;
 }
 
-// Convert dynamic curated activities into Gallery items format
-const initialGalleryItems: GalleryItem[] = initialActivities
-  .filter(act => act.isPublishedToGallery && act.featuredImage)
-  .map(act => ({
-    id: act.id,
-    title: act.title,
-    category: act.category,
-    image: act.featuredImage || "",
-    description: act.description,
-    date: act.date
-  }));
 
 const categories = ["Semua", "Akademik", "Keagamaan", "Ekstrakurikuler"];
 
 export default function GaleriPage() {
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+
+  // Sync with localStorage so activities uploaded in Portal Belajar show up here
+  useEffect(() => {
+    const stored = localStorage.getItem("sgw_activities");
+    const activeActs = stored ? JSON.parse(stored) : initialActivities;
+    
+    // Map activities to gallery item format. We display items with featuredImage.
+    const items: GalleryItem[] = activeActs
+      .filter((act: any) => act.featuredImage)
+      .map((act: any) => ({
+        id: act.id,
+        title: act.title,
+        category: act.category,
+        image: act.featuredImage || "",
+        description: act.description,
+        date: act.date
+      }));
+    setGalleryItems(items);
+  }, []);
 
   const filteredItems = selectedCategory === "Semua"
-    ? initialGalleryItems
-    : initialGalleryItems.filter(item => item.category === selectedCategory);
+    ? galleryItems
+    : galleryItems.filter(item => item.category === selectedCategory);
 
   // Handle keyboard navigations for Lightbox
   useEffect(() => {
