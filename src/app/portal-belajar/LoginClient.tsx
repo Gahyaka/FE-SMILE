@@ -16,6 +16,17 @@ export default function LoginClient() {
     // Clear any existing session when returning to login page
     localStorage.removeItem("user_session");
     localStorage.removeItem("auth_token");
+
+    // Initialize mock users into localStorage if they don't exist yet
+    const existingUsers = localStorage.getItem("system_users");
+    if (!existingUsers) {
+      const defaultUsers = [
+        { id: 1, name: "Admin Administrasi (Bunda Nisa)", username: "admin_adm", password: "admin123", role: "admin_adm" },
+        { id: 2, name: "Admin Transaksi (Bunda Ajeng)", username: "admin_trx", password: "admin123", role: "admin_trx" },
+        { id: 3, name: "Guru Kelas (Bunda Rahma)", username: "guru", password: "guru123", role: "guru" }
+      ];
+      localStorage.setItem("system_users", JSON.stringify(defaultUsers));
+    }
   }, []);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -23,6 +34,10 @@ export default function LoginClient() {
     setError("");
     setLoading(true);
 
+    /* 
+    // ==========================================
+    // KONEKSI API BACKEND NON-AKTIF SEMENTARA
+    // ==========================================
     try {
       // 1. Kirim request login ke backend Railway
       const loginRes = await authService.login({ username, password });
@@ -45,8 +60,6 @@ export default function LoginClient() {
       }
 
       // 4. Map Peran (Role) backend ke format state frontend
-      // Backend: ADMIN_ADMINISTRASI / ADMIN / ADMIN_TRANSAKSI / GURU
-      // Frontend: admin_adm / admin_trx / guru
       const rawRole = (user.role || "").toUpperCase();
       let mappedRole: "admin_adm" | "admin_trx" | "guru" = "guru";
 
@@ -75,6 +88,30 @@ export default function LoginClient() {
       setError(errMsg === "Network Error" ? "Gagal terhubung ke server backend API." : errMsg);
       setLoading(false);
     }
+    */
+
+    // ==========================================
+    // MOCK LOGIN AKTIF SEMENTARA UNTUK EKSPLORASI UI
+    // ==========================================
+    setTimeout(() => {
+      const stored = localStorage.getItem("system_users");
+      const currentUsers = stored ? JSON.parse(stored) : [];
+      
+      const matched = currentUsers.find(
+        (u: any) => u.username === username && u.password === password
+      );
+
+      if (matched) {
+        localStorage.setItem(
+          "user_session",
+          JSON.stringify({ role: matched.role, name: matched.name })
+        );
+        router.push("/portal-belajar/dashboard");
+      } else {
+        setError("Nama pengguna atau kata sandi salah. Silakan coba lagi!");
+        setLoading(false);
+      }
+    }, 600);
   };
 
   return (
