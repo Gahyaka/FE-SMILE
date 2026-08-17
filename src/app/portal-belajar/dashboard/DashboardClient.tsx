@@ -927,8 +927,8 @@ const handleDeleteUser = (userId: number) => {
                 
                 {/* Visual Avatar Card */}
                 <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-neutral-gray/10 flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center font-baloo font-bold text-base flex-shrink-0 border border-amber-500/20">
-                    👤
+                  <div className="w-12 h-12 rounded-full bg-primary-green text-white flex items-center justify-center font-extrabold text-xs flex-shrink-0">
+                    {session.role === "admin_adm" ? "AA" : session.role === "admin_trx" ? "AT" : "GR"}
                   </div>
                   <div>
                     <h5 className="font-baloo text-sm font-bold text-neutral-dark">{session.name}</h5>
@@ -983,13 +983,13 @@ const handleDeleteUser = (userId: number) => {
 
                 {/* Input Password Baru */}
                 <div>
-                  <label htmlFor="profPass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Ubah Sandi Baru (Opsional)</label>
+                  <label htmlFor="profPass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi Baru</label>
                   <input
                     type="password"
                     id="profPass"
                     value={profilePassword}
                     onChange={(e) => setProfilePassword(e.target.value)}
-                    placeholder="Kosongkan jika tidak ingin mengganti kata sandi"
+                    placeholder="Kosongkan jika tidak ingin mengubah kata sandi saat ini"
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
                   />
                 </div>
