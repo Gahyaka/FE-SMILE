@@ -3,15 +3,15 @@
 import React, { useState, useEffect } from "react";
 
 interface Student {
-  id: number;
+  id: string | number;
   name: string;
   class: string;
   activeStatus?: string;
 }
 
 interface SppTransaction {
-  id: number;
-  studentId: number;
+  id: string | number;
+  studentId: string | number;
   date: string;
   description: string;
   spp: number;
@@ -27,7 +27,7 @@ interface SppTabProps {
   isAdminTransaksi: boolean;
   onAddSppLesPayment: (newTx: Omit<SppTransaction, "id" | "total">) => void;
   onUpdateSppLesPayment: (updatedTx: SppTransaction) => void;
-  onDeleteSppLesPayment: (txId: number) => void;
+  onDeleteSppLesPayment: (txId: string | number) => void;
 }
 
 export default function SppTab({
@@ -63,14 +63,14 @@ export default function SppTab({
   const [selectedClass, setSelectedClass] = useState("Semua");
   const [selectedPeriod, setSelectedPeriod] = useState<"Hari Ini" | "Minggu Ini" | "Bulan Ini" | "Semester 1" | "Semester 2" | "Semua">("Semua");
   const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
-  const [payStudentId, setPayStudentId] = useState<number>(students[0]?.id || 1);
+  const [payStudentId, setPayStudentId] = useState<string | number>(students[0]?.id || "");
   const [payDate, setPayDate] = useState(new Date().toISOString().substring(0, 10));
   const [paySpp, setPaySpp] = useState("75000");
   const [payLes, setPayLes] = useState("40000");
   const [payDesc, setPayDesc] = useState("Pembayaran SPP + Les");
   const [newDepositStatus, setNewDepositStatus] = useState("Belum Disetor");
   const [editingTx, setEditingTx] = useState<SppTransaction | null>(null);
-  const [activeMobileKebabId, setActiveMobileKebabId] = useState<number | null>(null);
+  const [activeMobileKebabId, setActiveMobileKebabId] = useState<string | number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
   
@@ -233,7 +233,7 @@ export default function SppTab({
   }, [payStudentId, paySpp, payLes, payDate, payPaidMonths, students]);
 
   // Helper to get already paid months of selected student for selected academic year
-  const getPaidMonthsForStudent = (studentId: number): string[] => {
+  const getPaidMonthsForStudent = (studentId: string | number): string[] => {
     return sppTransactions
       .filter(tx => tx.studentId === studentId)
       .flatMap(tx => tx.paidMonths || []);
@@ -966,7 +966,7 @@ export default function SppTab({
                   <select
                     id="payStudent"
                     value={payStudentId}
-                    onChange={(e) => setPayStudentId(Number(e.target.value))}
+                    onChange={(e) => setPayStudentId(e.target.value)}
                     className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
                   >
                     {students.filter(st => st.activeStatus === "Aktif").map((st) => (

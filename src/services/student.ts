@@ -43,7 +43,7 @@ export const studentService = {
   /**
    * Menghapus data siswa secara permanen
    */
-  async delete(id: number) {
+  async delete(id: string | number) {
     const response = await api.delete(`/api/v1/siswa/${id}`);
     return response.data;
   }

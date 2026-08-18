@@ -27,6 +27,7 @@ import {
 import { studentService } from "@/services/student";
 import { classService } from "@/services/class";
 import { userService } from "@/services/user";
+import { sppService } from "@/services/spp";
 
 type TabKey = "siswa" | "kelas" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "users" | "audit";
 
@@ -62,6 +63,20 @@ function mapClassesData(rawClasses: any[]): any[] {
     teacherName: c.waliKelas || c.wali_kelas || "Belum Ada Wali",
     fase: c.tahunAjaran || c.tahun_ajaran || "2025/2026", // Map Academic Year here
     description: c.description || c.deskripsi || "Tidak ada deskripsi"
+  }));
+}
+
+function mapSppTransactions(rawTxs: any[]): any[] {
+  return rawTxs.map((tx: any) => ({
+    id: tx.id,
+    studentId: tx.siswaId,
+    date: (tx.tanggalBayar || "").substring(0, 10),
+    description: tx.catatan || "Pembayaran SPP & Les",
+    spp: Number(tx.nominalSpp) || 0,
+    les: Number(tx.nominalLes) || 0,
+    total: (Number(tx.nominalSpp) || 0) + (Number(tx.nominalLes) || 0),
+    depositStatus: tx.statusSetoran || "Belum Disetor",
+    paidMonths: tx.paidMonths || []
   }));
 }
 
@@ -118,7 +133,7 @@ export default function DashboardClient() {
     title: string;
     message: string;
     actionType: "delete_student" | "delete_class" | "delete_spp" | "delete_user" | null;
-    targetId: number | null;
+    targetId: string | number | null;
   }>({
     isOpen: false,
     title: "",
@@ -170,6 +185,15 @@ export default function DashboardClient() {
           const classRes = await classService.getAll();
           const rawClasses = Array.isArray(classRes) ? classRes : classRes?.data || [];
           setClasses(mapClassesData(rawClasses));
+
+          // Fetch SPP transactions from backend Adonis
+          try {
+            const sppRes = await sppService.getAll("2026");
+            const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
+            setSppTransactions(mapSppTransactions(rawSpp));
+          } catch (sppErr) {
+            console.warn("[SGW] Failed to fetch SPP transactions from backend. Using mock fallbacks.");
+          }
 
            // Fetch users from backend Adonis (Only for Admin Administrasi)
           if (parsed.role === "admin_adm") {
@@ -624,15 +648,24 @@ const handleDeleteUser = (userId: number) => {
       const tx = sppTransactions.find(t => t.id === targetId);
       if (tx) {
         const studentName = students.find(s => s.id === tx.studentId)?.name || "Siswa";
-        setSppTransactions(prev => prev.filter(t => t.id !== targetId));
+        try {
+          await sppService.delete(targetId);
 
-        const newLog = {
-          id: Date.now(),
-          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-          user: session.name,
-          action: `Menghapus transaksi kas SPP ${studentName} senilai Rp ${tx.total.toLocaleString()}`,
-        };
-        setLogs([newLog, ...logs]);
+          // Refresh list
+          const sppRes = await sppService.getAll("2026");
+          const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
+          setSppTransactions(mapSppTransactions(rawSpp));
+
+          const newLog = {
+            id: Date.now(),
+            time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            user: session.name,
+            action: `Menghapus transaksi kas SPP ${studentName} dari backend`,
+          };
+          setLogs([newLog, ...logs]);
+        } catch (err: any) {
+          alert("Gagal menghapus transaksi SPP di backend: " + (err.response?.data?.message || err.message));
+        }
       }
     } else if (actionType === "delete_user") {
       const targetUser = users.find(u => u.id === targetId);
@@ -741,41 +774,68 @@ const handleDeleteUser = (userId: number) => {
 
 
 
-  const handleAddSppLesPayment = (newTxData: any) => {
+  const handleAddSppLesPayment = async (newTxData: any) => {
     if (!isAdminTransaksi) return;
-    const totalNum = newTxData.spp + newTxData.les;
-    const newTx = {
-      ...newTxData,
-      id: Date.now(),
-      total: totalNum
-    };
-    setSppTransactions([newTx, ...sppTransactions]);
+    try {
+      await sppService.create({
+        siswaId: String(newTxData.studentId),
+        tanggalBayar: newTxData.date,
+        nominalSpp: Number(newTxData.spp),
+        nominalLes: Number(newTxData.les),
+        catatan: newTxData.description,
+        statusSetoran: newTxData.depositStatus || "Belum Disetor",
+        paidMonths: newTxData.paidMonths || []
+      });
 
-    const studentName = students.find(s => s.id === newTxData.studentId)?.name || "Siswa";
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Mencatat SPP & Les ${studentName}: SPP Rp ${newTxData.spp.toLocaleString()}, Les Rp ${newTxData.les.toLocaleString()} (Total Rp ${totalNum.toLocaleString()})`,
-    };
-    setLogs([newLog, ...logs]);
+      // Refresh list
+      const sppRes = await sppService.getAll("2026");
+      const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
+      setSppTransactions(mapSppTransactions(rawSpp));
+
+      const studentName = students.find(s => s.id === newTxData.studentId)?.name || "Siswa";
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Mencatat SPP & Les ${studentName}: SPP Rp ${newTxData.spp.toLocaleString()}, Les Rp ${newTxData.les.toLocaleString()}`,
+      };
+      setLogs([newLog, ...logs]);
+    } catch (err: any) {
+      alert("Gagal mencatat pembayaran SPP ke backend: " + (err.response?.data?.message || err.message));
+    }
   };
 
-  const handleUpdateSppPayment = (updatedTx: any) => {
+  const handleUpdateSppPayment = async (updatedTx: any) => {
     if (!isAdminTransaksi) return;
-    setSppTransactions(prev => prev.map(t => t.id === updatedTx.id ? updatedTx : t));
+    try {
+      await sppService.update(updatedTx.id, {
+        nominalSpp: Number(updatedTx.spp),
+        nominalLes: Number(updatedTx.les),
+        statusSetoran: updatedTx.depositStatus,
+        tanggalBayar: updatedTx.date,
+        catatan: updatedTx.description,
+        paidMonths: updatedTx.paidMonths
+      });
 
-    const studentName = students.find(s => s.id === updatedTx.studentId)?.name || "Siswa";
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Memperbarui transaksi kas SPP ${studentName}: SPP Rp ${updatedTx.spp.toLocaleString()}, Les Rp ${updatedTx.les.toLocaleString()} (${updatedTx.depositStatus})`,
-    };
-    setLogs([newLog, ...logs]);
+      // Refresh list
+      const sppRes = await sppService.getAll("2026");
+      const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
+      setSppTransactions(mapSppTransactions(rawSpp));
+
+      const studentName = students.find(s => s.id === updatedTx.studentId)?.name || "Siswa";
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Memperbarui transaksi kas SPP ${studentName} (${updatedTx.depositStatus})`,
+      };
+      setLogs([newLog, ...logs]);
+    } catch (err: any) {
+      alert("Gagal memperbarui pembayaran SPP ke backend: " + (err.response?.data?.message || err.message));
+    }
   };
 
-  const handleDeleteSppPayment = (txId: number) => {
+  const handleDeleteSppPayment = (txId: string | number) => {
     if (!isAdminTransaksi) return;
     const tx = sppTransactions.find(t => t.id === txId);
     if (!tx) return;

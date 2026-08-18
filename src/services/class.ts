@@ -26,7 +26,7 @@ export const classService = {
   /**
    * Memperbarui detail kelas
    */
-  async update(id: number, payload: Partial<ClassPayload>) {
+  async update(id: string | number, payload: Partial<ClassPayload>) {
     const response = await api.put(`/api/v1/kelas/${id}`, payload);
     return response.data;
   },
@@ -34,7 +34,7 @@ export const classService = {
   /**
    * Menghapus kelas secara permanen
    */
-  async delete(id: number) {
+  async delete(id: string | number) {
     const response = await api.delete(`/api/v1/kelas/${id}`);
     return response.data;
   }
