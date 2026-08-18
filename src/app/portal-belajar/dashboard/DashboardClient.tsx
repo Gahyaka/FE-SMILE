@@ -24,6 +24,8 @@ import {
   initialClasses,
   initialUsers,
 } from "./mockData";
+import { studentService } from "@/services/student";
+import { classService } from "@/services/class";
 
 type TabKey = "siswa" | "kelas" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "users" | "audit";
 
@@ -96,6 +98,28 @@ export default function DashboardClient() {
       } else {
         localStorage.setItem("sgw_activities", JSON.stringify(initialActivities));
       }
+
+      // Fetch real data from backend Adonis server
+      const loadBackendData = async () => {
+        try {
+          const studentRes = await studentService.getAll();
+          if (studentRes && Array.isArray(studentRes)) {
+            setStudents(studentRes);
+          } else if (studentRes?.data && Array.isArray(studentRes.data)) {
+            setStudents(studentRes.data);
+          }
+
+          const classRes = await classService.getAll();
+          if (classRes && Array.isArray(classRes)) {
+            setClasses(classRes);
+          } else if (classRes?.data && Array.isArray(classRes.data)) {
+            setClasses(classRes.data);
+          }
+        } catch (err) {
+          console.warn("Backend data fetch warning (using mock fallbacks):", err);
+        }
+      };
+      loadBackendData();
     }
   }, [router]);
 
@@ -119,57 +143,98 @@ export default function DashboardClient() {
   const isGuru = session.role === "guru";
 
   // CRUD & Operations handlers
-  const handleAddStudent = (newStData: any) => {
+  const handleAddStudent = async (newStData: any) => {
     if (!isAdminAdministrasi) return;
-    const newSt = {
-      ...newStData,
-      id: Date.now(),
-      activeStatus: "Aktif"
-    };
-    setStudents([...students, newSt]);
-
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Mendaftarkan siswa baru: ${newSt.name} (NISN: ${newSt.nisn})`,
-    };
-    setLogs([newLog, ...logs]);
+    try {
+      await studentService.create({
+        name: newStData.name,
+        nisn: newStData.nisn,
+        madrasahName: newStData.madrasahName,
+        address: newStData.address,
+        semester: newStData.semester,
+        class: newStData.class,
+        fase: newStData.fase,
+        height: Number(newStData.height),
+        weight: Number(newStData.weight),
+        headCircumference: Number(newStData.headCircumference),
+        academicYear: newStData.academicYear,
+        portfolioLink: newStData.portfolioLink,
+        activeStatus: "Aktif"
+      });
+      
+      // Refresh list
+      const freshStudents = await studentService.getAll();
+      setStudents(Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || []);
+      
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Mendaftarkan siswa baru: ${newStData.name} (NISN: ${newStData.nisn}) ke database backend`,
+      };
+      setLogs([newLog, ...logs]);
+    } catch (err: any) {
+      alert("Gagal menambahkan siswa ke backend: " + (err.response?.data?.message || err.message));
+    }
   };
 
-  const handleUpdateStudent = (updatedStudent: any) => {
+  const handleUpdateStudent = async (updatedStudent: any) => {
     if (!isAdminAdministrasi) return;
-    setStudents(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
+    try {
+      await studentService.update(updatedStudent.id, {
+        name: updatedStudent.name,
+        nisn: updatedStudent.nisn,
+        madrasahName: updatedStudent.madrasahName,
+        address: updatedStudent.address,
+        semester: updatedStudent.semester,
+        class: updatedStudent.class,
+        fase: updatedStudent.fase,
+        height: Number(updatedStudent.height),
+        weight: Number(updatedStudent.weight),
+        headCircumference: Number(updatedStudent.headCircumference),
+        academicYear: updatedStudent.academicYear,
+        portfolioLink: updatedStudent.portfolioLink,
+        activeStatus: updatedStudent.activeStatus
+      });
 
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Memperbarui profil data siswa: ${updatedStudent.name} (NISN: ${updatedStudent.nisn})`,
-    };
-    setLogs([newLog, ...logs]);
+      // Refresh list
+      const freshStudents = await studentService.getAll();
+      setStudents(Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || []);
+
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Memperbarui profil data siswa: ${updatedStudent.name} (NISN: ${updatedStudent.nisn}) di backend`,
+      };
+      setLogs([newLog, ...logs]);
+    } catch (err: any) {
+      alert("Gagal memperbarui data siswa di backend: " + (err.response?.data?.message || err.message));
+    }
   };
 
-  const handleUpdateStudentStatus = (studentId: number, status: string) => {
+  const handleUpdateStudentStatus = async (studentId: number, status: string) => {
     if (!isAdminAdministrasi) return;
-    let studentName = "";
-    setStudents((prev) =>
-      prev.map((student) => {
-        if (student.id === studentId) {
-          studentName = student.name;
-          return { ...student, activeStatus: status };
-        }
-        return student;
-      })
-    );
+    const target = students.find(s => s.id === studentId);
+    if (!target) return;
+    
+    try {
+      await studentService.update(studentId, { activeStatus: status });
 
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Mengubah status keaktifan siswa ${studentName} menjadi: ${status}`,
-    };
-    setLogs([newLog, ...logs]);
+      // Refresh list
+      const freshStudents = await studentService.getAll();
+      setStudents(Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || []);
+
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Mengubah status keaktifan siswa ${target.name} menjadi: ${status} di backend`,
+      };
+      setLogs([newLog, ...logs]);
+    } catch (err: any) {
+      alert("Gagal memperbarui status keaktifan di backend: " + (err.response?.data?.message || err.message));
+    }
   };
 
   const handleDeleteStudent = (studentId: number) => {
@@ -184,34 +249,52 @@ export default function DashboardClient() {
     });
   };
 
-const handleAddClass = (newClsData: any) => {
+const handleAddClass = async (newClsData: any) => {
   if (!isAdminAdministrasi) return;
-  const newCls = {
-    ...newClsData,
-    id: Date.now()
-  };
-  setClasses([...classes, newCls]);
+  try {
+    await classService.create({
+      name: newClsData.className,
+      fase: newClsData.fase || "Fase Fondasi"
+    });
 
-  const newLog = {
-    id: Date.now(),
-    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-    user: session.name,
-    action: `Menambahkan kelas baru: ${newCls.className}`,
-  };
-  setLogs([newLog, ...logs]);
+    // Refresh list
+    const freshClasses = await classService.getAll();
+    setClasses(Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || []);
+
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session.name,
+      action: `Menambahkan kelas baru: ${newClsData.className} ke backend`,
+    };
+    setLogs([newLog, ...logs]);
+  } catch (err: any) {
+    alert("Gagal menambahkan kelas ke backend: " + (err.response?.data?.message || err.message));
+  }
 };
 
-const handleUpdateClass = (updatedCls: any) => {
+const handleUpdateClass = async (updatedCls: any) => {
   if (!isAdminAdministrasi) return;
-  setClasses(prev => prev.map(c => c.id === updatedCls.id ? updatedCls : c));
+  try {
+    await classService.update(updatedCls.id, {
+      name: updatedCls.className,
+      fase: updatedCls.fase || "Fase Fondasi"
+    });
 
-  const newLog = {
-    id: Date.now(),
-    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-    user: session.name,
-    action: `Memperbarui data kelas: ${updatedCls.className}`,
-  };
-  setLogs([newLog, ...logs]);
+    // Refresh list
+    const freshClasses = await classService.getAll();
+    setClasses(Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || []);
+
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session.name,
+      action: `Memperbarui data kelas: ${updatedCls.className} di backend`,
+    };
+    setLogs([newLog, ...logs]);
+  } catch (err: any) {
+    alert("Gagal memperbarui kelas di backend: " + (err.response?.data?.message || err.message));
+  }
 };
 
 const handleDeleteClass = (classId: number) => {
@@ -279,32 +362,48 @@ const handleDeleteUser = (userId: number) => {
   });
 };
 
-  const handleExecuteConfirmAction = () => {
+  const handleExecuteConfirmAction = async () => {
     const { actionType, targetId } = confirmModal;
     if (!targetId || !actionType) return;
 
     if (actionType === "delete_student") {
       const studentName = students.find((s) => s.id === targetId)?.name || "Siswa";
-      setStudents(students.filter((s) => s.id !== targetId));
+      try {
+        await studentService.delete(targetId);
+        
+        // Refresh list
+        const freshStudents = await studentService.getAll();
+        setStudents(Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || []);
 
-      const newLog = {
-        id: Date.now(),
-        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-        user: session.name,
-        action: `Menghapus data master siswa: ${studentName}`,
-      };
-      setLogs([newLog, ...logs]);
+        const newLog = {
+          id: Date.now(),
+          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          user: session.name,
+          action: `Menghapus data master siswa: ${studentName} dari backend`,
+        };
+        setLogs([newLog, ...logs]);
+      } catch (err: any) {
+        alert("Gagal menghapus siswa di backend: " + (err.response?.data?.message || err.message));
+      }
     } else if (actionType === "delete_class") {
       const clsName = classes.find(c => c.id === targetId)?.className || "Kelas";
-      setClasses(classes.filter(c => c.id !== targetId));
+      try {
+        await classService.delete(targetId);
 
-      const newLog = {
-        id: Date.now(),
-        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-        user: session.name,
-        action: `Menghapus kelas: ${clsName}`,
-      };
-      setLogs([newLog, ...logs]);
+        // Refresh list
+        const freshClasses = await classService.getAll();
+        setClasses(Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || []);
+
+        const newLog = {
+          id: Date.now(),
+          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          user: session.name,
+          action: `Menghapus kelas: ${clsName} dari backend`,
+        };
+        setLogs([newLog, ...logs]);
+      } catch (err: any) {
+        alert("Gagal menghapus kelas di backend: " + (err.response?.data?.message || err.message));
+      }
     } else if (actionType === "delete_spp") {
       const tx = sppTransactions.find(t => t.id === targetId);
       if (tx) {
