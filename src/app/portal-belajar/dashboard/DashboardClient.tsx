@@ -40,7 +40,8 @@ function mapStudentsData(rawStudents: any[]): any[] {
   return rawStudents.map((st: any) => ({
     id: st.id,
     name: st.namaLengkap || st.nama_lengkap || "Siswa Tanpa Nama",
-    nisn: st.nis || st.nisn || "",
+    nisn: st.nisn || "",
+    nis: st.nis || "",
     parentName: st.namaOrangTua || st.nama_orang_tua || "Wali Murid",
     class: st.kelas?.namaKelas || st.kelas?.nama_kelas || st.class || "Belum Ada Kelas",
     address: st.address || st.alamat || "Alamat belum diinput",
@@ -170,20 +171,26 @@ export default function DashboardClient() {
           const rawClasses = Array.isArray(classRes) ? classRes : classRes?.data || [];
           setClasses(mapClassesData(rawClasses));
 
-          // Fetch users from backend Adonis
-          try {
-            const userRes = await userService.getAll();
-            const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
-            setUsers(mapUsersData(rawUsers));
-          } catch (userErr) {
-            console.warn("Backend users list API not fully supported/accessible. Using local mock storage.");
-            const storedUsers = localStorage.getItem("system_users");
-            if (storedUsers) {
-              setUsers(JSON.parse(storedUsers));
-            } else {
-              setUsers(initialUsers);
-              localStorage.setItem("system_users", JSON.stringify(initialUsers));
+           // Fetch users from backend Adonis (Only for Admin Administrasi)
+          if (parsed.role === "admin_adm") {
+            try {
+              const userRes = await userService.getAll();
+              const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+              setUsers(mapUsersData(rawUsers));
+            } catch (userErr) {
+              console.warn("Backend users list API not fully supported/accessible. Using local mock storage.");
+              const storedUsers = localStorage.getItem("system_users");
+              if (storedUsers) {
+                setUsers(JSON.parse(storedUsers));
+              } else {
+                setUsers(initialUsers);
+                localStorage.setItem("system_users", JSON.stringify(initialUsers));
+              }
             }
+          } else {
+            // Non-admin roles fallback to local store for UI compatibility
+            const storedUsers = localStorage.getItem("system_users");
+            setUsers(storedUsers ? JSON.parse(storedUsers) : initialUsers);
           }
         } catch (err) {
           console.warn("Backend data fetch warning (using mock fallbacks):", err);
@@ -226,13 +233,20 @@ export default function DashboardClient() {
 
     try {
       await studentService.create({
-        nis: newStData.nisn,
         namaLengkap: newStData.name,
         namaOrangTua: newStData.parentName || "Wali Murid RA Sahabat",
-        kelasId: String(kelasId)
+        nisn: newStData.nisn,
+        nis: newStData.nis,
+        kelasId: kelasId ? String(kelasId) : null,
+        alamat: newStData.address || "Alamat belum diinput",
+        tinggiBadan: Number(newStData.height) || 100,
+        beratBadan: Number(newStData.weight) || 16,
+        lingkarKepala: Number(newStData.headCircumference) || 48,
+        semester: newStData.semester || "Semester 1 (Ganjil)",
+        tahunAjaran: newStData.academicYear || "2026/2027"
       });
       
-      // Refresh list
+      // Normal flow: Refresh list
       const freshStudents = await studentService.getAll();
       const rawFresh = Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || [];
       setStudents(mapStudentsData(rawFresh));
@@ -245,6 +259,34 @@ export default function DashboardClient() {
       };
       setLogs([newLog, ...logs]);
     } catch (err: any) {
+      console.warn("[SGW] Add student API returned error. Verifying database state...");
+      
+      try {
+        // Silent check: Pull latest student list from backend
+        const verifyRes = await studentService.getAll();
+        const rawVerify = Array.isArray(verifyRes) ? verifyRes : verifyRes?.data || [];
+        const mappedVerify = mapStudentsData(rawVerify);
+        
+        // Check if the student actually exists now (match by NISN)
+        const isSaved = mappedVerify.some((s: any) => s.nisn === newStData.nisn);
+        
+        if (isSaved) {
+          // If actually saved in DB, silently recover and update state
+          setStudents(mappedVerify);
+          const recoverLog = {
+            id: Date.now(),
+            time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            user: session.name,
+            action: `Mendaftarkan siswa baru: ${newStData.name} (NISN: ${newStData.nisn}) [Silent Recovery]`,
+          };
+          setLogs([recoverLog, ...logs]);
+          return; // Exit successfully
+        }
+      } catch (checkErr) {
+        console.error("Silent verification failed:", checkErr);
+      }
+      
+      // If student is truly not in the database, show the error alert
       alert("Gagal menambahkan siswa ke backend: " + (err.response?.data?.message || err.message));
     }
   };
@@ -259,10 +301,17 @@ export default function DashboardClient() {
 
     try {
       await studentService.update(updatedStudent.id, {
-        nis: updatedStudent.nisn,
         namaLengkap: updatedStudent.name,
         namaOrangTua: updatedStudent.parentName || "Wali Murid RA Sahabat",
-        kelasId: String(kelasId)
+        nisn: updatedStudent.nisn,
+        nis: updatedStudent.nis,
+        kelasId: kelasId ? String(kelasId) : null,
+        alamat: updatedStudent.address || "Alamat belum diinput",
+        tinggiBadan: Number(updatedStudent.height) || 100,
+        beratBadan: Number(updatedStudent.weight) || 16,
+        lingkarKepala: Number(updatedStudent.headCircumference) || 48,
+        semester: updatedStudent.semester || "Semester 1 (Ganjil)",
+        tahunAjaran: updatedStudent.academicYear || "2026/2027"
       });
 
       // Refresh list
