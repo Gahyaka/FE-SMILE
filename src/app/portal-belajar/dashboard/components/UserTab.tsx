@@ -33,6 +33,54 @@ export default function UserTab({
   const [newPassword, setNewPassword] = useState("");
   const [newRole, setNewRole] = useState<"admin_adm" | "admin_trx" | "guru">("guru");
 
+  // Success credentials modal state
+  const [successCredentials, setSuccessCredentials] = useState<{
+    name: string;
+    username: string;
+    role: string;
+    passwordText: string;
+  } | null>(null);
+
+  // Helper to generate dynamic random password
+  const generateRandomPassword = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let generated = "";
+    for (let i = 0; i < 8; i++) {
+      generated += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `sgw_${generated}`;
+  };
+
+  // Trigger password generation when add form is opened
+  React.useEffect(() => {
+    if (showAddForm) {
+      setNewPassword(generateRandomPassword());
+    }
+  }, [showAddForm]);
+
+  // Auto-generate username from name & role
+  React.useEffect(() => {
+    if (!newName.trim()) {
+      setNewUsername("");
+      return;
+    }
+    
+    // Clean and split name
+    const sanitized = newName
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "")
+      .trim();
+    const parts = sanitized.split(/\s+/);
+    // Prefer first or second word if "bunda" is used
+    let base = parts[0];
+    if ((base === "bunda" || base === "ibu" || base === "pak") && parts.length > 1) {
+      base = parts[1];
+    }
+
+    const roleSuffix = newRole === "admin_adm" ? "adm" : newRole === "admin_trx" ? "trx" : "guru";
+    setNewUsername(`${base}_${roleSuffix}`);
+  }, [newName, newRole]);
+
   const [searchQuery, setSearchQuery] = useState("");
 
   const visibleUsers = users.filter((u) => {
@@ -52,6 +100,14 @@ export default function UserTab({
       username: newUsername,
       password: newPassword,
       role: newRole,
+    });
+
+    // Save for the clipboard success dialog
+    setSuccessCredentials({
+      name: newName,
+      username: newUsername,
+      role: newRole === "admin_adm" ? "Admin Administrasi" : newRole === "admin_trx" ? "Admin Transaksi" : "Guru",
+      passwordText: newPassword
     });
 
     // Reset Form
@@ -141,16 +197,15 @@ export default function UserTab({
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
                   />
                 </div>
-                <div>
-                  <label htmlFor="username" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Username Login</label>
+                 <div>
+                  <label htmlFor="username" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Username Login (Otomatis)</label>
                   <input
                     type="text"
                     id="username"
-                    required
+                    disabled
                     value={newUsername}
-                    onChange={(e) => setNewUsername(e.target.value)}
-                    placeholder="Contoh: bundafitri"
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                    placeholder="Auto-generated dari nama & peran"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-mono font-bold bg-stone-50 text-stone-500 cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -167,16 +222,24 @@ export default function UserTab({
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="pass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi (Password)</label>
-                  <input
-                    type="password"
-                    id="pass"
-                    required
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Buat sandi minimal 6 karakter"
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                  />
+                  <label htmlFor="pass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi (Otomatis)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      id="pass"
+                      readOnly
+                      value={newPassword}
+                      className="flex-1 px-3.5 py-2.5 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-mono font-bold bg-stone-50 text-stone-600"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setNewPassword(generateRandomPassword())}
+                      className="px-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-extrabold text-[10px] rounded-xl border border-neutral-gray/10 transition-all cursor-pointer"
+                      title="Acak Ulang Kata Sandi"
+                    >
+                      Acak Ulang
+                    </button>
+                  </div>
                 </div>
 
                 {/* Sticky buttons at bottom */}
@@ -417,6 +480,62 @@ export default function UserTab({
         )}
       </div>
 
+      {/* 4. Credentials Success Modal Dialog */}
+      {successCredentials && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs select-none p-4">
+          <div className="w-full max-w-sm bg-white rounded-3xl border border-primary-green/10 shadow-2xl p-6 space-y-4 animate-scale-in text-neutral-dark">
+            <div className="text-center space-y-2">
+              <span className="text-3xl">🎉</span>
+              <h4 className="font-baloo text-base font-bold text-neutral-dark">Akun Berhasil Dibuat!</h4>
+              <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
+                Silakan salin kredensial login di bawah ini untuk dibagikan kepada petugas bersangkutan.
+              </p>
+            </div>
+
+            <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-primary-green/5 space-y-2.5 text-xs font-semibold text-neutral-gray font-mono">
+              <div>
+                <span className="block text-[8px] text-neutral-gray/60 uppercase font-sans">Nama Lengkap</span>
+                <span className="text-neutral-dark font-bold font-sans">{successCredentials.name}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase font-sans">Username</span>
+                  <span className="text-neutral-dark font-bold">{successCredentials.username}</span>
+                </div>
+                <div>
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase font-sans">Kata Sandi</span>
+                  <span className="text-neutral-dark font-bold">{successCredentials.passwordText}</span>
+                </div>
+              </div>
+              <div>
+                <span className="block text-[8px] text-neutral-gray/60 uppercase font-sans">Hak Akses / Peran</span>
+                <span className="text-primary-green font-bold font-sans">{successCredentials.role}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const message = `Halo ${successCredentials.name},\n\nBerikut akun login Portal Belajar KB/RA Sahabat Anda:\n-------------------------------------\nUsername: ${successCredentials.username}\nPassword: ${successCredentials.passwordText}\nHak Akses: ${successCredentials.role}\nLink Portal: ${window.location.origin}/portal-belajar\n-------------------------------------\nHarap simpan kredensial ini baik-baik.`;
+                  navigator.clipboard.writeText(message);
+                  alert("Kredensial login disalin ke clipboard! Siap dikirim via WhatsApp.");
+                }}
+                className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-3xs"
+              >
+                <span>Salin Kredensial</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSuccessCredentials(null)}
+                className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
