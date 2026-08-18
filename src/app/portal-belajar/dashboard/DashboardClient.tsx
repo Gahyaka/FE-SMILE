@@ -67,17 +67,31 @@ function mapClassesData(rawClasses: any[]): any[] {
 }
 
 function mapSppTransactions(rawTxs: any[]): any[] {
-  return rawTxs.map((tx: any) => ({
-    id: tx.id,
-    studentId: tx.siswaId,
-    date: (tx.tanggalBayar || "").substring(0, 10),
-    description: tx.catatan || "Pembayaran SPP & Les",
-    spp: Number(tx.nominalSpp) || 0,
-    les: Number(tx.nominalLes) || 0,
-    total: (Number(tx.nominalSpp) || 0) + (Number(tx.nominalLes) || 0),
-    depositStatus: tx.statusSetoran === "SUDAH" ? "Sudah Disetor" : "Belum Disetor",
-    paidMonths: tx.paidMonths || []
-  }));
+  return rawTxs.map((tx: any) => {
+    const formattedDate = (tx.tanggalBayar || "").substring(0, 10);
+    
+    // Fallback: If backend does not provide paidMonths array, deduce month from payment date (format: "YYYY-MM")
+    let months = tx.paidMonths;
+    if (!months || !Array.isArray(months) || months.length === 0) {
+      if (formattedDate && formattedDate.length >= 7) {
+        months = [formattedDate.substring(0, 7)];
+      } else {
+        months = [];
+      }
+    }
+
+    return {
+      id: tx.id,
+      studentId: tx.siswaId,
+      date: formattedDate,
+      description: tx.catatan || "Pembayaran SPP & Les",
+      spp: Number(tx.nominalSpp) || 0,
+      les: Number(tx.nominalLes) || 0,
+      total: (Number(tx.nominalSpp) || 0) + (Number(tx.nominalLes) || 0),
+      depositStatus: tx.statusSetoran === "SUDAH" ? "Sudah Disetor" : "Belum Disetor",
+      paidMonths: months
+    };
+  });
 }
 
 function mapUsersData(rawUsers: any[]): any[] {
@@ -141,6 +155,7 @@ export default function DashboardClient() {
     actionType: null,
     targetId: null
   });
+  const [isConfirming, setIsConfirming] = useState(false);
 
   // State edit profil saya
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
@@ -604,111 +619,116 @@ const handleDeleteUser = (userId: number) => {
     const { actionType, targetId } = confirmModal;
     if (!targetId || !actionType) return;
 
-    if (actionType === "delete_student") {
-      const studentName = students.find((s) => s.id === targetId)?.name || "Siswa";
-      try {
-        await studentService.delete(targetId);
-        
-        // Refresh list
-        const freshStudents = await studentService.getAll();
-        const rawFresh = Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || [];
-        setStudents(mapStudentsData(rawFresh));
+    try {
+      setIsConfirming(true);
 
-        const newLog = {
-          id: Date.now(),
-          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-          user: session.name,
-          action: `Menghapus data master siswa: ${studentName} dari backend`,
-        };
-        setLogs([newLog, ...logs]);
-      } catch (err: any) {
-        alert("Gagal menghapus siswa di backend: " + (err.response?.data?.message || err.message));
-      }
-    } else if (actionType === "delete_class") {
-      const clsName = classes.find(c => c.id === targetId)?.className || "Kelas";
-      try {
-        await classService.delete(targetId);
-
-        // Refresh list
-        const freshClasses = await classService.getAll();
-        const rawFresh = Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || [];
-        setClasses(mapClassesData(rawFresh));
-
-        const newLog = {
-          id: Date.now(),
-          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-          user: session.name,
-          action: `Menghapus kelas: ${clsName} dari backend`,
-        };
-        setLogs([newLog, ...logs]);
-      } catch (err: any) {
-        alert("Gagal menghapus kelas di backend: " + (err.response?.data?.message || err.message));
-      }
-    } else if (actionType === "delete_spp") {
-      const tx = sppTransactions.find(t => t.id === targetId);
-      if (tx) {
-        const studentName = students.find(s => s.id === tx.studentId)?.name || "Siswa";
+      if (actionType === "delete_student") {
+        const studentName = students.find((s) => s.id === targetId)?.name || "Siswa";
         try {
-          await sppService.delete(targetId);
-
+          await studentService.delete(targetId);
+          
           // Refresh list
-          const sppRes = await sppService.getAll("2026");
-          const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
-          setSppTransactions(mapSppTransactions(rawSpp));
+          const freshStudents = await studentService.getAll();
+          const rawFresh = Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || [];
+          setStudents(mapStudentsData(rawFresh));
 
           const newLog = {
             id: Date.now(),
             time: new Date().toISOString().replace('T', ' ').substring(0, 16),
             user: session.name,
-            action: `Menghapus transaksi kas SPP ${studentName} dari backend`,
+            action: `Menghapus data master siswa: ${studentName} dari backend`,
           };
           setLogs([newLog, ...logs]);
         } catch (err: any) {
-          alert("Gagal menghapus transaksi SPP di backend: " + (err.response?.data?.message || err.message));
+          alert("Gagal menghapus siswa di backend: " + (err.response?.data?.message || err.message));
         }
-      }
-    } else if (actionType === "delete_user") {
-      const targetUser = users.find(u => u.id === targetId);
-      if (targetUser) {
+      } else if (actionType === "delete_class") {
+        const clsName = classes.find(c => c.id === targetId)?.className || "Kelas";
         try {
-          // Coba hapus ke backend
-          await userService.delete(targetId);
-          
-          const userRes = await userService.getAll();
-          const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
-          setUsers(mapUsersData(rawUsers));
-        } catch {
-          // Fallback lokal jika backend tidak menyediakan rute delete user
-          // Catat ID di list local agar konsisten saat refresh
-          const raw = localStorage.getItem("deleted_user_ids");
-          const deletedUserIds = raw ? JSON.parse(raw) : [];
-          if (!deletedUserIds.includes(targetId)) {
-            deletedUserIds.push(targetId);
-            localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
+          await classService.delete(targetId);
+
+          // Refresh list
+          const freshClasses = await classService.getAll();
+          const rawFresh = Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || [];
+          setClasses(mapClassesData(rawFresh));
+
+          const newLog = {
+            id: Date.now(),
+            time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            user: session.name,
+            action: `Menghapus kelas: ${clsName} dari backend`,
+          };
+          setLogs([newLog, ...logs]);
+        } catch (err: any) {
+          alert("Gagal menghapus kelas di backend: " + (err.response?.data?.message || err.message));
+        }
+      } else if (actionType === "delete_spp") {
+        const tx = sppTransactions.find(t => t.id === targetId);
+        if (tx) {
+          const studentName = students.find(s => s.id === tx.studentId)?.name || "Siswa";
+          try {
+            await sppService.delete(targetId);
+
+            // Refresh list
+            const sppRes = await sppService.getAll("2026");
+            const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
+            setSppTransactions(mapSppTransactions(rawSpp));
+
+            const newLog = {
+              id: Date.now(),
+              time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+              user: session.name,
+              action: `Menghapus transaksi kas SPP ${studentName} dari backend`,
+            };
+            setLogs([newLog, ...logs]);
+          } catch (err: any) {
+            alert("Gagal menghapus transaksi SPP di backend: " + (err.response?.data?.message || err.message));
+          }
+        }
+      } else if (actionType === "delete_user") {
+        const targetUser = users.find(u => u.id === targetId);
+        if (targetUser) {
+          try {
+            // Coba hapus ke backend
+            await userService.delete(targetId);
+            
+            const userRes = await userService.getAll();
+            const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+            setUsers(mapUsersData(rawUsers));
+          } catch {
+            // Fallback lokal jika backend tidak menyediakan rute delete user
+            // Catat ID di list local agar konsisten saat refresh
+            const raw = localStorage.getItem("deleted_user_ids");
+            const deletedUserIds = raw ? JSON.parse(raw) : [];
+            if (!deletedUserIds.includes(targetId)) {
+              deletedUserIds.push(targetId);
+              localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
+            }
+
+            const updated = users.filter(u => u.id !== targetId);
+            setUsers(updated);
+            localStorage.setItem("system_users", JSON.stringify(updated));
           }
 
-          const updated = users.filter(u => u.id !== targetId);
-          setUsers(updated);
-          localStorage.setItem("system_users", JSON.stringify(updated));
+          const newLog = {
+            id: Date.now(),
+            time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            user: session.name,
+            action: `Menghapus akun pengguna: ${targetUser.name} (Lokal / Backend)`,
+          };
+          setLogs([newLog, ...logs]);
         }
-
-        const newLog = {
-          id: Date.now(),
-          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-          user: session.name,
-          action: `Menghapus akun pengguna: ${targetUser.name} (Lokal / Backend)`,
-        };
-        setLogs([newLog, ...logs]);
       }
+    } finally {
+      setIsConfirming(false);
+      setConfirmModal({
+        isOpen: false,
+        title: "",
+        message: "",
+        actionType: null,
+        targetId: null
+      });
     }
-
-    setConfirmModal({
-      isOpen: false,
-      title: "",
-      message: "",
-      actionType: null,
-      targetId: null
-    });
   };
 
   const handleAddActivity = (newActData: any) => {
@@ -1266,14 +1286,16 @@ const handleDeleteUser = (userId: number) => {
                 <button
                   type="button"
                   onClick={handleExecuteConfirmAction}
-                  className="flex-1 py-2 bg-accent hover:bg-accent-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-3xs"
+                  disabled={isConfirming}
+                  className="flex-1 py-2 bg-accent hover:bg-accent-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-3xs disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Ya, Lanjutkan
+                  {isConfirming ? "Memproses..." : "Ya, Lanjutkan"}
                 </button>
                 <button
                   type="button"
+                  disabled={isConfirming}
                   onClick={() => setConfirmModal({ isOpen: false, title: "", message: "", actionType: null, targetId: null })}
-                  className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50"
                 >
                   Batal
                 </button>

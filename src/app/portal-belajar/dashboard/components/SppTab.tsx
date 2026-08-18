@@ -833,8 +833,7 @@ export default function SppTab({
                 Melacak lunas/tidaknya SPP tiap murid berdasarkan tahun pembukuan yang dipilih.
               </p>
             </div>
-            
-            {/* Quick stats on the right */}
+              {/* Quick stats on the right */}
             <div className="flex items-center gap-3 bg-[#FAF8F5] px-4 py-2.5 rounded-xl border border-primary-green/10">
               <div className="text-center border-r border-neutral-gray/10 pr-3">
                 <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold">Total Murid</span>
@@ -849,7 +848,7 @@ export default function SppTab({
                     students
                       .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
                       .filter(student => {
-                        const studentTxs = sppTransactions.filter(tx => tx.studentId === student.id);
+                        const studentTxs = sppTransactions.filter(tx => String(tx.studentId) === String(student.id));
                         return studentTxs.some(tx => (tx.paidMonths || []).some(m => getAcademicYearFromDate(tx.date) === selectedAcademicYear));
                       }).length
                   }
@@ -862,7 +861,7 @@ export default function SppTab({
                     students
                       .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
                       .filter(student => {
-                        const studentTxs = sppTransactions.filter(tx => tx.studentId === student.id);
+                        const studentTxs = sppTransactions.filter(tx => String(tx.studentId) === String(student.id));
                         return !studentTxs.some(tx => (tx.paidMonths || []).some(m => getAcademicYearFromDate(tx.date) === selectedAcademicYear));
                       }).length
                   }
@@ -870,7 +869,7 @@ export default function SppTab({
               </div>
             </div>
           </div>
-
+          
           <div className="overflow-x-auto rounded-xl border border-neutral-gray/10">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
@@ -903,7 +902,7 @@ export default function SppTab({
                           const monthKey = `${labelYear}-${m.value}`;
                           
                           // Check if student has a transaction with paidMonths containing this monthKey
-                          const studentTxs = sppTransactions.filter(tx => tx.studentId === student.id);
+                          const studentTxs = sppTransactions.filter(tx => String(tx.studentId) === String(student.id));
                           const isPaid = studentTxs.some(tx => tx.paidMonths?.includes(monthKey));
 
                           return (
