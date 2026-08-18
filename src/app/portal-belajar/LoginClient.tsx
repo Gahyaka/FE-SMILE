@@ -28,16 +28,11 @@ export default function LoginClient() {
       localStorage.setItem("system_users", JSON.stringify(defaultUsers));
     }
   }, []);
-
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    /* 
-    // ==========================================
-    // KONEKSI API BACKEND NON-AKTIF SEMENTARA
-    // ==========================================
     try {
       // 1. Kirim request login ke backend Railway
       const loginRes = await authService.login({ username, password });
@@ -88,30 +83,6 @@ export default function LoginClient() {
       setError(errMsg === "Network Error" ? "Gagal terhubung ke server backend API." : errMsg);
       setLoading(false);
     }
-    */
-
-    // ==========================================
-    // MOCK LOGIN AKTIF SEMENTARA UNTUK EKSPLORASI UI
-    // ==========================================
-    setTimeout(() => {
-      const stored = localStorage.getItem("system_users");
-      const currentUsers = stored ? JSON.parse(stored) : [];
-      
-      const matched = currentUsers.find(
-        (u: any) => u.username === username && u.password === password
-      );
-
-      if (matched) {
-        localStorage.setItem(
-          "user_session",
-          JSON.stringify({ role: matched.role, name: matched.name })
-        );
-        router.push("/portal-belajar/dashboard");
-      } else {
-        setError("Nama pengguna atau kata sandi salah. Silakan coba lagi!");
-        setLoading(false);
-      }
-    }, 600);
   };
 
   return (
