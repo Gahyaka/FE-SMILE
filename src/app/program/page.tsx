@@ -8,19 +8,19 @@ export default function ProgramPage() {
     <div className="flex flex-col min-h-screen text-neutral-dark bg-[#FAF8F5] pt-20 select-none">
       
       {/* HEADER SECTION */}
-      <section className="relative bg-gradient-to-b from-[#FAF8F5] to-white py-16 text-center overflow-hidden border-b border-soft-mint">
+      <section className="relative bg-gradient-to-b from-[#FAF8F5] to-white py-20 text-center overflow-hidden border-b border-soft-mint">
         {/* Chalkboard grid overlay background */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.015)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none -z-10"></div>
-        {/* Swirly background doodles */}
+        {/* Decorative doodles */}
         <div className="absolute top-10 left-10 text-warm-yellow/30 text-5xl select-none font-bold hidden md:block">★</div>
         <div className="absolute bottom-6 right-12 text-primary-green/20 text-5xl select-none font-bold hidden md:block">★</div>
 
         <div className="max-w-4xl mx-auto px-4 space-y-5 relative z-10">
           <span className="inline-block text-xs uppercase font-extrabold text-primary-dark tracking-widest bg-soft-mint px-4 py-2 rounded-[99px_15px_99px_15px]/[15px_99px_15px_99px] border-2 border-dashed border-primary-green/30">
-            Pilar Kegiatan
+            Kurikulum & Kegiatan
           </span>
           <h1 className="font-baloo text-4xl sm:text-5xl font-bold text-neutral-dark leading-tight">
-            Program Unggulan <span className="text-primary-green relative">RA Sahabat
+            Program & <span className="text-primary-green relative">Kurikulum Unggulan
               {/* Underline sketch */}
               <svg className="absolute -bottom-2 left-0 w-full h-2.5 text-warm-yellow" viewBox="0 0 100 10" preserveAspectRatio="none" fill="none">
                 <path d="M0,5 Q50,9 100,5" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
@@ -28,7 +28,7 @@ export default function ProgramPage() {
             </span>
           </h1>
           <p className="text-sm sm:text-base text-neutral-gray max-w-2xl mx-auto leading-relaxed font-medium">
-            Memadukan karakter luhur Aswaja NU, stimulasi tumbuh kembang motorik kognitif, dan pembiasaan hidup sehat harian.
+            Memadukan Pembelajaran Mendalam (PM) dengan Kurikulum Berbasis Cinta (Panca Cinta) demi melahirkan generasi CERIA yang Qur'ani dan cinta tanah air.
           </p>
         </div>
       </section>
@@ -36,56 +36,58 @@ export default function ProgramPage() {
       {/* DETAIL PROGRAM PILLARS */}
       <section className="py-16 space-y-24 max-w-7xl mx-4 md:mx-6 lg:mx-8 xl:mx-auto px-4 sm:px-6 lg:px-8 bg-white/40 rounded-[40px_15px_50px_20px]/[20px_50px_15px_40px] border border-soft-mint my-8">
         
-        {/* PILAR 1: KARAKTER ASWAJA */}
+        {/* PROGRAM 1: KEAGAMAAN (Tahfidz Yanbu'a) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-6 space-y-6">
+          <div className="lg:col-span-7 space-y-6">
             <div className="w-16 h-16 bg-secondary-soft rounded-[12px_6px_10px_8px]/[8px_10px_6px_12px] border-2 border-dashed border-secondary/40 flex items-center justify-center text-secondary shadow-xs">
-              {/* Sketched Book/Quran SVG */}
               <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" strokeDasharray="3 1" />
               </svg>
             </div>
             <h2 className="font-baloo text-3xl font-bold text-neutral-dark">
-              1. Pendidikan Karakter Aswaja <span className="text-secondary">(Nilai Keagamaan Islami)</span>
+              1. Program Keagamaan <span className="text-secondary">(Religius)</span>
             </h2>
             <p className="text-sm text-neutral-gray leading-relaxed font-medium">
-              Menanamkan cinta kepada Allah SWT dan Rasulullah SAW sejak usia dini menjadi misi utama kami. Melalui pilar ini, anak-anak diperkenalkan dengan ibadah harian praktis, asmaul husna, doa-doa pendek, sholawat, dan praktek latihan manasik haji cilik.
+              Membangun rasa kecintaan terhadap Al-Qur'an sejak dini dengan menyelaraskan pengalaman belajar dengan nilai-nilai agama dan asmaul husna secara menyenangkan.
             </p>
-            <div className="space-y-3">
-              <h4 className="font-bold text-sm text-secondary uppercase tracking-wide">Fokus Kegiatan:</h4>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-neutral-gray font-semibold">
-                <li className="flex items-center gap-2">
-                  <span className="text-secondary text-sm">✔</span> Hafalan Doa Harian Praktis
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-secondary text-sm">✔</span> Pembiasaan Sholawat Aswaja
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-secondary text-sm">✔</span> Praktek Wudhu & Sholat Dhuha
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-secondary text-sm">✔</span> Latihan Manasik Haji Cilik
-                </li>
-              </ul>
+            <div className="space-y-4">
+              <div className="p-4 bg-secondary-soft/50 rounded-xl border border-secondary/10">
+                <h4 className="font-bold text-xs text-secondary uppercase tracking-wider mb-1">Tahfidz & Tahsin Qur'an</h4>
+                <p className="text-xs text-neutral-gray font-semibold leading-relaxed">
+                  Menghafal Al-Qur'an menggunakan metode setoran hafalan praktis *"One Day One Ayat"*, serta perbaikan bacaan (tahsin) menggunakan metode **Yanbu’a**.
+                </p>
+              </div>
+              <div className="p-4 bg-secondary-soft/50 rounded-xl border border-secondary/10">
+                <h4 className="font-bold text-xs text-secondary uppercase tracking-wider mb-1">Pembiasaan Ibadah Harian</h4>
+                <p className="text-xs text-neutral-gray font-semibold leading-relaxed">
+                  Pelaksanaan sholat dhuha berjamaah, pembacaan sholawat, menghafal hadits-hadits pendek pilihan, doa sehari-hari, serta pengenalan Asmaul Husna secara rutin.
+                </p>
+              </div>
+              <div className="p-4 bg-secondary-soft/50 rounded-xl border border-secondary/10">
+                <h4 className="font-bold text-xs text-secondary uppercase tracking-wider mb-1">Simulasi Manasik Haji</h4>
+                <p className="text-xs text-neutral-gray font-semibold leading-relaxed">
+                  Penyelenggaraan manasik haji cilik sebagai pengenalan rukun Islam kelima melalui simulasi fisik yang interaktif.
+                </p>
+              </div>
             </div>
           </div>
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-5">
             <div className="bg-[#FAF8F5] p-8 rounded-[35px_15px_45px_20px]/[20px_45px_15px_35px] border-2 border-dashed border-secondary/30 flex flex-col justify-center shadow-sm">
-              <h3 className="font-baloo text-xl font-bold text-secondary mb-3">Kegiatan Keagamaan Mingguan</h3>
+              <h3 className="font-baloo text-xl font-bold text-secondary mb-3">Target Keagamaan</h3>
               <p className="text-xs text-neutral-gray leading-relaxed mb-6 font-medium">
-                Setiap hari Jumat pagi, seluruh siswa KB dan RA diajak membaca sholawat nabi dan mendengarkan dongeng Islami interaktif mengenai akhlak terpuji para nabi.
+                Setiap santri didorong untuk memiliki pembiasaan akhlakul karimah yang terpantau melalui sinergi guru dan orang tua.
               </p>
               <div className="bg-white p-5 rounded-[20px_40px_15px_35px]/[35px_15px_40px_20px] shadow-xs border-2 border-secondary/20 space-y-4">
                 <div className="flex items-center justify-between border-b border-secondary-soft pb-2">
-                  <span className="text-xs font-extrabold text-neutral-dark">Keterlibatan Ibadah Praktis</span>
-                  <span className="text-xs font-extrabold text-secondary">95% Siswa Terbiasa</span>
+                  <span className="text-xs font-extrabold text-neutral-dark">Kefasihan Ibadah Harian</span>
+                  <span className="text-xs font-extrabold text-secondary">Hingga 95% Capaian</span>
                 </div>
                 <div className="w-full bg-secondary-soft h-3.5 rounded-[99px_15px_99px_15px] overflow-hidden border border-secondary/10">
                   <div className="bg-secondary h-full w-[95%] rounded-[99px_0px_0px_99px]"></div>
                 </div>
                 <div className="text-[10px] text-neutral-gray leading-relaxed font-semibold">
-                  *Dipantau melalui lembar monitoring ibadah rumah tangga bekerja sama dengan wali murid.
+                  *Mufradat Bahasa Arab juga diperkenalkan sebanyak 4 kosakata baru setiap bulannya (48 kosakata dalam setahun).
                 </div>
               </div>
             </div>
@@ -94,54 +96,58 @@ export default function ProgramPage() {
 
         <hr className="border-t-2 border-dashed border-soft-mint" />
 
-        {/* PILAR 2: PLAYFUL LEARNING */}
+        {/* PROGRAM 2: PROGRAM KHUSUS (Mamahku Guruku & Siaga Bencana) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-6 lg:order-2 space-y-6">
+          <div className="lg:col-span-7 space-y-6">
             <div className="w-16 h-16 bg-soft-mint rounded-[12px_6px_10px_8px]/[8px_10px_6px_12px] border-2 border-dashed border-primary-green/40 flex items-center justify-center text-primary-green shadow-xs">
-              {/* Sketched Puzzle Piece SVG */}
               <svg className="w-8 h-8 text-primary-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22C12 22 12 13 12 8C12 5.5 14.5 3 16.5 3" />
-                <path d="M12 12C8.5 12 5 9.5 5 7C5 5.5 7.5 5.5 12 8" />
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
               </svg>
             </div>
             <h2 className="font-baloo text-3xl font-bold text-neutral-dark">
-              2. Metode Playful Learning <span className="text-primary-green">(Bermain Seraya Belajar)</span>
+              2. Program Khusus & Kemitraan
             </h2>
             <p className="text-sm text-neutral-gray leading-relaxed font-medium">
-              Eksplorasi sensorik motorik sangat penting di usia emas. Kami menerapkan metode belajar kreatif berbasis sentra, di mana anak belajar logika dasar (angka/huruf), sains sederhana, dan kreasi seni rupa lewat stimulasi permainan kelompok yang ceria.
+              Meningkatkan keterlibatan aktif orang tua serta menumbuhkan kesadaran diri anak terhadap lingkungan sosial dan alam sekitar.
             </p>
-            <div className="space-y-3">
-              <h4 className="font-bold text-sm text-primary-dark uppercase tracking-wide">Inisiatif Kognitif:</h4>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-neutral-gray font-semibold">
-                <li className="flex items-center gap-2">
-                  <span className="text-[#FF9F5B] text-sm">🍂</span> Permainan Sensorik Motorik
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-[#FF9F5B] text-sm">🍂</span> Eksperimen Sains Cilik
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-[#FF9F5B] text-sm">🍂</span> Sentra Seni & Gambar Ceria
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-[#FF9F5B] text-sm">🍂</span> Pengenalan Huruf & Angka
-                </li>
-              </ul>
+            <div className="space-y-4">
+              <div className="p-4 bg-primary-soft/50 rounded-xl border border-primary-green/10">
+                <h4 className="font-bold text-xs text-primary-dark uppercase tracking-wider mb-1">Mamahku Adalah Guruku</h4>
+                <p className="text-xs text-neutral-gray font-semibold leading-relaxed">
+                  Program kolaboratif di mana orang tua/wali murid dengan keahlian khusus diundang secara sukarela ke madrasah untuk berbagi pengetahuan nyata kepada anak-anak.
+                </p>
+              </div>
+              <div className="p-4 bg-primary-soft/50 rounded-xl border border-primary-green/10">
+                <h4 className="font-bold text-xs text-primary-dark uppercase tracking-wider mb-1">Madrasah Tanggap & Siaga Bencana</h4>
+                <p className="text-xs text-neutral-gray font-semibold leading-relaxed">
+                  Edukasi keselamatan dasar bagi murid dalam melindungi diri dari berbagai ancaman alam (seperti simulasi gempa bumi, banjir, letusan Gunung Merapi).
+                </p>
+              </div>
+              <div className="p-4 bg-primary-soft/50 rounded-xl border border-primary-green/10">
+                <h4 className="font-bold text-xs text-primary-dark uppercase tracking-wider mb-1">Program Moderasi Beragama</h4>
+                <p className="text-xs text-neutral-gray font-semibold leading-relaxed">
+                  Pengenalan keragaman sosial dan perbedaan di sekitar untuk membina rasa toleransi, anti-kekerasan, dan saling menghormati sejak usia dini.
+                </p>
+              </div>
             </div>
           </div>
-          <div className="lg:col-span-6 lg:order-1">
+          <div className="lg:col-span-5">
             <div className="bg-[#FAF8F5] p-8 rounded-[40px_15px_30px_25px]/[25px_30px_15px_40px] border-2 border-dashed border-primary-green/30 flex flex-col justify-center shadow-sm">
-              <h3 className="font-baloo text-xl font-bold text-primary-dark mb-3">Statistik Sentra Bermain</h3>
+              <h3 className="font-baloo text-xl font-bold text-primary-dark mb-3">Kolaborasi Kemitraan</h3>
               <p className="text-xs text-neutral-gray leading-relaxed mb-6 font-medium">
-                Penyediaan media alat peraga edukatif (APE) dalam ruangan dan luar ruangan yang aman, ramah anak, serta merangsang daya motorik kognitif secara aktif.
+                Kekuatan RA Sahabat didukung oleh jaringan stakeholder yang kuat, termasuk Puskesmas Berbah untuk pemantauan tumbuh kembang (Holistik Integratif).
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white p-4 rounded-[15px_30px_15px_30px]/[30px_15px_30px_15px] border-2 border-dashed border-primary-green/20 text-center shadow-xs">
-                  <span className="block text-2xl font-extrabold text-primary-green">32+</span>
-                  <span className="text-[10px] text-neutral-gray uppercase font-extrabold mt-1 block">Alat Peraga Edukatif</span>
+                  <span className="block text-2xl font-extrabold text-primary-green">100%</span>
+                  <span className="text-[10px] text-neutral-gray uppercase font-extrabold mt-1 block">Layanan PAUD HI</span>
                 </div>
                 <div className="bg-white p-4 rounded-[30px_15px_30px_15px]/[15px_30px_15px_30px] border-2 border-dashed border-primary-green/20 text-center shadow-xs">
-                  <span className="block text-2xl font-extrabold text-secondary">5 Sentra</span>
-                  <span className="text-[10px] text-neutral-gray uppercase font-extrabold mt-1 block">Pilihan Belajar</span>
+                  <span className="block text-2xl font-extrabold text-secondary">Jumat Pon</span>
+                  <span className="text-[10px] text-neutral-gray uppercase font-extrabold mt-1 block">Mengenal Budaya Jawa</span>
                 </div>
               </div>
             </div>
@@ -150,51 +156,77 @@ export default function ProgramPage() {
 
         <hr className="border-t-2 border-dashed border-soft-mint" />
 
-        {/* PILAR 3: TUMBUH KEMBANG SEHAT */}
+        {/* PROGRAM 3: 7 KEBIASAAN ANAK INDONESIA HEBAT (7 KAIH) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-6 space-y-6">
+          <div className="lg:col-span-7 space-y-6">
             <div className="w-16 h-16 bg-accent-soft rounded-[12px_6px_10px_8px]/[8px_10px_6px_12px] border-2 border-dashed border-accent/40 flex items-center justify-center text-accent shadow-xs">
-              {/* Sketched Apple/Gizi SVG */}
               <svg className="w-8 h-8 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="8" strokeDasharray="3 1" />
-                <path d="M12 4c1-2 4-2 4-2" />
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v4l3 3" />
               </svg>
             </div>
             <h2 className="font-baloo text-3xl font-bold text-neutral-dark">
-              3. Tumbuh Kembang Sehat <span className="text-accent">(Pola Hidup Bersih & Sehat)</span>
+              3. 7 Kebiasaan Anak Indonesia Hebat <span className="text-accent">(7 KAIH)</span>
             </h2>
             <p className="text-sm text-neutral-gray leading-relaxed font-medium">
-              Kesehatan fisik adalah fondasi utama anak mampu belajar secara aktif. Pilar **Tumbuh Kembang Sehat** mengawal pencatatan gizi rutin bulanan (bekerja sama dengan Puskesmas Berbah), penyediaan makanan sehat tambahan (PMT) berkala, serta edukasi sikat gigi dan cuci tangan bersih.
+              Kerangka pembiasaan positif harian yang sistematis dan praktis untuk menanamkan karakter luhur dan gaya hidup sehat mandiri pada anak.
             </p>
-            <div className="space-y-3">
-              <h4 className="font-bold text-sm text-accent uppercase tracking-wide">Ragam Aktivitas:</h4>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-neutral-gray font-semibold">
-                <li className="flex items-center gap-2">
-                  <span className="text-accent text-sm">❤</span> Pengukuran Tinggi & Berat Bulanan
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-accent text-sm">❤</span> Program PMT Sehat Bergizi
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-accent text-sm">❤</span> Kampanye Cuci Tangan PHBS
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-accent text-sm">❤</span> Pemeriksaan Gigi Berkala
-                </li>
-              </ul>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="flex gap-2">
+                <span className="text-accent font-extrabold text-sm">01.</span>
+                <div>
+                  <h4 className="font-extrabold text-xs text-neutral-dark">Bangun Pagi</h4>
+                  <p className="text-[10px] text-neutral-gray font-medium mt-0.5">Melatih kesiapan anak mengawali hari.</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-accent font-extrabold text-sm">02.</span>
+                <div>
+                  <h4 className="font-extrabold text-xs text-neutral-dark">Beribadah</h4>
+                  <p className="text-[10px] text-neutral-gray font-medium mt-0.5">Pembiasaan spiritual harian.</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-accent font-extrabold text-sm">03.</span>
+                <div>
+                  <h4 className="font-extrabold text-xs text-neutral-dark">Berolahraga</h4>
+                  <p className="text-[10px] text-neutral-gray font-medium mt-0.5">Menjaga kebugaran jasmani fisik motorik.</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-accent font-extrabold text-sm">04.</span>
+                <div>
+                  <h4 className="font-extrabold text-xs text-neutral-dark">Mengonsumsi Makanan Sehat</h4>
+                  <p className="text-[10px] text-neutral-gray font-medium mt-0.5">Nutrisi bergizi seimbang.</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-accent font-extrabold text-sm">05.</span>
+                <div>
+                  <h4 className="font-extrabold text-xs text-neutral-dark">Gemar Belajar</h4>
+                  <p className="text-[10px] text-neutral-gray font-medium mt-0.5">Merangsang rasa ingin tahu kognitif.</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-accent font-extrabold text-sm">06.</span>
+                <div>
+                  <h4 className="font-extrabold text-xs text-neutral-dark">Bermasyarakat</h4>
+                  <p className="text-[10px] text-neutral-gray font-medium mt-0.5">Melatih interaksi dan kolaborasi sosial.</p>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-5">
             <div className="bg-[#FAF8F5] p-8 rounded-[25px_35px_15px_40px]/[40px_15px_35px_25px] border-2 border-dashed border-primary-green/30 flex flex-col justify-center shadow-sm">
-              <h3 className="font-baloo text-xl font-bold text-primary-dark mb-3">Monitoring Tumbuh Kembang</h3>
+              <h3 className="font-baloo text-xl font-bold text-primary-dark mb-3">Tidur Cepat & Istirahat</h3>
               <p className="text-xs text-neutral-gray leading-relaxed mb-6 font-medium">
-                Setiap data fisik siswa dicatat secara terpusat oleh guru untuk diarsipkan sebagai bukti fisik laporan akreditasi serta bahan evaluasi konsultasi tumbuh kembang anak dengan wali murid.
+                Poin ketujuh dari 7 KAIH adalah membiasakan tidur cepat dan beristirahat yang cukup agar metabolisme tumbuh kembang anak berjalan optimal secara alami.
               </p>
               <div className="bg-white p-5 rounded-[40px_20px_35px_15px]/[15px_35px_20px_40px] shadow-xs border-2 border-accent/30 flex items-center space-x-4">
-                <div className="w-12 h-12 bg-accent-soft rounded-full flex items-center justify-center text-accent font-bold text-lg flex-shrink-0">💡</div>
+                <div className="w-12 h-12 bg-accent-soft rounded-full flex items-center justify-center text-accent font-bold text-lg flex-shrink-0">✓</div>
                 <div className="flex-1">
-                  <h4 className="font-bold text-xs text-neutral-dark">Penyediaan PMT Sehat</h4>
-                  <p className="text-[10px] text-neutral-gray font-medium mt-0.5">Program pemberian makanan tambahan bergizi seminggu sekali (susu, bubur kacang hijau, buah segar).</p>
+                  <h4 className="font-bold text-xs text-neutral-dark">Konsistensi Evaluasi Harian</h4>
+                  <p className="text-[10px] text-neutral-gray font-medium mt-0.5">Dipadukan dengan buku monitoring siswa di madrasah dan rumah secara sinergi.</p>
                 </div>
               </div>
             </div>
@@ -211,14 +243,14 @@ export default function ProgramPage() {
         <div className="max-w-3xl mx-auto px-4 space-y-6 relative z-10">
           <h2 className="font-baloo text-3xl font-bold text-neutral-dark">Tertarik Mendaftarkan Anak Anda di RA Sahabat?</h2>
           <p className="text-sm text-neutral-gray max-w-xl mx-auto leading-relaxed font-medium">
-            Proses Penerimaan Peserta Didik Baru (PPDB) dapat dilakukan secara mudah secara daring melalui formulir pendaftaran awal di halaman utama kami.
+            Silakan hubungi kami untuk informasi kuota kelas pendaftaran melalui WhatsApp Admin di halaman utama.
           </p>
           <div className="pt-2">
             <Link
-              href="/kontak"
+              href="/"
               className="inline-flex items-center justify-center px-8 py-4 rounded-[30px_90px_30px_100px]/[100px_30px_90px_20px] bg-primary-green hover:bg-primary-dark text-white font-extrabold text-base transition-all shadow-md hover:-translate-y-0.5 border-2 border-primary-dark"
             >
-              Isi Formulir PPDB Online
+              Hubungi WhatsApp Admin
             </Link>
           </div>
         </div>
