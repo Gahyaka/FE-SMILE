@@ -67,8 +67,16 @@ function mapClassesData(rawClasses: any[]): any[] {
 function mapUsersData(rawUsers: any[]): any[] {
   const allowedRoles = ["ADMIN", "ADMIN_ADMINISTRASI", "ADMIN_TRANSAKSI", "GURU"];
   
+  // Read locally deleted user IDs to filter them out from backend response
+  let deletedUserIds: any[] = [];
+  if (typeof window !== "undefined") {
+    const raw = localStorage.getItem("deleted_user_ids");
+    deletedUserIds = raw ? JSON.parse(raw) : [];
+  }
+
   return rawUsers
     .filter((u: any) => allowedRoles.includes((u.role || "").toUpperCase()))
+    .filter((u: any) => !deletedUserIds.includes(u.id))
     .map((u: any) => ({
       id: u.id,
       name: u.nama || u.name || "Petugas Madrasah",
@@ -533,6 +541,14 @@ const handleDeleteUser = (userId: number) => {
           setUsers(mapUsersData(rawUsers));
         } catch {
           // Fallback lokal jika backend tidak menyediakan rute delete user
+          // Catat ID di list local agar konsisten saat refresh
+          const raw = localStorage.getItem("deleted_user_ids");
+          const deletedUserIds = raw ? JSON.parse(raw) : [];
+          if (!deletedUserIds.includes(targetId)) {
+            deletedUserIds.push(targetId);
+            localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
+          }
+
           const updated = users.filter(u => u.id !== targetId);
           setUsers(updated);
           localStorage.setItem("system_users", JSON.stringify(updated));
