@@ -21,7 +21,6 @@ import {
   initialSppTransactions,
   initialSavings,
   initialMurajaah,
-  initialLogs,
   initialClasses,
   initialUsers,
 } from "./mockData";
@@ -101,11 +100,16 @@ export default function DashboardClient() {
   const [classes, setClasses] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  // Local password store: { [username]: plaintext_password } — because backend never returns hashed passwords
+  const [localPasswords, setLocalPasswords] = useState<Record<string, string>>(() => {
+    if (typeof window === "undefined") return {};
+    try { return JSON.parse(localStorage.getItem("sgw_local_passwords") || "{}"); } catch { return {}; }
+  });
   const [activities, setActivities] = useState(initialActivities);
   const [sppTransactions, setSppTransactions] = useState(initialSppTransactions);
   const [savings, setSavings] = useState(initialSavings);
   const [murajaahData, setMurajaahData] = useState<{[studentId: number]: {[param: string]: string}}>(initialMurajaah);
-  const [logs, setLogs] = useState(initialLogs);
+  const [logs, setLogs] = useState<any[]>([]);
 
   // Custom confirmation modal state
   const [confirmModal, setConfirmModal] = useState<{
@@ -409,19 +413,30 @@ const handleAddUser = async (newUsrData: any) => {
         });
         success = true;
       } catch (err: any) {
-        console.error("Registration attempt failed:", err.response?.data || err.message);
-        const errMessage = String(err.response?.data?.message || err.message).toLowerCase();
-        const isConflict = err.response?.status === 409 || errMessage.includes("409") || errMessage.includes("terdaftar") || errMessage.includes("conflict");
+        const httpStatus = err.response?.status;
+        const errBody = err.response?.data;
+        const errMessage = String(
+          errBody?.message || errBody?.error || err.message || ""
+        ).toLowerCase();
         
+        // Conflict = HTTP 409, or message contains known conflict keywords
+        const isConflict =
+          httpStatus === 409 ||
+          errMessage.includes("terdaftar") ||
+          errMessage.includes("conflict") ||
+          errMessage.includes("already") ||
+          errMessage.includes("duplicate") ||
+          // Handle empty body {} with status 4xx as conflict fallback during retry
+          (httpStatus === 422 && errMessage === "");
+
         if (isConflict && attempts < maxAttempts) {
-          // Auto-generate username variation by appending a random 2-digit number
           const randomSuffix = String(Math.floor(10 + Math.random() * 90));
           finalUsername = `${newUsrData.username}${randomSuffix}`;
-          console.warn(`Username conflict detected. Auto-retrying with alternative username: ${finalUsername}`);
+          console.warn(`[SGW] Username conflict (${httpStatus}). Retrying as: ${finalUsername}`);
           continue;
         }
-        
-        // If other error or max attempts reached, throw to the outer catch block
+
+        // Non-conflict error or max attempts reached
         throw err;
       }
     }
@@ -444,6 +459,11 @@ const handleAddUser = async (newUsrData: any) => {
         setUsers(updated);
         localStorage.setItem("system_users", JSON.stringify(updated));
       }
+
+      // Persist password locally so it can be copied later from Kelola Pengguna
+      const updatedPasswords = { ...localPasswords, [finalUsername]: newUsrData.password };
+      setLocalPasswords(updatedPasswords);
+      localStorage.setItem("sgw_local_passwords", JSON.stringify(updatedPasswords));
 
       const newLog = {
         id: Date.now(),
@@ -778,7 +798,7 @@ const handleDeleteUser = (userId: number) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-neutral-dark flex flex-col md:flex-row relative font-sans">
+    <div className="h-screen overflow-hidden bg-[#FAF8F5] text-neutral-dark flex relative font-sans">
       {/* Background Chalkboard Grid Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.012)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none -z-10"></div>
 
@@ -791,7 +811,7 @@ const handleDeleteUser = (userId: number) => {
       )}
 
       {/* Sidebar Navigation */}
-      <aside className={`w-64 bg-white text-neutral-dark flex flex-col justify-between p-5 border-r border-primary-green/10 z-40 fixed h-screen transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      <aside className={`w-64 bg-white text-neutral-dark flex flex-col justify-between p-5 border-r border-primary-green/10 z-40 h-full flex-shrink-0 transition-transform duration-300 md:translate-x-0 fixed md:relative ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} overflow-y-auto`}>
         <div className="space-y-6">
           <div className="flex items-center justify-between border-b border-primary-green/10 pb-5">
             <div className="flex items-center gap-3">
@@ -993,42 +1013,40 @@ const handleDeleteUser = (userId: number) => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 p-6 md:p-10 min-h-screen flex flex-col justify-between">
-        <div className="space-y-6">
-          {/* Path Header info */}
-          <div className="flex flex-row justify-between items-center gap-4 border-b border-primary-green/10 pb-4">
-            <div>
-              <span className="text-[9px] text-neutral-gray font-bold uppercase tracking-wider block">
-                Portal Belajar & Administrasi KB/RA Sahabat
-              </span>
-              <h2 className="font-baloo text-xl sm:text-2xl font-bold text-neutral-dark mt-0.5">
-                {activeTab === "siswa" && "Manajemen Data Peserta Didik"}
-                {activeTab === "kelas" && "Manajemen Data Kelas RA Sahabat"}
-                {activeTab === "users" && "Kelola Akses Pengguna & Akun Petugas"}
-                {activeTab === "kegiatan" && "Dokumentasi Kegiatan"}
-                {activeTab === "spp" && "Pencatatan SPP & Les Terpadu"}
-                {activeTab === "tabungan" && "Buku Tabungan Digital"}
-                {activeTab === "murajaah" && "Laporan Hasil Murajaah Santri"}
-                {activeTab === "audit" && "Log Aktivitas Petugas"}
-              </h2>
-            </div>
-            
-            <div className="flex items-center gap-2 flex-shrink-0">
-              
-              {/* Hamburger Button for Mobile */}
-              <button
-                type="button"
-                onClick={() => setSidebarOpen(true)}
-                className="md:hidden p-2 rounded-lg bg-white border border-primary-green/10 text-primary-green hover:bg-soft-mint/10 cursor-pointer shadow-3xs flex items-center justify-center"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
+      <main className="flex-1 flex flex-col h-full overflow-hidden">
+
+        {/* ── Fixed Top Header ── */}
+        <div className="flex-shrink-0 flex items-center justify-between px-6 md:px-10 pt-6 md:pt-7 pb-4 border-b border-primary-green/10 bg-[#FAF8F5]">
+          <div>
+            <span className="text-[9px] text-neutral-gray font-bold uppercase tracking-wider block">
+              Portal Belajar &amp; Administrasi KB/RA Sahabat
+            </span>
+            <h2 className="font-baloo text-xl sm:text-2xl font-bold text-neutral-dark mt-0.5">
+              {activeTab === "siswa" && "Manajemen Data Peserta Didik"}
+              {activeTab === "kelas" && "Manajemen Data Kelas RA Sahabat"}
+              {activeTab === "users" && "Kelola Akses Pengguna & Akun Petugas"}
+              {activeTab === "kegiatan" && "Dokumentasi Kegiatan"}
+              {activeTab === "spp" && "Pencatatan SPP & Les Terpadu"}
+              {activeTab === "tabungan" && "Buku Tabungan Digital"}
+              {activeTab === "murajaah" && "Laporan Hasil Murajaah Santri"}
+              {activeTab === "audit" && "Log Aktivitas Petugas"}
+            </h2>
           </div>
 
-          {/* Render Active Tab Component */}
+          {/* Hamburger Button for Mobile */}
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className="md:hidden p-2 rounded-lg bg-white border border-primary-green/10 text-primary-green hover:bg-soft-mint/10 cursor-pointer shadow-3xs flex items-center justify-center"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+
+        {/* ── Scrollable Tab Content ── */}
+        <div className="flex-1 overflow-y-auto px-6 md:px-10 py-6">
           {loadingData ? (
             <SkeletonLoader type={activeTab as any} />
           ) : (
@@ -1061,6 +1079,7 @@ const handleDeleteUser = (userId: number) => {
               {activeTab === "users" && (
                 <UserTab
                   users={users}
+                  localPasswords={localPasswords}
                   onAddUser={handleAddUser}
                   onUpdateUser={handleUpdateUser}
                   onDeleteUser={handleDeleteUser}
