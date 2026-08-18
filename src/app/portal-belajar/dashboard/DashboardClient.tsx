@@ -96,9 +96,10 @@ export default function DashboardClient() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Shared database states
-  const [students, setStudents] = useState(initialStudents);
-  const [classes, setClasses] = useState(initialClasses);
+  const [students, setStudents] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
   const [activities, setActivities] = useState(initialActivities);
   const [sppTransactions, setSppTransactions] = useState(initialSppTransactions);
   const [savings, setSavings] = useState(initialSavings);
@@ -181,6 +182,8 @@ export default function DashboardClient() {
           }
         } catch (err) {
           console.warn("Backend data fetch warning (using mock fallbacks):", err);
+        } finally {
+          setLoadingData(false);
         }
       };
       loadBackendData();
@@ -1025,83 +1028,95 @@ const handleDeleteUser = (userId: number) => {
           </div>
 
           {/* Render Active Tab Component */}
-          {activeTab === "siswa" && (
-            <StudentTab
-              students={students}
-              classes={classes}
-              isAdminAdministrasi={isAdminAdministrasi}
-              onAddStudent={handleAddStudent}
-              onUpdateStudent={handleUpdateStudent}
-              onDeleteStudent={handleDeleteStudent}
-              onUpdateStudentStatus={handleUpdateStudentStatus}
-            />
-          )}
+          {loadingData ? (
+            <div className="w-full space-y-6 animate-pulse select-none">
+              <div className="h-14 bg-stone-100 rounded-2xl w-full border border-neutral-gray/5"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="h-44 bg-stone-100 rounded-3xl border border-neutral-gray/5"></div>
+                <div className="h-44 bg-stone-100 rounded-3xl border border-neutral-gray/5"></div>
+                <div className="h-44 bg-stone-100 rounded-3xl border border-neutral-gray/5"></div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {activeTab === "siswa" && (
+                <StudentTab
+                  students={students}
+                  classes={classes}
+                  isAdminAdministrasi={isAdminAdministrasi}
+                  onAddStudent={handleAddStudent}
+                  onUpdateStudent={handleUpdateStudent}
+                  onDeleteStudent={handleDeleteStudent}
+                  onUpdateStudentStatus={handleUpdateStudentStatus}
+                />
+              )}
 
-          {activeTab === "kelas" && (
-            <KelasTab
-              students={students}
-              classes={classes}
-              isAdminAdministrasi={isAdminAdministrasi}
-              isGuru={isGuru}
-              currentUserDisplayName={session.name}
-              onAddClass={handleAddClass}
-              onUpdateClass={handleUpdateClass}
-              onDeleteClass={handleDeleteClass}
-            />
-          )}
+              {activeTab === "kelas" && (
+                <KelasTab
+                  students={students}
+                  classes={classes}
+                  isAdminAdministrasi={isAdminAdministrasi}
+                  isGuru={isGuru}
+                  currentUserDisplayName={session.name}
+                  onAddClass={handleAddClass}
+                  onUpdateClass={handleUpdateClass}
+                  onDeleteClass={handleDeleteClass}
+                />
+              )}
 
-          {activeTab === "users" && (
-            <UserTab
-              users={users}
-              onAddUser={handleAddUser}
-              onUpdateUser={handleUpdateUser}
-              onDeleteUser={handleDeleteUser}
-            />
-          )}
+              {activeTab === "users" && (
+                <UserTab
+                  users={users}
+                  onAddUser={handleAddUser}
+                  onUpdateUser={handleUpdateUser}
+                  onDeleteUser={handleDeleteUser}
+                />
+              )}
 
-          {activeTab === "kegiatan" && (
-            <KegiatanTab
-              activities={activities}
-              isAdminAdministrasi={isAdminAdministrasi}
-              isGuru={isGuru}
-              onAddActivity={handleAddActivity}
-            />
-          )}
+              {activeTab === "kegiatan" && (
+                <KegiatanTab
+                  activities={activities}
+                  isAdminAdministrasi={isAdminAdministrasi}
+                  isGuru={isGuru}
+                  onAddActivity={handleAddActivity}
+                />
+              )}
 
-          {activeTab === "spp" && (
-            <SppTab
-              students={students}
-              sppTransactions={sppTransactions}
-              isAdminTransaksi={isAdminTransaksi}
-              onAddSppLesPayment={handleAddSppLesPayment}
-              onUpdateSppLesPayment={handleUpdateSppPayment}
-              onDeleteSppLesPayment={handleDeleteSppPayment}
-            />
-          )}
+              {activeTab === "spp" && (
+                <SppTab
+                  students={students}
+                  sppTransactions={sppTransactions}
+                  isAdminTransaksi={isAdminTransaksi}
+                  onAddSppLesPayment={handleAddSppLesPayment}
+                  onUpdateSppLesPayment={handleUpdateSppPayment}
+                  onDeleteSppLesPayment={handleDeleteSppPayment}
+                />
+              )}
 
-          {activeTab === "tabungan" && (
-            <TabunganTab
-              students={students}
-              savings={savings}
-              isAdminTransaksi={isAdminTransaksi}
-              adminName={session.name}
-              onAddTransaction={handleAddSavingsTransaction}
-            />
-          )}
+              {activeTab === "tabungan" && (
+                <TabunganTab
+                  students={students}
+                  savings={savings}
+                  isAdminTransaksi={isAdminTransaksi}
+                  adminName={session.name}
+                  onAddTransaction={handleAddSavingsTransaction}
+                />
+              )}
 
-          {activeTab === "murajaah" && (
-            <MurajaahTab
-              students={students}
-              murajaahData={murajaahData}
-              isAdminAdministrasi={isAdminAdministrasi}
-              isGuru={isGuru}
-              onUpdateMurajaah={handleUpdateMurajaah}
-            />
-          )}
+              {activeTab === "murajaah" && (
+                <MurajaahTab
+                  students={students}
+                  murajaahData={murajaahData}
+                  isAdminAdministrasi={isAdminAdministrasi}
+                  isGuru={isGuru}
+                  onUpdateMurajaah={handleUpdateMurajaah}
+                />
+              )}
 
-
-          {activeTab === "audit" && (
-            <AuditTab logs={logs} />
+              {activeTab === "audit" && (
+                <AuditTab logs={logs} />
+              )}
+            </>
           )}
         </div>
 

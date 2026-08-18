@@ -478,9 +478,26 @@ export default function UserTab({
                 <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5 space-y-1.5 text-[11px] font-semibold text-neutral-gray">
                   <div className="flex justify-between items-center">
                     <span>Kata Sandi:</span>
-                    <span className="font-mono text-neutral-dark font-bold bg-white px-2 py-0.5 rounded border border-neutral-gray/10">
-                      {u.password || "••••••"}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono text-neutral-gray font-bold tracking-widest text-[9px] select-none bg-stone-100/50 px-1.5 py-0.5 rounded">
+                        ••••••••
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const passToCopy = u.password || "sgw_default123";
+                          navigator.clipboard.writeText(passToCopy);
+                          setToastMessage(`Kata sandi ${u.name} berhasil disalin!`);
+                          setTimeout(() => setToastMessage(null), 3000);
+                        }}
+                        className="p-1 rounded-lg hover:bg-stone-100 text-primary-green transition-colors cursor-pointer flex items-center justify-center border border-neutral-gray/5"
+                        title="Salin Kata Sandi ke Clipboard"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
