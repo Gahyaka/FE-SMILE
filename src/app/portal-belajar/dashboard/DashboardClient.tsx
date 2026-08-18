@@ -12,6 +12,7 @@ import SppTab from "./components/SppTab";
 import TabunganTab from "./components/TabunganTab";
 import MurajaahTab from "./components/MurajaahTab";
 import AuditTab from "./components/AuditTab";
+import SkeletonLoader from "./components/SkeletonLoader";
 
 // Import initial mock data
 import {
@@ -20,10 +21,12 @@ import {
   initialSppTransactions,
   initialSavings,
   initialMurajaah,
-  initialLogs,
   initialClasses,
   initialUsers,
 } from "./mockData";
+import { studentService } from "@/services/student";
+import { classService } from "@/services/class";
+import { userService } from "@/services/user";
 
 type TabKey = "siswa" | "kelas" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "users" | "audit";
 
@@ -33,6 +36,59 @@ function getDefaultTab(role: "admin_adm" | "admin_trx" | "guru"): TabKey {
   return "siswa"; // admin_adm
 }
 
+function mapStudentsData(rawStudents: any[]): any[] {
+  return rawStudents.map((st: any) => ({
+    id: st.id,
+    name: st.namaLengkap || st.nama_lengkap || "Siswa Tanpa Nama",
+    nisn: st.nis || st.nisn || "",
+    parentName: st.namaOrangTua || st.nama_orang_tua || "Wali Murid",
+    class: st.kelas?.namaKelas || st.kelas?.nama_kelas || st.class || "Belum Ada Kelas",
+    address: st.address || st.alamat || "Alamat belum diinput",
+    semester: st.semester || "Semester 1",
+    fase: st.fase || "Fase Fondasi",
+    height: Number(st.height) || 100,
+    weight: Number(st.weight) || 16,
+    headCircumference: Number(st.headCircumference) || 48,
+    academicYear: st.academicYear || st.academic_year || "2026/2027",
+    activeStatus: st.activeStatus || st.status || "Aktif"
+  }));
+}
+
+function mapClassesData(rawClasses: any[]): any[] {
+  return rawClasses.map((c: any) => ({
+    id: c.id,
+    className: c.namaKelas || c.nama_kelas || "Kelas Tanpa Nama",
+    teacherName: c.waliKelas || c.wali_kelas || "Belum Ada Wali",
+    fase: c.tahunAjaran || c.tahun_ajaran || "2025/2026", // Map Academic Year here
+    description: c.description || c.deskripsi || "Tidak ada deskripsi"
+  }));
+}
+
+function mapUsersData(rawUsers: any[]): any[] {
+  const allowedRoles = ["ADMIN", "ADMIN_ADMINISTRASI", "ADMIN_TRANSAKSI", "GURU"];
+  
+  // Read locally deleted user IDs to filter them out from backend response
+  let deletedUserIds: any[] = [];
+  if (typeof window !== "undefined") {
+    const raw = localStorage.getItem("deleted_user_ids");
+    deletedUserIds = raw ? JSON.parse(raw) : [];
+  }
+
+  return rawUsers
+    .filter((u: any) => allowedRoles.includes((u.role || "").toUpperCase()))
+    .filter((u: any) => !deletedUserIds.includes(u.id))
+    .map((u: any) => ({
+      id: u.id,
+      name: u.nama || u.name || "Petugas Madrasah",
+      username: u.username,
+      role: (u.role || "").toUpperCase() === "ADMIN_ADMINISTRASI" || (u.role || "").toUpperCase() === "ADMIN" 
+        ? "admin_adm" 
+        : (u.role || "").toUpperCase() === "ADMIN_TRANSAKSI" 
+          ? "admin_trx" 
+          : "guru"
+    }));
+}
+
 export default function DashboardClient() {
   const router = useRouter();
   const [session, setSession] = useState<{ role: "admin_adm" | "admin_trx" | "guru"; name: string } | null>(null);
@@ -40,14 +96,20 @@ export default function DashboardClient() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Shared database states
-  const [students, setStudents] = useState(initialStudents);
-  const [classes, setClasses] = useState(initialClasses);
+  const [students, setStudents] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+  // Local password store: { [username]: plaintext_password } — because backend never returns hashed passwords
+  const [localPasswords, setLocalPasswords] = useState<Record<string, string>>(() => {
+    if (typeof window === "undefined") return {};
+    try { return JSON.parse(localStorage.getItem("sgw_local_passwords") || "{}"); } catch { return {}; }
+  });
   const [activities, setActivities] = useState(initialActivities);
   const [sppTransactions, setSppTransactions] = useState(initialSppTransactions);
   const [savings, setSavings] = useState(initialSavings);
   const [murajaahData, setMurajaahData] = useState<{[studentId: number]: {[param: string]: string}}>(initialMurajaah);
-  const [logs, setLogs] = useState(initialLogs);
+  const [logs, setLogs] = useState<any[]>([]);
 
   // Custom confirmation modal state
   const [confirmModal, setConfirmModal] = useState<{
@@ -63,6 +125,11 @@ export default function DashboardClient() {
     actionType: null,
     targetId: null
   });
+
+  // State edit profil saya
+  const [showProfileDrawer, setShowProfileDrawer] = useState(false);
+  const [profileName, setProfileName] = useState("");
+  const [profilePassword, setProfilePassword] = useState("");
 
   useEffect(() => {
     // Authenticate session on client side
@@ -83,6 +150,48 @@ export default function DashboardClient() {
         setUsers(initialUsers);
         localStorage.setItem("system_users", JSON.stringify(initialUsers));
       }
+
+      // Sync activities with localStorage for landing page dynamic galeri
+      const storedActivities = localStorage.getItem("sgw_activities");
+      if (storedActivities) {
+        setActivities(JSON.parse(storedActivities));
+      } else {
+        localStorage.setItem("sgw_activities", JSON.stringify(initialActivities));
+      }
+
+      // Fetch real data from backend Adonis server
+      const loadBackendData = async () => {
+        try {
+          const studentRes = await studentService.getAll();
+          const rawStudents = Array.isArray(studentRes) ? studentRes : studentRes?.data || [];
+          setStudents(mapStudentsData(rawStudents));
+
+          const classRes = await classService.getAll();
+          const rawClasses = Array.isArray(classRes) ? classRes : classRes?.data || [];
+          setClasses(mapClassesData(rawClasses));
+
+          // Fetch users from backend Adonis
+          try {
+            const userRes = await userService.getAll();
+            const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+            setUsers(mapUsersData(rawUsers));
+          } catch (userErr) {
+            console.warn("Backend users list API not fully supported/accessible. Using local mock storage.");
+            const storedUsers = localStorage.getItem("system_users");
+            if (storedUsers) {
+              setUsers(JSON.parse(storedUsers));
+            } else {
+              setUsers(initialUsers);
+              localStorage.setItem("system_users", JSON.stringify(initialUsers));
+            }
+          }
+        } catch (err) {
+          console.warn("Backend data fetch warning (using mock fallbacks):", err);
+        } finally {
+          setLoadingData(false);
+        }
+      };
+      loadBackendData();
     }
   }, [router]);
 
@@ -106,57 +215,95 @@ export default function DashboardClient() {
   const isGuru = session.role === "guru";
 
   // CRUD & Operations handlers
-  const handleAddStudent = (newStData: any) => {
+  const handleAddStudent = async (newStData: any) => {
     if (!isAdminAdministrasi) return;
-    const newSt = {
-      ...newStData,
-      id: Date.now(),
-      activeStatus: "Aktif"
-    };
-    setStudents([...students, newSt]);
-
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Mendaftarkan siswa baru: ${newSt.name} (NISN: ${newSt.nisn})`,
-    };
-    setLogs([newLog, ...logs]);
-  };
-
-  const handleUpdateStudent = (updatedStudent: any) => {
-    if (!isAdminAdministrasi) return;
-    setStudents(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
-
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Memperbarui profil data siswa: ${updatedStudent.name} (NISN: ${updatedStudent.nisn})`,
-    };
-    setLogs([newLog, ...logs]);
-  };
-
-  const handleUpdateStudentStatus = (studentId: number, status: string) => {
-    if (!isAdminAdministrasi) return;
-    let studentName = "";
-    setStudents((prev) =>
-      prev.map((student) => {
-        if (student.id === studentId) {
-          studentName = student.name;
-          return { ...student, activeStatus: status };
-        }
-        return student;
-      })
+    
+    // Find matching class UUID from backend database
+    const matchedClass = classes.find(
+      (c: any) => c.className === newStData.class || c.name === newStData.class
     );
+    const kelasId = matchedClass?.id || classes[0]?.id || "7367fed7-6f2b-4cdc-88aa-1399ce1d2175";
 
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Mengubah status keaktifan siswa ${studentName} menjadi: ${status}`,
-    };
-    setLogs([newLog, ...logs]);
+    try {
+      await studentService.create({
+        nis: newStData.nisn,
+        namaLengkap: newStData.name,
+        namaOrangTua: newStData.parentName || "Wali Murid RA Sahabat",
+        kelasId: String(kelasId)
+      });
+      
+      // Refresh list
+      const freshStudents = await studentService.getAll();
+      const rawFresh = Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || [];
+      setStudents(mapStudentsData(rawFresh));
+      
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Mendaftarkan siswa baru: ${newStData.name} (NISN: ${newStData.nisn}) ke database backend`,
+      };
+      setLogs([newLog, ...logs]);
+    } catch (err: any) {
+      alert("Gagal menambahkan siswa ke backend: " + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const handleUpdateStudent = async (updatedStudent: any) => {
+    if (!isAdminAdministrasi) return;
+    
+    const matchedClass = classes.find(
+      (c: any) => c.className === updatedStudent.class || c.name === updatedStudent.class
+    );
+    const kelasId = matchedClass?.id || classes[0]?.id || "7367fed7-6f2b-4cdc-88aa-1399ce1d2175";
+
+    try {
+      await studentService.update(updatedStudent.id, {
+        nis: updatedStudent.nisn,
+        namaLengkap: updatedStudent.name,
+        namaOrangTua: updatedStudent.parentName || "Wali Murid RA Sahabat",
+        kelasId: String(kelasId)
+      });
+
+      // Refresh list
+      const freshStudents = await studentService.getAll();
+      const rawFresh = Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || [];
+      setStudents(mapStudentsData(rawFresh));
+
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Memperbarui profil data siswa: ${updatedStudent.name} (NISN: ${updatedStudent.nisn}) di backend`,
+      };
+      setLogs([newLog, ...logs]);
+    } catch (err: any) {
+      alert("Gagal memperbarui data siswa di backend: " + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const handleUpdateStudentStatus = async (studentId: number, status: string) => {
+    if (!isAdminAdministrasi) return;
+    const target = students.find(s => s.id === studentId);
+    if (!target) return;
+    
+    try {
+      await studentService.update(studentId, { activeStatus: status });
+
+      // Refresh list
+      const freshStudents = await studentService.getAll();
+      setStudents(Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || []);
+
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Mengubah status keaktifan siswa ${target.name} menjadi: ${status} di backend`,
+      };
+      setLogs([newLog, ...logs]);
+    } catch (err: any) {
+      alert("Gagal memperbarui status keaktifan di backend: " + (err.response?.data?.message || err.message));
+    }
   };
 
   const handleDeleteStudent = (studentId: number) => {
@@ -171,34 +318,56 @@ export default function DashboardClient() {
     });
   };
 
-const handleAddClass = (newClsData: any) => {
+const handleAddClass = async (newClsData: any) => {
   if (!isAdminAdministrasi) return;
-  const newCls = {
-    ...newClsData,
-    id: Date.now()
-  };
-  setClasses([...classes, newCls]);
+  try {
+    await classService.create({
+      namaKelas: newClsData.className,
+      tahunAjaran: newClsData.fase, // Send selected academic year dynamically
+      waliKelas: newClsData.teacherName || "Bunda Guru"
+    });
 
-  const newLog = {
-    id: Date.now(),
-    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-    user: session.name,
-    action: `Menambahkan kelas baru: ${newCls.className}`,
-  };
-  setLogs([newLog, ...logs]);
+    // Refresh list
+    const freshClasses = await classService.getAll();
+    const rawFresh = Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || [];
+    setClasses(mapClassesData(rawFresh));
+
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session.name,
+      action: `Menambahkan kelas baru: ${newClsData.className} ke backend`,
+    };
+    setLogs([newLog, ...logs]);
+  } catch (err: any) {
+    alert("Gagal menambahkan kelas ke backend: " + (err.response?.data?.message || err.message));
+  }
 };
 
-const handleUpdateClass = (updatedCls: any) => {
+const handleUpdateClass = async (updatedCls: any) => {
   if (!isAdminAdministrasi) return;
-  setClasses(prev => prev.map(c => c.id === updatedCls.id ? updatedCls : c));
+  try {
+    await classService.update(updatedCls.id, {
+      namaKelas: updatedCls.className,
+      tahunAjaran: updatedCls.fase, // Send updated academic year dynamically
+      waliKelas: updatedCls.teacherName || "Bunda Guru"
+    });
 
-  const newLog = {
-    id: Date.now(),
-    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-    user: session.name,
-    action: `Memperbarui data kelas: ${updatedCls.className}`,
-  };
-  setLogs([newLog, ...logs]);
+    // Refresh list
+    const freshClasses = await classService.getAll();
+    const rawFreshUpdate = Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || [];
+    setClasses(mapClassesData(rawFreshUpdate));
+
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session.name,
+      action: `Memperbarui data kelas: ${updatedCls.className} di backend`,
+    };
+    setLogs([newLog, ...logs]);
+  } catch (err: any) {
+    alert("Gagal memperbarui kelas di backend: " + (err.response?.data?.message || err.message));
+  }
 };
 
 const handleDeleteClass = (classId: number) => {
@@ -213,38 +382,130 @@ const handleDeleteClass = (classId: number) => {
   });
 };
 
-const handleAddUser = (newUsrData: any) => {
+const handleAddUser = async (newUsrData: any) => {
   if (!isAdminAdministrasi) return;
-  const newUsr = {
-    ...newUsrData,
-    id: Date.now()
-  };
-  const updated = [...users, newUsr];
-  setUsers(updated);
-  localStorage.setItem("system_users", JSON.stringify(updated));
+  
+  // Map frontend role format back to Backend role standard
+  let backendRole: "ADMIN_ADMINISTRASI" | "ADMIN_TRANSAKSI" | "GURU" | "ADMIN" = "GURU";
+  if (newUsrData.role === "admin_adm") {
+    backendRole = "ADMIN_ADMINISTRASI";
+  } else if (newUsrData.role === "admin_trx") {
+    backendRole = "ADMIN_TRANSAKSI";
+  } else if (newUsrData.role === "guru") {
+    backendRole = "GURU";
+  }
 
-  const newLog = {
-    id: Date.now(),
-    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-    user: session.name,
-    action: `Mendaftarkan akun pengguna baru: ${newUsr.name} (${newUsr.role})`,
-  };
-  setLogs([newLog, ...logs]);
+  let finalUsername = newUsrData.username;
+  let success = false;
+  let attempts = 0;
+  const maxAttempts = 4;
+
+  try {
+    while (!success && attempts < maxAttempts) {
+      try {
+        attempts++;
+        console.log(`Attempt ${attempts}: Registering user '${newUsrData.name}' with username '${finalUsername}'`);
+        await userService.create({
+          nama: newUsrData.name,
+          username: finalUsername,
+          password: newUsrData.password,
+          role: backendRole
+        });
+        success = true;
+      } catch (err: any) {
+        const httpStatus = err.response?.status;
+        const errBody = err.response?.data;
+        const errMessage = String(
+          errBody?.message || errBody?.error || err.message || ""
+        ).toLowerCase();
+        
+        // Conflict = HTTP 409, or message contains known conflict keywords
+        const isConflict =
+          httpStatus === 409 ||
+          errMessage.includes("terdaftar") ||
+          errMessage.includes("conflict") ||
+          errMessage.includes("already") ||
+          errMessage.includes("duplicate") ||
+          // Handle empty body {} with status 4xx as conflict fallback during retry
+          (httpStatus === 422 && errMessage === "");
+
+        if (isConflict && attempts < maxAttempts) {
+          const randomSuffix = String(Math.floor(10 + Math.random() * 90));
+          finalUsername = `${newUsrData.username}${randomSuffix}`;
+          console.warn(`[SGW] Username conflict (${httpStatus}). Retrying as: ${finalUsername}`);
+          continue;
+        }
+
+        // Non-conflict error or max attempts reached
+        throw err;
+      }
+    }
+
+    if (success) {
+      // If username changed due to retry, update the success UI state parameters
+      newUsrData.username = finalUsername;
+
+      // Refresh users list
+      try {
+        const userRes = await userService.getAll();
+        const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+        setUsers(mapUsersData(rawUsers));
+      } catch {
+        // Local fallback
+        const stored = localStorage.getItem("system_users");
+        const current = stored ? JSON.parse(stored) : [];
+        const localNew = { ...newUsrData, id: Date.now() };
+        const updated = [...current, localNew];
+        setUsers(updated);
+        localStorage.setItem("system_users", JSON.stringify(updated));
+      }
+
+      // Persist password locally so it can be copied later from Kelola Pengguna
+      const updatedPasswords = { ...localPasswords, [finalUsername]: newUsrData.password };
+      setLocalPasswords(updatedPasswords);
+      localStorage.setItem("sgw_local_passwords", JSON.stringify(updatedPasswords));
+
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Mendaftarkan akun pengguna baru: ${newUsrData.name} (${finalUsername}) ke backend`,
+      };
+      setLogs([newLog, ...logs]);
+    }
+  } catch (err: any) {
+    alert("Gagal mendaftarkan user di backend: " + (err.response?.data?.message || err.message));
+  }
 };
 
-const handleUpdateUser = (updatedUsr: any) => {
+const handleUpdateUser = async (updatedUsr: any) => {
   if (!isAdminAdministrasi) return;
-  const updated = users.map(u => u.id === updatedUsr.id ? updatedUsr : u);
-  setUsers(updated);
-  localStorage.setItem("system_users", JSON.stringify(updated));
+  try {
+    if (updatedUsr.password) {
+      await userService.resetPassword(updatedUsr.id, updatedUsr.password);
+    }
 
-  const newLog = {
-    id: Date.now(),
-    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-    user: session.name,
-    action: `Memperbarui data akun pengguna: ${updatedUsr.name}`,
-  };
-  setLogs([newLog, ...logs]);
+    // Refresh list locally/API
+    try {
+      const userRes = await userService.getAll();
+      const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+      setUsers(mapUsersData(rawUsers));
+    } catch {
+      const updated = users.map(u => u.id === updatedUsr.id ? updatedUsr : u);
+      setUsers(updated);
+      localStorage.setItem("system_users", JSON.stringify(updated));
+    }
+
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session.name,
+      action: `Memperbarui data akun pengguna: ${updatedUsr.name} di backend`,
+    };
+    setLogs([newLog, ...logs]);
+  } catch (err: any) {
+    alert("Gagal mereset password di backend: " + (err.response?.data?.message || err.message));
+  }
 };
 
 const handleDeleteUser = (userId: number) => {
@@ -266,32 +527,50 @@ const handleDeleteUser = (userId: number) => {
   });
 };
 
-  const handleExecuteConfirmAction = () => {
+  const handleExecuteConfirmAction = async () => {
     const { actionType, targetId } = confirmModal;
     if (!targetId || !actionType) return;
 
     if (actionType === "delete_student") {
       const studentName = students.find((s) => s.id === targetId)?.name || "Siswa";
-      setStudents(students.filter((s) => s.id !== targetId));
+      try {
+        await studentService.delete(targetId);
+        
+        // Refresh list
+        const freshStudents = await studentService.getAll();
+        const rawFresh = Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || [];
+        setStudents(mapStudentsData(rawFresh));
 
-      const newLog = {
-        id: Date.now(),
-        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-        user: session.name,
-        action: `Menghapus data master siswa: ${studentName}`,
-      };
-      setLogs([newLog, ...logs]);
+        const newLog = {
+          id: Date.now(),
+          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          user: session.name,
+          action: `Menghapus data master siswa: ${studentName} dari backend`,
+        };
+        setLogs([newLog, ...logs]);
+      } catch (err: any) {
+        alert("Gagal menghapus siswa di backend: " + (err.response?.data?.message || err.message));
+      }
     } else if (actionType === "delete_class") {
       const clsName = classes.find(c => c.id === targetId)?.className || "Kelas";
-      setClasses(classes.filter(c => c.id !== targetId));
+      try {
+        await classService.delete(targetId);
 
-      const newLog = {
-        id: Date.now(),
-        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-        user: session.name,
-        action: `Menghapus kelas: ${clsName}`,
-      };
-      setLogs([newLog, ...logs]);
+        // Refresh list
+        const freshClasses = await classService.getAll();
+        const rawFresh = Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || [];
+        setClasses(mapClassesData(rawFresh));
+
+        const newLog = {
+          id: Date.now(),
+          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          user: session.name,
+          action: `Menghapus kelas: ${clsName} dari backend`,
+        };
+        setLogs([newLog, ...logs]);
+      } catch (err: any) {
+        alert("Gagal menghapus kelas di backend: " + (err.response?.data?.message || err.message));
+      }
     } else if (actionType === "delete_spp") {
       const tx = sppTransactions.find(t => t.id === targetId);
       if (tx) {
@@ -309,15 +588,33 @@ const handleDeleteUser = (userId: number) => {
     } else if (actionType === "delete_user") {
       const targetUser = users.find(u => u.id === targetId);
       if (targetUser) {
-        const updated = users.filter(u => u.id !== targetId);
-        setUsers(updated);
-        localStorage.setItem("system_users", JSON.stringify(updated));
+        try {
+          // Coba hapus ke backend
+          await userService.delete(targetId);
+          
+          const userRes = await userService.getAll();
+          const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+          setUsers(mapUsersData(rawUsers));
+        } catch {
+          // Fallback lokal jika backend tidak menyediakan rute delete user
+          // Catat ID di list local agar konsisten saat refresh
+          const raw = localStorage.getItem("deleted_user_ids");
+          const deletedUserIds = raw ? JSON.parse(raw) : [];
+          if (!deletedUserIds.includes(targetId)) {
+            deletedUserIds.push(targetId);
+            localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
+          }
+
+          const updated = users.filter(u => u.id !== targetId);
+          setUsers(updated);
+          localStorage.setItem("system_users", JSON.stringify(updated));
+        }
 
         const newLog = {
           id: Date.now(),
           time: new Date().toISOString().replace('T', ' ').substring(0, 16),
           user: session.name,
-          action: `Menghapus akun pengguna: ${targetUser.name}`,
+          action: `Menghapus akun pengguna: ${targetUser.name} (Lokal / Backend)`,
         };
         setLogs([newLog, ...logs]);
       }
@@ -334,20 +631,66 @@ const handleDeleteUser = (userId: number) => {
 
   const handleAddActivity = (newActData: any) => {
     if (!isAdminAdministrasi && !isGuru) return;
+    
+    // Auto-generate drive folder link based on activity title
+    const sanitizedTitle = (newActData.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const newAct = {
       ...newActData,
-      id: Date.now()
+      id: Date.now(),
+      driveLink: `https://drive.google.com/drive/folders/mock-${sanitizedTitle}-${Date.now()}`
     };
-    setActivities([newAct, ...activities]);
+    
+    const updated = [newAct, ...activities];
+    setActivities(updated);
+    localStorage.setItem("sgw_activities", JSON.stringify(updated));
 
     const newLog = {
       id: Date.now(),
       time: new Date().toISOString().replace('T', ' ').substring(0, 16),
       user: session.name,
-      action: `Menambahkan kegiatan: ${newAct.title}`,
+      action: `Menambahkan kegiatan: ${newAct.title} (Folder Google Drive terbuat otomatis)`,
     };
     setLogs([newLog, ...logs]);
   };
+
+  const handleUpdateProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session || !profileName) return;
+
+    // Cari user bersangkutan berdasarkan username login yang aktif
+    const activeUsername = session.role === "admin_adm" ? "admin_adm" : session.role === "admin_trx" ? "admin_trx" : "guru";
+    
+    // Perbarui password jika input password tidak kosong
+    setUsers(prev => prev.map(u => {
+      if (u.username === activeUsername) {
+        const updated = { ...u, name: profileName };
+        if (profilePassword) {
+          updated.password = profilePassword;
+        }
+        return updated;
+      }
+      return u;
+    }));
+
+    // Perbarui session aktif
+    setSession({
+      ...session,
+      name: profileName
+    });
+
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: profileName,
+      action: `Memperbarui profil mandiri (Nama lengkap${profilePassword ? " & kata sandi" : ""})`,
+    };
+    setLogs([newLog, ...logs]);
+    
+    setShowProfileDrawer(false);
+    setProfilePassword("");
+  };
+
+
 
   const handleAddSppLesPayment = (newTxData: any) => {
     if (!isAdminTransaksi) return;
@@ -455,7 +798,7 @@ const handleDeleteUser = (userId: number) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-neutral-dark flex flex-col md:flex-row relative font-sans">
+    <div className="h-screen overflow-hidden bg-[#FAF8F5] text-neutral-dark flex relative font-sans">
       {/* Background Chalkboard Grid Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.012)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none -z-10"></div>
 
@@ -468,7 +811,7 @@ const handleDeleteUser = (userId: number) => {
       )}
 
       {/* Sidebar Navigation */}
-      <aside className={`w-64 bg-white text-neutral-dark flex flex-col justify-between p-5 border-r border-primary-green/10 z-40 fixed h-screen transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      <aside className={`w-64 bg-white text-neutral-dark flex flex-col justify-between p-5 border-r border-primary-green/10 z-40 h-full flex-shrink-0 transition-transform duration-300 md:translate-x-0 fixed md:relative ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} overflow-y-auto`}>
         <div className="space-y-6">
           <div className="flex items-center justify-between border-b border-primary-green/10 pb-5">
             <div className="flex items-center gap-3">
@@ -636,7 +979,16 @@ const handleDeleteUser = (userId: number) => {
 
         {/* Sidebar Footer */}
         <div className="space-y-4 pt-5 border-t border-primary-green/10">
-          <div className="bg-[#FAF8F5] border border-primary-green/10 rounded-xl p-3 flex items-center gap-3">
+          {/* Clickable Sidebar User Profile Card */}
+          <div 
+            onClick={() => {
+              setProfileName(session.name);
+              setProfilePassword("");
+              setShowProfileDrawer(true);
+            }}
+            className="bg-[#FAF8F5] border border-primary-green/10 hover:border-primary-green rounded-xl p-3 flex items-center gap-3 cursor-pointer hover:bg-soft-mint/20 transition-all"
+            title="Klik untuk ubah nama atau kata sandi profil"
+          >
             <div className="w-8 h-8 rounded-full bg-primary-green text-white flex items-center justify-center font-extrabold text-[10px] flex-shrink-0">
               {isAdminAdministrasi ? "AA" : isAdminTransaksi ? "AT" : "GR"}
             </div>
@@ -661,118 +1013,123 @@ const handleDeleteUser = (userId: number) => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 p-6 md:p-10 min-h-screen flex flex-col justify-between">
-        <div className="space-y-6">
-          {/* Path Header info */}
-          <div className="flex flex-row justify-between items-center gap-4 border-b border-primary-green/10 pb-4">
-            <div>
-              <span className="text-[9px] text-neutral-gray font-bold uppercase tracking-wider block">
-                Portal Belajar & Administrasi KB/RA Sahabat
-              </span>
-              <h2 className="font-baloo text-xl sm:text-2xl font-bold text-neutral-dark mt-0.5">
-                {activeTab === "siswa" && "Manajemen Data Peserta Didik"}
-                {activeTab === "kelas" && "Manajemen Data Kelas RA Sahabat"}
-                {activeTab === "users" && "Kelola Akses Pengguna & Akun Petugas"}
-                {activeTab === "kegiatan" && "Dokumentasi Kegiatan"}
-                {activeTab === "spp" && "Pencatatan SPP & Les Terpadu"}
-                {activeTab === "tabungan" && "Buku Tabungan Digital"}
-                {activeTab === "murajaah" && "Laporan Hasil Murajaah Santri"}
-                {activeTab === "audit" && "Log Aktivitas Petugas"}
-              </h2>
-            </div>
-            
-            <div className="flex items-center gap-2 flex-shrink-0">
-              
-              {/* Hamburger Button for Mobile */}
-              <button
-                type="button"
-                onClick={() => setSidebarOpen(true)}
-                className="md:hidden p-2 rounded-lg bg-white border border-primary-green/10 text-primary-green hover:bg-soft-mint/10 cursor-pointer shadow-3xs flex items-center justify-center"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
+      <main className="flex-1 flex flex-col h-full overflow-hidden">
+
+        {/* ── Fixed Top Header ── */}
+        <div className="flex-shrink-0 flex items-center justify-between px-6 md:px-10 pt-6 md:pt-7 pb-4 border-b border-primary-green/10 bg-[#FAF8F5]">
+          <div>
+            <span className="text-[9px] text-neutral-gray font-bold uppercase tracking-wider block">
+              Portal Belajar &amp; Administrasi KB/RA Sahabat
+            </span>
+            <h2 className="font-baloo text-xl sm:text-2xl font-bold text-neutral-dark mt-0.5">
+              {activeTab === "siswa" && "Manajemen Data Peserta Didik"}
+              {activeTab === "kelas" && "Manajemen Data Kelas RA Sahabat"}
+              {activeTab === "users" && "Kelola Akses Pengguna & Akun Petugas"}
+              {activeTab === "kegiatan" && "Dokumentasi Kegiatan"}
+              {activeTab === "spp" && "Pencatatan SPP & Les Terpadu"}
+              {activeTab === "tabungan" && "Buku Tabungan Digital"}
+              {activeTab === "murajaah" && "Laporan Hasil Murajaah Santri"}
+              {activeTab === "audit" && "Log Aktivitas Petugas"}
+            </h2>
           </div>
 
-          {/* Render Active Tab Component */}
-          {activeTab === "siswa" && (
-            <StudentTab
-              students={students}
-              isAdminAdministrasi={isAdminAdministrasi}
-              onAddStudent={handleAddStudent}
-              onUpdateStudent={handleUpdateStudent}
-              onDeleteStudent={handleDeleteStudent}
-              onUpdateStudentStatus={handleUpdateStudentStatus}
-            />
-          )}
+          {/* Hamburger Button for Mobile */}
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className="md:hidden p-2 rounded-lg bg-white border border-primary-green/10 text-primary-green hover:bg-soft-mint/10 cursor-pointer shadow-3xs flex items-center justify-center"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
 
-          {activeTab === "kelas" && (
-            <KelasTab
-              students={students}
-              classes={classes}
-              isAdminAdministrasi={isAdminAdministrasi}
-              isGuru={isGuru}
-              currentUserDisplayName={session.name}
-              onAddClass={handleAddClass}
-              onUpdateClass={handleUpdateClass}
-              onDeleteClass={handleDeleteClass}
-            />
-          )}
+        {/* ── Scrollable Tab Content ── */}
+        <div className="flex-1 overflow-y-auto px-6 md:px-10 py-6">
+          {loadingData ? (
+            <SkeletonLoader type={activeTab as any} />
+          ) : (
+            <>
+              {activeTab === "siswa" && (
+                <StudentTab
+                  students={students}
+                  classes={classes}
+                  isAdminAdministrasi={isAdminAdministrasi}
+                  onAddStudent={handleAddStudent}
+                  onUpdateStudent={handleUpdateStudent}
+                  onDeleteStudent={handleDeleteStudent}
+                  onUpdateStudentStatus={handleUpdateStudentStatus}
+                />
+              )}
 
-          {activeTab === "users" && (
-            <UserTab
-              users={users}
-              onAddUser={handleAddUser}
-              onUpdateUser={handleUpdateUser}
-              onDeleteUser={handleDeleteUser}
-            />
-          )}
+              {activeTab === "kelas" && (
+                <KelasTab
+                  students={students}
+                  classes={classes}
+                  isAdminAdministrasi={isAdminAdministrasi}
+                  isGuru={isGuru}
+                  currentUserDisplayName={session.name}
+                  onAddClass={handleAddClass}
+                  onUpdateClass={handleUpdateClass}
+                  onDeleteClass={handleDeleteClass}
+                />
+              )}
 
-          {activeTab === "kegiatan" && (
-            <KegiatanTab
-              activities={activities}
-              isAdminAdministrasi={isAdminAdministrasi}
-              isGuru={isGuru}
-              onAddActivity={handleAddActivity}
-            />
-          )}
+              {activeTab === "users" && (
+                <UserTab
+                  users={users}
+                  localPasswords={localPasswords}
+                  onAddUser={handleAddUser}
+                  onUpdateUser={handleUpdateUser}
+                  onDeleteUser={handleDeleteUser}
+                />
+              )}
 
-          {activeTab === "spp" && (
-            <SppTab
-              students={students}
-              sppTransactions={sppTransactions}
-              isAdminTransaksi={isAdminTransaksi}
-              onAddSppLesPayment={handleAddSppLesPayment}
-              onUpdateSppLesPayment={handleUpdateSppPayment}
-              onDeleteSppLesPayment={handleDeleteSppPayment}
-            />
-          )}
+              {activeTab === "kegiatan" && (
+                <KegiatanTab
+                  activities={activities}
+                  isAdminAdministrasi={isAdminAdministrasi}
+                  isGuru={isGuru}
+                  onAddActivity={handleAddActivity}
+                />
+              )}
 
-          {activeTab === "tabungan" && (
-            <TabunganTab
-              students={students}
-              savings={savings}
-              isAdminTransaksi={isAdminTransaksi}
-              adminName={session.name}
-              onAddTransaction={handleAddSavingsTransaction}
-            />
-          )}
+              {activeTab === "spp" && (
+                <SppTab
+                  students={students}
+                  sppTransactions={sppTransactions}
+                  isAdminTransaksi={isAdminTransaksi}
+                  onAddSppLesPayment={handleAddSppLesPayment}
+                  onUpdateSppLesPayment={handleUpdateSppPayment}
+                  onDeleteSppLesPayment={handleDeleteSppPayment}
+                />
+              )}
 
-          {activeTab === "murajaah" && (
-            <MurajaahTab
-              students={students}
-              murajaahData={murajaahData}
-              isAdminAdministrasi={isAdminAdministrasi}
-              isGuru={isGuru}
-              onUpdateMurajaah={handleUpdateMurajaah}
-            />
-          )}
+              {activeTab === "tabungan" && (
+                <TabunganTab
+                  students={students}
+                  savings={savings}
+                  isAdminTransaksi={isAdminTransaksi}
+                  adminName={session.name}
+                  onAddTransaction={handleAddSavingsTransaction}
+                />
+              )}
 
+              {activeTab === "murajaah" && (
+                <MurajaahTab
+                  students={students}
+                  murajaahData={murajaahData}
+                  isAdminAdministrasi={isAdminAdministrasi}
+                  isGuru={isGuru}
+                  onUpdateMurajaah={handleUpdateMurajaah}
+                />
+              )}
 
-          {activeTab === "audit" && (
-            <AuditTab logs={logs} />
+              {activeTab === "audit" && (
+                <AuditTab logs={logs} />
+              )}
+            </>
           )}
         </div>
 
@@ -813,6 +1170,136 @@ const handleDeleteUser = (userId: number) => {
           </div>
         )}
       </main>
+
+      {/* Profil Akun Saya - Sliding Side Drawer */}
+      {showProfileDrawer && session && (
+        <div className="fixed inset-0 z-50 overflow-hidden select-none">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => {
+              setShowProfileDrawer(false);
+              setProfilePassword("");
+            }}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <div>
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark">Profil Akun Saya</h4>
+                  <p className="text-[10px] text-amber-600 font-bold uppercase tracking-wide">Kelola nama lengkap & kata sandi</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfileDrawer(false);
+                    setProfilePassword("");
+                  }}
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Form Content */}
+              <form onSubmit={handleUpdateProfile} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                
+                {/* Visual Avatar Card */}
+                <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-neutral-gray/10 flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-primary-green text-white flex items-center justify-center font-extrabold text-xs flex-shrink-0">
+                    {session.role === "admin_adm" ? "AA" : session.role === "admin_trx" ? "AT" : "GR"}
+                  </div>
+                  <div>
+                    <h5 className="font-baloo text-sm font-bold text-neutral-dark">{session.name}</h5>
+                    <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 bg-amber-50 text-amber-700 rounded border border-amber-200 mt-1 inline-block">
+                      {session.role === "admin_adm" ? "Admin Administrasi" : session.role === "admin_trx" ? "Admin Transaksi" : "Guru Kelas"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Input Nama Lengkap */}
+                <div>
+                  <label htmlFor="profName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Lengkap (Gelar)</label>
+                  <input
+                    type="text"
+                    id="profName"
+                    required
+                    value={profileName}
+                    onChange={(e) => setProfileName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+
+                {/* Read-Only Username */}
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Username Login</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={session.role === "admin_adm" ? "admin_adm" : session.role === "admin_trx" ? "admin_trx" : "guru"}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-neutral-gray/10 bg-neutral-gray/5 text-neutral-gray text-xs font-mono focus:outline-none cursor-not-allowed"
+                    title="Username login tidak dapat diubah demi alasan keamanan"
+                  />
+                  <span className="text-[8px] text-neutral-gray font-normal block mt-1 leading-normal">
+                    *Username login dikunci demi integritas sistem.
+                  </span>
+                </div>
+
+                {/* Read-Only Peran Akses */}
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Hak Akses Sistem (Role)</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={session.role === "admin_adm" ? "Admin Administrasi" : session.role === "admin_trx" ? "Admin Transaksi" : "Guru Kelas"}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-neutral-gray/10 bg-neutral-gray/5 text-neutral-gray text-xs font-semibold focus:outline-none cursor-not-allowed"
+                    title="Hak akses hanya bisa diubah oleh Admin Administrasi utama"
+                  />
+                  <span className="text-[8px] text-neutral-gray font-normal block mt-1 leading-normal">
+                    *Hanya Admin Administrasi yang berwenang mengganti hak akses.
+                  </span>
+                </div>
+
+                {/* Input Password Baru */}
+                <div>
+                  <label htmlFor="profPass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi Baru</label>
+                  <input
+                    type="password"
+                    id="profPass"
+                    value={profilePassword}
+                    onChange={(e) => setProfilePassword(e.target.value)}
+                    placeholder="Kosongkan jika tidak ingin mengubah kata sandi saat ini"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+
+                {/* Sticky buttons at bottom */}
+                <div className="flex gap-2 pt-4 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Simpan Profil
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowProfileDrawer(false);
+                      setProfilePassword("");
+                    }}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

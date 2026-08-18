@@ -7,6 +7,8 @@ export const initialActivities = [
     category: "Keagamaan",
     driveLink: "https://drive.google.com/drive/folders/mock-manasik",
     description: "Latihan pengenalan tawaf dan sai untuk mengenalkan rukun Islam kelima.",
+    featuredImage: "https://images.unsplash.com/photo-1590076214561-2679be15bb56?auto=format&fit=crop&q=80&w=800",
+    isPublishedToGallery: true
   },
   {
     id: 2,
@@ -15,6 +17,8 @@ export const initialActivities = [
     category: "Akademik",
     driveLink: "https://drive.google.com/drive/folders/mock-gardening",
     description: "Edukasi sains praktis mengenal jenis tanaman dan cara menyiram sayur.",
+    featuredImage: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800",
+    isPublishedToGallery: true
   },
   {
     id: 3,
@@ -23,6 +27,8 @@ export const initialActivities = [
     category: "Keagamaan",
     driveLink: "https://drive.google.com/drive/folders/mock-santri",
     description: "Kegiatan rutin melafalkan sholawat nabi dan penguatan nilai Aswaja NU.",
+    featuredImage: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800",
+    isPublishedToGallery: true
   },
   {
     id: 4,
@@ -31,6 +37,8 @@ export const initialActivities = [
     category: "Ekstrakurikuler",
     driveLink: "https://drive.google.com/drive/folders/mock-pentas-2025",
     description: "Pertunjukan tari tradisional, hafalan surat pendek, dan drama pendek oleh santri kelas B.",
+    featuredImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=800",
+    isPublishedToGallery: true
   },
   {
     id: 5,
@@ -39,6 +47,8 @@ export const initialActivities = [
     category: "Akademik",
     driveLink: "https://drive.google.com/drive/folders/mock-lomba-2024",
     description: "Meraih Juara 2 dalam festival kreativitas anak usia dini tingkat kecamatan.",
+    featuredImage: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800",
+    isPublishedToGallery: true
   }
 ];
 
@@ -55,6 +65,7 @@ export const initialStudents = [
     fase: "Fase Fondasi",
     height: 105,
     weight: 18,
+    headCircumference: 50,
     academicYear: "2026/2027",
     activeStatus: "Aktif",
     portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-rayyan"
@@ -70,6 +81,7 @@ export const initialStudents = [
     fase: "Fase Fondasi",
     height: 110,
     weight: 19,
+    headCircumference: 51,
     academicYear: "2026/2027",
     activeStatus: "Aktif",
     portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-bilqis"
@@ -85,6 +97,7 @@ export const initialStudents = [
     fase: "Fase Fondasi",
     height: 98,
     weight: 15,
+    headCircumference: 48,
     academicYear: "2026/2027",
     activeStatus: "Aktif",
     portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-fatih"
@@ -100,6 +113,7 @@ export const initialStudents = [
     fase: "Fase Fondasi",
     height: 112,
     weight: 20,
+    headCircumference: 52,
     academicYear: "2025/2026",
     activeStatus: "Lulus",
     portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-rania"
@@ -115,6 +129,7 @@ export const initialStudents = [
     fase: "Fase Fondasi",
     height: 115,
     weight: 22,
+    headCircumference: 53,
     academicYear: "2024/2025",
     activeStatus: "Lulus",
     portfolioLink: "https://drive.google.com/drive/folders/mock-portfolio-yusuf"
@@ -123,18 +138,18 @@ export const initialStudents = [
 
 // Mock Initial Transaksi SPP & Les
 export const initialSppTransactions = [
-  { id: 1,  studentId: 1, date: "2026-08-01", description: "Pembayaran SPP + Les Agustus", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" },
-  { id: 2,  studentId: 2, date: "2026-08-02", description: "Lunas SPP & Les Agustus", spp: 75000, les: 40000, total: 115000, depositStatus: "Belum Disetor" },
-  { id: 3,  studentId: 3, date: "2026-08-03", description: "Pembayaran SPP + Les Agustus", spp: 75000, les: 40000, total: 115000, depositStatus: "Belum Disetor" },
-  { id: 4,  studentId: 1, date: "2026-08-05", description: "Uang Les Tambahan Agustus", spp: 0, les: 40000, total: 40000, depositStatus: "Sudah Disetor" },
-  { id: 5,  studentId: 2, date: "2026-08-07", description: "Pembayaran SPP Agustus", spp: 75000, les: 0, total: 75000, depositStatus: "Belum Disetor" },
-  { id: 6,  studentId: 3, date: "2026-08-08", description: "Lunas Les Agustus", spp: 0, les: 40000, total: 40000, depositStatus: "Sudah Disetor" },
-  { id: 7,  studentId: 1, date: "2026-07-02", description: "Pembayaran SPP + Les Juli", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" },
-  { id: 8,  studentId: 2, date: "2026-07-05", description: "Pembayaran SPP + Les Juli", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" },
-  { id: 9,  studentId: 3, date: "2026-07-08", description: "Pembayaran SPP + Les Juli", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" },
-  { id: 10, studentId: 1, date: "2026-06-03", description: "Pembayaran SPP + Les Juni", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" },
-  { id: 11, studentId: 2, date: "2026-06-05", description: "Pembayaran SPP + Les Juni", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor" },
-  { id: 12, studentId: 4, date: "2025-05-12", description: "Lunas SPP Mei", spp: 75000, les: 0, total: 75000, depositStatus: "Sudah Disetor" },
+  { id: 1,  studentId: 1, date: "2026-08-01", description: "Pembayaran SPP + Les Agustus", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor", paidMonths: ["2026-08"] },
+  { id: 2,  studentId: 2, date: "2026-08-02", description: "Lunas SPP & Les Agustus", spp: 75000, les: 40000, total: 115000, depositStatus: "Belum Disetor", paidMonths: ["2026-08"] },
+  { id: 3,  studentId: 3, date: "2026-08-03", description: "Pembayaran SPP + Les Agustus", spp: 75000, les: 40000, total: 115000, depositStatus: "Belum Disetor", paidMonths: ["2026-08"] },
+  { id: 4,  studentId: 1, date: "2026-08-05", description: "Uang Les Tambahan Agustus", spp: 0, les: 40000, total: 40000, depositStatus: "Sudah Disetor", paidMonths: [] },
+  { id: 5,  studentId: 2, date: "2026-08-07", description: "Pembayaran SPP Agustus", spp: 75000, les: 0, total: 75000, depositStatus: "Belum Disetor", paidMonths: ["2026-08"] },
+  { id: 6,  studentId: 3, date: "2026-08-08", description: "Lunas Les Agustus", spp: 0, les: 40000, total: 40000, depositStatus: "Sudah Disetor", paidMonths: [] },
+  { id: 7,  studentId: 1, date: "2026-07-02", description: "Pembayaran SPP + Les Juli", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor", paidMonths: ["2026-07"] },
+  { id: 8,  studentId: 2, date: "2026-07-05", description: "Pembayaran SPP + Les Juli", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor", paidMonths: ["2026-07"] },
+  { id: 9,  studentId: 3, date: "2026-07-08", description: "Pembayaran SPP + Les Juli", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor", paidMonths: ["2026-07"] },
+  { id: 10, studentId: 1, date: "2026-06-03", description: "Pembayaran SPP + Les Juni", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor", paidMonths: ["2026-06"] },
+  { id: 11, studentId: 2, date: "2026-06-05", description: "Pembayaran SPP + Les Juni", spp: 75000, les: 40000, total: 115000, depositStatus: "Sudah Disetor", paidMonths: ["2026-06"] },
+  { id: 12, studentId: 4, date: "2026-05-12", description: "Lunas SPP Mei", spp: 75000, les: 0, total: 75000, depositStatus: "Sudah Disetor", paidMonths: ["2026-05"] },
 ];
 
 // Mock Initial Tabungan

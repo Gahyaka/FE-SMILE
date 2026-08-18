@@ -6,6 +6,7 @@ interface Student {
   id: number;
   name: string;
   class: string;
+  activeStatus?: string;
 }
 
 interface SppTransaction {
@@ -17,6 +18,7 @@ interface SppTransaction {
   les: number;
   total: number;
   depositStatus: string;
+  paidMonths?: string[];
 }
 
 interface SppTabProps {
@@ -36,15 +38,28 @@ export default function SppTab({
   onUpdateSppLesPayment,
   onDeleteSppLesPayment,
 }: SppTabProps) {
-  // Dynamic year extraction from transaction dates
-  const uniqueYears = Array.from(new Set(sppTransactions.map((tx) => tx.date.substring(0, 4))));
-  if (uniqueYears.length === 0) {
-    uniqueYears.push(new Date().getFullYear().toString());
+  // Dynamic academic year extraction from transaction dates (e.g., '2026/2027')
+  const getAcademicYearFromDate = (dateStr: string): string => {
+    const year = parseInt(dateStr.substring(0, 4), 10);
+    const month = parseInt(dateStr.substring(5, 7), 10);
+    return month >= 7 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+  };
+
+  const uniqueAcademicYears = Array.from(
+    new Set(sppTransactions.map((tx) => getAcademicYearFromDate(tx.date)))
+  );
+  if (uniqueAcademicYears.length === 0) {
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+    const defaultAcadYear = currentMonth >= 7 
+      ? `${currentYear}/${currentYear + 1}` 
+      : `${currentYear - 1}/${currentYear}`;
+    uniqueAcademicYears.push(defaultAcadYear);
   }
-  uniqueYears.sort().reverse();
+  uniqueAcademicYears.sort().reverse();
 
   const [showSppForm, setShowSppForm] = useState(false);
-  const [selectedYear, setSelectedYear] = useState(uniqueYears[0]);
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState(uniqueAcademicYears[0]);
   const [selectedClass, setSelectedClass] = useState("Semua");
   const [selectedPeriod, setSelectedPeriod] = useState<"Hari Ini" | "Minggu Ini" | "Bulan Ini" | "Semester 1" | "Semester 2" | "Semua">("Semua");
   const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
@@ -58,6 +73,28 @@ export default function SppTab({
   const [activeMobileKebabId, setActiveMobileKebabId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
+  
+  // Sub-tab state
+  const [activeSubTab, setActiveSubTab] = useState<"buku-kas" | "matriks-monitoring">("buku-kas");
+  
+  // Paid months state for form
+  const [payPaidMonths, setPayPaidMonths] = useState<string[]>([]);
+  
+  // Standard Academic Months (Juli - Juni)
+  const academicMonths = [
+    { value: "07", name: "Juli" },
+    { value: "08", name: "Agustus" },
+    { value: "09", name: "September" },
+    { value: "10", name: "Oktober" },
+    { value: "11", name: "November" },
+    { value: "12", name: "Desember" },
+    { value: "01", name: "Januari" },
+    { value: "02", name: "Februari" },
+    { value: "03", name: "Maret" },
+    { value: "04", name: "April" },
+    { value: "05", name: "Mei" },
+    { value: "06", name: "Juni" },
+  ];
 
   // Helper: check if a date string (YYYY-MM-DD) falls within the selected period
   const isInPeriod = (dateStr: string): boolean => {
@@ -82,24 +119,27 @@ export default function SppTab({
         txDate.getMonth() === today.getMonth()
       );
     }
+    // Semester/Year boundary based on Academic Year
+    const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
+    const startYear = parseInt(startYearStr, 10);
+    const endYear = parseInt(endYearStr, 10);
+
     if (selectedPeriod === "Semester 1") {
-      // Semester 1: Juli - Desember (month index 6-11)
-      const year = parseInt(dateStr.substring(0, 4));
-      const month = parseInt(dateStr.substring(5, 7)); // 1-indexed
-      return year === parseInt(selectedYear) && month >= 7 && month <= 12;
+      const year = parseInt(dateStr.substring(0, 4), 10);
+      const month = parseInt(dateStr.substring(5, 7), 10);
+      return year === startYear && month >= 7 && month <= 12;
     }
     if (selectedPeriod === "Semester 2") {
-      // Semester 2: Januari - Juni (month index 0-5)
-      const year = parseInt(dateStr.substring(0, 4));
-      const month = parseInt(dateStr.substring(5, 7)); // 1-indexed
-      return year === parseInt(selectedYear) && month >= 1 && month <= 6;
+      const year = parseInt(dateStr.substring(0, 4), 10);
+      const month = parseInt(dateStr.substring(5, 7), 10);
+      return year === endYear && month >= 1 && month <= 6;
     }
-    // "Semua" - only filter by year
-    return dateStr.startsWith(selectedYear);
+    // "Semua" - must match selectedAcademicYear
+    return getAcademicYearFromDate(dateStr) === selectedAcademicYear;
   };
 
   const filteredTransactions = sppTransactions.filter((tx) => {
-    const matchesYear = selectedPeriod === "Semua" ? tx.date.startsWith(selectedYear) : true;
+    const matchesYear = selectedPeriod === "Semua" ? getAcademicYearFromDate(tx.date) === selectedAcademicYear : true;
     const matchesPeriod = selectedPeriod === "Semua" ? true : isInPeriod(tx.date);
     const student = students.find((s) => s.id === tx.studentId);
     const matchesClass = selectedClass === "Semua" || (student && student.class === selectedClass);
@@ -109,7 +149,7 @@ export default function SppTab({
   // Calculate summaries dynamically (Only Les fees are deposited, SPP remains at Treasurer)
   // Summaries track all classes but respect the selected period/year
   const periodFilteredAll = sppTransactions.filter((tx) => {
-    if (selectedPeriod === "Semua") return tx.date.startsWith(selectedYear);
+    if (selectedPeriod === "Semua") return getAcademicYearFromDate(tx.date) === selectedAcademicYear;
     return isInPeriod(tx.date);
   });
 
@@ -123,7 +163,7 @@ export default function SppTab({
 
   const getTxCount = (cls: string) => {
     return sppTransactions.filter((tx) => {
-      const matchesYear = selectedPeriod === "Semua" ? tx.date.startsWith(selectedYear) : true;
+      const matchesYear = selectedPeriod === "Semua" ? getAcademicYearFromDate(tx.date) === selectedAcademicYear : true;
       const matchesPeriod = selectedPeriod === "Semua" ? true : isInPeriod(tx.date);
       const student = students.find((s) => s.id === tx.studentId);
       if (!student) return false;
@@ -142,27 +182,12 @@ export default function SppTab({
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedYear, selectedClass, selectedPeriod]);
+  }, [selectedAcademicYear, selectedClass, selectedPeriod]);
 
-  // Dynamic Description Effect based on selection
+  // Dynamic Description Effect based on selection (generates multi-month details if checkboxes are ticked)
   useEffect(() => {
     const student = students.find((s) => s.id === payStudentId);
     if (!student) return;
-    const monthNames = [
-      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-    ];
-    
-    // Parse payDate dynamically from YYYY-MM-DD
-    const dateParts = payDate.split("-");
-    let currentMonthName = "";
-    if (dateParts.length === 3) {
-      const monthIdx = parseInt(dateParts[1], 10) - 1;
-      const year = dateParts[0];
-      currentMonthName = (monthNames[monthIdx] || "Agustus") + " " + year;
-    } else {
-      currentMonthName = monthNames[new Date().getMonth()] + " " + new Date().getFullYear();
-    }
 
     const sppNum = Number(paySpp || 0);
     const lesNum = Number(payLes || 0);
@@ -177,8 +202,69 @@ export default function SppTab({
       typeText = "Administrasi";
     }
 
-    setPayDesc(`Pembayaran ${typeText} - ${student.name} - ${currentMonthName}`);
-  }, [payStudentId, paySpp, payLes, payDate, students]);
+    // Format paid months description if any are checked
+    let monthDetail = "";
+    if (sppNum > 0 && payPaidMonths.length > 0) {
+      const monthNamesShort = {
+        "01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr", "05": "Mei", "06": "Jun",
+        "07": "Jul", "08": "Agt", "09": "Sep", "10": "Okt", "11": "Nov", "12": "Des"
+      } as any;
+      const formattedMonths = payPaidMonths
+        .map(m => {
+          const [yr, mo] = m.split("-");
+          return `${monthNamesShort[mo] || mo} '${yr.substring(2)}`;
+        })
+        .join(", ");
+      monthDetail = ` (${formattedMonths})`;
+    } else {
+      const monthNames = [
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+      ];
+      const dateParts = payDate.split("-");
+      if (dateParts.length === 3) {
+        const monthIdx = parseInt(dateParts[1], 10) - 1;
+        const year = dateParts[0];
+        monthDetail = ` - ${monthNames[monthIdx]} ${year}`;
+      }
+    }
+
+    setPayDesc(`Pembayaran ${typeText}${monthDetail} - ${student.name}`);
+  }, [payStudentId, paySpp, payLes, payDate, payPaidMonths, students]);
+
+  // Helper to get already paid months of selected student for selected academic year
+  const getPaidMonthsForStudent = (studentId: number): string[] => {
+    return sppTransactions
+      .filter(tx => tx.studentId === studentId)
+      .flatMap(tx => tx.paidMonths || []);
+  };
+
+  // Reset paidMonths and Auto-select first unpaid month when switching student
+  useEffect(() => {
+    const student = students.find((s) => s.id === payStudentId);
+    if (!student) return;
+
+    const alreadyPaid = getPaidMonthsForStudent(payStudentId);
+    
+    // Find first month in academicMonths that is not yet paid
+    const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
+    let firstUnpaidKey = "";
+    
+    for (const m of academicMonths) {
+      const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
+      const monthKey = `${labelYear}-${m.value}`;
+      if (!alreadyPaid.includes(monthKey)) {
+        firstUnpaidKey = monthKey;
+        break;
+      }
+    }
+
+    if (firstUnpaidKey) {
+      setPayPaidMonths([firstUnpaidKey]);
+    } else {
+      setPayPaidMonths([]);
+    }
+  }, [payStudentId, selectedAcademicYear]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,11 +277,13 @@ export default function SppTab({
       spp: Number(paySpp),
       les: Number(payLes),
       depositStatus: newDepositStatus,
+      paidMonths: payPaidMonths,
     });
 
     // Reset Form to defaults
     setPaySpp("75000");
     setPayLes("40000");
+    setPayPaidMonths([]);
     setNewDepositStatus("Belum Disetor");
     setShowSppForm(false);
   };
@@ -245,22 +333,75 @@ export default function SppTab({
         </div>
       </div>
       {/* Active period label below widgets */}
-      <div className="flex items-center gap-2">
-        <svg className="w-3.5 h-3.5 text-primary-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <span className="text-[10px] text-neutral-gray font-bold">
-          Data ringkasan di atas menampilkan periode: <span className="text-primary-green font-extrabold">{selectedPeriod === "Semua" ? `Seluruh Tahun ${selectedYear}` : selectedPeriod}</span>
-        </span>
+      <div className="flex items-center justify-between flex-wrap gap-3 bg-[#FAF8F5] p-3 rounded-2xl border border-primary-green/10">
+        <div className="flex items-center gap-2">
+          <svg className="w-3.5 h-3.5 text-primary-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span className="text-[10px] text-neutral-gray font-bold">
+            Data ringkasan di atas menampilkan periode: <span className="text-primary-green font-extrabold">{selectedPeriod === "Semua" ? `Seluruh Tahun Ajaran ${selectedAcademicYear}` : selectedPeriod}</span>
+          </span>
+        </div>
+        
+        {/* Filter Kategori Kelas (Global) */}
+        <div className="flex items-center gap-1">
+          <span className="text-[9px] font-extrabold text-neutral-gray uppercase mr-1">Kelas:</span>
+          <div className="flex items-center gap-1">
+            {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => (
+              <button
+                key={cls}
+                type="button"
+                onClick={() => setSelectedClass(cls)}
+                className={`px-2.5 py-1 rounded-lg text-[9px] font-extrabold border transition-all cursor-pointer ${
+                  selectedClass === cls
+                    ? "bg-primary-green text-white border-primary-green shadow-3xs"
+                    : "bg-white text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
+                }`}
+              >
+                {cls} ({getTxCount(cls)})
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Tabel SPP & Les */}
-      <div className="w-full space-y-4">
-        <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border border-primary-green/10 shadow-xs space-y-6">
-          
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
-            <div>
-              <h3 className="font-baloo text-xl font-bold text-neutral-dark">Buku Kas Pembayaran SPP & Les</h3>
+      {/* Sub-tab Selector */}
+      <div className="flex border-b border-neutral-gray/10 pb-px gap-6">
+        <button
+          onClick={() => setActiveSubTab("buku-kas")}
+          className={`pb-3 text-xs font-black uppercase transition-all relative cursor-pointer ${
+            activeSubTab === "buku-kas"
+              ? "text-primary-green"
+              : "text-neutral-gray hover:text-neutral-dark"
+          }`}
+        >
+          <span>Jurnal Buku Kas SPP & Les</span>
+          {activeSubTab === "buku-kas" && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-green rounded-full animate-fade-in" />
+          )}
+        </button>
+        <button
+          onClick={() => setActiveSubTab("matriks-monitoring")}
+          className={`pb-3 text-xs font-black uppercase transition-all relative cursor-pointer ${
+            activeSubTab === "matriks-monitoring"
+              ? "text-primary-green"
+              : "text-neutral-gray hover:text-neutral-dark"
+          }`}
+        >
+          <span>Matriks Monitoring SPP</span>
+          {activeSubTab === "matriks-monitoring" && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-green rounded-full animate-fade-in" />
+          )}
+        </button>
+      </div>
+
+      {activeSubTab === "buku-kas" ? (
+        <div className="w-full space-y-4">
+          <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border border-primary-green/10 shadow-xs space-y-6">
+            
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
+              <div>
+                <h3 className="font-baloo text-xl font-bold text-neutral-dark">Buku Kas Pembayaran SPP & Les</h3>
               <p className="text-[11px] text-neutral-gray font-semibold mt-1 flex items-center gap-1">
                 <svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -274,17 +415,17 @@ export default function SppTab({
             </div>
 
             <div className="flex items-center gap-3.5 flex-wrap sm:flex-nowrap">
-              {/* Dropdown Filter Tahun Pembukuan - only visible on 'Semua' period */}
+              {/* Dropdown Filter Tahun Ajaran - only visible on 'Semua' period */}
               {selectedPeriod === "Semua" && (
                 <div className="flex items-center gap-1.5 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-primary-green/10">
-                  <span className="text-[9px] font-extrabold text-neutral-gray uppercase">Tahun:</span>
+                  <span className="text-[9px] font-extrabold text-neutral-gray uppercase">Tahun Ajaran:</span>
                   <select
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value)}
+                    value={selectedAcademicYear}
+                    onChange={(e) => setSelectedAcademicYear(e.target.value)}
                     className="px-2 py-1 rounded-lg text-[10px] font-extrabold bg-white border border-primary-green/15 focus:outline-none cursor-pointer"
                   >
-                    {uniqueYears.map((yr) => (
-                      <option key={yr} value={yr}>{yr}</option>
+                    {uniqueAcademicYears.map((ay) => (
+                      <option key={ay} value={ay}>{ay}</option>
                     ))}
                   </select>
                 </div>
@@ -318,7 +459,7 @@ export default function SppTab({
               <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span>Periode: <span className="font-black">{selectedPeriod === "Semua" ? `Semua (${selectedYear})` : selectedPeriod}</span></span>
+              <span>Periode: <span className="font-black">{selectedPeriod === "Semua" ? `Semua (${selectedAcademicYear})` : selectedPeriod}</span></span>
               <svg className={`w-3 h-3 transition-transform flex-shrink-0 ${showPeriodDropdown ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
@@ -341,7 +482,7 @@ export default function SppTab({
                     { label: "Bulan Ini", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2", desc: "Bulan berjalan" },
                     { label: "Semester 1", icon: "M4 6h16M4 10h16M4 14h16M4 18h16", desc: "Juli – Desember" },
                     { label: "Semester 2", icon: "M4 6h16M4 10h16M4 14h16M4 18h16", desc: "Januari – Juni" },
-                    { label: "Semua", icon: "M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z", desc: `Seluruh tahun ${selectedYear}` },
+                    { label: "Semua", icon: "M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z", desc: `Seluruh Tahun Ajaran ${selectedAcademicYear}` },
                   ] as const).map(({ label, icon, desc }) => (
                     <button
                       key={label}
@@ -375,25 +516,6 @@ export default function SppTab({
             )}
           </div>
 
-          {/* Filter Kategori Kelas */}
-          <div className="flex flex-wrap items-center gap-2 bg-[#FAF8F5] p-3 rounded-2xl border border-primary-green/10">
-            <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Kategori Kelas:</span>
-            {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => (
-              <button
-                key={cls}
-                type="button"
-                onClick={() => setSelectedClass(cls)}
-                className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer ${
-                  selectedClass === cls
-                    ? "bg-primary-green text-white border-primary-green shadow-3xs"
-                    : "bg-white text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
-                }`}
-              >
-                {cls} ({getTxCount(cls)})
-              </button>
-            ))}
-          </div>
-
           {/* Tampilan Desktop/Tablet: Tabel Buku Kas */}
           <div className="hidden sm:block overflow-x-auto rounded-xl border border-neutral-gray/10">
             <table className="w-full text-left border-collapse text-xs">
@@ -413,7 +535,7 @@ export default function SppTab({
                 {filteredTransactions.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-10 text-center text-neutral-gray font-semibold italic">
-                      Tidak ada data pencatatan transaksi SPP & Les untuk tahun {selectedYear} dengan filter kelas ini.
+                      Tidak ada data pencatatan transaksi SPP & Les untuk Tahun Ajaran {selectedAcademicYear} dengan filter kelas ini.
                     </td>
                   </tr>
                 ) : (
@@ -507,7 +629,7 @@ export default function SppTab({
           <div className="block sm:hidden space-y-4">
             {filteredTransactions.length === 0 ? (
               <div className="py-12 px-4 text-center text-neutral-gray font-semibold italic bg-[#FAF8F5] rounded-2xl border border-dashed border-neutral-gray/25">
-                Tidak ada data pencatatan transaksi SPP & Les untuk tahun {selectedYear} dengan filter kelas ini.
+                Tidak ada data pencatatan transaksi SPP & Les untuk Tahun Ajaran {selectedAcademicYear} dengan filter kelas ini.
               </div>
             ) : (
               paginatedTransactions.map((tx) => {
@@ -693,289 +815,504 @@ export default function SppTab({
           )}
         </div>
       </div>
-
-      {/* Form Input Pembayaran SPP & Les Pop-up Modal */}
-      {showSppForm && isAdminTransaksi && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-md p-6 relative shadow-lg space-y-4 animate-fade-in">
-            <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-3">
-              <h4 className="font-baloo text-base font-bold text-neutral-dark">Catat Transaksi Pembayaran SPP & Les</h4>
-              <button
-                type="button"
-                onClick={() => setShowSppForm(false)}
-                className="w-6 h-6 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors hover:bg-neutral-gray/5"
-              >
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+      ) : (
+        /* Matriks Monitoring SPP */
+        <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border border-primary-green/10 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
+            <div>
+              <h3 className="font-baloo text-xl font-bold text-neutral-dark">Matriks Monitoring SPP</h3>
+              <p className="text-[11px] text-neutral-gray font-semibold mt-1">
+                Melacak lunas/tidaknya SPP tiap murid berdasarkan tahun pembukuan yang dipilih.
+              </p>
             </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3.5 text-xs font-semibold text-neutral-dark">
-              <div>
-                <label htmlFor="payStudent" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Pilih Siswa</label>
-                <select
-                  id="payStudent"
-                  value={payStudentId}
-                  onChange={(e) => setPayStudentId(Number(e.target.value))}
-                  className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
-                >
-                  {students.map((st) => (
-                    <option key={st.id} value={st.id}>{st.name} ({st.class})</option>
-                  ))}
-                </select>
+            
+            {/* Quick stats on the right */}
+            <div className="flex items-center gap-3 bg-[#FAF8F5] px-4 py-2.5 rounded-xl border border-primary-green/10">
+              <div className="text-center border-r border-neutral-gray/10 pr-3">
+                <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold">Total Murid</span>
+                <span className="font-mono text-xs font-black text-neutral-dark">
+                  {students.filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif").length}
+                </span>
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="payDate" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tanggal Bayar</label>
-                  <input
-                    type="date"
-                    id="payDate"
-                    value={payDate}
-                    onChange={(e) => setPayDate(e.target.value)}
-                    required
-                    className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Total (Otomatis)</label>
-                  <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
-                    Rp {(Number(paySpp || 0) + Number(payLes || 0)).toLocaleString()}
-                  </div>
-                </div>
+              <div className="text-center pr-3 border-r border-neutral-gray/10">
+                <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold text-emerald-600">Lunas SPP</span>
+                <span className="font-mono text-xs font-black text-emerald-600">
+                  {
+                    students
+                      .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
+                      .filter(student => {
+                        const studentTxs = sppTransactions.filter(tx => tx.studentId === student.id);
+                        return studentTxs.some(tx => (tx.paidMonths || []).some(m => getAcademicYearFromDate(tx.date) === selectedAcademicYear));
+                      }).length
+                  }
+                </span>
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="paySpp" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal SPP (Rp)</label>
-                  <input
-                    type="number"
-                    id="paySpp"
-                    min="0"
-                    value={paySpp}
-                    onChange={(e) => setPaySpp(e.target.value)}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
-                    placeholder="Default 75000"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="payLes" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal Les (Rp)</label>
-                  <input
-                    type="number"
-                    id="payLes"
-                    min="0"
-                    value={payLes}
-                    onChange={(e) => setPayLes(e.target.value)}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
-                    placeholder="Default 40000"
-                  />
-                </div>
+              <div className="text-center">
+                <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold text-rose-600">Tunggakan</span>
+                <span className="font-mono text-xs font-black text-rose-600">
+                  {
+                    students
+                      .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
+                      .filter(student => {
+                        const studentTxs = sppTransactions.filter(tx => tx.studentId === student.id);
+                        return !studentTxs.some(tx => (tx.paidMonths || []).some(m => getAcademicYearFromDate(tx.date) === selectedAcademicYear));
+                      }).length
+                  }
+                </span>
               </div>
+            </div>
+          </div>
 
-              {/* Tombol Pintasan Preset Nominal */}
-              <div>
-                <span className="block text-[8px] text-neutral-gray/60 uppercase mb-1.5 font-bold tracking-wide">Pilih Pintasan Nominal (Hemat Waktu)</span>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPaySpp("75000");
-                      setPayLes("40000");
-                    }}
-                    className="py-2 px-2.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-[9px] font-black rounded-xl border-2 border-emerald-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center whitespace-nowrap"
-                  >
-                    SPP + Les (115rb)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPaySpp("75000");
-                      setPayLes("0");
-                    }}
-                    className="py-2 px-2.5 bg-sky-50 hover:bg-sky-600 hover:text-white text-sky-700 text-[9px] font-black rounded-xl border-2 border-sky-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center whitespace-nowrap"
-                  >
-                    Hanya SPP (75rb)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPaySpp("0");
-                      setPayLes("40000");
-                    }}
-                    className="py-2 px-2.5 bg-fuchsia-50 hover:bg-fuchsia-600 hover:text-white text-fuchsia-700 text-[9px] font-black rounded-xl border-2 border-fuchsia-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center whitespace-nowrap"
-                  >
-                    Hanya Les (40rb)
-                  </button>
-                </div>
-              </div>
+          <div className="overflow-x-auto rounded-xl border border-neutral-gray/10">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10">
+                  <th className="py-3 px-4 min-w-[150px]">Nama Murid (Kelas)</th>
+                  {academicMonths.map(m => {
+                    const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
+                    const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
+                    return (
+                      <th key={m.value} className="py-3 px-2 text-center whitespace-nowrap">
+                        {m.name} <span className="block text-[8px] text-neutral-gray/50">{labelYear}</span>
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-gray/5 font-semibold text-neutral-dark">
+                {students
+                  .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
+                  .map(student => {
+                    return (
+                      <tr key={student.id} className="hover:bg-soft-mint/30 transition-colors">
+                        <td className="py-2.5 px-4 font-bold">
+                          {student.name}
+                          <span className="block text-[9px] font-bold text-neutral-gray">{student.class}</span>
+                        </td>
+                        {academicMonths.map(m => {
+                          const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
+                          const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
+                          const monthKey = `${labelYear}-${m.value}`;
+                          
+                          // Check if student has a transaction with paidMonths containing this monthKey
+                          const studentTxs = sppTransactions.filter(tx => tx.studentId === student.id);
+                          const isPaid = studentTxs.some(tx => tx.paidMonths?.includes(monthKey));
 
-              <div>
-                <label htmlFor="payDesc" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Keterangan / Uraian</label>
-                <input
-                  type="text"
-                  id="payDesc"
-                  value={payDesc}
-                  onChange={(e) => setPayDesc(e.target.value)}
-                  required
-                  className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                  placeholder="Contoh: Pembayaran SPP Agustus + Les"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="newDepositStatus" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Status Setoran Uang Fisik</label>
-                <select
-                  id="newDepositStatus"
-                  value={newDepositStatus}
-                  onChange={(e) => setNewDepositStatus(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
-                >
-                  <option value="Belum Disetor">Belum Disetor (Kas Pending)</option>
-                  <option value="Sudah Disetor">Sudah Disetor (Kas Fisik Riil)</option>
-                </select>
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="submit"
-                  className="flex-1 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
-                >
-                  Simpan Pembayaran
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowSppForm(false)}
-                  className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
-                >
-                  Batal
-                </button>
-              </div>
-            </form>
+                          return (
+                            <td key={m.value} className="py-2 px-1 text-center">
+                              <div className="flex justify-center">
+                                {isPaid ? (
+                                  <span 
+                                    className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200/50 shadow-3xs" 
+                                    title={`Lunas SPP ${m.name} ${labelYear}`}
+                                  >
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  </span>
+                                ) : (
+                                  <span 
+                                    className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-rose-50 text-rose-400 border border-rose-100 shadow-3xs" 
+                                    title={`Belum Bayar SPP ${m.name} ${labelYear}`}
+                                  >
+                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      {/* Edit SppTransaction Modal Pop-up */}
-      {editingTx && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-md p-6 relative shadow-lg space-y-4 animate-fade-in">
-            <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-3">
-              <h4 className="font-baloo text-base font-bold text-neutral-dark">Ubah Transaksi Kas SPP & Les</h4>
-              <button
-                type="button"
-                onClick={() => setEditingTx(null)}
-                className="w-6 h-6 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors hover:bg-neutral-gray/5"
-              >
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                onUpdateSppLesPayment({
-                  ...editingTx,
-                  total: Number(editingTx.spp) + Number(editingTx.les)
-                });
-                setEditingTx(null);
-              }}
-              className="space-y-3.5 text-xs font-semibold text-neutral-dark"
-            >
-              <div>
-                <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Siswa</label>
-                <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-neutral-dark">
-                  {students.find(s => s.id === editingTx.studentId)?.name || "Siswa"}
-                </div>
+      {/* Form Input Pembayaran SPP & Les Sliding Side Drawer */}
+      {showSppForm && isAdminTransaksi && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => setShowSppForm(false)}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Catat Pembayaran SPP & Les</h4>
+                <button
+                  type="button"
+                  onClick={() => setShowSppForm(false)}
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                >
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              {/* Form Content (Scrollable) */}
+              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
                 <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tanggal Bayar</label>
-                  <input
-                    type="date"
-                    required
-                    value={editingTx.date}
-                    onChange={(e) => setEditingTx({ ...editingTx, date: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                  />
+                  <label htmlFor="payStudent" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Pilih Siswa</label>
+                  <select
+                    id="payStudent"
+                    value={payStudentId}
+                    onChange={(e) => setPayStudentId(Number(e.target.value))}
+                    className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                  >
+                    {students.filter(st => st.activeStatus === "Aktif").map((st) => (
+                      <option key={st.id} value={st.id}>{st.name} ({st.class})</option>
+                    ))}
+                  </select>
                 </div>
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Total</label>
-                  <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
-                    Rp {(Number(editingTx.spp) + Number(editingTx.les)).toLocaleString()}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="payDate" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tanggal Bayar</label>
+                    <input
+                      type="date"
+                      id="payDate"
+                      value={payDate}
+                      onChange={(e) => setPayDate(e.target.value)}
+                      required
+                      className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Total (Otomatis)</label>
+                    <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
+                      Rp {(Number(paySpp || 0) + Number(payLes || 0)).toLocaleString()}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="paySpp" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal SPP (Rp)</label>
+                    <input
+                      type="number"
+                      id="paySpp"
+                      min="0"
+                      value={paySpp}
+                      onChange={(e) => setPaySpp(e.target.value)}
+                      required
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                      placeholder="Default 75000"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="payLes" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal Les (Rp)</label>
+                    <input
+                      type="number"
+                      id="payLes"
+                      min="0"
+                      value={payLes}
+                      onChange={(e) => setPayLes(e.target.value)}
+                      required
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                      placeholder="Default 40000"
+                    />
+                  </div>
+                </div>
+
+                {/* Tombol Pintasan Preset Nominal */}
                 <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal SPP (Rp)</label>
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase mb-1.5 font-bold tracking-wide">Pilih Pintasan Nominal (Hemat Waktu)</span>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaySpp("75000");
+                        setPayLes("40000");
+                      }}
+                      className="py-2 px-1 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-[9px] font-black rounded-xl border-2 border-emerald-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center"
+                    >
+                      SPP+Les (115k)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaySpp("75000");
+                        setPayLes("0");
+                      }}
+                      className="py-2 px-1 bg-sky-50 hover:bg-sky-600 hover:text-white text-sky-700 text-[9px] font-black rounded-xl border-2 border-sky-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center"
+                    >
+                      SPP (75k)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaySpp("0");
+                        setPayLes("40000");
+                      }}
+                      className="py-2 px-1 bg-fuchsia-50 hover:bg-fuchsia-600 hover:text-white text-fuchsia-700 text-[9px] font-black rounded-xl border-2 border-fuchsia-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center"
+                    >
+                      Les (40k)
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Pilih Bulan Pembayaran SPP (Bisa Rapel)</label>
+                  <div className="grid grid-cols-2 gap-2 bg-[#FAF8F5] p-3 rounded-lg border border-primary-green/10 max-h-[140px] overflow-y-auto">
+                    {academicMonths.map((m) => {
+                      const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
+                      const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
+                      const monthKey = `${labelYear}-${m.value}`;
+                      
+                      const alreadyPaid = getPaidMonthsForStudent(payStudentId);
+                      const isPaid = alreadyPaid.includes(monthKey);
+                      const isChecked = payPaidMonths.includes(monthKey);
+                      
+                      return (
+                        <label key={monthKey} className={`flex items-center gap-1.5 select-none ${isPaid ? "cursor-not-allowed text-neutral-gray/50" : "cursor-pointer text-neutral-dark"}`}>
+                          <input
+                            type="checkbox"
+                            checked={isChecked || isPaid}
+                            disabled={isPaid}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setPayPaidMonths([...payPaidMonths, monthKey]);
+                              } else {
+                                setPayPaidMonths(payPaidMonths.filter(x => x !== monthKey));
+                              }
+                            }}
+                            className="rounded text-primary-green focus:ring-primary-green disabled:opacity-50"
+                          />
+                          <span className="text-[10px] font-bold">
+                            {m.name} <span className="text-[8px] opacity-75">'{labelYear.substring(2)}</span>
+                            {isPaid && <span className="text-[8px] text-emerald-600 block font-semibold">(Lunas)</span>}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="payDesc" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Keterangan / Uraian</label>
                   <input
-                    type="number"
+                    type="text"
+                    id="payDesc"
+                    value={payDesc}
+                    onChange={(e) => setPayDesc(e.target.value)}
                     required
-                    min="0"
-                    value={editingTx.spp}
-                    onChange={(e) => setEditingTx({ ...editingTx, spp: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                    className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    placeholder="Contoh: Pembayaran SPP Agustus + Les"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal Les (Rp)</label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    value={editingTx.les}
-                    onChange={(e) => setEditingTx({ ...editingTx, les: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
-                  />
+                  <label htmlFor="newDepositStatus" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Status Setoran Uang Fisik</label>
+                  <select
+                    id="newDepositStatus"
+                    value={newDepositStatus}
+                    onChange={(e) => setNewDepositStatus(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                  >
+                    <option value="Belum Disetor">Belum Disetor (Kas Pending)</option>
+                    <option value="Sudah Disetor">Sudah Disetor (Kas Fisik Riil)</option>
+                  </select>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Status Setoran Uang Fisik</label>
-                <select
-                  value={editingTx.depositStatus}
-                  onChange={(e) => setEditingTx({ ...editingTx, depositStatus: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
-                >
-                  <option value="Belum Disetor">Belum Disetor (Kas Pending)</option>
-                  <option value="Sudah Disetor">Sudah Disetor (Kas Fisik Riil)</option>
-                </select>
-              </div>
+                {/* Submit / Action buttons fixed at bottom of scrollable drawer */}
+                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Simpan Pembayaran
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowSppForm(false)}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
-              <div>
-                <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Keterangan / Uraian</label>
-                <input
-                  type="text"
-                  required
-                  value={editingTx.description}
-                  onChange={(e) => setEditingTx({ ...editingTx, description: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="submit"
-                  className="flex-1 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
-                >
-                  Simpan Perubahan
-                </button>
+      {/* Edit SppTransaction Sliding Side Drawer */}
+      {editingTx && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => setEditingTx(null)}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Ubah Transaksi SPP & Les</h4>
                 <button
                   type="button"
                   onClick={() => setEditingTx(null)}
-                  className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
                 >
-                  Batal
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
-            </form>
+
+              {/* Form Content (Scrollable) */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  onUpdateSppLesPayment({
+                    ...editingTx,
+                    total: Number(editingTx.spp) + Number(editingTx.les)
+                  });
+                  setEditingTx(null);
+                }}
+                className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark"
+              >
+                <div>
+                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Siswa</label>
+                  <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-neutral-dark">
+                    {students.find(s => s.id === editingTx.studentId)?.name || "Siswa"}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tanggal Bayar</label>
+                    <input
+                      type="date"
+                      required
+                      value={editingTx.date}
+                      onChange={(e) => setEditingTx({ ...editingTx, date: e.target.value })}
+                      className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Total</label>
+                    <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
+                      Rp {(Number(editingTx.spp) + Number(editingTx.les)).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal SPP (Rp)</label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      value={editingTx.spp}
+                      onChange={(e) => setEditingTx({ ...editingTx, spp: Number(e.target.value) })}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal Les (Rp)</label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      value={editingTx.les}
+                      onChange={(e) => setEditingTx({ ...editingTx, les: Number(e.target.value) })}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1 font-bold">Bulan Pembayaran SPP</label>
+                  <div className="grid grid-cols-2 gap-2 bg-[#FAF8F5] p-3 rounded-lg border border-primary-green/10 max-h-[140px] overflow-y-auto">
+                    {academicMonths.map((m) => {
+                      const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
+                      const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
+                      const monthKey = `${labelYear}-${m.value}`;
+                      
+                      const alreadyPaid = getPaidMonthsForStudent(editingTx.studentId);
+                      const isPaidInOtherTx = alreadyPaid.includes(monthKey) && !(editingTx.paidMonths || []).includes(monthKey);
+                      const isChecked = editingTx.paidMonths?.includes(monthKey) || false;
+                      
+                      return (
+                        <label key={monthKey} className={`flex items-center gap-1.5 select-none ${isPaidInOtherTx ? "cursor-not-allowed text-neutral-gray/50" : "cursor-pointer text-neutral-dark"}`}>
+                          <input
+                            type="checkbox"
+                            checked={isChecked || isPaidInOtherTx}
+                            disabled={isPaidInOtherTx}
+                            onChange={(e) => {
+                              const currentPaid = editingTx.paidMonths || [];
+                              const updatedPaid = e.target.checked
+                                ? [...currentPaid, monthKey]
+                                : currentPaid.filter(x => x !== monthKey);
+                              setEditingTx({ ...editingTx, paidMonths: updatedPaid });
+                            }}
+                            className="rounded text-primary-green focus:ring-primary-green disabled:opacity-50"
+                          />
+                          <span className="text-[10px] font-bold">
+                            {m.name} <span className="text-[8px] opacity-75">'{labelYear.substring(2)}</span>
+                            {isPaidInOtherTx && <span className="text-[8px] text-emerald-600 block font-semibold">(Lunas)</span>}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Status Setoran Uang Fisik</label>
+                  <select
+                    value={editingTx.depositStatus}
+                    onChange={(e) => setEditingTx({ ...editingTx, depositStatus: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                  >
+                    <option value="Belum Disetor">Belum Disetor (Kas Pending)</option>
+                    <option value="Sudah Disetor">Sudah Disetor (Kas Fisik Riil)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Keterangan / Uraian</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingTx.description}
+                    onChange={(e) => setEditingTx({ ...editingTx, description: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                  />
+                </div>
+
+                {/* Submit / Action buttons fixed at bottom of scrollable drawer */}
+                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Simpan Perubahan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingTx(null)}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
