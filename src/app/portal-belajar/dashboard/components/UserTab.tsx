@@ -397,8 +397,11 @@ export default function UserTab({
                   </span>
                   
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-neutral-gray font-mono font-bold">
-                      ID: USR-{u.id}
+                    <span 
+                      className="text-[10px] text-neutral-gray font-mono font-bold cursor-help"
+                      title={`Lengkap: USR-${u.id}`}
+                    >
+                      ID: USR-{String(u.id).length > 8 ? `${String(u.id).substring(0, 8)}...` : u.id}
                     </span>
 
                     {/* Kebab Dropdown Menu */}
