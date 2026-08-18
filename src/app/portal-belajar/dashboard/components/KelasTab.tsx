@@ -46,7 +46,7 @@ export default function KelasTab({
 
   // Form states
   const [newClassName, setNewClassName] = useState("");
-  const [newFase, setNewFase] = useState("Fase Fondasi");
+  const [newFase, setNewFase] = useState("2026/2027");
   const [newTeacherName, setNewTeacherName] = useState("");
   const [newDescription, setNewDescription] = useState("");
 
@@ -85,7 +85,7 @@ export default function KelasTab({
 
     // Reset Form
     setNewClassName("");
-    setNewFase("Fase Fondasi");
+    setNewFase("2026/2027");
     setNewTeacherName("");
     setNewDescription("");
     setShowAddForm(false);

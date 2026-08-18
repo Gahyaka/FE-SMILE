@@ -53,6 +53,16 @@ function mapStudentsData(rawStudents: any[]): any[] {
   }));
 }
 
+function mapClassesData(rawClasses: any[]): any[] {
+  return rawClasses.map((c: any) => ({
+    id: c.id,
+    className: c.namaKelas || c.nama_kelas || "Kelas Tanpa Nama",
+    teacherName: c.waliKelas || c.wali_kelas || "Belum Ada Wali",
+    fase: c.tahunAjaran || c.tahun_ajaran || "2025/2026", // Map Academic Year here
+    description: c.description || c.deskripsi || "Tidak ada deskripsi"
+  }));
+}
+
 export default function DashboardClient() {
   const router = useRouter();
   const [session, setSession] = useState<{ role: "admin_adm" | "admin_trx" | "guru"; name: string } | null>(null);
@@ -126,14 +136,7 @@ export default function DashboardClient() {
 
           const classRes = await classService.getAll();
           const rawClasses = Array.isArray(classRes) ? classRes : classRes?.data || [];
-          const mappedClasses = rawClasses.map((c: any) => ({
-            id: c.id,
-            className: c.namaKelas || c.nama_kelas || "Kelas Tanpa Nama",
-            teacherName: c.waliKelas || c.wali_kelas || "Belum Ada Wali",
-            fase: c.tahunAjaran || c.tahun_ajaran || "2025/2026", // Map Academic Year here
-            description: c.description || c.deskripsi || "Tidak ada deskripsi"
-          }));
-          setClasses(mappedClasses);
+          setClasses(mapClassesData(rawClasses));
         } catch (err) {
           console.warn("Backend data fetch warning (using mock fallbacks):", err);
         }
@@ -270,13 +273,14 @@ const handleAddClass = async (newClsData: any) => {
   try {
     await classService.create({
       namaKelas: newClsData.className,
-      tahunAjaran: "2025/2026", // Default academic year required by backend Adonis
+      tahunAjaran: newClsData.fase, // Send selected academic year dynamically
       waliKelas: newClsData.teacherName || "Bunda Guru"
     });
 
     // Refresh list
     const freshClasses = await classService.getAll();
-    setClasses(Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || []);
+    const rawFresh = Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || [];
+    setClasses(mapClassesData(rawFresh));
 
     const newLog = {
       id: Date.now(),
@@ -295,13 +299,14 @@ const handleUpdateClass = async (updatedCls: any) => {
   try {
     await classService.update(updatedCls.id, {
       namaKelas: updatedCls.className,
-      tahunAjaran: "2025/2026",
+      tahunAjaran: updatedCls.fase, // Send updated academic year dynamically
       waliKelas: updatedCls.teacherName || "Bunda Guru"
     });
 
     // Refresh list
     const freshClasses = await classService.getAll();
-    setClasses(Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || []);
+    const rawFreshUpdate = Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || [];
+    setClasses(mapClassesData(rawFreshUpdate));
 
     const newLog = {
       id: Date.now(),
@@ -411,7 +416,8 @@ const handleDeleteUser = (userId: number) => {
 
         // Refresh list
         const freshClasses = await classService.getAll();
-        setClasses(Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || []);
+        const rawFresh = Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || [];
+        setClasses(mapClassesData(rawFresh));
 
         const newLog = {
           id: Date.now(),
