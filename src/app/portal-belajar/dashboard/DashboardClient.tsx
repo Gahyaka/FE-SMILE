@@ -26,6 +26,7 @@ import {
 } from "./mockData";
 import { studentService } from "@/services/student";
 import { classService } from "@/services/class";
+import { userService } from "@/services/user";
 
 type TabKey = "siswa" | "kelas" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "users" | "audit";
 
@@ -61,6 +62,23 @@ function mapClassesData(rawClasses: any[]): any[] {
     fase: c.tahunAjaran || c.tahun_ajaran || "2025/2026", // Map Academic Year here
     description: c.description || c.deskripsi || "Tidak ada deskripsi"
   }));
+}
+
+function mapUsersData(rawUsers: any[]): any[] {
+  const allowedRoles = ["ADMIN", "ADMIN_ADMINISTRASI", "ADMIN_TRANSAKSI", "GURU"];
+  
+  return rawUsers
+    .filter((u: any) => allowedRoles.includes((u.role || "").toUpperCase()))
+    .map((u: any) => ({
+      id: u.id,
+      name: u.nama || u.name || "Petugas Madrasah",
+      username: u.username,
+      role: (u.role || "").toUpperCase() === "ADMIN_ADMINISTRASI" || (u.role || "").toUpperCase() === "ADMIN" 
+        ? "admin_adm" 
+        : (u.role || "").toUpperCase() === "ADMIN_TRANSAKSI" 
+          ? "admin_trx" 
+          : "guru"
+    }));
 }
 
 export default function DashboardClient() {
@@ -137,6 +155,22 @@ export default function DashboardClient() {
           const classRes = await classService.getAll();
           const rawClasses = Array.isArray(classRes) ? classRes : classRes?.data || [];
           setClasses(mapClassesData(rawClasses));
+
+          // Fetch users from backend Adonis
+          try {
+            const userRes = await userService.getAll();
+            const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+            setUsers(mapUsersData(rawUsers));
+          } catch (userErr) {
+            console.warn("Backend users list API not fully supported/accessible. Using local mock storage.");
+            const storedUsers = localStorage.getItem("system_users");
+            if (storedUsers) {
+              setUsers(JSON.parse(storedUsers));
+            } else {
+              setUsers(initialUsers);
+              localStorage.setItem("system_users", JSON.stringify(initialUsers));
+            }
+          }
         } catch (err) {
           console.warn("Backend data fetch warning (using mock fallbacks):", err);
         }
@@ -332,38 +366,82 @@ const handleDeleteClass = (classId: number) => {
   });
 };
 
-const handleAddUser = (newUsrData: any) => {
+const handleAddUser = async (newUsrData: any) => {
   if (!isAdminAdministrasi) return;
-  const newUsr = {
-    ...newUsrData,
-    id: Date.now()
-  };
-  const updated = [...users, newUsr];
-  setUsers(updated);
-  localStorage.setItem("system_users", JSON.stringify(updated));
+  
+  // Map frontend role format back to Backend role standard
+  let backendRole: "ADMIN_ADMINISTRASI" | "ADMIN_TRANSAKSI" | "GURU" | "ADMIN" = "GURU";
+  if (newUsrData.role === "admin_adm") {
+    backendRole = "ADMIN_ADMINISTRASI";
+  } else if (newUsrData.role === "admin_trx") {
+    backendRole = "ADMIN_TRANSAKSI";
+  } else if (newUsrData.role === "guru") {
+    backendRole = "GURU";
+  }
 
-  const newLog = {
-    id: Date.now(),
-    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-    user: session.name,
-    action: `Mendaftarkan akun pengguna baru: ${newUsr.name} (${newUsr.role})`,
-  };
-  setLogs([newLog, ...logs]);
+  try {
+    await userService.create({
+      nama: newUsrData.name,
+      username: newUsrData.username,
+      password: newUsrData.password,
+      role: backendRole
+    });
+
+    // Refresh users list
+    try {
+      const userRes = await userService.getAll();
+      const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+      setUsers(mapUsersData(rawUsers));
+    } catch {
+      // Local fallback
+      const stored = localStorage.getItem("system_users");
+      const current = stored ? JSON.parse(stored) : [];
+      const localNew = { ...newUsrData, id: Date.now() };
+      const updated = [...current, localNew];
+      setUsers(updated);
+      localStorage.setItem("system_users", JSON.stringify(updated));
+    }
+
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session.name,
+      action: `Mendaftarkan akun pengguna baru: ${newUsrData.name} (${newUsrData.role}) ke backend`,
+    };
+    setLogs([newLog, ...logs]);
+  } catch (err: any) {
+    alert("Gagal mendaftarkan user di backend: " + (err.response?.data?.message || err.message));
+  }
 };
 
-const handleUpdateUser = (updatedUsr: any) => {
+const handleUpdateUser = async (updatedUsr: any) => {
   if (!isAdminAdministrasi) return;
-  const updated = users.map(u => u.id === updatedUsr.id ? updatedUsr : u);
-  setUsers(updated);
-  localStorage.setItem("system_users", JSON.stringify(updated));
+  try {
+    if (updatedUsr.password) {
+      await userService.resetPassword(updatedUsr.id, updatedUsr.password);
+    }
 
-  const newLog = {
-    id: Date.now(),
-    time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-    user: session.name,
-    action: `Memperbarui data akun pengguna: ${updatedUsr.name}`,
-  };
-  setLogs([newLog, ...logs]);
+    // Refresh list locally/API
+    try {
+      const userRes = await userService.getAll();
+      const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+      setUsers(mapUsersData(rawUsers));
+    } catch {
+      const updated = users.map(u => u.id === updatedUsr.id ? updatedUsr : u);
+      setUsers(updated);
+      localStorage.setItem("system_users", JSON.stringify(updated));
+    }
+
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session.name,
+      action: `Memperbarui data akun pengguna: ${updatedUsr.name} di backend`,
+    };
+    setLogs([newLog, ...logs]);
+  } catch (err: any) {
+    alert("Gagal mereset password di backend: " + (err.response?.data?.message || err.message));
+  }
 };
 
 const handleDeleteUser = (userId: number) => {
@@ -446,15 +524,25 @@ const handleDeleteUser = (userId: number) => {
     } else if (actionType === "delete_user") {
       const targetUser = users.find(u => u.id === targetId);
       if (targetUser) {
-        const updated = users.filter(u => u.id !== targetId);
-        setUsers(updated);
-        localStorage.setItem("system_users", JSON.stringify(updated));
+        try {
+          // Coba hapus ke backend
+          await userService.delete(targetId);
+          
+          const userRes = await userService.getAll();
+          const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+          setUsers(mapUsersData(rawUsers));
+        } catch {
+          // Fallback lokal jika backend tidak menyediakan rute delete user
+          const updated = users.filter(u => u.id !== targetId);
+          setUsers(updated);
+          localStorage.setItem("system_users", JSON.stringify(updated));
+        }
 
         const newLog = {
           id: Date.now(),
           time: new Date().toISOString().replace('T', ' ').substring(0, 16),
           user: session.name,
-          action: `Menghapus akun pengguna: ${targetUser.name}`,
+          action: `Menghapus akun pengguna: ${targetUser.name} (Lokal / Backend)`,
         };
         setLogs([newLog, ...logs]);
       }
