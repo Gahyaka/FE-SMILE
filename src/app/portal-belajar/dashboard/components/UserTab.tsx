@@ -82,8 +82,18 @@ export default function UserTab({
     }
 
     const roleSuffix = newRole === "admin_adm" ? "adm" : newRole === "admin_trx" ? "trx" : "guru";
-    setNewUsername(`${base}_${roleSuffix}`);
-  }, [newName, newRole]);
+    const suggestedBase = `${base}_${roleSuffix}`;
+
+    // Deduplicate username dynamically against current user list to prevent 409 Conflict
+    let finalUsername = suggestedBase;
+    let counter = 1;
+    while (users.some((u) => u.username === finalUsername)) {
+      finalUsername = `${suggestedBase}${counter}`;
+      counter++;
+    }
+
+    setNewUsername(finalUsername);
+  }, [newName, newRole, users]);
 
   const visibleUsers = users.filter((u) => {
     return (

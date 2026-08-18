@@ -387,36 +387,68 @@ const handleAddUser = async (newUsrData: any) => {
     backendRole = "GURU";
   }
 
-  try {
-    await userService.create({
-      nama: newUsrData.name,
-      username: newUsrData.username,
-      password: newUsrData.password,
-      role: backendRole
-    });
+  let finalUsername = newUsrData.username;
+  let success = false;
+  let attempts = 0;
+  const maxAttempts = 4;
 
-    // Refresh users list
-    try {
-      const userRes = await userService.getAll();
-      const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
-      setUsers(mapUsersData(rawUsers));
-    } catch {
-      // Local fallback
-      const stored = localStorage.getItem("system_users");
-      const current = stored ? JSON.parse(stored) : [];
-      const localNew = { ...newUsrData, id: Date.now() };
-      const updated = [...current, localNew];
-      setUsers(updated);
-      localStorage.setItem("system_users", JSON.stringify(updated));
+  try {
+    while (!success && attempts < maxAttempts) {
+      try {
+        attempts++;
+        console.log(`Attempt ${attempts}: Registering user '${newUsrData.name}' with username '${finalUsername}'`);
+        await userService.create({
+          nama: newUsrData.name,
+          username: finalUsername,
+          password: newUsrData.password,
+          role: backendRole
+        });
+        success = true;
+      } catch (err: any) {
+        console.error("Registration attempt failed:", err.response?.data || err.message);
+        const errMessage = String(err.response?.data?.message || err.message).toLowerCase();
+        const isConflict = err.response?.status === 409 || errMessage.includes("409") || errMessage.includes("terdaftar") || errMessage.includes("conflict");
+        
+        if (isConflict && attempts < maxAttempts) {
+          // Auto-generate username variation by appending a random 2-digit number
+          const randomSuffix = String(Math.floor(10 + Math.random() * 90));
+          finalUsername = `${newUsrData.username}${randomSuffix}`;
+          console.warn(`Username conflict detected. Auto-retrying with alternative username: ${finalUsername}`);
+          continue;
+        }
+        
+        // If other error or max attempts reached, throw to the outer catch block
+        throw err;
+      }
     }
 
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Mendaftarkan akun pengguna baru: ${newUsrData.name} (${newUsrData.role}) ke backend`,
-    };
-    setLogs([newLog, ...logs]);
+    if (success) {
+      // If username changed due to retry, update the success UI state parameters
+      newUsrData.username = finalUsername;
+
+      // Refresh users list
+      try {
+        const userRes = await userService.getAll();
+        const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+        setUsers(mapUsersData(rawUsers));
+      } catch {
+        // Local fallback
+        const stored = localStorage.getItem("system_users");
+        const current = stored ? JSON.parse(stored) : [];
+        const localNew = { ...newUsrData, id: Date.now() };
+        const updated = [...current, localNew];
+        setUsers(updated);
+        localStorage.setItem("system_users", JSON.stringify(updated));
+      }
+
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Mendaftarkan akun pengguna baru: ${newUsrData.name} (${finalUsername}) ke backend`,
+      };
+      setLogs([newLog, ...logs]);
+    }
   } catch (err: any) {
     alert("Gagal mendaftarkan user di backend: " + (err.response?.data?.message || err.message));
   }
