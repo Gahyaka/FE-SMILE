@@ -12,6 +12,7 @@ interface User {
 
 interface UserTabProps {
   users: User[];
+  localPasswords?: Record<string, string>;
   onAddUser: (newUser: Omit<User, "id">) => void;
   onUpdateUser: (updatedUser: User) => void;
   onDeleteUser: (userId: number) => void;
@@ -19,6 +20,7 @@ interface UserTabProps {
 
 export default function UserTab({
   users,
+  localPasswords = {},
   onAddUser,
   onUpdateUser,
   onDeleteUser,
@@ -32,8 +34,68 @@ export default function UserTab({
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newRole, setNewRole] = useState<"admin_adm" | "admin_trx" | "guru">("guru");
-
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Success credentials modal state
+  const [successCredentials, setSuccessCredentials] = useState<{
+    name: string;
+    username: string;
+    role: string;
+    passwordText: string;
+  } | null>(null);
+
+  // Floating toast notification state
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Helper to generate dynamic random password
+  const generateRandomPassword = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let generated = "";
+    for (let i = 0; i < 8; i++) {
+      generated += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `sgw_${generated}`;
+  };
+
+  // Trigger password generation when add form is opened
+  React.useEffect(() => {
+    if (showAddForm) {
+      setNewPassword(generateRandomPassword());
+    }
+  }, [showAddForm]);
+
+  // Auto-generate username from name & role
+  React.useEffect(() => {
+    if (!newName.trim()) {
+      setNewUsername("");
+      return;
+    }
+    
+    // Clean and split name
+    const sanitized = newName
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "")
+      .trim();
+    const parts = sanitized.split(/\s+/);
+    // Prefer first or second word if "bunda" is used
+    let base = parts[0];
+    if ((base === "bunda" || base === "ibu" || base === "pak") && parts.length > 1) {
+      base = parts[1];
+    }
+
+    const roleSuffix = newRole === "admin_adm" ? "adm" : newRole === "admin_trx" ? "trx" : "guru";
+    const suggestedBase = `${base}_${roleSuffix}`;
+
+    // Deduplicate username dynamically against current user list to prevent 409 Conflict
+    let finalUsername = suggestedBase;
+    let counter = 1;
+    while (users.some((u) => u.username === finalUsername)) {
+      finalUsername = `${suggestedBase}${counter}`;
+      counter++;
+    }
+
+    setNewUsername(finalUsername);
+  }, [newName, newRole, users]);
 
   const visibleUsers = users.filter((u) => {
     return (
@@ -52,6 +114,14 @@ export default function UserTab({
       username: newUsername,
       password: newPassword,
       role: newRole,
+    });
+
+    // Save for the clipboard success dialog
+    setSuccessCredentials({
+      name: newName,
+      username: newUsername,
+      role: newRole === "admin_adm" ? "Admin Administrasi" : newRole === "admin_trx" ? "Admin Transaksi" : "Guru",
+      passwordText: newPassword
     });
 
     // Reset Form
@@ -141,16 +211,15 @@ export default function UserTab({
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
                   />
                 </div>
-                <div>
-                  <label htmlFor="username" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Username Login</label>
+                 <div>
+                  <label htmlFor="username" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Username Login (Otomatis)</label>
                   <input
                     type="text"
                     id="username"
-                    required
+                    disabled
                     value={newUsername}
-                    onChange={(e) => setNewUsername(e.target.value)}
-                    placeholder="Contoh: bundafitri"
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                    placeholder="Auto-generated dari nama & peran"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-mono font-bold bg-stone-50 text-stone-500 cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -167,16 +236,24 @@ export default function UserTab({
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="pass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi (Password)</label>
-                  <input
-                    type="password"
-                    id="pass"
-                    required
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Buat sandi minimal 6 karakter"
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                  />
+                  <label htmlFor="pass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi (Otomatis)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      id="pass"
+                      readOnly
+                      value={newPassword}
+                      className="flex-1 px-3.5 py-2.5 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-mono font-bold bg-stone-50 text-stone-600"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setNewPassword(generateRandomPassword())}
+                      className="px-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-extrabold text-[10px] rounded-xl border border-neutral-gray/10 transition-all cursor-pointer"
+                      title="Acak Ulang Kata Sandi"
+                    >
+                      Acak Ulang
+                    </button>
+                  </div>
                 </div>
 
                 {/* Sticky buttons at bottom */}
@@ -322,8 +399,11 @@ export default function UserTab({
                   </span>
                   
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-neutral-gray font-mono font-bold">
-                      ID: USR-{u.id}
+                    <span 
+                      className="text-[10px] text-neutral-gray font-mono font-bold cursor-help"
+                      title={`Lengkap: USR-${u.id}`}
+                    >
+                      ID: USR-{String(u.id).length > 8 ? `${String(u.id).substring(0, 8)}...` : u.id}
                     </span>
 
                     {/* Kebab Dropdown Menu */}
@@ -400,9 +480,36 @@ export default function UserTab({
                 <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5 space-y-1.5 text-[11px] font-semibold text-neutral-gray">
                   <div className="flex justify-between items-center">
                     <span>Kata Sandi:</span>
-                    <span className="font-mono text-neutral-dark font-bold bg-white px-2 py-0.5 rounded border border-neutral-gray/10">
-                      {u.password || "••••••"}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono text-neutral-gray font-bold tracking-widest text-[9px] select-none bg-stone-100/50 px-1.5 py-0.5 rounded">
+                        ••••••••
+                      </span>
+                      {localPasswords[u.username] ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(localPasswords[u.username]);
+                            setToastMessage(`Kata sandi ${u.name} berhasil disalin!`);
+                            setTimeout(() => setToastMessage(null), 3000);
+                          }}
+                          className="p-1 rounded-lg hover:bg-stone-100 text-primary-green transition-colors cursor-pointer flex items-center justify-center border border-neutral-gray/5"
+                          title="Salin Kata Sandi ke Clipboard"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                          </svg>
+                        </button>
+                      ) : (
+                        <span
+                          className="p-1 rounded-lg text-neutral-gray/40 flex items-center justify-center border border-neutral-gray/5 cursor-not-allowed"
+                          title="Kata sandi tidak tersedia — gunakan fitur Ubah untuk reset password"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                          </svg>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -417,6 +524,81 @@ export default function UserTab({
         )}
       </div>
 
+      {/* 4. Credentials Success Modal Dialog */}
+      {successCredentials && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs select-none p-4 animate-fade-in">
+          <div className="w-full max-w-sm bg-white rounded-3xl border border-primary-green/10 shadow-2xl p-6 space-y-4 animate-scale-in text-neutral-dark">
+            <div className="text-center space-y-3">
+              {/* Gold Trumpet/Megaphone SVG Icon */}
+              <div className="mx-auto w-14 h-14 bg-yellow-50 rounded-full flex items-center justify-center text-yellow-600 shadow-3xs animate-pulse">
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                </svg>
+              </div>
+              <h4 className="font-baloo text-base font-bold text-neutral-dark leading-tight">Akun Petugas Berhasil Dibuat!</h4>
+              <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
+                Silakan salin kredensial login di bawah ini untuk dibagikan kepada petugas bersangkutan.
+              </p>
+            </div>
+
+            <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-primary-green/5 space-y-3 text-xs font-semibold text-neutral-gray font-mono">
+              <div>
+                <span className="block text-[8px] text-neutral-gray/60 uppercase font-sans tracking-wider mb-0.5">Nama Lengkap</span>
+                <span className="text-neutral-dark font-bold font-sans text-xs">{successCredentials.name}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 border-t border-b border-neutral-gray/5 py-2.5 my-2">
+                <div>
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase font-sans tracking-wider mb-0.5">Username</span>
+                  <span className="text-neutral-dark font-bold bg-white px-2 py-0.5 rounded border border-neutral-gray/10 text-[11px] block w-fit">{successCredentials.username}</span>
+                </div>
+                <div>
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase font-sans tracking-wider mb-0.5">Kata Sandi</span>
+                  <span className="text-neutral-dark font-bold bg-white px-2 py-0.5 rounded border border-neutral-gray/10 text-[11px] block w-fit">{successCredentials.passwordText}</span>
+                </div>
+              </div>
+              <div>
+                <span className="block text-[8px] text-neutral-gray/60 uppercase font-sans tracking-wider mb-0.5">Hak Akses / Peran</span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-100 font-sans">{successCredentials.role}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const message = `Halo ${successCredentials.name},\n\nBerikut akun login Portal Belajar KB/RA Sahabat Anda:\n-------------------------------------\nUsername: ${successCredentials.username}\nPassword: ${successCredentials.passwordText}\nHak Akses: ${successCredentials.role}\nLink Portal: ${window.location.origin}/portal-belajar\n-------------------------------------\nHarap simpan kredensial ini baik-baik.`;
+                  navigator.clipboard.writeText(message);
+                  setToastMessage("Kredensial login disalin ke clipboard! Siap dikirim via WhatsApp.");
+                  setTimeout(() => setToastMessage(null), 3000);
+                }}
+                className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-3xs"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                </svg>
+                <span>Salin Akun</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSuccessCredentials(null)}
+                className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer border border-neutral-gray/10"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Custom Floating Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-[#2D6A4F] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-[11px] font-extrabold border border-emerald-500/20 animate-fade-in">
+          <svg className="w-4 h-4 text-emerald-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }
