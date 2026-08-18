@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { initialActivities } from "@/app/portal-belajar/dashboard/mockData";
 
 export default function HomePage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -11,6 +13,27 @@ export default function HomePage() {
     phone: "",
     classType: "RA",
   });
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [galleryItems, setGalleryItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("sgw_activities");
+      const activeActs = stored ? JSON.parse(stored) : initialActivities;
+      const items = activeActs
+        .filter((act: any) => act.featuredImage)
+        .slice(0, 3) // Only pick top 3 items
+        .map((act: any) => ({
+          id: act.id,
+          title: act.title,
+          category: act.category,
+          image: act.featuredImage || "",
+          description: act.description,
+          date: act.date
+        }));
+      setGalleryItems(items);
+    }
+  }, []);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -283,109 +306,50 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Gallery 1 */}
-            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[-1.5deg] hover:rotate-[1deg] hover:shadow-md transition-all duration-300">
-              {/* Polaroid tape */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[2deg] shadow-3xs pointer-events-none"></div>
-              
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-soft-mint to-primary-light/35 rounded-md flex items-center justify-center text-primary-green relative overflow-hidden">
-                {/* Simulated kid drawing icon */}
-                <svg className="w-12 h-12 text-primary-green/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5" />
-                </svg>
-              </div>
-              <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Latihan Manasik Haji Cilik</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Pembiasaan ibadah haji sejak usia dini</p>
-              </div>
-            </div>
+            {galleryItems.map((item, index) => {
+              // Alternate rotation angles for polaroid organic feel
+              const rotationClass = 
+                index % 3 === 0 
+                  ? "rotate-[-1.5deg] hover:rotate-[1deg]" 
+                  : index % 3 === 1 
+                    ? "rotate-[2deg] hover:rotate-[-1deg]" 
+                    : "rotate-[-1deg] hover:rotate-[2deg]";
 
-            {/* Gallery 2 */}
-            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[2deg] hover:rotate-[-1deg] hover:shadow-md transition-all duration-300">
-              {/* Polaroid tape */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[-3deg] shadow-3xs pointer-events-none"></div>
-              
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-secondary-soft to-accent-soft/30 rounded-md flex items-center justify-center text-secondary relative overflow-hidden">
-                {/* Simulated kid drawing icon */}
-                <svg className="w-12 h-12 text-secondary/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1" />
-                </svg>
-              </div>
-              <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Berkebun di Halaman</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Edukasi kecintaan alam & tanaman hijau</p>
-              </div>
-            </div>
+              return (
+                <div
+                  key={item.id || index}
+                  onClick={() => setLightboxIndex(index)}
+                  className={`bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative hover:shadow-md transition-all duration-300 cursor-pointer ${rotationClass}`}
+                >
+                  {/* Polaroid tape */}
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[-1deg] shadow-3xs pointer-events-none z-20"></div>
 
-            {/* Gallery 3 */}
-            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[-1deg] hover:rotate-[2deg] hover:shadow-md transition-all duration-300">
-              {/* Polaroid tape */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[1deg] shadow-3xs pointer-events-none"></div>
-              
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-accent-soft to-secondary-soft/30 rounded-md flex items-center justify-center text-accent relative overflow-hidden">
-                {/* Simulated kid drawing icon */}
-                <svg className="w-12 h-12 text-accent/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364" />
-                </svg>
-              </div>
-              <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Hari Santri & Sholawat</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Penanaman akhlak mulia sejak dini</p>
-              </div>
-            </div>
+                  {/* Photo Container */}
+                  <div className="w-full aspect-[4/3] rounded-md overflow-hidden bg-stone-100 relative group">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    
+                    {/* Category tag */}
+                    <span className="absolute top-2 left-2 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark shadow-3xs">
+                      {item.category}
+                    </span>
+                  </div>
 
-            {/* Gallery 4 */}
-            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[1.5deg] hover:rotate-[-1.5deg] hover:shadow-md transition-all duration-300">
-              {/* Polaroid tape */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[-1deg] shadow-3xs pointer-events-none"></div>
-              
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-soft-mint to-secondary-soft/30 rounded-md flex items-center justify-center text-primary-green relative overflow-hidden">
-                {/* Simulated kid drawing APE icon */}
-                <svg className="w-12 h-12 text-primary-green/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-                  <circle cx="12" cy="12" r="10" strokeDasharray="3 2" />
-                  <path d="M12 8v8M8 12h8" />
-                </svg>
-              </div>
-              <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Eksperimen Pelangi Gembira</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Sains cilik & pencampuran warna</p>
-              </div>
-            </div>
-
-            {/* Gallery 5 */}
-            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[-2deg] hover:rotate-[1deg] hover:shadow-md transition-all duration-300">
-              {/* Polaroid tape */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[2deg] shadow-3xs pointer-events-none"></div>
-              
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-secondary-soft to-primary-light/20 rounded-md flex items-center justify-center text-secondary relative overflow-hidden">
-                {/* Simulated art drawing icon */}
-                <svg className="w-12 h-12 text-secondary/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93z" />
-                </svg>
-              </div>
-              <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Pentas Seni Anak RA</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Saluran ekspresi minat bakat & percaya diri</p>
-              </div>
-            </div>
-
-            {/* Gallery 6 */}
-            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[1deg] hover:rotate-[-2deg] hover:shadow-md transition-all duration-300">
-              {/* Polaroid tape */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[-2deg] shadow-3xs pointer-events-none"></div>
-              
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-accent-soft to-soft-mint/30 rounded-md flex items-center justify-center text-accent relative overflow-hidden">
-                {/* Simulated kid tooth/gizi icon */}
-                <svg className="w-12 h-12 text-accent/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-                  <circle cx="12" cy="12" r="8" />
-                  <path d="M12 2a4 4 0 0 0-4 4c0 3 4 8 4 8s4-5 4-4a4 4 0 0 0-4-4z" />
-                </svg>
-              </div>
-              <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Senam & Gosok Gigi PHBS</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Pembiasaan perilaku hidup bersih sehat</p>
-              </div>
-            </div>
+                  {/* Description under polaroid */}
+                  <div className="mt-4 text-center space-y-1">
+                    <h4 className="font-baloo text-base font-bold text-neutral-dark leading-tight group-hover:text-primary-green transition-colors">
+                      {item.title}
+                    </h4>
+                    <p className="text-[10px] text-neutral-gray font-semibold">
+                      Diambil pada {item.date}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Button to full gallery page */}
@@ -618,6 +582,76 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Pure Full-Screen Lightbox Slideshow */}
+      <AnimatePresence>
+        {lightboxIndex !== null && galleryItems[lightboxIndex] && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xs select-none">
+            {/* Backdrop Dismiss Trigger */}
+            <div 
+              className="absolute inset-0 cursor-zoom-out" 
+              onClick={() => setLightboxIndex(null)}
+            />
+
+            {/* Close Button */}
+            <button
+              onClick={() => setLightboxIndex(null)}
+              className="absolute top-6 right-6 z-[110] w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-lg cursor-pointer transition-colors"
+              title="Tutup (Esc)"
+            >
+              ✕
+            </button>
+
+            {/* Prev Button */}
+            <button
+              onClick={() => setLightboxIndex((lightboxIndex - 1 + galleryItems.length) % galleryItems.length)}
+              className="absolute left-4 md:left-8 z-[110] w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xl cursor-pointer transition-colors"
+              title="Sebelumnya"
+            >
+              ‹
+            </button>
+
+            {/* Next Button */}
+            <button
+              onClick={() => setLightboxIndex((lightboxIndex + 1) % galleryItems.length)}
+              className="absolute right-4 md:right-8 z-[110] w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xl cursor-pointer transition-colors"
+              title="Berikutnya"
+            >
+              ›
+            </button>
+
+            {/* Slide Container */}
+            <div className="relative w-full max-w-4xl max-h-[80vh] px-4 flex flex-col items-center justify-center z-10 space-y-4">
+              <motion.img
+                key={galleryItems[lightboxIndex].id || lightboxIndex}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                src={galleryItems[lightboxIndex].image}
+                alt={galleryItems[lightboxIndex].title}
+                className="max-w-full max-h-[72vh] object-contain rounded-lg border border-white/10 shadow-2xl"
+              />
+
+              {/* Caption */}
+              <div className="text-center text-white space-y-1 px-4 max-w-xl">
+                <span className="text-[9px] uppercase font-black tracking-widest text-primary-green bg-primary-green/10 px-2 py-0.5 rounded border border-primary-green/20">
+                  {galleryItems[lightboxIndex].category}
+                </span>
+                <h4 className="font-baloo text-base font-bold mt-1.5">
+                  {galleryItems[lightboxIndex].title}
+                </h4>
+                <p className="text-[10px] text-neutral-gray leading-relaxed font-semibold">
+                  {galleryItems[lightboxIndex].description}
+                </p>
+                <span className="text-[9px] text-stone-500 font-bold block mt-1">
+                  Foto {lightboxIndex + 1} dari {galleryItems.length} • Diambil pada {galleryItems[lightboxIndex].date}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
