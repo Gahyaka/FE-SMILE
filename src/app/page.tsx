@@ -52,7 +52,7 @@ export default function HomePage() {
                 Membentuk Generasi <span className="text-primary-green">Cerdas</span> & Berkarakter Islami
               </h1>
               <p className="text-sm sm:text-base text-neutral-gray max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-                KB/RA Sahabat Berbah Sleman berkomitmen menghadirkan ekosistem pendidikan anak usia dini yang menyenangkan, berakhlak mulia, dan berlandaskan nilai Aswaja NU.
+                RA Sahabat berkomitmen memuliakan setiap anak melalui pendekatan Pembelajaran Mendalam (PM) dengan Kurikulum Berbasis Cinta yang berlandaskan suasana belajar yang berkesadaran, bermakna, dan menggembirakan.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
                 <a
@@ -153,21 +153,25 @@ export default function HomePage() {
                 Pendidikan Islami yang Hangat, Ramah, dan Ceria
               </h2>
               <p className="text-sm text-neutral-gray leading-relaxed font-medium">
-                **KB/RA Sahabat** merupakan lembaga pendidikan anak usia dini swasta di wilayah Berbah, Sleman, Yogyakarta yang berada di bawah naungan Kementerian Agama (Kemenag) dengan afiliasi Nahdlatul Ulama (NU). Kami memadukan kurikulum pendidikan umum ramah anak dengan dasar akhlakul karimah dan ibadah harian praktis.
+                **RA Sahabat** merupakan lembaga pendidikan jenjang TK di Tlogowono, Tegaltirto, Berbah, Sleman, Yogyakarta yang berada di bawah naungan Yayasan Rumah Sahabat Kita dan Kemenag Kabupaten Sleman. Kami mengimplementasikan Pembelajaran Mendalam (PM) dengan mengoptimalkan seluruh potensi anak (olah pikir, olah hati, olah rasa, dan olah raga).
               </p>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                 <div className="p-5 bg-soft-mint rounded-lg border-2 border-dashed border-primary-green/30">
-                  <h4 className="font-baloo text-lg font-bold text-primary-dark mb-1">Visi Kami</h4>
+                  <h4 className="font-baloo text-lg font-bold text-primary-dark mb-1">Visi RA Sahabat</h4>
                   <p className="text-xs text-neutral-gray font-semibold leading-relaxed">
-                    Mewujudkan generasi bertakwa, berakhlak mulia, cerdas, kreatif, mandiri, dan cinta tanah air sejak usia dini.
+                    "Terwujudnya generasi Qur’ani yang CERIA (Cerdas, Riang, Berakhlaq Mulia) serta cinta tanah air"
                   </p>
                 </div>
                 <div className="p-5 bg-secondary-soft rounded-lg border-2 border-dashed border-secondary/30">
-                  <h4 className="font-baloo text-lg font-bold text-secondary-dark mb-1">Nilai Aswaja NU</h4>
-                  <p className="text-xs text-neutral-gray font-semibold leading-relaxed">
-                    Menanamkan karakter tawasut (moderat), tawazun (seimbang), i'tidal (tegak lurus), dan tasamuh (toleran) lewat pembiasaan harian.
-                  </p>
+                  <h4 className="font-baloo text-lg font-bold text-secondary-dark mb-1">Kurikulum Berbasis Cinta (Panca Cinta)</h4>
+                  <ul className="text-xs text-neutral-gray font-semibold leading-relaxed list-disc list-inside space-y-0.5">
+                    <li>Cinta Allah dan Rasul-Nya</li>
+                    <li>Cinta Ilmu</li>
+                    <li>Cinta Lingkungan</li>
+                    <li>Cinta Diri & Sesama Manusia</li>
+                    <li>Cinta Tanah Air</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -182,18 +186,18 @@ export default function HomePage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between border-b border-primary-green/10 pb-2">
                     <span className="text-xs font-extrabold text-neutral-dark">Kapasitas Pendidik</span>
-                    <span className="text-xs font-extrabold text-secondary">6 Guru Berdedikasi</span>
+                    <span className="text-xs font-extrabold text-secondary">7 Staf & Guru Berdedikasi</span>
                   </div>
                   <div className="flex items-center justify-between border-b border-primary-green/10 pb-2">
-                    <span className="text-xs font-extrabold text-neutral-dark">Afiliasi Resmi</span>
-                    <span className="text-xs font-extrabold text-primary-green">Kemenag Sleman & NU</span>
+                    <span className="text-xs font-extrabold text-neutral-dark">Penyelenggara</span>
+                    <span className="text-xs font-extrabold text-primary-green">Yayasan Rumah Sahabat Kita</span>
                   </div>
                   <div className="flex items-center justify-between border-b border-primary-green/10 pb-2">
-                    <span className="text-xs font-extrabold text-neutral-dark">Kesiapan Akreditasi</span>
-                    <span className="text-xs font-extrabold text-accent">Persiapan BAN-PDM (Sispena)</span>
+                    <span className="text-xs font-extrabold text-neutral-dark">Status Akreditasi</span>
+                    <span className="text-xs font-extrabold text-accent">Terakreditasi B</span>
                   </div>
                   <p className="text-[10px] text-neutral-gray leading-relaxed font-semibold text-center mt-4">
-                    *Tim guru RA Sahabat aktif mengikuti pelatihan kurikulum merdeka PAUD secara berkala.
+                    *Alamat: Tlogowono RT 06/RW 05, Tegaltirto, Berbah, Sleman, DIY.
                   </p>
                 </div>
               </div>
@@ -227,9 +231,9 @@ export default function HomePage() {
                 <svg className="w-10 h-10 text-secondary mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13" />
                 </svg>
-                <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">Pendidikan Karakter Aswaja</h3>
+                <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">Pembelajaran Mendalam (PM)</h3>
                 <p className="text-xs text-neutral-gray leading-relaxed font-semibold">
-                  Mengenalkan doa-doa harian, asmaul husna, manasik haji cilik, dan kecintaan pada sholawat nabi sejak usia dini.
+                  Pendekatan yang menekankan pada penciptaan suasana belajar yang berkesadaran, bermakna, dan menggembirakan secara terpadu.
                 </p>
               </div>
             </div>
@@ -241,9 +245,9 @@ export default function HomePage() {
                 <svg className="w-10 h-10 text-primary-green mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">Metode Playful Learning</h3>
+                <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">7 Kebiasaan Anak Indonesia Hebat</h3>
                 <p className="text-xs text-neutral-gray leading-relaxed font-semibold">
-                  Menerapkan konsep bermain seraya belajar yang merangsang sensorik motorik anak melalui eksperimen kreatif dan permainan kelompok.
+                  Menerapkan kerangka karakter praktis harian: bangun pagi, beribadah, berolahraga, makan sehat, gemar belajar, hingga bermasyarakat.
                 </p>
               </div>
             </div>
@@ -255,9 +259,9 @@ export default function HomePage() {
                 <svg className="w-10 h-10 text-accent mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
-                <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">Tumbuh Kembang Sehat</h3>
+                <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">Program Unggulan Keagamaan</h3>
                 <p className="text-xs text-neutral-gray leading-relaxed font-semibold">
-                  Melakukan pemantauan gizi siswa harian, koordinasi dengan Puskesmas Berbah, serta pembinaan pola hidup bersih sehat (PHBS).
+                  Tahfidz Qur'an Yanbu'a dengan metode setoran "one day one ayat", sholat dhuha berjamaah, dan simulaasi manasik haji.
                 </p>
               </div>
             </div>
@@ -382,6 +386,17 @@ export default function HomePage() {
                 <p className="text-[10px] text-neutral-gray font-semibold mt-1">Pembiasaan perilaku hidup bersih sehat</p>
               </div>
             </div>
+          </div>
+
+          {/* Button to full gallery page */}
+          <div className="flex justify-center mt-12">
+            <Link
+              href="/galeri"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent hover:bg-accent-dark text-white font-extrabold text-xs transition-all shadow-3xs border border-accent-dark active:scale-95 duration-200 cursor-pointer"
+            >
+              <span>Lihat Seluruh Galeri Dokumentasi</span>
+              <span className="text-xs">➔</span>
+            </Link>
           </div>
         </div>
       </section>
@@ -526,91 +541,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* PREVIEW GALERI SECTION */}
-      <section className="py-20 bg-white relative overflow-hidden border-b border-soft-mint">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-            <div className="space-y-3 max-w-xl text-center md:text-left">
-              <span className="inline-block text-xs font-accent font-semibold uppercase tracking-wider text-primary-dark bg-soft-mint px-4 py-2 rounded-lg border-2 border-dashed border-primary-green/30">
-                Dokumentasi Kegiatan
-              </span>
-              <h2 className="font-baloo text-3xl font-bold text-neutral-dark">Keseruan Sahabat Cilik</h2>
-              <p className="text-sm text-neutral-gray leading-relaxed font-semibold">
-                Intip sekilas keceriaan anak-anak dalam mengikuti berbagai aktivitas edukatif, keagamaan, dan petualangan outbound kami.
-              </p>
-            </div>
-            <div className="flex justify-center md:justify-end flex-shrink-0">
-              <Link
-                href="/galeri"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent hover:bg-accent-dark text-white font-extrabold text-xs transition-all shadow-3xs border border-accent-dark active:scale-95 duration-200 cursor-pointer"
-              >
-                <span>Lihat Seluruh Galeri</span>
-                <span className="text-xs">➔</span>
-              </Link>
-            </div>
-          </div>
 
-          {/* Grid Preview 3 Foto */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-[#FAF8F5] rounded-3xl overflow-hidden border border-primary-green/10 p-4 space-y-4 hover:shadow-sm transition-all duration-300">
-              <div className="relative h-48 rounded-2xl overflow-hidden bg-stone-100">
-                <img
-                  src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800"
-                  alt="Belajar Al-Qur'an"
-                  className="w-full h-full object-cover"
-                />
-                <span className="absolute top-3 left-3 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark">
-                  Keagamaan
-                </span>
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-baloo text-sm font-bold text-neutral-dark">Belajar Membaca Al-Qur'an</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
-                  Kegiatan membaca Iqro bersama guru pendamping setiap pagi hari.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-[#FAF8F5] rounded-3xl overflow-hidden border border-primary-green/10 p-4 space-y-4 hover:shadow-sm transition-all duration-300">
-              <div className="relative h-48 rounded-2xl overflow-hidden bg-stone-100">
-                <img
-                  src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800"
-                  alt="Outbound"
-                  className="w-full h-full object-cover"
-                />
-                <span className="absolute top-3 left-3 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark">
-                  Outbound
-                </span>
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-baloo text-sm font-bold text-neutral-dark">Outbound Kebun Binatang</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
-                  Pengenalan satwa dan edukasi lapangan untuk melatih kemandirian anak.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-[#FAF8F5] rounded-3xl overflow-hidden border border-primary-green/10 p-4 space-y-4 hover:shadow-sm transition-all duration-300">
-              <div className="relative h-48 rounded-2xl overflow-hidden bg-stone-100">
-                <img
-                  src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=800"
-                  alt="Pentas Seni"
-                  className="w-full h-full object-cover"
-                />
-                <span className="absolute top-3 left-3 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark">
-                  Pentas Seni
-                </span>
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-baloo text-sm font-bold text-neutral-dark">Pentas Seni Akhir Tahun</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
-                  Menampilkan bakat kreativitas, tarian, dan hafalan surah pendek.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* PPDB REGISTER INFO SECTION — REDESIGNED TO WHATSAPP DIRECT */}
       <section id="ppdb" className="py-20 bg-[#FAF8F5] relative overflow-hidden border-b border-soft-mint">
