@@ -75,7 +75,7 @@ function mapSppTransactions(rawTxs: any[]): any[] {
     spp: Number(tx.nominalSpp) || 0,
     les: Number(tx.nominalLes) || 0,
     total: (Number(tx.nominalSpp) || 0) + (Number(tx.nominalLes) || 0),
-    depositStatus: tx.statusSetoran || "Belum Disetor",
+    depositStatus: tx.statusSetoran === "SUDAH" ? "Sudah Disetor" : "Belum Disetor",
     paidMonths: tx.paidMonths || []
   }));
 }
@@ -777,13 +777,14 @@ const handleDeleteUser = (userId: number) => {
   const handleAddSppLesPayment = async (newTxData: any) => {
     if (!isAdminTransaksi) return;
     try {
+      const apiStatusSetoran = newTxData.depositStatus === "Sudah Disetor" ? "SUDAH" : "BELUM";
       await sppService.create({
         siswaId: String(newTxData.studentId),
         tanggalBayar: newTxData.date,
         nominalSpp: Number(newTxData.spp),
         nominalLes: Number(newTxData.les),
         catatan: newTxData.description,
-        statusSetoran: newTxData.depositStatus || "Belum Disetor",
+        statusSetoran: apiStatusSetoran,
         paidMonths: newTxData.paidMonths || []
       });
 
@@ -808,10 +809,11 @@ const handleDeleteUser = (userId: number) => {
   const handleUpdateSppPayment = async (updatedTx: any) => {
     if (!isAdminTransaksi) return;
     try {
+      const apiStatusSetoran = updatedTx.depositStatus === "Sudah Disetor" ? "SUDAH" : "BELUM";
       await sppService.update(updatedTx.id, {
         nominalSpp: Number(updatedTx.spp),
         nominalLes: Number(updatedTx.les),
-        statusSetoran: updatedTx.depositStatus,
+        statusSetoran: apiStatusSetoran,
         tanggalBayar: updatedTx.date,
         catatan: updatedTx.description,
         paidMonths: updatedTx.paidMonths
@@ -1207,6 +1209,7 @@ const handleDeleteUser = (userId: number) => {
               {activeTab === "spp" && (
                 <SppTab
                   students={students}
+                  classes={classes}
                   sppTransactions={sppTransactions}
                   isAdminTransaksi={isAdminTransaksi}
                   onAddSppLesPayment={handleAddSppLesPayment}
