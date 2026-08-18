@@ -1,19 +1,17 @@
 import api from "@/lib/api";
 
 export interface StudentPayload {
-  nis: string;
   namaLengkap: string;
   namaOrangTua: string;
-  kelasId: string;
-  // Optional/additional parameters
-  address?: string;
+  nisn: string;
+  nis: string;
+  kelasId: string | null;
+  alamat?: string;
+  tinggiBadan?: number;
+  beratBadan?: number;
+  lingkarKepala?: number;
   semester?: string;
-  class?: string;
-  fase?: string;
-  height?: number;
-  weight?: number;
-  headCircumference?: number;
-  academicYear?: string;
+  tahunAjaran?: string;
   activeStatus?: string;
 }
 
@@ -45,7 +43,7 @@ export const studentService = {
   /**
    * Menghapus data siswa secara permanen
    */
-  async delete(id: number) {
+  async delete(id: string | number) {
     const response = await api.delete(`/api/v1/siswa/${id}`);
     return response.data;
   }

@@ -6,6 +6,7 @@ interface Student {
   id: number;
   name: string;
   nisn: string;
+  nis: string;
   address: string;
   semester: string;
   class: string;
@@ -49,6 +50,7 @@ export default function StudentTab({
   // Local Form States (Offline Registration)
   const [newStudentName, setNewStudentName] = useState("");
   const [newStudentNisn, setNewStudentNisn] = useState("");
+  const [newStudentNis, setNewStudentNis] = useState("");
   const [newStudentAddress, setNewStudentAddress] = useState("");
   const [newStudentSemester, setNewStudentSemester] = useState("Semester 1");
   const [newStudentClass, setNewStudentClass] = useState("KB");
@@ -87,6 +89,7 @@ export default function StudentTab({
     onAddStudent({
       name: newStudentName,
       nisn: newStudentNisn,
+      nis: newStudentNis,
       address: newStudentAddress || "Alamat belum diinput",
       semester: newStudentSemester,
       class: newStudentClass,
@@ -101,6 +104,7 @@ export default function StudentTab({
     // Reset Form
     setNewStudentName("");
     setNewStudentNisn("");
+    setNewStudentNis("");
     setNewStudentAddress("");
     setNewStudentParentName("");
     setShowStudentForm(false);
@@ -359,26 +363,55 @@ export default function StudentTab({
             </div>
 
             <div className="space-y-3 text-xs font-semibold text-neutral-dark">
+              {/* Nama Lengkap */}
               <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
                 <span className="block text-[8px] text-neutral-gray/60 uppercase">Nama Lengkap</span>
                 <span className="text-sm font-bold text-neutral-dark">{activeDetailStudent.name}</span>
               </div>
+
+              {/* NISN & NIS */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
                   <span className="block text-[8px] text-neutral-gray/60 uppercase">NISN</span>
-                  <span className="font-mono text-neutral-dark">{activeDetailStudent.nisn}</span>
+                  <span className="font-mono text-neutral-dark font-bold">{activeDetailStudent.nisn || "-"}</span>
                 </div>
                 <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
-                  <span className="block text-[8px] text-neutral-gray/60 uppercase">Kelas & Fase</span>
-                  <span className="font-bold text-neutral-dark">{activeDetailStudent.class} ({activeDetailStudent.fase})</span>
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase">NIS (Nomor Induk)</span>
+                  <span className="font-mono text-neutral-dark font-bold">{activeDetailStudent.nis || "-"}</span>
                 </div>
               </div>
 
+              {/* Orang Tua & Tahun Ajaran */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase">Orang Tua / Wali</span>
+                  <span className="text-neutral-dark font-bold">{activeDetailStudent.parentName || "-"}</span>
+                </div>
+                <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase">Tahun Ajaran</span>
+                  <span className="text-neutral-dark font-bold">{activeDetailStudent.academicYear || "-"}</span>
+                </div>
+              </div>
+
+              {/* Kelas/Fase & Semester */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase">Kelas &amp; Fase</span>
+                  <span className="font-bold text-neutral-dark">{activeDetailStudent.class} ({activeDetailStudent.fase})</span>
+                </div>
+                <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase">Semester</span>
+                  <span className="text-neutral-dark font-bold">{activeDetailStudent.semester || "-"}</span>
+                </div>
+              </div>
+
+              {/* Alamat */}
               <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
                 <span className="block text-[8px] text-neutral-gray/60 uppercase">Alamat Rumah</span>
                 <span className="text-neutral-gray font-normal">{activeDetailStudent.address}</span>
               </div>
 
+              {/* TB, BB, LK, Status */}
               <div className="grid grid-cols-4 gap-2 text-center">
                 <div className="bg-[#FAF8F5] p-2 rounded-lg border border-neutral-gray/5">
                   <span className="block text-[7px] text-neutral-gray/60 uppercase">TB</span>
@@ -394,7 +427,7 @@ export default function StudentTab({
                 </div>
                 <div className="bg-[#FAF8F5] p-2 rounded-lg border border-neutral-gray/5">
                   <span className="block text-[7px] text-neutral-gray/60 uppercase">Status</span>
-                  <span className="font-bold text-[10px] text-emerald-600">{activeDetailStudent.activeStatus}</span>
+                  <span className={`font-bold text-[10px] ${activeDetailStudent.activeStatus === "Aktif" ? "text-emerald-600" : "text-rose-500"}`}>{activeDetailStudent.activeStatus}</span>
                 </div>
               </div>
             </div>
@@ -473,6 +506,20 @@ export default function StudentTab({
                       className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-mono text-neutral-dark"
                     />
                   </div>
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NIS (Nomor Induk)</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingStudent.nis || ""}
+                      onChange={(e) => setEditingStudent({ ...editingStudent, nis: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-mono text-neutral-dark"
+                      placeholder="Contoh: 2026001"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kelas</label>
                     <select
@@ -645,9 +692,7 @@ export default function StudentTab({
                     className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
                     placeholder="Contoh: Siti Aminah"
                   />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
+                </div>                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="newStudentNisn" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NISN (10 Digit)</label>
                     <input
@@ -663,6 +708,21 @@ export default function StudentTab({
                       placeholder="10 digit NISN"
                     />
                   </div>
+                  <div>
+                    <label htmlFor="newStudentNis" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NIS (Nomor Induk)</label>
+                    <input
+                      type="text"
+                      required
+                      id="newStudentNis"
+                      value={newStudentNis}
+                      onChange={(e) => setNewStudentNis(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-mono text-neutral-dark"
+                      placeholder="Contoh: 2026001"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="newStudentClass" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kelas</label>
                     <select

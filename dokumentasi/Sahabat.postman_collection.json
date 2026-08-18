@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "5d1fe290-c72f-475e-96c8-bcceb651b219",
+    "_postman_id": "248ab4fc-bffa-4d55-9f7a-7d9a2d9186b1",
     "name": "KB RA Sahabat",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "52385280",
-    "_collection_link": "https://go.postman.co/collection/52385280-5d1fe290-c72f-475e-96c8-bcceb651b219?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/52385280-248ab4fc-bffa-4d55-9f7a-7d9a2d9186b1?source=collection_link"
   },
   "item": [
     {
@@ -857,7 +857,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                  "value": "",
                   "type": "string"
                 }
               ]
@@ -866,7 +866,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nis\": \"1001\",\r\n  \"namaLengkap\": \"Ahmad Rizky\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"kelasId\": \"7367fed7-6f2b-4cdc-88aa-1399ce1d2175\"\r\n}",
+              "raw": "{\r\n  \"namaLengkap\": \"Ahmad Fauzi\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"nisn\": \"0012345678\",\r\n  \"nis\": \"2026001\",\r\n  \"kelasId\": null,\r\n  \"alamat\": \"Jl. Kaliurang KM 5, Yogyakarta\",\r\n  \"tinggiBadan\": 100,\r\n  \"beratBadan\": 16,\r\n  \"lingkarKepala\": 48,\r\n  \"semester\": \"Semester 1 (Ganjil)\",\r\n  \"tahunAjaran\": \"2026/2027\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -895,7 +895,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI4YzZlMjc5LWJlZDYtNGZhNi1iZGIxLTNmMWQ2ZTEzYTE4NSIsInVzZXJuYW1lIjoieWF5YSIsInJvbGUiOiJHVVJVIiwiaWF0IjoxNzg1OTkyMzQ3LCJleHAiOjE3ODYwNzg3NDd9.608Fj_o29cNv09aA30jip_klh8CXh9CRhb02C42jBls",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzAyMzMwMSwiZXhwIjoxNzg3MTA5NzAxfQ.kszqFWkqLPkVHFYDVQLc3nA6aRFC4WCphp0jUNVildg",
                   "type": "string"
                 }
               ]
@@ -904,7 +904,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nis\": \"10011\",\r\n  \"namaLengkap\": \"Ahmad Rizky Update\",\r\n  \"namaOrangTua\": \"Siti Aminah Update\",\r\n  \"kelasId\": \"f59e9859-4a43-4f6e-a241-87e6f3bed2e2\"\r\n}",
+              "raw": "{\r\n  \"namaLengkap\": \"Ahmad Fauzi\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"nisn\": \"001234567\",\r\n  \"nis\": \"202600\",\r\n  \"kelasId\": null,\r\n  \"alamat\": \"Jl. Kaliurang KM 5, Yogyakarta\",\r\n  \"tinggiBadan\": 100,\r\n  \"beratBadan\": 16,\r\n  \"lingkarKepala\": 48,\r\n  \"semester\": \"Semester 1 (Ganjil)\",\r\n  \"tahunAjaran\": \"2026/2027\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -940,7 +940,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI4YzZlMjc5LWJlZDYtNGZhNi1iZGIxLTNmMWQ2ZTEzYTE4NSIsInVzZXJuYW1lIjoieWF5YSIsInJvbGUiOiJHVVJVIiwiaWF0IjoxNzg1OTkyMzQ3LCJleHAiOjE3ODYwNzg3NDd9.608Fj_o29cNv09aA30jip_klh8CXh9CRhb02C42jBls",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzAyMzMwMSwiZXhwIjoxNzg3MTA5NzAxfQ.kszqFWkqLPkVHFYDVQLc3nA6aRFC4WCphp0jUNVildg",
                   "type": "string"
                 }
               ]
@@ -949,7 +949,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nis\": \"1001\",\r\n  \"namaLengkap\": \"Ahmad Rizky\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"kelasId\": \"7367fed7-6f2b-4cdc-88aa-1399ce1d2175\"\r\n}"
+              "raw": ""
             },
             "url": {
               "raw": "{{base_url}}/api/v1/siswa/:idSiswa",
@@ -999,7 +999,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4OTljMzcxLWFkNTEtNDE0OS1hMDhiLTkwOWJmZWQ1YjZiNSIsInVzZXJuYW1lIjoic2lzd2FfMTAwMTIiLCJyb2xlIjoiU0lTV0EiLCJpYXQiOjE3ODU5OTYzNjMsImV4cCI6MTc4NjA4Mjc2M30.H19rB7jurlliIKcaZlQPekUj__ERBsWmcbA92AIYB8o",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzAyMzMwMSwiZXhwIjoxNzg3MTA5NzAxfQ.kszqFWkqLPkVHFYDVQLc3nA6aRFC4WCphp0jUNVildg",
                   "type": "string"
                 }
               ]

@@ -120,44 +120,58 @@ export default function GaleriPage() {
         {/* Pure Visual Grid */}
         <motion.div 
           layout 
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
         >
           <AnimatePresence mode="popLayout">
-            {filteredItems.map((item, index) => (
-              <motion.div
-                key={item.id}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.25 }}
-                onClick={() => setLightboxIndex(index)}
-                className="relative aspect-[4/3] bg-white rounded-xl overflow-hidden border border-primary-green/10 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.07)] cursor-pointer group transform hover:-translate-y-1 transition-all duration-300"
-              >
-                {/* Photo Element */}
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
-                />
+            {filteredItems.map((item, index) => {
+              // Alternate rotation angles for polaroid organic feel
+              const rotationClass = 
+                index % 3 === 0 
+                  ? "rotate-[-1.5deg] hover:rotate-[1deg]" 
+                  : index % 3 === 1 
+                    ? "rotate-[2deg] hover:rotate-[-1deg]" 
+                    : "rotate-[-1deg] hover:rotate-[2deg]";
 
-                {/* Minimalist Hover Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5 space-y-1 text-white">
-                  <span className="text-[8px] font-black uppercase tracking-wider bg-primary-green px-2 py-0.5 rounded self-start">
-                    {item.category}
-                  </span>
-                  <h3 className="font-baloo text-sm font-bold leading-tight">
-                    {item.title}
-                  </h3>
-                  <span className="text-[8px] opacity-75 font-semibold">{item.date}</span>
-                </div>
+              return (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.25 }}
+                  onClick={() => setLightboxIndex(index)}
+                  className={`bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative hover:shadow-md transition-all duration-300 cursor-pointer ${rotationClass}`}
+                >
+                  {/* Polaroid tape */}
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[-1deg] shadow-3xs pointer-events-none z-20"></div>
 
-                {/* Constant small label (Visible when not hovered) */}
-                <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-primary-green/5 text-[9px] font-bold text-neutral-dark group-hover:opacity-0 transition-opacity duration-200">
-                  {item.title}
-                </div>
-              </motion.div>
-            ))}
+                  {/* Photo Container */}
+                  <div className="w-full aspect-[4/3] rounded-md overflow-hidden bg-stone-100 relative group">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    
+                    {/* Category tag */}
+                    <span className="absolute top-2 left-2 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark shadow-3xs">
+                      {item.category}
+                    </span>
+                  </div>
+
+                  {/* Description under polaroid */}
+                  <div className="mt-4 text-center space-y-1">
+                    <h4 className="font-baloo text-base font-bold text-neutral-dark leading-tight group-hover:text-primary-green transition-colors">
+                      {item.title}
+                    </h4>
+                    <p className="text-[10px] text-neutral-gray font-semibold">
+                      Diambil pada {item.date}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </motion.div>
 

@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { initialActivities } from "@/app/portal-belajar/dashboard/mockData";
 
 export default function HomePage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -11,6 +13,27 @@ export default function HomePage() {
     phone: "",
     classType: "RA",
   });
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [galleryItems, setGalleryItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("sgw_activities");
+      const activeActs = stored ? JSON.parse(stored) : initialActivities;
+      const items = activeActs
+        .filter((act: any) => act.featuredImage)
+        .slice(0, 3) // Only pick top 3 items
+        .map((act: any) => ({
+          id: act.id,
+          title: act.title,
+          category: act.category,
+          image: act.featuredImage || "",
+          description: act.description,
+          date: act.date
+        }));
+      setGalleryItems(items);
+    }
+  }, []);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -52,7 +75,7 @@ export default function HomePage() {
                 Membentuk Generasi <span className="text-primary-green">Cerdas</span> & Berkarakter Islami
               </h1>
               <p className="text-sm sm:text-base text-neutral-gray max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-                KB/RA Sahabat Berbah Sleman berkomitmen menghadirkan ekosistem pendidikan anak usia dini yang menyenangkan, berakhlak mulia, dan berlandaskan nilai Aswaja NU.
+                RA Sahabat berkomitmen memuliakan setiap anak melalui pendekatan Pembelajaran Mendalam (PM) dengan Kurikulum Berbasis Cinta yang berlandaskan suasana belajar yang berkesadaran, bermakna, dan menggembirakan.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
                 <a
@@ -153,21 +176,25 @@ export default function HomePage() {
                 Pendidikan Islami yang Hangat, Ramah, dan Ceria
               </h2>
               <p className="text-sm text-neutral-gray leading-relaxed font-medium">
-                **KB/RA Sahabat** merupakan lembaga pendidikan anak usia dini swasta di wilayah Berbah, Sleman, Yogyakarta yang berada di bawah naungan Kementerian Agama (Kemenag) dengan afiliasi Nahdlatul Ulama (NU). Kami memadukan kurikulum pendidikan umum ramah anak dengan dasar akhlakul karimah dan ibadah harian praktis.
+                **RA Sahabat** merupakan lembaga pendidikan jenjang TK di Tlogowono, Tegaltirto, Berbah, Sleman, Yogyakarta yang berada di bawah naungan Yayasan Rumah Sahabat Kita dan Kemenag Kabupaten Sleman. Kami mengimplementasikan Pembelajaran Mendalam (PM) dengan mengoptimalkan seluruh potensi anak (olah pikir, olah hati, olah rasa, dan olah raga).
               </p>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                 <div className="p-5 bg-soft-mint rounded-lg border-2 border-dashed border-primary-green/30">
-                  <h4 className="font-baloo text-lg font-bold text-primary-dark mb-1">Visi Kami</h4>
+                  <h4 className="font-baloo text-lg font-bold text-primary-dark mb-1">Visi RA Sahabat</h4>
                   <p className="text-xs text-neutral-gray font-semibold leading-relaxed">
-                    Mewujudkan generasi bertakwa, berakhlak mulia, cerdas, kreatif, mandiri, dan cinta tanah air sejak usia dini.
+                    "Terwujudnya generasi Qur’ani yang CERIA (Cerdas, Riang, Berakhlaq Mulia) serta cinta tanah air"
                   </p>
                 </div>
                 <div className="p-5 bg-secondary-soft rounded-lg border-2 border-dashed border-secondary/30">
-                  <h4 className="font-baloo text-lg font-bold text-secondary-dark mb-1">Nilai Aswaja NU</h4>
-                  <p className="text-xs text-neutral-gray font-semibold leading-relaxed">
-                    Menanamkan karakter tawasut (moderat), tawazun (seimbang), i'tidal (tegak lurus), dan tasamuh (toleran) lewat pembiasaan harian.
-                  </p>
+                  <h4 className="font-baloo text-lg font-bold text-secondary-dark mb-1">Kurikulum Berbasis Cinta (Panca Cinta)</h4>
+                  <ul className="text-xs text-neutral-gray font-semibold leading-relaxed list-disc list-inside space-y-0.5">
+                    <li>Cinta Allah dan Rasul-Nya</li>
+                    <li>Cinta Ilmu</li>
+                    <li>Cinta Lingkungan</li>
+                    <li>Cinta Diri & Sesama Manusia</li>
+                    <li>Cinta Tanah Air</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -182,18 +209,18 @@ export default function HomePage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between border-b border-primary-green/10 pb-2">
                     <span className="text-xs font-extrabold text-neutral-dark">Kapasitas Pendidik</span>
-                    <span className="text-xs font-extrabold text-secondary">6 Guru Berdedikasi</span>
+                    <span className="text-xs font-extrabold text-secondary">7 Staf & Guru Berdedikasi</span>
                   </div>
                   <div className="flex items-center justify-between border-b border-primary-green/10 pb-2">
-                    <span className="text-xs font-extrabold text-neutral-dark">Afiliasi Resmi</span>
-                    <span className="text-xs font-extrabold text-primary-green">Kemenag Sleman & NU</span>
+                    <span className="text-xs font-extrabold text-neutral-dark">Penyelenggara</span>
+                    <span className="text-xs font-extrabold text-primary-green">Yayasan Rumah Sahabat Kita</span>
                   </div>
                   <div className="flex items-center justify-between border-b border-primary-green/10 pb-2">
-                    <span className="text-xs font-extrabold text-neutral-dark">Kesiapan Akreditasi</span>
-                    <span className="text-xs font-extrabold text-accent">Persiapan BAN-PDM (Sispena)</span>
+                    <span className="text-xs font-extrabold text-neutral-dark">Status Akreditasi</span>
+                    <span className="text-xs font-extrabold text-accent">Terakreditasi B</span>
                   </div>
                   <p className="text-[10px] text-neutral-gray leading-relaxed font-semibold text-center mt-4">
-                    *Tim guru RA Sahabat aktif mengikuti pelatihan kurikulum merdeka PAUD secara berkala.
+                    *Alamat: Tlogowono RT 06/RW 05, Tegaltirto, Berbah, Sleman, DIY.
                   </p>
                 </div>
               </div>
@@ -227,9 +254,9 @@ export default function HomePage() {
                 <svg className="w-10 h-10 text-secondary mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13" />
                 </svg>
-                <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">Pendidikan Karakter Aswaja</h3>
+                <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">Pembelajaran Mendalam (PM)</h3>
                 <p className="text-xs text-neutral-gray leading-relaxed font-semibold">
-                  Mengenalkan doa-doa harian, asmaul husna, manasik haji cilik, dan kecintaan pada sholawat nabi sejak usia dini.
+                  Pendekatan yang menekankan pada penciptaan suasana belajar yang berkesadaran, bermakna, dan menggembirakan secara terpadu.
                 </p>
               </div>
             </div>
@@ -241,9 +268,9 @@ export default function HomePage() {
                 <svg className="w-10 h-10 text-primary-green mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">Metode Playful Learning</h3>
+                <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">7 Kebiasaan Anak Indonesia Hebat</h3>
                 <p className="text-xs text-neutral-gray leading-relaxed font-semibold">
-                  Menerapkan konsep bermain seraya belajar yang merangsang sensorik motorik anak melalui eksperimen kreatif dan permainan kelompok.
+                  Menerapkan kerangka karakter praktis harian: bangun pagi, beribadah, berolahraga, makan sehat, gemar belajar, hingga bermasyarakat.
                 </p>
               </div>
             </div>
@@ -255,9 +282,9 @@ export default function HomePage() {
                 <svg className="w-10 h-10 text-accent mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
-                <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">Tumbuh Kembang Sehat</h3>
+                <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">Program Unggulan Keagamaan</h3>
                 <p className="text-xs text-neutral-gray leading-relaxed font-semibold">
-                  Melakukan pemantauan gizi siswa harian, koordinasi dengan Puskesmas Berbah, serta pembinaan pola hidup bersih sehat (PHBS).
+                  Tahfidz Qur'an Yanbu'a dengan metode setoran "one day one ayat", sholat dhuha berjamaah, dan simulaasi manasik haji.
                 </p>
               </div>
             </div>
@@ -279,109 +306,61 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Gallery 1 */}
-            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[-1.5deg] hover:rotate-[1deg] hover:shadow-md transition-all duration-300">
-              {/* Polaroid tape */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[2deg] shadow-3xs pointer-events-none"></div>
-              
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-soft-mint to-primary-light/35 rounded-md flex items-center justify-center text-primary-green relative overflow-hidden">
-                {/* Simulated kid drawing icon */}
-                <svg className="w-12 h-12 text-primary-green/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5" />
-                </svg>
-              </div>
-              <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Latihan Manasik Haji Cilik</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Pembiasaan ibadah haji sejak usia dini</p>
-              </div>
-            </div>
+            {galleryItems.map((item, index) => {
+              // Alternate rotation angles for polaroid organic feel
+              const rotationClass = 
+                index % 3 === 0 
+                  ? "rotate-[-1.5deg] hover:rotate-[1deg]" 
+                  : index % 3 === 1 
+                    ? "rotate-[2deg] hover:rotate-[-1deg]" 
+                    : "rotate-[-1deg] hover:rotate-[2deg]";
 
-            {/* Gallery 2 */}
-            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[2deg] hover:rotate-[-1deg] hover:shadow-md transition-all duration-300">
-              {/* Polaroid tape */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[-3deg] shadow-3xs pointer-events-none"></div>
-              
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-secondary-soft to-accent-soft/30 rounded-md flex items-center justify-center text-secondary relative overflow-hidden">
-                {/* Simulated kid drawing icon */}
-                <svg className="w-12 h-12 text-secondary/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1" />
-                </svg>
-              </div>
-              <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Berkebun di Halaman</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Edukasi kecintaan alam & tanaman hijau</p>
-              </div>
-            </div>
+              return (
+                <div
+                  key={item.id || index}
+                  onClick={() => setLightboxIndex(index)}
+                  className={`bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative hover:shadow-md transition-all duration-300 cursor-pointer ${rotationClass}`}
+                >
+                  {/* Polaroid tape */}
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[-1deg] shadow-3xs pointer-events-none z-20"></div>
 
-            {/* Gallery 3 */}
-            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[-1deg] hover:rotate-[2deg] hover:shadow-md transition-all duration-300">
-              {/* Polaroid tape */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[1deg] shadow-3xs pointer-events-none"></div>
-              
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-accent-soft to-secondary-soft/30 rounded-md flex items-center justify-center text-accent relative overflow-hidden">
-                {/* Simulated kid drawing icon */}
-                <svg className="w-12 h-12 text-accent/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364" />
-                </svg>
-              </div>
-              <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Hari Santri & Sholawat</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Penanaman akhlak mulia sejak dini</p>
-              </div>
-            </div>
+                  {/* Photo Container */}
+                  <div className="w-full aspect-[4/3] rounded-md overflow-hidden bg-stone-100 relative group">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    
+                    {/* Category tag */}
+                    <span className="absolute top-2 left-2 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark shadow-3xs">
+                      {item.category}
+                    </span>
+                  </div>
 
-            {/* Gallery 4 */}
-            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[1.5deg] hover:rotate-[-1.5deg] hover:shadow-md transition-all duration-300">
-              {/* Polaroid tape */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[-1deg] shadow-3xs pointer-events-none"></div>
-              
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-soft-mint to-secondary-soft/30 rounded-md flex items-center justify-center text-primary-green relative overflow-hidden">
-                {/* Simulated kid drawing APE icon */}
-                <svg className="w-12 h-12 text-primary-green/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-                  <circle cx="12" cy="12" r="10" strokeDasharray="3 2" />
-                  <path d="M12 8v8M8 12h8" />
-                </svg>
-              </div>
-              <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Eksperimen Pelangi Gembira</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Sains cilik & pencampuran warna</p>
-              </div>
-            </div>
+                  {/* Description under polaroid */}
+                  <div className="mt-4 text-center space-y-1">
+                    <h4 className="font-baloo text-base font-bold text-neutral-dark leading-tight group-hover:text-primary-green transition-colors">
+                      {item.title}
+                    </h4>
+                    <p className="text-[10px] text-neutral-gray font-semibold">
+                      Diambil pada {item.date}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
-            {/* Gallery 5 */}
-            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[-2deg] hover:rotate-[1deg] hover:shadow-md transition-all duration-300">
-              {/* Polaroid tape */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[2deg] shadow-3xs pointer-events-none"></div>
-              
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-secondary-soft to-primary-light/20 rounded-md flex items-center justify-center text-secondary relative overflow-hidden">
-                {/* Simulated art drawing icon */}
-                <svg className="w-12 h-12 text-secondary/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93z" />
-                </svg>
-              </div>
-              <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Pentas Seni Anak RA</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Saluran ekspresi minat bakat & percaya diri</p>
-              </div>
-            </div>
-
-            {/* Gallery 6 */}
-            <div className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative rotate-[1deg] hover:rotate-[-2deg] hover:shadow-md transition-all duration-300">
-              {/* Polaroid tape */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[-2deg] shadow-3xs pointer-events-none"></div>
-              
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-accent-soft to-soft-mint/30 rounded-md flex items-center justify-center text-accent relative overflow-hidden">
-                {/* Simulated kid tooth/gizi icon */}
-                <svg className="w-12 h-12 text-accent/45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-                  <circle cx="12" cy="12" r="8" />
-                  <path d="M12 2a4 4 0 0 0-4 4c0 3 4 8 4 8s4-5 4-4a4 4 0 0 0-4-4z" />
-                </svg>
-              </div>
-              <div className="mt-4 text-center">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Senam & Gosok Gigi PHBS</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold mt-1">Pembiasaan perilaku hidup bersih sehat</p>
-              </div>
-            </div>
+          {/* Button to full gallery page */}
+          <div className="flex justify-center mt-12">
+            <Link
+              href="/galeri"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent hover:bg-accent-dark text-white font-extrabold text-xs transition-all shadow-3xs border border-accent-dark active:scale-95 duration-200 cursor-pointer"
+            >
+              <span>Lihat Seluruh Galeri Dokumentasi</span>
+              <span className="text-xs">➔</span>
+            </Link>
           </div>
         </div>
       </section>
@@ -526,91 +505,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* PREVIEW GALERI SECTION */}
-      <section className="py-20 bg-white relative overflow-hidden border-b border-soft-mint">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-            <div className="space-y-3 max-w-xl text-center md:text-left">
-              <span className="inline-block text-xs font-accent font-semibold uppercase tracking-wider text-primary-dark bg-soft-mint px-4 py-2 rounded-lg border-2 border-dashed border-primary-green/30">
-                Dokumentasi Kegiatan
-              </span>
-              <h2 className="font-baloo text-3xl font-bold text-neutral-dark">Keseruan Sahabat Cilik</h2>
-              <p className="text-sm text-neutral-gray leading-relaxed font-semibold">
-                Intip sekilas keceriaan anak-anak dalam mengikuti berbagai aktivitas edukatif, keagamaan, dan petualangan outbound kami.
-              </p>
-            </div>
-            <div className="flex justify-center md:justify-end flex-shrink-0">
-              <Link
-                href="/galeri"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent hover:bg-accent-dark text-white font-extrabold text-xs transition-all shadow-3xs border border-accent-dark active:scale-95 duration-200 cursor-pointer"
-              >
-                <span>Lihat Seluruh Galeri</span>
-                <span className="text-xs">➔</span>
-              </Link>
-            </div>
-          </div>
 
-          {/* Grid Preview 3 Foto */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-[#FAF8F5] rounded-3xl overflow-hidden border border-primary-green/10 p-4 space-y-4 hover:shadow-sm transition-all duration-300">
-              <div className="relative h-48 rounded-2xl overflow-hidden bg-stone-100">
-                <img
-                  src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800"
-                  alt="Belajar Al-Qur'an"
-                  className="w-full h-full object-cover"
-                />
-                <span className="absolute top-3 left-3 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark">
-                  Keagamaan
-                </span>
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-baloo text-sm font-bold text-neutral-dark">Belajar Membaca Al-Qur'an</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
-                  Kegiatan membaca Iqro bersama guru pendamping setiap pagi hari.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-[#FAF8F5] rounded-3xl overflow-hidden border border-primary-green/10 p-4 space-y-4 hover:shadow-sm transition-all duration-300">
-              <div className="relative h-48 rounded-2xl overflow-hidden bg-stone-100">
-                <img
-                  src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800"
-                  alt="Outbound"
-                  className="w-full h-full object-cover"
-                />
-                <span className="absolute top-3 left-3 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark">
-                  Outbound
-                </span>
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-baloo text-sm font-bold text-neutral-dark">Outbound Kebun Binatang</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
-                  Pengenalan satwa dan edukasi lapangan untuk melatih kemandirian anak.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-[#FAF8F5] rounded-3xl overflow-hidden border border-primary-green/10 p-4 space-y-4 hover:shadow-sm transition-all duration-300">
-              <div className="relative h-48 rounded-2xl overflow-hidden bg-stone-100">
-                <img
-                  src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=800"
-                  alt="Pentas Seni"
-                  className="w-full h-full object-cover"
-                />
-                <span className="absolute top-3 left-3 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark">
-                  Pentas Seni
-                </span>
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-baloo text-sm font-bold text-neutral-dark">Pentas Seni Akhir Tahun</h4>
-                <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
-                  Menampilkan bakat kreativitas, tarian, dan hafalan surah pendek.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* PPDB REGISTER INFO SECTION — REDESIGNED TO WHATSAPP DIRECT */}
       <section id="ppdb" className="py-20 bg-[#FAF8F5] relative overflow-hidden border-b border-soft-mint">
@@ -687,6 +582,76 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Pure Full-Screen Lightbox Slideshow */}
+      <AnimatePresence>
+        {lightboxIndex !== null && galleryItems[lightboxIndex] && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xs select-none">
+            {/* Backdrop Dismiss Trigger */}
+            <div 
+              className="absolute inset-0 cursor-zoom-out" 
+              onClick={() => setLightboxIndex(null)}
+            />
+
+            {/* Close Button */}
+            <button
+              onClick={() => setLightboxIndex(null)}
+              className="absolute top-6 right-6 z-[110] w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-lg cursor-pointer transition-colors"
+              title="Tutup (Esc)"
+            >
+              ✕
+            </button>
+
+            {/* Prev Button */}
+            <button
+              onClick={() => setLightboxIndex((lightboxIndex - 1 + galleryItems.length) % galleryItems.length)}
+              className="absolute left-4 md:left-8 z-[110] w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xl cursor-pointer transition-colors"
+              title="Sebelumnya"
+            >
+              ‹
+            </button>
+
+            {/* Next Button */}
+            <button
+              onClick={() => setLightboxIndex((lightboxIndex + 1) % galleryItems.length)}
+              className="absolute right-4 md:right-8 z-[110] w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xl cursor-pointer transition-colors"
+              title="Berikutnya"
+            >
+              ›
+            </button>
+
+            {/* Slide Container */}
+            <div className="relative w-full max-w-4xl max-h-[80vh] px-4 flex flex-col items-center justify-center z-10 space-y-4">
+              <motion.img
+                key={galleryItems[lightboxIndex].id || lightboxIndex}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                src={galleryItems[lightboxIndex].image}
+                alt={galleryItems[lightboxIndex].title}
+                className="max-w-full max-h-[72vh] object-contain rounded-lg border border-white/10 shadow-2xl"
+              />
+
+              {/* Caption */}
+              <div className="text-center text-white space-y-1 px-4 max-w-xl">
+                <span className="text-[9px] uppercase font-black tracking-widest text-primary-green bg-primary-green/10 px-2 py-0.5 rounded border border-primary-green/20">
+                  {galleryItems[lightboxIndex].category}
+                </span>
+                <h4 className="font-baloo text-base font-bold mt-1.5">
+                  {galleryItems[lightboxIndex].title}
+                </h4>
+                <p className="text-[10px] text-neutral-gray leading-relaxed font-semibold">
+                  {galleryItems[lightboxIndex].description}
+                </p>
+                <span className="text-[9px] text-stone-500 font-bold block mt-1">
+                  Foto {lightboxIndex + 1} dari {galleryItems.length} • Diambil pada {galleryItems[lightboxIndex].date}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

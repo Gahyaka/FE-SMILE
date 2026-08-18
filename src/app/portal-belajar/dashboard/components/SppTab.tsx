@@ -3,15 +3,15 @@
 import React, { useState, useEffect } from "react";
 
 interface Student {
-  id: number;
+  id: string | number;
   name: string;
   class: string;
   activeStatus?: string;
 }
 
 interface SppTransaction {
-  id: number;
-  studentId: number;
+  id: string | number;
+  studentId: string | number;
   date: string;
   description: string;
   spp: number;
@@ -23,15 +23,17 @@ interface SppTransaction {
 
 interface SppTabProps {
   students: Student[];
+  classes: any[];
   sppTransactions: SppTransaction[];
   isAdminTransaksi: boolean;
   onAddSppLesPayment: (newTx: Omit<SppTransaction, "id" | "total">) => void;
   onUpdateSppLesPayment: (updatedTx: SppTransaction) => void;
-  onDeleteSppLesPayment: (txId: number) => void;
+  onDeleteSppLesPayment: (txId: string | number) => void;
 }
 
 export default function SppTab({
   students,
+  classes,
   sppTransactions,
   isAdminTransaksi,
   onAddSppLesPayment,
@@ -63,14 +65,14 @@ export default function SppTab({
   const [selectedClass, setSelectedClass] = useState("Semua");
   const [selectedPeriod, setSelectedPeriod] = useState<"Hari Ini" | "Minggu Ini" | "Bulan Ini" | "Semester 1" | "Semester 2" | "Semua">("Semua");
   const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
-  const [payStudentId, setPayStudentId] = useState<number>(students[0]?.id || 1);
+  const [payStudentId, setPayStudentId] = useState<string | number>(students[0]?.id || "");
   const [payDate, setPayDate] = useState(new Date().toISOString().substring(0, 10));
   const [paySpp, setPaySpp] = useState("75000");
   const [payLes, setPayLes] = useState("40000");
   const [payDesc, setPayDesc] = useState("Pembayaran SPP + Les");
   const [newDepositStatus, setNewDepositStatus] = useState("Belum Disetor");
   const [editingTx, setEditingTx] = useState<SppTransaction | null>(null);
-  const [activeMobileKebabId, setActiveMobileKebabId] = useState<number | null>(null);
+  const [activeMobileKebabId, setActiveMobileKebabId] = useState<string | number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
   
@@ -233,7 +235,7 @@ export default function SppTab({
   }, [payStudentId, paySpp, payLes, payDate, payPaidMonths, students]);
 
   // Helper to get already paid months of selected student for selected academic year
-  const getPaidMonthsForStudent = (studentId: number): string[] => {
+  const getPaidMonthsForStudent = (studentId: string | number): string[] => {
     return sppTransactions
       .filter(tx => tx.studentId === studentId)
       .flatMap(tx => tx.paidMonths || []);
@@ -294,39 +296,45 @@ export default function SppTab({
       {/* Widget Ringkasan Rekonsiliasi Kas */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Total Kas SPP */}
-        <div className="bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 p-4 rounded-2xl border border-indigo-500/20 flex items-center justify-between shadow-3xs">
+        <div className="bg-white p-4 rounded-2xl border border-neutral-gray/10 flex items-center justify-between shadow-3xs hover:shadow-xs transition-shadow duration-300">
           <div className="space-y-1">
-            <span className="text-[10px] text-indigo-800 font-extrabold uppercase tracking-wider">Total Kas SPP (Yayasan)</span>
-            <h4 className="font-mono text-xl font-black text-indigo-700">Rp {totalSppTerbayar.toLocaleString()}</h4>
+            <span className="text-[10px] text-neutral-gray font-extrabold uppercase tracking-wider">Total Kas SPP (Yayasan)</span>
+            <h4 className="font-mono text-xl font-bold text-neutral-dark">Rp {totalSppTerbayar.toLocaleString()}</h4>
           </div>
-          <div className="w-10 h-10 rounded-full bg-indigo-500/15 flex items-center justify-center text-indigo-600 flex-shrink-0">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <div className="w-10 h-10 rounded-xl bg-stone-50 border border-neutral-gray/10 flex items-center justify-center text-stone-500 flex-shrink-0">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
         </div>
 
         {/* Uang Les Sudah Disetor */}
-        <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 p-4 rounded-2xl border border-emerald-500/20 flex items-center justify-between shadow-3xs">
+        <div className="bg-white p-4 rounded-2xl border border-neutral-gray/10 flex items-center justify-between shadow-3xs hover:shadow-xs transition-shadow duration-300">
           <div className="space-y-1">
-            <span className="text-[10px] text-emerald-800 font-extrabold uppercase tracking-wider">Setoran Les (Selesai)</span>
-            <h4 className="font-mono text-xl font-black text-emerald-700">Rp {totalLesSudahDisetor.toLocaleString()}</h4>
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="text-[10px] text-neutral-gray font-extrabold uppercase tracking-wider">Setoran Les (Selesai)</span>
+            </div>
+            <h4 className="font-mono text-xl font-bold text-neutral-dark">Rp {totalLesSudahDisetor.toLocaleString()}</h4>
           </div>
-          <div className="w-10 h-10 rounded-full bg-emerald-500/15 flex items-center justify-center text-emerald-600 flex-shrink-0">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0 animate-fade-in">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
         </div>
 
         {/* Uang Les Belum Disetor */}
-        <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-4 rounded-2xl border border-amber-500/20 flex items-center justify-between shadow-3xs">
+        <div className="bg-white p-4 rounded-2xl border border-neutral-gray/10 flex items-center justify-between shadow-3xs hover:shadow-xs transition-shadow duration-300">
           <div className="space-y-1">
-            <span className="text-[10px] text-amber-800 font-extrabold uppercase tracking-wider">Setoran Les (Belum Disetor)</span>
-            <h4 className="font-mono text-xl font-black text-amber-700">Rp {totalLesBelumDisetor.toLocaleString()}</h4>
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span className="text-[10px] text-neutral-gray font-extrabold uppercase tracking-wider">Setoran Les (Belum Disetor)</span>
+            </div>
+            <h4 className="font-mono text-xl font-bold text-neutral-dark">Rp {totalLesBelumDisetor.toLocaleString()}</h4>
           </div>
-          <div className="w-10 h-10 rounded-full bg-amber-500/15 flex items-center justify-center text-amber-600 flex-shrink-0">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -347,7 +355,7 @@ export default function SppTab({
         <div className="flex items-center gap-1">
           <span className="text-[9px] font-extrabold text-neutral-gray uppercase mr-1">Kelas:</span>
           <div className="flex items-center gap-1">
-            {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => (
+            {["Semua", ...classes.map((c) => c.className)].map((cls) => (
               <button
                 key={cls}
                 type="button"
@@ -825,8 +833,7 @@ export default function SppTab({
                 Melacak lunas/tidaknya SPP tiap murid berdasarkan tahun pembukuan yang dipilih.
               </p>
             </div>
-            
-            {/* Quick stats on the right */}
+              {/* Quick stats on the right */}
             <div className="flex items-center gap-3 bg-[#FAF8F5] px-4 py-2.5 rounded-xl border border-primary-green/10">
               <div className="text-center border-r border-neutral-gray/10 pr-3">
                 <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold">Total Murid</span>
@@ -841,7 +848,7 @@ export default function SppTab({
                     students
                       .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
                       .filter(student => {
-                        const studentTxs = sppTransactions.filter(tx => tx.studentId === student.id);
+                        const studentTxs = sppTransactions.filter(tx => String(tx.studentId) === String(student.id));
                         return studentTxs.some(tx => (tx.paidMonths || []).some(m => getAcademicYearFromDate(tx.date) === selectedAcademicYear));
                       }).length
                   }
@@ -854,7 +861,7 @@ export default function SppTab({
                     students
                       .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
                       .filter(student => {
-                        const studentTxs = sppTransactions.filter(tx => tx.studentId === student.id);
+                        const studentTxs = sppTransactions.filter(tx => String(tx.studentId) === String(student.id));
                         return !studentTxs.some(tx => (tx.paidMonths || []).some(m => getAcademicYearFromDate(tx.date) === selectedAcademicYear));
                       }).length
                   }
@@ -862,7 +869,7 @@ export default function SppTab({
               </div>
             </div>
           </div>
-
+          
           <div className="overflow-x-auto rounded-xl border border-neutral-gray/10">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
@@ -895,7 +902,7 @@ export default function SppTab({
                           const monthKey = `${labelYear}-${m.value}`;
                           
                           // Check if student has a transaction with paidMonths containing this monthKey
-                          const studentTxs = sppTransactions.filter(tx => tx.studentId === student.id);
+                          const studentTxs = sppTransactions.filter(tx => String(tx.studentId) === String(student.id));
                           const isPaid = studentTxs.some(tx => tx.paidMonths?.includes(monthKey));
 
                           return (
@@ -966,7 +973,7 @@ export default function SppTab({
                   <select
                     id="payStudent"
                     value={payStudentId}
-                    onChange={(e) => setPayStudentId(Number(e.target.value))}
+                    onChange={(e) => setPayStudentId(e.target.value)}
                     className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
                   >
                     {students.filter(st => st.activeStatus === "Aktif").map((st) => (

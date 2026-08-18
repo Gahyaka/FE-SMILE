@@ -27,6 +27,7 @@ import {
 import { studentService } from "@/services/student";
 import { classService } from "@/services/class";
 import { userService } from "@/services/user";
+import { sppService } from "@/services/spp";
 
 type TabKey = "siswa" | "kelas" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "users" | "audit";
 
@@ -40,7 +41,8 @@ function mapStudentsData(rawStudents: any[]): any[] {
   return rawStudents.map((st: any) => ({
     id: st.id,
     name: st.namaLengkap || st.nama_lengkap || "Siswa Tanpa Nama",
-    nisn: st.nis || st.nisn || "",
+    nisn: st.nisn || "",
+    nis: st.nis || "",
     parentName: st.namaOrangTua || st.nama_orang_tua || "Wali Murid",
     class: st.kelas?.namaKelas || st.kelas?.nama_kelas || st.class || "Belum Ada Kelas",
     address: st.address || st.alamat || "Alamat belum diinput",
@@ -62,6 +64,34 @@ function mapClassesData(rawClasses: any[]): any[] {
     fase: c.tahunAjaran || c.tahun_ajaran || "2025/2026", // Map Academic Year here
     description: c.description || c.deskripsi || "Tidak ada deskripsi"
   }));
+}
+
+function mapSppTransactions(rawTxs: any[]): any[] {
+  return rawTxs.map((tx: any) => {
+    const formattedDate = (tx.tanggalBayar || "").substring(0, 10);
+    
+    // Fallback: If backend does not provide paidMonths array, deduce month from payment date (format: "YYYY-MM")
+    let months = tx.paidMonths;
+    if (!months || !Array.isArray(months) || months.length === 0) {
+      if (formattedDate && formattedDate.length >= 7) {
+        months = [formattedDate.substring(0, 7)];
+      } else {
+        months = [];
+      }
+    }
+
+    return {
+      id: tx.id,
+      studentId: tx.siswaId,
+      date: formattedDate,
+      description: tx.catatan || "Pembayaran SPP & Les",
+      spp: Number(tx.nominalSpp) || 0,
+      les: Number(tx.nominalLes) || 0,
+      total: (Number(tx.nominalSpp) || 0) + (Number(tx.nominalLes) || 0),
+      depositStatus: tx.statusSetoran === "SUDAH" ? "Sudah Disetor" : "Belum Disetor",
+      paidMonths: months
+    };
+  });
 }
 
 function mapUsersData(rawUsers: any[]): any[] {
@@ -117,7 +147,7 @@ export default function DashboardClient() {
     title: string;
     message: string;
     actionType: "delete_student" | "delete_class" | "delete_spp" | "delete_user" | null;
-    targetId: number | null;
+    targetId: string | number | null;
   }>({
     isOpen: false,
     title: "",
@@ -125,6 +155,7 @@ export default function DashboardClient() {
     actionType: null,
     targetId: null
   });
+  const [isConfirming, setIsConfirming] = useState(false);
 
   // State edit profil saya
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
@@ -170,20 +201,35 @@ export default function DashboardClient() {
           const rawClasses = Array.isArray(classRes) ? classRes : classRes?.data || [];
           setClasses(mapClassesData(rawClasses));
 
-          // Fetch users from backend Adonis
+          // Fetch SPP transactions from backend Adonis
           try {
-            const userRes = await userService.getAll();
-            const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
-            setUsers(mapUsersData(rawUsers));
-          } catch (userErr) {
-            console.warn("Backend users list API not fully supported/accessible. Using local mock storage.");
-            const storedUsers = localStorage.getItem("system_users");
-            if (storedUsers) {
-              setUsers(JSON.parse(storedUsers));
-            } else {
-              setUsers(initialUsers);
-              localStorage.setItem("system_users", JSON.stringify(initialUsers));
+            const sppRes = await sppService.getAll("2026");
+            const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
+            setSppTransactions(mapSppTransactions(rawSpp));
+          } catch (sppErr) {
+            console.warn("[SGW] Failed to fetch SPP transactions from backend. Using mock fallbacks.");
+          }
+
+           // Fetch users from backend Adonis (Only for Admin Administrasi)
+          if (parsed.role === "admin_adm") {
+            try {
+              const userRes = await userService.getAll();
+              const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+              setUsers(mapUsersData(rawUsers));
+            } catch (userErr) {
+              console.warn("Backend users list API not fully supported/accessible. Using local mock storage.");
+              const storedUsers = localStorage.getItem("system_users");
+              if (storedUsers) {
+                setUsers(JSON.parse(storedUsers));
+              } else {
+                setUsers(initialUsers);
+                localStorage.setItem("system_users", JSON.stringify(initialUsers));
+              }
             }
+          } else {
+            // Non-admin roles fallback to local store for UI compatibility
+            const storedUsers = localStorage.getItem("system_users");
+            setUsers(storedUsers ? JSON.parse(storedUsers) : initialUsers);
           }
         } catch (err) {
           console.warn("Backend data fetch warning (using mock fallbacks):", err);
@@ -226,13 +272,20 @@ export default function DashboardClient() {
 
     try {
       await studentService.create({
-        nis: newStData.nisn,
         namaLengkap: newStData.name,
         namaOrangTua: newStData.parentName || "Wali Murid RA Sahabat",
-        kelasId: String(kelasId)
+        nisn: newStData.nisn,
+        nis: newStData.nis,
+        kelasId: kelasId ? String(kelasId) : null,
+        alamat: newStData.address || "Alamat belum diinput",
+        tinggiBadan: Number(newStData.height) || 100,
+        beratBadan: Number(newStData.weight) || 16,
+        lingkarKepala: Number(newStData.headCircumference) || 48,
+        semester: newStData.semester || "Semester 1 (Ganjil)",
+        tahunAjaran: newStData.academicYear || "2026/2027"
       });
       
-      // Refresh list
+      // Normal flow: Refresh list
       const freshStudents = await studentService.getAll();
       const rawFresh = Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || [];
       setStudents(mapStudentsData(rawFresh));
@@ -245,6 +298,34 @@ export default function DashboardClient() {
       };
       setLogs([newLog, ...logs]);
     } catch (err: any) {
+      console.warn("[SGW] Add student API returned error. Verifying database state...");
+      
+      try {
+        // Silent check: Pull latest student list from backend
+        const verifyRes = await studentService.getAll();
+        const rawVerify = Array.isArray(verifyRes) ? verifyRes : verifyRes?.data || [];
+        const mappedVerify = mapStudentsData(rawVerify);
+        
+        // Check if the student actually exists now (match by NISN)
+        const isSaved = mappedVerify.some((s: any) => s.nisn === newStData.nisn);
+        
+        if (isSaved) {
+          // If actually saved in DB, silently recover and update state
+          setStudents(mappedVerify);
+          const recoverLog = {
+            id: Date.now(),
+            time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            user: session.name,
+            action: `Mendaftarkan siswa baru: ${newStData.name} (NISN: ${newStData.nisn}) [Silent Recovery]`,
+          };
+          setLogs([recoverLog, ...logs]);
+          return; // Exit successfully
+        }
+      } catch (checkErr) {
+        console.error("Silent verification failed:", checkErr);
+      }
+      
+      // If student is truly not in the database, show the error alert
       alert("Gagal menambahkan siswa ke backend: " + (err.response?.data?.message || err.message));
     }
   };
@@ -259,10 +340,17 @@ export default function DashboardClient() {
 
     try {
       await studentService.update(updatedStudent.id, {
-        nis: updatedStudent.nisn,
         namaLengkap: updatedStudent.name,
         namaOrangTua: updatedStudent.parentName || "Wali Murid RA Sahabat",
-        kelasId: String(kelasId)
+        nisn: updatedStudent.nisn,
+        nis: updatedStudent.nis,
+        kelasId: kelasId ? String(kelasId) : null,
+        alamat: updatedStudent.address || "Alamat belum diinput",
+        tinggiBadan: Number(updatedStudent.height) || 100,
+        beratBadan: Number(updatedStudent.weight) || 16,
+        lingkarKepala: Number(updatedStudent.headCircumference) || 48,
+        semester: updatedStudent.semester || "Semester 1 (Ganjil)",
+        tahunAjaran: updatedStudent.academicYear || "2026/2027"
       });
 
       // Refresh list
@@ -531,102 +619,116 @@ const handleDeleteUser = (userId: number) => {
     const { actionType, targetId } = confirmModal;
     if (!targetId || !actionType) return;
 
-    if (actionType === "delete_student") {
-      const studentName = students.find((s) => s.id === targetId)?.name || "Siswa";
-      try {
-        await studentService.delete(targetId);
-        
-        // Refresh list
-        const freshStudents = await studentService.getAll();
-        const rawFresh = Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || [];
-        setStudents(mapStudentsData(rawFresh));
+    try {
+      setIsConfirming(true);
 
-        const newLog = {
-          id: Date.now(),
-          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-          user: session.name,
-          action: `Menghapus data master siswa: ${studentName} dari backend`,
-        };
-        setLogs([newLog, ...logs]);
-      } catch (err: any) {
-        alert("Gagal menghapus siswa di backend: " + (err.response?.data?.message || err.message));
-      }
-    } else if (actionType === "delete_class") {
-      const clsName = classes.find(c => c.id === targetId)?.className || "Kelas";
-      try {
-        await classService.delete(targetId);
-
-        // Refresh list
-        const freshClasses = await classService.getAll();
-        const rawFresh = Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || [];
-        setClasses(mapClassesData(rawFresh));
-
-        const newLog = {
-          id: Date.now(),
-          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-          user: session.name,
-          action: `Menghapus kelas: ${clsName} dari backend`,
-        };
-        setLogs([newLog, ...logs]);
-      } catch (err: any) {
-        alert("Gagal menghapus kelas di backend: " + (err.response?.data?.message || err.message));
-      }
-    } else if (actionType === "delete_spp") {
-      const tx = sppTransactions.find(t => t.id === targetId);
-      if (tx) {
-        const studentName = students.find(s => s.id === tx.studentId)?.name || "Siswa";
-        setSppTransactions(prev => prev.filter(t => t.id !== targetId));
-
-        const newLog = {
-          id: Date.now(),
-          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-          user: session.name,
-          action: `Menghapus transaksi kas SPP ${studentName} senilai Rp ${tx.total.toLocaleString()}`,
-        };
-        setLogs([newLog, ...logs]);
-      }
-    } else if (actionType === "delete_user") {
-      const targetUser = users.find(u => u.id === targetId);
-      if (targetUser) {
+      if (actionType === "delete_student") {
+        const studentName = students.find((s) => s.id === targetId)?.name || "Siswa";
         try {
-          // Coba hapus ke backend
-          await userService.delete(targetId);
+          await studentService.delete(targetId);
           
-          const userRes = await userService.getAll();
-          const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
-          setUsers(mapUsersData(rawUsers));
-        } catch {
-          // Fallback lokal jika backend tidak menyediakan rute delete user
-          // Catat ID di list local agar konsisten saat refresh
-          const raw = localStorage.getItem("deleted_user_ids");
-          const deletedUserIds = raw ? JSON.parse(raw) : [];
-          if (!deletedUserIds.includes(targetId)) {
-            deletedUserIds.push(targetId);
-            localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
+          // Refresh list
+          const freshStudents = await studentService.getAll();
+          const rawFresh = Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || [];
+          setStudents(mapStudentsData(rawFresh));
+
+          const newLog = {
+            id: Date.now(),
+            time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            user: session.name,
+            action: `Menghapus data master siswa: ${studentName} dari backend`,
+          };
+          setLogs([newLog, ...logs]);
+        } catch (err: any) {
+          alert("Gagal menghapus siswa di backend: " + (err.response?.data?.message || err.message));
+        }
+      } else if (actionType === "delete_class") {
+        const clsName = classes.find(c => c.id === targetId)?.className || "Kelas";
+        try {
+          await classService.delete(targetId);
+
+          // Refresh list
+          const freshClasses = await classService.getAll();
+          const rawFresh = Array.isArray(freshClasses) ? freshClasses : freshClasses?.data || [];
+          setClasses(mapClassesData(rawFresh));
+
+          const newLog = {
+            id: Date.now(),
+            time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            user: session.name,
+            action: `Menghapus kelas: ${clsName} dari backend`,
+          };
+          setLogs([newLog, ...logs]);
+        } catch (err: any) {
+          alert("Gagal menghapus kelas di backend: " + (err.response?.data?.message || err.message));
+        }
+      } else if (actionType === "delete_spp") {
+        const tx = sppTransactions.find(t => t.id === targetId);
+        if (tx) {
+          const studentName = students.find(s => s.id === tx.studentId)?.name || "Siswa";
+          try {
+            await sppService.delete(targetId);
+
+            // Refresh list
+            const sppRes = await sppService.getAll("2026");
+            const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
+            setSppTransactions(mapSppTransactions(rawSpp));
+
+            const newLog = {
+              id: Date.now(),
+              time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+              user: session.name,
+              action: `Menghapus transaksi kas SPP ${studentName} dari backend`,
+            };
+            setLogs([newLog, ...logs]);
+          } catch (err: any) {
+            alert("Gagal menghapus transaksi SPP di backend: " + (err.response?.data?.message || err.message));
+          }
+        }
+      } else if (actionType === "delete_user") {
+        const targetUser = users.find(u => u.id === targetId);
+        if (targetUser) {
+          try {
+            // Coba hapus ke backend
+            await userService.delete(targetId);
+            
+            const userRes = await userService.getAll();
+            const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+            setUsers(mapUsersData(rawUsers));
+          } catch {
+            // Fallback lokal jika backend tidak menyediakan rute delete user
+            // Catat ID di list local agar konsisten saat refresh
+            const raw = localStorage.getItem("deleted_user_ids");
+            const deletedUserIds = raw ? JSON.parse(raw) : [];
+            if (!deletedUserIds.includes(targetId)) {
+              deletedUserIds.push(targetId);
+              localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
+            }
+
+            const updated = users.filter(u => u.id !== targetId);
+            setUsers(updated);
+            localStorage.setItem("system_users", JSON.stringify(updated));
           }
 
-          const updated = users.filter(u => u.id !== targetId);
-          setUsers(updated);
-          localStorage.setItem("system_users", JSON.stringify(updated));
+          const newLog = {
+            id: Date.now(),
+            time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            user: session.name,
+            action: `Menghapus akun pengguna: ${targetUser.name} (Lokal / Backend)`,
+          };
+          setLogs([newLog, ...logs]);
         }
-
-        const newLog = {
-          id: Date.now(),
-          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-          user: session.name,
-          action: `Menghapus akun pengguna: ${targetUser.name} (Lokal / Backend)`,
-        };
-        setLogs([newLog, ...logs]);
       }
+    } finally {
+      setIsConfirming(false);
+      setConfirmModal({
+        isOpen: false,
+        title: "",
+        message: "",
+        actionType: null,
+        targetId: null
+      });
     }
-
-    setConfirmModal({
-      isOpen: false,
-      title: "",
-      message: "",
-      actionType: null,
-      targetId: null
-    });
   };
 
   const handleAddActivity = (newActData: any) => {
@@ -692,41 +794,70 @@ const handleDeleteUser = (userId: number) => {
 
 
 
-  const handleAddSppLesPayment = (newTxData: any) => {
+  const handleAddSppLesPayment = async (newTxData: any) => {
     if (!isAdminTransaksi) return;
-    const totalNum = newTxData.spp + newTxData.les;
-    const newTx = {
-      ...newTxData,
-      id: Date.now(),
-      total: totalNum
-    };
-    setSppTransactions([newTx, ...sppTransactions]);
+    try {
+      const apiStatusSetoran = newTxData.depositStatus === "Sudah Disetor" ? "SUDAH" : "BELUM";
+      await sppService.create({
+        siswaId: String(newTxData.studentId),
+        tanggalBayar: newTxData.date,
+        nominalSpp: Number(newTxData.spp),
+        nominalLes: Number(newTxData.les),
+        catatan: newTxData.description,
+        statusSetoran: apiStatusSetoran,
+        paidMonths: newTxData.paidMonths || []
+      });
 
-    const studentName = students.find(s => s.id === newTxData.studentId)?.name || "Siswa";
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Mencatat SPP & Les ${studentName}: SPP Rp ${newTxData.spp.toLocaleString()}, Les Rp ${newTxData.les.toLocaleString()} (Total Rp ${totalNum.toLocaleString()})`,
-    };
-    setLogs([newLog, ...logs]);
+      // Refresh list
+      const sppRes = await sppService.getAll("2026");
+      const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
+      setSppTransactions(mapSppTransactions(rawSpp));
+
+      const studentName = students.find(s => s.id === newTxData.studentId)?.name || "Siswa";
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Mencatat SPP & Les ${studentName}: SPP Rp ${newTxData.spp.toLocaleString()}, Les Rp ${newTxData.les.toLocaleString()}`,
+      };
+      setLogs([newLog, ...logs]);
+    } catch (err: any) {
+      alert("Gagal mencatat pembayaran SPP ke backend: " + (err.response?.data?.message || err.message));
+    }
   };
 
-  const handleUpdateSppPayment = (updatedTx: any) => {
+  const handleUpdateSppPayment = async (updatedTx: any) => {
     if (!isAdminTransaksi) return;
-    setSppTransactions(prev => prev.map(t => t.id === updatedTx.id ? updatedTx : t));
+    try {
+      const apiStatusSetoran = updatedTx.depositStatus === "Sudah Disetor" ? "SUDAH" : "BELUM";
+      await sppService.update(updatedTx.id, {
+        nominalSpp: Number(updatedTx.spp),
+        nominalLes: Number(updatedTx.les),
+        statusSetoran: apiStatusSetoran,
+        tanggalBayar: updatedTx.date,
+        catatan: updatedTx.description,
+        paidMonths: updatedTx.paidMonths
+      });
 
-    const studentName = students.find(s => s.id === updatedTx.studentId)?.name || "Siswa";
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Memperbarui transaksi kas SPP ${studentName}: SPP Rp ${updatedTx.spp.toLocaleString()}, Les Rp ${updatedTx.les.toLocaleString()} (${updatedTx.depositStatus})`,
-    };
-    setLogs([newLog, ...logs]);
+      // Refresh list
+      const sppRes = await sppService.getAll("2026");
+      const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
+      setSppTransactions(mapSppTransactions(rawSpp));
+
+      const studentName = students.find(s => s.id === updatedTx.studentId)?.name || "Siswa";
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Memperbarui transaksi kas SPP ${studentName} (${updatedTx.depositStatus})`,
+      };
+      setLogs([newLog, ...logs]);
+    } catch (err: any) {
+      alert("Gagal memperbarui pembayaran SPP ke backend: " + (err.response?.data?.message || err.message));
+    }
   };
 
-  const handleDeleteSppPayment = (txId: number) => {
+  const handleDeleteSppPayment = (txId: string | number) => {
     if (!isAdminTransaksi) return;
     const tx = sppTransactions.find(t => t.id === txId);
     if (!tx) return;
@@ -1098,6 +1229,7 @@ const handleDeleteUser = (userId: number) => {
               {activeTab === "spp" && (
                 <SppTab
                   students={students}
+                  classes={classes}
                   sppTransactions={sppTransactions}
                   isAdminTransaksi={isAdminTransaksi}
                   onAddSppLesPayment={handleAddSppLesPayment}
@@ -1154,14 +1286,16 @@ const handleDeleteUser = (userId: number) => {
                 <button
                   type="button"
                   onClick={handleExecuteConfirmAction}
-                  className="flex-1 py-2 bg-accent hover:bg-accent-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-3xs"
+                  disabled={isConfirming}
+                  className="flex-1 py-2 bg-accent hover:bg-accent-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-3xs disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Ya, Lanjutkan
+                  {isConfirming ? "Memproses..." : "Ya, Lanjutkan"}
                 </button>
                 <button
                   type="button"
+                  disabled={isConfirming}
                   onClick={() => setConfirmModal({ isOpen: false, title: "", message: "", actionType: null, targetId: null })}
-                  className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50"
                 >
                   Batal
                 </button>
