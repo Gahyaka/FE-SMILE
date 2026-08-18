@@ -1,18 +1,19 @@
 import api from "@/lib/api";
 
 export interface StudentPayload {
-  name: string;
-  nisn: string;
-  madrasahName: string;
-  address: string;
-  semester: string;
-  class: string;
-  fase: string;
-  height: number;
-  weight: number;
-  headCircumference: number;
-  academicYear: string;
-  portfolioLink?: string;
+  nis: string;
+  namaLengkap: string;
+  namaOrangTua: string;
+  kelasId: string;
+  // Optional/additional parameters
+  address?: string;
+  semester?: string;
+  class?: string;
+  fase?: string;
+  height?: number;
+  weight?: number;
+  headCircumference?: number;
+  academicYear?: string;
   activeStatus?: string;
 }
 

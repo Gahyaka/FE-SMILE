@@ -190,16 +190,16 @@ export default function KelasTab({
                   />
                 </div>
                 <div>
-                  <label htmlFor="fase" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Fase Pembelajaran</label>
-                  <select
+                  <label htmlFor="fase" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Tahun Ajaran</label>
+                  <input
+                    type="text"
                     id="fase"
+                    required
                     value={newFase}
                     onChange={(e) => setNewFase(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer bg-white"
-                  >
-                    <option value="Fase Fondasi">Fase Fondasi</option>
-                    <option value="Fase A">Fase A</option>
-                  </select>
+                    placeholder="Contoh: 2025/2026"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
                 </div>
                 <div>
                   <label htmlFor="description" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Deskripsi Singkat</label>
@@ -287,16 +287,15 @@ export default function KelasTab({
                   />
                 </div>
                 <div>
-                  <label htmlFor="editFase" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Fase Pembelajaran</label>
-                  <select
+                  <label htmlFor="editFase" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Tahun Ajaran</label>
+                  <input
+                    type="text"
                     id="editFase"
+                    required
                     value={editingClass.fase}
                     onChange={(e) => setEditingClass({ ...editingClass, fase: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer bg-white"
-                  >
-                    <option value="Fase Fondasi">Fase Fondasi</option>
-                    <option value="Fase A">Fase A</option>
-                  </select>
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
                 </div>
                 <div>
                   <label htmlFor="editDescription" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Deskripsi Singkat</label>
@@ -350,8 +349,8 @@ export default function KelasTab({
                   </span>
                   
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] text-neutral-gray font-mono font-bold">
-                      ID: CLS-{cls.id}
+                    <span className="text-[9px] text-neutral-gray font-mono font-bold" title={`ID Kelas Lengkap: ${cls.id}`}>
+                      ID: CLS-{cls.id.toString().length > 12 ? `${cls.id.toString().substring(0, 8)}...` : cls.id}
                     </span>
 
                     {/* Kebab Dropdown Menu untuk Admin Administrasi */}

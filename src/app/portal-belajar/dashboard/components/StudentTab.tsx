@@ -6,7 +6,6 @@ interface Student {
   id: number;
   name: string;
   nisn: string;
-  madrasahName: string;
   address: string;
   semester: string;
   class: string;
@@ -16,7 +15,7 @@ interface Student {
   headCircumference: number;
   academicYear: string;
   activeStatus: string;
-  portfolioLink: string;
+  parentName?: string;
 }
 
 interface StudentTabProps {
@@ -26,6 +25,7 @@ interface StudentTabProps {
   onUpdateStudent: (updatedStudent: Student) => void;
   onDeleteStudent: (studentId: number) => void;
   onUpdateStudentStatus: (studentId: number, status: string) => void;
+  classes: any[];
 }
 
 export default function StudentTab({
@@ -35,6 +35,7 @@ export default function StudentTab({
   onUpdateStudent,
   onDeleteStudent,
   onUpdateStudentStatus,
+  classes,
 }: StudentTabProps) {
   // Local UI States
   const [selectedFilterClass, setSelectedFilterClass] = useState("Semua");
@@ -48,7 +49,6 @@ export default function StudentTab({
   // Local Form States (Offline Registration)
   const [newStudentName, setNewStudentName] = useState("");
   const [newStudentNisn, setNewStudentNisn] = useState("");
-  const [newStudentMadrasah, setNewStudentMadrasah] = useState("RA Sahabat Berbah Sleman");
   const [newStudentAddress, setNewStudentAddress] = useState("");
   const [newStudentSemester, setNewStudentSemester] = useState("Semester 1");
   const [newStudentClass, setNewStudentClass] = useState("KB");
@@ -57,7 +57,7 @@ export default function StudentTab({
   const [newStudentWeight, setNewStudentWeight] = useState("16");
   const [newStudentHead, setNewStudentHead] = useState("48");
   const [newStudentYear, setNewStudentYear] = useState("2026/2027");
-  const [newStudentPortfolio, setNewStudentPortfolio] = useState("");
+  const [newStudentParentName, setNewStudentParentName] = useState("");
 
   // Get unique years dynamically
   const uniqueYears = Array.from(new Set(students.map((s) => s.academicYear)));
@@ -87,7 +87,6 @@ export default function StudentTab({
     onAddStudent({
       name: newStudentName,
       nisn: newStudentNisn,
-      madrasahName: newStudentMadrasah,
       address: newStudentAddress || "Alamat belum diinput",
       semester: newStudentSemester,
       class: newStudentClass,
@@ -96,14 +95,14 @@ export default function StudentTab({
       weight: Number(newStudentWeight) || 16,
       headCircumference: Number(newStudentHead) || 48,
       academicYear: newStudentYear,
-      portfolioLink: newStudentPortfolio || `https://drive.google.com/drive/folders/mock-portfolio-${newStudentNisn}`
+      parentName: newStudentParentName
     });
 
     // Reset Form
     setNewStudentName("");
     setNewStudentNisn("");
     setNewStudentAddress("");
-    setNewStudentPortfolio("");
+    setNewStudentParentName("");
     setShowStudentForm(false);
   };
 
@@ -124,7 +123,7 @@ export default function StudentTab({
           {/* Kelas & Tahun Ajaran filter badges — Startup Segmented Control Style */}
           <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs">
             <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-fit">
-              {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => {
+              {["Semua", ...classes.map((c: any) => c.className)].map((cls) => {
                 const isActive = selectedFilterClass === cls;
                 return (
                   <button
@@ -374,32 +373,12 @@ export default function StudentTab({
                   <span className="font-bold text-neutral-dark">{activeDetailStudent.class} ({activeDetailStudent.fase})</span>
                 </div>
               </div>
-              <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
-                <span className="block text-[8px] text-neutral-gray/60 uppercase">Nama Madrasah</span>
-                <span className="text-neutral-dark">{activeDetailStudent.madrasahName}</span>
-              </div>
+
               <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
                 <span className="block text-[8px] text-neutral-gray/60 uppercase">Alamat Rumah</span>
                 <span className="text-neutral-gray font-normal">{activeDetailStudent.address}</span>
               </div>
-              <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
-                <span className="block text-[8px] text-neutral-gray/60 uppercase">Tautan Portofolio Foto Raport (Google Drive)</span>
-                {activeDetailStudent.portfolioLink ? (
-                  <a
-                    href={activeDetailStudent.portfolioLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary-green hover:underline font-bold flex items-center gap-1 mt-0.5 cursor-pointer"
-                  >
-                    <svg className="w-3.5 h-3.5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
-                    <span>Buka Portofolio Drive</span>
-                  </a>
-                ) : (
-                  <span className="text-neutral-gray/70 italic font-normal">Belum diisi</span>
-                )}
-              </div>
+
               <div className="grid grid-cols-4 gap-2 text-center">
                 <div className="bg-[#FAF8F5] p-2 rounded-lg border border-neutral-gray/5">
                   <span className="block text-[7px] text-neutral-gray/60 uppercase">TB</span>
@@ -468,6 +447,18 @@ export default function StudentTab({
                   />
                 </div>
 
+                <div>
+                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Orang Tua / Wali</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingStudent.parentName || ""}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, parentName: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    placeholder="Nama Orang Tua Murid"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NISN (10 Digit)</label>
@@ -489,23 +480,21 @@ export default function StudentTab({
                       onChange={(e) => setEditingStudent({ ...editingStudent, class: e.target.value })}
                       className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
                     >
-                      <option value="KB">KB</option>
-                      <option value="RA (A)">RA (A)</option>
-                      <option value="RA (B)">RA (B)</option>
+                      {classes.length > 0 ? (
+                        classes.map((c: any) => (
+                          <option key={c.id} value={c.className}>{c.className}</option>
+                        ))
+                      ) : (
+                        <>
+                          <option value="KB">KB</option>
+                          <option value="RA (A)">RA (A)</option>
+                          <option value="RA (B)">RA (B)</option>
+                        </>
+                      )}
                     </select>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Madrasah</label>
-                  <input
-                    type="text"
-                    required
-                    value={editingStudent.madrasahName}
-                    onChange={(e) => setEditingStudent({ ...editingStudent, madrasahName: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                  />
-                </div>
 
                 <div>
                   <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Alamat Rumah</label>
@@ -518,16 +507,6 @@ export default function StudentTab({
                   />
                 </div>
 
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tautan Portofolio Foto Raport (Google Drive)</label>
-                  <input
-                    type="url"
-                    value={editingStudent.portfolioLink || ""}
-                    onChange={(e) => setEditingStudent({ ...editingStudent, portfolioLink: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono"
-                    placeholder="https://drive.google.com/..."
-                  />
-                </div>
 
                 <div className="grid grid-cols-3 gap-2.5">
                   <div>
@@ -655,6 +634,19 @@ export default function StudentTab({
                   />
                 </div>
 
+                <div>
+                  <label htmlFor="newStudentParent" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Orang Tua / Wali</label>
+                  <input
+                    type="text"
+                    id="newStudentParent"
+                    required
+                    value={newStudentParentName}
+                    onChange={(e) => setNewStudentParentName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    placeholder="Contoh: Siti Aminah"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="newStudentNisn" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NISN (10 Digit)</label>
@@ -679,24 +671,21 @@ export default function StudentTab({
                       onChange={(e) => setNewStudentClass(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
                     >
-                      <option value="KB">KB</option>
-                      <option value="RA (A)">RA (A)</option>
-                      <option value="RA (B)">RA (B)</option>
+                      {classes.length > 0 ? (
+                        classes.map((c: any) => (
+                          <option key={c.id} value={c.className}>{c.className}</option>
+                        ))
+                      ) : (
+                        <>
+                          <option value="KB">KB</option>
+                          <option value="RA (A)">RA (A)</option>
+                          <option value="RA (B)">RA (B)</option>
+                        </>
+                      )}
                     </select>
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="newStudentMadrasah" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Madrasah Asal</label>
-                  <input
-                    type="text"
-                    required
-                    id="newStudentMadrasah"
-                    value={newStudentMadrasah}
-                    onChange={(e) => setNewStudentMadrasah(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                  />
-                </div>
 
                 <div>
                   <label htmlFor="newStudentAddress" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Alamat Rumah</label>
@@ -711,17 +700,6 @@ export default function StudentTab({
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="newStudentPortfolio" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tautan Portofolio Foto Raport (Google Drive)</label>
-                  <input
-                    type="url"
-                    id="newStudentPortfolio"
-                    value={newStudentPortfolio}
-                    onChange={(e) => setNewStudentPortfolio(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono"
-                    placeholder="https://drive.google.com/..."
-                  />
-                </div>
 
                 <div className="grid grid-cols-3 gap-2.5">
                   <div>

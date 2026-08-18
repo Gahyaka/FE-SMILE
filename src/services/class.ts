@@ -1,10 +1,9 @@
 import api from "@/lib/api";
 
 export interface ClassPayload {
-  name: string;
-  roomName?: string;
-  teacherId?: number;
-  fase: string;
+  namaKelas: string;
+  tahunAjaran: string;
+  waliKelas: string;
 }
 
 export const classService = {

@@ -35,6 +35,24 @@ function getDefaultTab(role: "admin_adm" | "admin_trx" | "guru"): TabKey {
   return "siswa"; // admin_adm
 }
 
+function mapStudentsData(rawStudents: any[]): any[] {
+  return rawStudents.map((st: any) => ({
+    id: st.id,
+    name: st.namaLengkap || st.nama_lengkap || "Siswa Tanpa Nama",
+    nisn: st.nis || st.nisn || "",
+    parentName: st.namaOrangTua || st.nama_orang_tua || "Wali Murid",
+    class: st.kelas?.namaKelas || st.kelas?.nama_kelas || st.class || "Belum Ada Kelas",
+    address: st.address || st.alamat || "Alamat belum diinput",
+    semester: st.semester || "Semester 1",
+    fase: st.fase || "Fase Fondasi",
+    height: Number(st.height) || 100,
+    weight: Number(st.weight) || 16,
+    headCircumference: Number(st.headCircumference) || 48,
+    academicYear: st.academicYear || st.academic_year || "2026/2027",
+    activeStatus: st.activeStatus || st.status || "Aktif"
+  }));
+}
+
 export default function DashboardClient() {
   const router = useRouter();
   const [session, setSession] = useState<{ role: "admin_adm" | "admin_trx" | "guru"; name: string } | null>(null);
@@ -103,18 +121,19 @@ export default function DashboardClient() {
       const loadBackendData = async () => {
         try {
           const studentRes = await studentService.getAll();
-          if (studentRes && Array.isArray(studentRes)) {
-            setStudents(studentRes);
-          } else if (studentRes?.data && Array.isArray(studentRes.data)) {
-            setStudents(studentRes.data);
-          }
+          const rawStudents = Array.isArray(studentRes) ? studentRes : studentRes?.data || [];
+          setStudents(mapStudentsData(rawStudents));
 
           const classRes = await classService.getAll();
-          if (classRes && Array.isArray(classRes)) {
-            setClasses(classRes);
-          } else if (classRes?.data && Array.isArray(classRes.data)) {
-            setClasses(classRes.data);
-          }
+          const rawClasses = Array.isArray(classRes) ? classRes : classRes?.data || [];
+          const mappedClasses = rawClasses.map((c: any) => ({
+            id: c.id,
+            className: c.namaKelas || c.nama_kelas || "Kelas Tanpa Nama",
+            teacherName: c.waliKelas || c.wali_kelas || "Belum Ada Wali",
+            fase: c.tahunAjaran || c.tahun_ajaran || "2025/2026", // Map Academic Year here
+            description: c.description || c.deskripsi || "Tidak ada deskripsi"
+          }));
+          setClasses(mappedClasses);
         } catch (err) {
           console.warn("Backend data fetch warning (using mock fallbacks):", err);
         }
@@ -145,26 +164,25 @@ export default function DashboardClient() {
   // CRUD & Operations handlers
   const handleAddStudent = async (newStData: any) => {
     if (!isAdminAdministrasi) return;
+    
+    // Find matching class UUID from backend database
+    const matchedClass = classes.find(
+      (c: any) => c.className === newStData.class || c.name === newStData.class
+    );
+    const kelasId = matchedClass?.id || classes[0]?.id || "7367fed7-6f2b-4cdc-88aa-1399ce1d2175";
+
     try {
       await studentService.create({
-        name: newStData.name,
-        nisn: newStData.nisn,
-        madrasahName: newStData.madrasahName,
-        address: newStData.address,
-        semester: newStData.semester,
-        class: newStData.class,
-        fase: newStData.fase,
-        height: Number(newStData.height),
-        weight: Number(newStData.weight),
-        headCircumference: Number(newStData.headCircumference),
-        academicYear: newStData.academicYear,
-        portfolioLink: newStData.portfolioLink,
-        activeStatus: "Aktif"
+        nis: newStData.nisn,
+        namaLengkap: newStData.name,
+        namaOrangTua: newStData.parentName || "Wali Murid RA Sahabat",
+        kelasId: String(kelasId)
       });
       
       // Refresh list
       const freshStudents = await studentService.getAll();
-      setStudents(Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || []);
+      const rawFresh = Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || [];
+      setStudents(mapStudentsData(rawFresh));
       
       const newLog = {
         id: Date.now(),
@@ -180,26 +198,24 @@ export default function DashboardClient() {
 
   const handleUpdateStudent = async (updatedStudent: any) => {
     if (!isAdminAdministrasi) return;
+    
+    const matchedClass = classes.find(
+      (c: any) => c.className === updatedStudent.class || c.name === updatedStudent.class
+    );
+    const kelasId = matchedClass?.id || classes[0]?.id || "7367fed7-6f2b-4cdc-88aa-1399ce1d2175";
+
     try {
       await studentService.update(updatedStudent.id, {
-        name: updatedStudent.name,
-        nisn: updatedStudent.nisn,
-        madrasahName: updatedStudent.madrasahName,
-        address: updatedStudent.address,
-        semester: updatedStudent.semester,
-        class: updatedStudent.class,
-        fase: updatedStudent.fase,
-        height: Number(updatedStudent.height),
-        weight: Number(updatedStudent.weight),
-        headCircumference: Number(updatedStudent.headCircumference),
-        academicYear: updatedStudent.academicYear,
-        portfolioLink: updatedStudent.portfolioLink,
-        activeStatus: updatedStudent.activeStatus
+        nis: updatedStudent.nisn,
+        namaLengkap: updatedStudent.name,
+        namaOrangTua: updatedStudent.parentName || "Wali Murid RA Sahabat",
+        kelasId: String(kelasId)
       });
 
       // Refresh list
       const freshStudents = await studentService.getAll();
-      setStudents(Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || []);
+      const rawFresh = Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || [];
+      setStudents(mapStudentsData(rawFresh));
 
       const newLog = {
         id: Date.now(),
@@ -253,8 +269,9 @@ const handleAddClass = async (newClsData: any) => {
   if (!isAdminAdministrasi) return;
   try {
     await classService.create({
-      name: newClsData.className,
-      fase: newClsData.fase || "Fase Fondasi"
+      namaKelas: newClsData.className,
+      tahunAjaran: "2025/2026", // Default academic year required by backend Adonis
+      waliKelas: newClsData.teacherName || "Bunda Guru"
     });
 
     // Refresh list
@@ -277,8 +294,9 @@ const handleUpdateClass = async (updatedCls: any) => {
   if (!isAdminAdministrasi) return;
   try {
     await classService.update(updatedCls.id, {
-      name: updatedCls.className,
-      fase: updatedCls.fase || "Fase Fondasi"
+      namaKelas: updatedCls.className,
+      tahunAjaran: "2025/2026",
+      waliKelas: updatedCls.teacherName || "Bunda Guru"
     });
 
     // Refresh list
@@ -373,7 +391,8 @@ const handleDeleteUser = (userId: number) => {
         
         // Refresh list
         const freshStudents = await studentService.getAll();
-        setStudents(Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || []);
+        const rawFresh = Array.isArray(freshStudents) ? freshStudents : freshStudents?.data || [];
+        setStudents(mapStudentsData(rawFresh));
 
         const newLog = {
           id: Date.now(),
@@ -867,6 +886,7 @@ const handleDeleteUser = (userId: number) => {
           {activeTab === "siswa" && (
             <StudentTab
               students={students}
+              classes={classes}
               isAdminAdministrasi={isAdminAdministrasi}
               onAddStudent={handleAddStudent}
               onUpdateStudent={handleUpdateStudent}
