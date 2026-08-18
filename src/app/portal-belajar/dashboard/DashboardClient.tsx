@@ -12,6 +12,7 @@ import SppTab from "./components/SppTab";
 import TabunganTab from "./components/TabunganTab";
 import MurajaahTab from "./components/MurajaahTab";
 import AuditTab from "./components/AuditTab";
+import SkeletonLoader from "./components/SkeletonLoader";
 
 // Import initial mock data
 import {
@@ -1029,14 +1030,7 @@ const handleDeleteUser = (userId: number) => {
 
           {/* Render Active Tab Component */}
           {loadingData ? (
-            <div className="w-full space-y-6 animate-pulse select-none">
-              <div className="h-14 bg-stone-100 rounded-2xl w-full border border-neutral-gray/5"></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="h-44 bg-stone-100 rounded-3xl border border-neutral-gray/5"></div>
-                <div className="h-44 bg-stone-100 rounded-3xl border border-neutral-gray/5"></div>
-                <div className="h-44 bg-stone-100 rounded-3xl border border-neutral-gray/5"></div>
-              </div>
-            </div>
+            <SkeletonLoader type={activeTab as any} />
           ) : (
             <>
               {activeTab === "siswa" && (
