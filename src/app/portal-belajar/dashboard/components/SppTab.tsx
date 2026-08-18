@@ -25,20 +25,24 @@ interface SppTabProps {
   students: Student[];
   classes: any[];
   sppTransactions: SppTransaction[];
+  sppMatriksData?: any[];
   isAdminTransaksi: boolean;
   onAddSppLesPayment: (newTx: Omit<SppTransaction, "id" | "total">) => void;
   onUpdateSppLesPayment: (updatedTx: SppTransaction) => void;
   onDeleteSppLesPayment: (txId: string | number) => void;
+  onRefreshMatriks?: (tahunAjaran: string) => void;
 }
 
 export default function SppTab({
   students,
   classes,
   sppTransactions,
+  sppMatriksData = [],
   isAdminTransaksi,
   onAddSppLesPayment,
   onUpdateSppLesPayment,
   onDeleteSppLesPayment,
+  onRefreshMatriks,
 }: SppTabProps) {
   // Dynamic academic year extraction from transaction dates (e.g., '2026/2027')
   const getAcademicYearFromDate = (dateStr: string): string => {
@@ -78,6 +82,12 @@ export default function SppTab({
   
   // Sub-tab state
   const [activeSubTab, setActiveSubTab] = useState<"buku-kas" | "matriks-monitoring">("buku-kas");
+
+  useEffect(() => {
+    if (onRefreshMatriks && selectedAcademicYear) {
+      onRefreshMatriks(selectedAcademicYear);
+    }
+  }, [selectedAcademicYear, onRefreshMatriks]);
   
   // Paid months state for form
   const [payPaidMonths, setPayPaidMonths] = useState<string[]>([]);
@@ -845,12 +855,12 @@ export default function SppTab({
                 <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold text-emerald-600">Lunas SPP</span>
                 <span className="font-mono text-xs font-black text-emerald-600">
                   {
-                    students
-                      .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
-                      .filter(student => {
-                        const studentTxs = sppTransactions.filter(tx => String(tx.studentId) === String(student.id));
-                        return studentTxs.some(tx => (tx.paidMonths || []).some(m => getAcademicYearFromDate(tx.date) === selectedAcademicYear));
-                      }).length
+                    sppMatriksData
+                      .filter((item: any) => {
+                        const originalStudent = students.find(s => String(s.id) === String(item.siswaId));
+                        return originalStudent && (selectedClass === "Semua" || originalStudent.class === selectedClass) && originalStudent.activeStatus === "Aktif";
+                      })
+                      .filter((item: any) => Number(item.totalTunggakanBulan) === 0).length
                   }
                 </span>
               </div>
@@ -858,12 +868,12 @@ export default function SppTab({
                 <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold text-rose-600">Tunggakan</span>
                 <span className="font-mono text-xs font-black text-rose-600">
                   {
-                    students
-                      .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
-                      .filter(student => {
-                        const studentTxs = sppTransactions.filter(tx => String(tx.studentId) === String(student.id));
-                        return !studentTxs.some(tx => (tx.paidMonths || []).some(m => getAcademicYearFromDate(tx.date) === selectedAcademicYear));
-                      }).length
+                    sppMatriksData
+                      .filter((item: any) => {
+                        const originalStudent = students.find(s => String(s.id) === String(item.siswaId));
+                        return originalStudent && (selectedClass === "Semua" || originalStudent.class === selectedClass) && originalStudent.activeStatus === "Aktif";
+                      })
+                      .filter((item: any) => Number(item.totalTunggakanBulan) > 0).length
                   }
                 </span>
               </div>
@@ -899,11 +909,15 @@ export default function SppTab({
                         {academicMonths.map(m => {
                           const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
                           const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
-                          const monthKey = `${labelYear}-${m.value}`;
                           
-                          // Check if student has a transaction with paidMonths containing this monthKey
-                          const studentTxs = sppTransactions.filter(tx => String(tx.studentId) === String(student.id));
-                          const isPaid = studentTxs.some(tx => tx.paidMonths?.includes(monthKey));
+                          // Look up the student record from backend-provided sppMatriksData array
+                          const studentMatrix = sppMatriksData.find(
+                            (item: any) => String(item.siswaId) === String(student.id)
+                          );
+                          
+                          // The backend matrix keys are capitalized English/Indonesian month names: e.g. "JULI", "AGUSTUS"
+                          const monthNameUpper = m.name.toUpperCase();
+                          const isPaid = studentMatrix?.matriks?.[monthNameUpper] === true;
 
                           return (
                             <td key={m.value} className="py-2 px-1 text-center">

@@ -41,5 +41,13 @@ export const sppService = {
   async delete(id: string | number) {
     const response = await api.delete(`/api/v1/pembayaran-spp-les/${id}`);
     return response.data;
+  },
+
+  /**
+   * Mengambil matriks pembayaran SPP tahunan
+   */
+  async getMatriks(tahunAjaran: string) {
+    const response = await api.get(`/api/v1/pembayaran-spp-les/matriks?tahunAjaran=${encodeURIComponent(tahunAjaran)}`);
+    return response.data;
   }
 };

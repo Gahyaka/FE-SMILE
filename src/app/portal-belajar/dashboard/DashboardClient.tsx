@@ -137,6 +137,7 @@ export default function DashboardClient() {
   });
   const [activities, setActivities] = useState(initialActivities);
   const [sppTransactions, setSppTransactions] = useState(initialSppTransactions);
+  const [sppMatriksData, setSppMatriksData] = useState<any[]>([]);
   const [savings, setSavings] = useState(initialSavings);
   const [murajaahData, setMurajaahData] = useState<{[studentId: number]: {[param: string]: string}}>(initialMurajaah);
   const [logs, setLogs] = useState<any[]>([]);
@@ -161,6 +162,17 @@ export default function DashboardClient() {
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [profilePassword, setProfilePassword] = useState("");
+
+  const loadSppMatriks = async (tahunAjaran: string = "2026/2027") => {
+    try {
+      const res = await sppService.getMatriks(tahunAjaran);
+      if (res && res.success && Array.isArray(res.data)) {
+        setSppMatriksData(res.data);
+      }
+    } catch (err) {
+      console.warn("[SGW] Failed to fetch SPP Matriks from backend:", err);
+    }
+  };
 
   useEffect(() => {
     // Authenticate session on client side
@@ -206,6 +218,9 @@ export default function DashboardClient() {
             const sppRes = await sppService.getAll("2026");
             const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
             setSppTransactions(mapSppTransactions(rawSpp));
+            
+            // Fetch Matriks monitoring SPP
+            await loadSppMatriks("2026/2027");
           } catch (sppErr) {
             console.warn("[SGW] Failed to fetch SPP transactions from backend. Using mock fallbacks.");
           }
@@ -674,6 +689,9 @@ const handleDeleteUser = (userId: number) => {
             const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
             setSppTransactions(mapSppTransactions(rawSpp));
 
+            // Refresh Matriks
+            await loadSppMatriks("2026/2027");
+
             const newLog = {
               id: Date.now(),
               time: new Date().toISOString().replace('T', ' ').substring(0, 16),
@@ -813,6 +831,9 @@ const handleDeleteUser = (userId: number) => {
       const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
       setSppTransactions(mapSppTransactions(rawSpp));
 
+      // Refresh Matriks
+      await loadSppMatriks("2026/2027");
+
       const studentName = students.find(s => s.id === newTxData.studentId)?.name || "Siswa";
       const newLog = {
         id: Date.now(),
@@ -843,6 +864,9 @@ const handleDeleteUser = (userId: number) => {
       const sppRes = await sppService.getAll("2026");
       const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
       setSppTransactions(mapSppTransactions(rawSpp));
+
+      // Refresh Matriks
+      await loadSppMatriks("2026/2027");
 
       const studentName = students.find(s => s.id === updatedTx.studentId)?.name || "Siswa";
       const newLog = {
@@ -1231,10 +1255,12 @@ const handleDeleteUser = (userId: number) => {
                   students={students}
                   classes={classes}
                   sppTransactions={sppTransactions}
+                  sppMatriksData={sppMatriksData}
                   isAdminTransaksi={isAdminTransaksi}
                   onAddSppLesPayment={handleAddSppLesPayment}
                   onUpdateSppLesPayment={handleUpdateSppPayment}
                   onDeleteSppLesPayment={handleDeleteSppPayment}
+                  onRefreshMatriks={loadSppMatriks}
                 />
               )}
 
