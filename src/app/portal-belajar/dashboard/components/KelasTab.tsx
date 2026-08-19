@@ -21,6 +21,7 @@ interface ClassData {
 interface KelasTabProps {
   students: Student[];
   classes: ClassData[];
+  users: any[];
   isAdminAdministrasi: boolean;
   isGuru: boolean;
   currentUserDisplayName: string;
@@ -32,6 +33,7 @@ interface KelasTabProps {
 export default function KelasTab({
   students,
   classes,
+  users = [],
   isAdminAdministrasi,
   isGuru,
   currentUserDisplayName,
@@ -49,6 +51,8 @@ export default function KelasTab({
   const [newFase, setNewFase] = useState("2026/2027");
   const [newTeacherName, setNewTeacherName] = useState("");
   const [newDescription, setNewDescription] = useState("");
+
+  const teachersList = users.filter((u) => u.role === "guru" || u.role === "GURU" || u.role === "admin_trx");
 
   // Search filter
   const [searchQuery, setSearchQuery] = useState("");
@@ -179,15 +183,18 @@ export default function KelasTab({
                 </div>
                 <div>
                   <label htmlFor="teacherName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Guru Pengampu</label>
-                  <input
-                    type="text"
+                  <select
                     id="teacherName"
                     required
                     value={newTeacherName}
                     onChange={(e) => setNewTeacherName(e.target.value)}
-                    placeholder="Contoh: Bunda Rahma"
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                  />
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white cursor-pointer"
+                  >
+                    <option value="">-- Pilih Guru Pengampu --</option>
+                    {teachersList.map((t) => (
+                      <option key={t.id} value={t.name}>{t.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label htmlFor="fase" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Tahun Ajaran</label>
@@ -277,14 +284,18 @@ export default function KelasTab({
                 </div>
                 <div>
                   <label htmlFor="editTeacherName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Guru Pengampu</label>
-                  <input
-                    type="text"
+                  <select
                     id="editTeacherName"
                     required
                     value={editingClass.teacherName}
                     onChange={(e) => setEditingClass({ ...editingClass, teacherName: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                  />
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white cursor-pointer"
+                  >
+                    <option value="">-- Pilih Guru Pengampu --</option>
+                    {teachersList.map((t) => (
+                      <option key={t.id} value={t.name}>{t.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label htmlFor="editFase" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Tahun Ajaran</label>

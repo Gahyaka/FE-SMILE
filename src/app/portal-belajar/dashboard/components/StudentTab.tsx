@@ -22,6 +22,7 @@ interface Student {
 interface StudentTabProps {
   students: Student[];
   isAdminAdministrasi: boolean;
+  isGuru?: boolean;
   onAddStudent: (newStudent: Omit<Student, "id" | "activeStatus">) => void;
   onUpdateStudent: (updatedStudent: Student) => void;
   onDeleteStudent: (studentId: number) => void;
@@ -32,6 +33,7 @@ interface StudentTabProps {
 export default function StudentTab({
   students,
   isAdminAdministrasi,
+  isGuru = false,
   onAddStudent,
   onUpdateStudent,
   onDeleteStudent,
@@ -126,25 +128,32 @@ export default function StudentTab({
           
           {/* Kelas & Tahun Ajaran filter badges — Startup Segmented Control Style */}
           <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs">
-            <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-fit">
-              {["Semua", ...classes.map((c: any) => c.className)].map((cls) => {
-                const isActive = selectedFilterClass === cls;
-                return (
-                  <button
-                    key={cls}
-                    type="button"
-                    onClick={() => setSelectedFilterClass(cls)}
-                    className={`px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all duration-200 cursor-pointer ${
-                      isActive
-                        ? "bg-primary-green text-white shadow-xs"
-                        : "text-neutral-gray hover:text-neutral-dark"
-                    }`}
-                  >
-                    {cls} <span className={`ml-1 px-1.5 py-0.5 rounded text-[8px] font-black ${isActive ? "bg-white/20 text-white" : "bg-neutral-gray/10 text-neutral-gray"}`}>{getStudentCount(cls)}</span>
-                  </button>
-                );
-              })}
-            </div>
+            {!isGuru ? (
+              <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-fit flex-wrap">
+                {["Semua", ...classes.map((c: any) => c.className)].map((cls) => {
+                  const isActive = selectedFilterClass === cls;
+                  return (
+                    <button
+                      key={cls}
+                      type="button"
+                      onClick={() => setSelectedFilterClass(cls)}
+                      className={`px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all duration-200 cursor-pointer ${
+                        isActive
+                          ? "bg-primary-green text-white shadow-xs"
+                          : "text-neutral-gray hover:text-neutral-dark"
+                      }`}
+                    >
+                      {cls} <span className={`ml-1 px-1.5 py-0.5 rounded text-[8px] font-black ${isActive ? "bg-white/20 text-white" : "bg-neutral-gray/10 text-neutral-gray"}`}>{getStudentCount(cls)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-[10px] font-bold text-neutral-gray uppercase px-2 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary-green" />
+                <span>Peserta Didik Kelas Anda</span>
+              </div>
+            )}
 
             <div className="flex items-center gap-2 border-t md:border-t-0 pt-2 md:pt-0 border-neutral-gray/10">
               <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Tahun Ajaran:</span>

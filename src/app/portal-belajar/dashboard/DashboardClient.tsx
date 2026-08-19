@@ -33,7 +33,7 @@ type TabKey = "siswa" | "kelas" | "kegiatan" | "spp" | "tabungan" | "murajaah" |
 
 function getDefaultTab(role: "admin_adm" | "admin_trx" | "guru"): TabKey {
   if (role === "admin_trx") return "spp";
-  if (role === "guru") return "kegiatan";
+  if (role === "guru") return "siswa";
   return "siswa"; // admin_adm
 }
 
@@ -1101,8 +1101,8 @@ const handleDeleteUser = (userId: number) => {
           <nav className="space-y-1.5">
             <span className="text-[9px] text-primary-green/60 font-extrabold uppercase tracking-widest block mb-2 px-3">Menu Utama</span>
 
-            {/* Data Siswa — Admin Administrasi only */}
-            {isAdminAdministrasi && (
+            {/* Data Siswa — Admin Administrasi & Guru */}
+            {(isAdminAdministrasi || isGuru) && (
               <button
                 onClick={() => { setActiveTab("siswa"); setSidebarOpen(false); }}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
@@ -1118,8 +1118,8 @@ const handleDeleteUser = (userId: number) => {
               </button>
             )}
 
-            {/* Data Kelas — Admin Administrasi & Guru */}
-            {(isAdminAdministrasi || isGuru) && (
+            {/* Data Kelas — Admin Administrasi only */}
+            {isAdminAdministrasi && (
               <button
                 onClick={() => { setActiveTab("kelas"); setSidebarOpen(false); }}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
@@ -1313,22 +1313,36 @@ const handleDeleteUser = (userId: number) => {
             <SkeletonLoader type={activeTab as any} />
           ) : (
             <>
-              {activeTab === "siswa" && (
-                <StudentTab
-                  students={students}
-                  classes={classes}
-                  isAdminAdministrasi={isAdminAdministrasi}
-                  onAddStudent={handleAddStudent}
-                  onUpdateStudent={handleUpdateStudent}
-                  onDeleteStudent={handleDeleteStudent}
-                  onUpdateStudentStatus={handleUpdateStudentStatus}
-                />
-              )}
+              {activeTab === "siswa" && (() => {
+                const guruClassNames = classes
+                  .filter((c) => {
+                    const tName = (c.teacherName || "").trim().toLowerCase();
+                    const sName = (session?.name || "").trim().toLowerCase();
+                    return tName === sName && tName !== "";
+                  })
+                  .map((c) => c.className);
+                const displayedStudents = isGuru
+                  ? students.filter((st) => guruClassNames.includes(st.class))
+                  : students;
+                return (
+                  <StudentTab
+                    students={displayedStudents}
+                    classes={classes}
+                    isAdminAdministrasi={isAdminAdministrasi}
+                    isGuru={isGuru}
+                    onAddStudent={handleAddStudent}
+                    onUpdateStudent={handleUpdateStudent}
+                    onDeleteStudent={handleDeleteStudent}
+                    onUpdateStudentStatus={handleUpdateStudentStatus}
+                  />
+                );
+              })()}
 
               {activeTab === "kelas" && (
                 <KelasTab
                   students={students}
                   classes={classes}
+                  users={users}
                   isAdminAdministrasi={isAdminAdministrasi}
                   isGuru={isGuru}
                   currentUserDisplayName={session.name}
@@ -1382,16 +1396,28 @@ const handleDeleteUser = (userId: number) => {
                 />
               )}
 
-              {activeTab === "murajaah" && (
-                <MurajaahTab
-                  students={students}
-                  classes={classes}
-                  murajaahData={murajaahData}
-                  isAdminAdministrasi={isAdminAdministrasi}
-                  isGuru={isGuru}
-                  onUpdateMurajaah={handleUpdateMurajaah}
-                />
-              )}
+              {activeTab === "murajaah" && (() => {
+                const guruClassNames = classes
+                  .filter((c) => {
+                    const tName = (c.teacherName || "").trim().toLowerCase();
+                    const sName = (session?.name || "").trim().toLowerCase();
+                    return tName === sName && tName !== "";
+                  })
+                  .map((c) => c.className);
+                const displayedStudents = isGuru
+                  ? students.filter((st) => guruClassNames.includes(st.class))
+                  : students;
+                return (
+                  <MurajaahTab
+                    students={displayedStudents}
+                    classes={classes}
+                    murajaahData={murajaahData}
+                    isAdminAdministrasi={isAdminAdministrasi}
+                    isGuru={isGuru}
+                    onUpdateMurajaah={handleUpdateMurajaah}
+                  />
+                );
+              })()}
 
               {activeTab === "audit" && (
                 <AuditTab logs={logs} />
