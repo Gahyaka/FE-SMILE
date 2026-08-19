@@ -198,7 +198,7 @@ export default function DashboardClient() {
   const [sppTransactions, setSppTransactions] = useState(initialSppTransactions);
   const [sppMatriksData, setSppMatriksData] = useState<any[]>([]);
   const [savings, setSavings] = useState(initialSavings);
-  const [murajaahData, setMurajaahData] = useState<{[studentId: number]: {[param: string]: string}}>(initialMurajaah);
+  const [murajaahData, setMurajaahData] = useState<{[studentId: string]: {[param: string]: string}}>(initialMurajaah);
   const [logs, setLogs] = useState<any[]>([]);
 
   // Custom confirmation modal state
@@ -1045,13 +1045,13 @@ const handleDeleteUser = (userId: number) => {
     return true;
   };
 
-  const handleUpdateMurajaah = (studentId: number, param: string, score: string) => {
+  const handleUpdateMurajaah = (studentId: string | number, param: string, score: string) => {
     if (!isAdminAdministrasi && !isGuru) return;
     setMurajaahData(prev => {
-      const studentData = prev[studentId] || {};
+      const studentData = prev[String(studentId)] || {};
       return {
         ...prev,
-        [studentId]: {
+        [String(studentId)]: {
           ...studentData,
           [param]: score
         }
@@ -1385,6 +1385,7 @@ const handleDeleteUser = (userId: number) => {
               {activeTab === "murajaah" && (
                 <MurajaahTab
                   students={students}
+                  classes={classes}
                   murajaahData={murajaahData}
                   isAdminAdministrasi={isAdminAdministrasi}
                   isGuru={isGuru}

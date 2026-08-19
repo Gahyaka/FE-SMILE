@@ -12,7 +12,7 @@ const MURAJAAH_PARAMS = {
 };
 
 interface Student {
-  id: number;
+  id: string | number;
   name: string;
   class: string;
   nisn: string;
@@ -24,26 +24,28 @@ interface Student {
 
 interface MurajaahTabProps {
   students: Student[];
-  murajaahData: { [studentId: number]: { [param: string]: string } };
+  classes: any[];
+  murajaahData: { [studentId: string]: { [param: string]: string } };
   isAdminAdministrasi: boolean;
   isGuru: boolean;
-  onUpdateMurajaah: (studentId: number, param: string, score: string) => void;
+  onUpdateMurajaah: (studentId: string | number, param: string, score: string) => void;
 }
 
 export default function MurajaahTab({
   students,
+  classes = [],
   murajaahData,
   isAdminAdministrasi,
   isGuru,
   onUpdateMurajaah,
 }: MurajaahTabProps) {
-  const [murajaahStudentId, setMurajaahStudentId] = useState<number>(students[0]?.id || 1);
+  const [murajaahStudentId, setMurajaahStudentId] = useState<string | number>(students[0]?.id || "");
   const [editingCategory, setEditingCategory] = useState<keyof typeof MURAJAAH_PARAMS>("suratPendek");
   const [classFilter, setClassFilter] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeWorkTab, setActiveWorkTab] = useState<"input" | "summary">("input");
 
-  const currentStudent = students.find(s => s.id === murajaahStudentId);
+  const currentStudent = students.find(s => String(s.id) === String(murajaahStudentId));
 
   const filteredStudents = students.filter((st) => {
     const matchesClass = classFilter === "Semua" || st.class === classFilter;
@@ -213,22 +215,33 @@ export default function MurajaahTab({
         </div>
 
         {/* Filter Kategori Kelas — Startup Segmented Control Style */}
-        <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-fit">
-          {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => {
-            const isActive = classFilter === cls;
-            const classCount = cls === "Semua" ? students.length : students.filter((s) => s.class === cls).length;
+        <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-fit flex-wrap">
+          <button
+            type="button"
+            onClick={() => setClassFilter("Semua")}
+            className={`px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all duration-200 cursor-pointer ${
+              classFilter === "Semua"
+                ? "bg-primary-green text-white shadow-xs"
+                : "text-neutral-gray hover:text-neutral-dark"
+            }`}
+          >
+            Semua <span className={`ml-1 px-1.5 py-0.5 rounded text-[8px] font-black ${classFilter === "Semua" ? "bg-white/20 text-white" : "bg-neutral-gray/10 text-neutral-gray"}`}>{students.length}</span>
+          </button>
+          {classes.map((c: any) => {
+            const isActive = classFilter === c.className;
+            const classCount = students.filter((s) => s.class === c.className).length;
             return (
               <button
-                key={cls}
+                key={c.id || c.className}
                 type="button"
-                onClick={() => setClassFilter(cls)}
+                onClick={() => setClassFilter(c.className)}
                 className={`px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all duration-200 cursor-pointer ${
                   isActive
                     ? "bg-primary-green text-white shadow-xs"
                     : "text-neutral-gray hover:text-neutral-dark"
                 }`}
               >
-                {cls} <span className={`ml-1 px-1.5 py-0.5 rounded text-[8px] font-black ${isActive ? "bg-white/20 text-white" : "bg-neutral-gray/10 text-neutral-gray"}`}>{classCount}</span>
+                {c.className} <span className={`ml-1 px-1.5 py-0.5 rounded text-[8px] font-black ${isActive ? "bg-white/20 text-white" : "bg-neutral-gray/10 text-neutral-gray"}`}>{classCount}</span>
               </button>
             );
           })}
