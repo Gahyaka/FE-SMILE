@@ -151,9 +151,14 @@ export default function SppTab({
   };
 
   const filteredTransactions = sppTransactions.filter((tx) => {
-    const matchesYear = selectedPeriod === "Semua" ? getAcademicYearFromDate(tx.date) === selectedAcademicYear : true;
+    const acadYear = getAcademicYearFromDate(tx.date || "");
+    const isDirtyData = !tx.date || tx.date.length < 7 || acadYear.includes("NaN");
+    
+    if (isDirtyData) return true; // Force show dirty database entries for cleanup
+
+    const matchesYear = selectedPeriod === "Semua" ? acadYear === selectedAcademicYear : true;
     const matchesPeriod = selectedPeriod === "Semua" ? true : isInPeriod(tx.date);
-    const student = students.find((s) => s.id === tx.studentId);
+    const student = students.find((s) => String(s.id) === String(tx.studentId));
     const matchesClass = selectedClass === "Semua" || (student && student.class === selectedClass);
     return matchesYear && matchesPeriod && matchesClass;
   });
@@ -246,9 +251,37 @@ export default function SppTab({
 
   // Helper to get already paid months of selected student for selected academic year
   const getPaidMonthsForStudent = (studentId: string | number): string[] => {
-    return sppTransactions
-      .filter(tx => tx.studentId === studentId)
-      .flatMap(tx => tx.paidMonths || []);
+    const studentMatrix = sppMatriksData.find(
+      (item: any) => String(item.siswaId) === String(studentId)
+    );
+    
+    if (!studentMatrix || !studentMatrix.matriks) return [];
+    
+    const paidMonthsUpper = Object.keys(studentMatrix.matriks).filter(
+      (key) => studentMatrix.matriks[key] === true
+    );
+    
+    const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
+    const reverseMap: Record<string, string> = {
+      "JULI": "07",
+      "AGUSTUS": "08",
+      "SEPTEMBER": "09",
+      "OKTOBER": "10",
+      "NOVEMBER": "11",
+      "DESEMBER": "12",
+      "JANUARI": "01",
+      "FEBRUARI": "02",
+      "MARET": "03",
+      "APRIL": "04",
+      "MEI": "05",
+      "JUNI": "06"
+    };
+    
+    return paidMonthsUpper.map((m) => {
+      const monthNum = reverseMap[m.toUpperCase()];
+      const labelYear = Number(monthNum) >= 7 ? startYearStr : endYearStr;
+      return `${labelYear}-${monthNum}`;
+    });
   };
 
   // Reset paidMonths and Auto-select first unpaid month when switching student
@@ -563,7 +596,7 @@ export default function SppTab({
                       <tr key={tx.id} className="hover:bg-soft-mint/30 transition-colors">
                         <td className="py-3 px-4 text-neutral-gray font-mono">{tx.date}</td>
                         <td className="py-3 px-4 font-bold">
-                          {student ? `${student.name} (${student.class})` : "Siswa dihapus"}
+                          {student ? `${student.name} (${student.class})` : `ID Siswa: ${tx.studentId}`}
                         </td>
                         <td className="py-3 px-4 text-neutral-gray">{tx.description}</td>
                         <td className={`py-3 px-4 text-right font-mono font-bold ${
@@ -737,7 +770,7 @@ export default function SppTab({
 
                     <div className="space-y-1">
                       <h4 className="font-baloo text-sm font-bold text-neutral-dark leading-tight break-words">
-                        {student ? student.name : "Siswa dihapus"}
+                        {student ? student.name : `ID Siswa: ${tx.studentId}`}
                       </h4>
                       <p className="text-[11px] text-neutral-gray font-medium leading-relaxed break-words">
                         {tx.description}
@@ -1011,7 +1044,7 @@ export default function SppTab({
                   <div>
                     <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Total (Otomatis)</label>
                     <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
-                      Rp {(Number(paySpp || 0) + Number(payLes || 0)).toLocaleString()}
+                      Rp {((Number(paySpp || 0) * Math.max(1, payPaidMonths.length)) + Number(payLes || 0)).toLocaleString()}
                     </div>
                   </div>
                 </div>

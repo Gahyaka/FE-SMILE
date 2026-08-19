@@ -66,12 +66,48 @@ function mapClassesData(rawClasses: any[]): any[] {
   }));
 }
 
+function parseLocalDateString(dateStr: string): string {
+  if (!dateStr) return "";
+  if (dateStr.includes("T")) {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) {
+      return dateStr.substring(0, 10);
+    }
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+  return dateStr.substring(0, 10);
+}
+
 function mapSppTransactions(rawTxs: any[]): any[] {
-  return rawTxs.map((tx: any) => {
-    const formattedDate = (tx.tanggalBayar || "").substring(0, 10);
+  const reverseMap: Record<string, string> = {
+    "JULI": "07",
+    "AGUSTUS": "08",
+    "SEPTEMBER": "09",
+    "OKTOBER": "10",
+    "NOVEMBER": "11",
+    "DESEMBER": "12",
+    "JANUARI": "01",
+    "FEBRUARI": "02",
+    "MARET": "03",
+    "APRIL": "04",
+    "MEI": "05",
+    "JUNI": "06"
+  };
+
+  const mapped = rawTxs.map((tx: any) => {
+    const formattedDate = parseLocalDateString(tx.tanggalBayar || "");
+    const year = formattedDate ? formattedDate.substring(0, 4) : new Date().getFullYear().toString();
+
+    // Map backend capitalized months back to YYYY-MM
+    let months = (tx.paidMonths || []).map((m: string) => {
+      const monthNum = reverseMap[m.toUpperCase()];
+      return monthNum ? `${year}-${monthNum}` : m;
+    });
     
     // Fallback: If backend does not provide paidMonths array, deduce month from payment date (format: "YYYY-MM")
-    let months = tx.paidMonths;
     if (!months || !Array.isArray(months) || months.length === 0) {
       if (formattedDate && formattedDate.length >= 7) {
         months = [formattedDate.substring(0, 7)];
@@ -92,6 +128,29 @@ function mapSppTransactions(rawTxs: any[]): any[] {
       paidMonths: months
     };
   });
+
+  // Group transactions that were posted in the same batch
+  const grouped: any[] = [];
+  const visitedKeys = new Set<string>();
+
+  mapped.forEach((tx) => {
+    const matchKey = `${tx.studentId}_${tx.date}_${tx.description}_${tx.spp}_${tx.les}`;
+    
+    if (!visitedKeys.has(matchKey)) {
+      visitedKeys.add(matchKey);
+      grouped.push(tx);
+    } else {
+      const existing = grouped.find(
+        (item) => `${item.studentId}_${item.date}_${item.description}_${item.spp}_${item.les}` === matchKey
+      );
+      if (existing) {
+        const mergedMonths = Array.from(new Set([...(existing.paidMonths || []), ...(tx.paidMonths || [])]));
+        existing.paidMonths = mergedMonths;
+      }
+    }
+  });
+
+  return grouped;
 }
 
 function mapUsersData(rawUsers: any[]): any[] {
@@ -162,9 +221,11 @@ export default function DashboardClient() {
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [profilePassword, setProfilePassword] = useState("");
+  const [activeAcademicYear, setActiveAcademicYear] = useState("2026/2027");
 
   const loadSppMatriks = async (tahunAjaran: string = "2026/2027") => {
     try {
+      setActiveAcademicYear(tahunAjaran);
       const res = await sppService.getMatriks(tahunAjaran);
       if (res && res.success && Array.isArray(res.data)) {
         setSppMatriksData(res.data);
@@ -215,7 +276,7 @@ export default function DashboardClient() {
 
           // Fetch SPP transactions from backend Adonis
           try {
-            const sppRes = await sppService.getAll("2026");
+            const sppRes = await sppService.getAll();
             const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
             setSppTransactions(mapSppTransactions(rawSpp));
             
@@ -685,12 +746,12 @@ const handleDeleteUser = (userId: number) => {
             await sppService.delete(targetId);
 
             // Refresh list
-            const sppRes = await sppService.getAll("2026");
+            const sppRes = await sppService.getAll();
             const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
             setSppTransactions(mapSppTransactions(rawSpp));
 
             // Refresh Matriks
-            await loadSppMatriks("2026/2027");
+            await loadSppMatriks(activeAcademicYear);
 
             const newLog = {
               id: Date.now(),
@@ -812,27 +873,70 @@ const handleDeleteUser = (userId: number) => {
 
 
 
+  const mapFrontendMonthsToBackend = (months: string[]): string[] => {
+    if (!months || !Array.isArray(months)) return [];
+    const monthMap: Record<string, string> = {
+      "07": "JULI",
+      "08": "AGUSTUS",
+      "09": "SEPTEMBER",
+      "10": "OKTOBER",
+      "11": "NOVEMBER",
+      "12": "DESEMBER",
+      "01": "JANUARI",
+      "02": "FEBRUARI",
+      "03": "MARET",
+      "04": "APRIL",
+      "05": "MEI",
+      "06": "JUNI"
+    };
+    return months.map(m => {
+      const parts = m.split("-");
+      const monthNum = parts.length > 1 ? parts[1] : parts[0];
+      return monthMap[monthNum] || m;
+    });
+  };
+
   const handleAddSppLesPayment = async (newTxData: any) => {
     if (!isAdminTransaksi) return;
     try {
       const apiStatusSetoran = newTxData.depositStatus === "Sudah Disetor" ? "SUDAH" : "BELUM";
-      await sppService.create({
-        siswaId: String(newTxData.studentId),
-        tanggalBayar: newTxData.date,
-        nominalSpp: Number(newTxData.spp),
-        nominalLes: Number(newTxData.les),
-        catatan: newTxData.description,
-        statusSetoran: apiStatusSetoran,
-        paidMonths: newTxData.paidMonths || []
+      const selectedMonths = newTxData.paidMonths || [];
+
+      // Format bulanList to match backend expectations: Array<{ bulan: number, tahun: number }>
+      const bulanList = selectedMonths.map((m: string) => {
+        const [yearStr, monthStr] = m.split("-");
+        return {
+          bulan: Number(monthStr),
+          tahun: Number(yearStr)
+        };
       });
 
+      const payload: any = {
+        siswaId: String(newTxData.studentId),
+        tanggalBayar: newTxData.date,
+        tahunAjaran: activeAcademicYear,
+        nominalSpp: Number(newTxData.spp) * Math.max(1, selectedMonths.length),
+        nominalLes: Number(newTxData.les),
+        catatan: newTxData.description,
+        statusSetoran: apiStatusSetoran
+      };
+
+      // Add bulanList to payload if multi-months are selected
+      if (bulanList.length > 0) {
+        payload.bulanList = bulanList;
+      }
+
+      console.log("[SGW Debug] Posting SPP Payload to Backend:", JSON.stringify(payload, null, 2));
+
+      await sppService.create(payload);
+
       // Refresh list
-      const sppRes = await sppService.getAll("2026");
+      const sppRes = await sppService.getAll();
       const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
       setSppTransactions(mapSppTransactions(rawSpp));
 
       // Refresh Matriks
-      await loadSppMatriks("2026/2027");
+      await loadSppMatriks(activeAcademicYear);
 
       const studentName = students.find(s => s.id === newTxData.studentId)?.name || "Siswa";
       const newLog = {
@@ -843,7 +947,9 @@ const handleDeleteUser = (userId: number) => {
       };
       setLogs([newLog, ...logs]);
     } catch (err: any) {
-      alert("Gagal mencatat pembayaran SPP ke backend: " + (err.response?.data?.message || err.message));
+      console.error("[SGW Debug] Failed SPP post details:", err.response?.data || err);
+      const errorMsg = err.response?.data?.message || (err.response?.data ? JSON.stringify(err.response.data) : err.message);
+      alert("Gagal mencatat pembayaran SPP ke backend: " + errorMsg);
     }
   };
 
@@ -851,22 +957,23 @@ const handleDeleteUser = (userId: number) => {
     if (!isAdminTransaksi) return;
     try {
       const apiStatusSetoran = updatedTx.depositStatus === "Sudah Disetor" ? "SUDAH" : "BELUM";
+      const apiPaidMonths = mapFrontendMonthsToBackend(updatedTx.paidMonths || []);
+
       await sppService.update(updatedTx.id, {
         nominalSpp: Number(updatedTx.spp),
         nominalLes: Number(updatedTx.les),
         statusSetoran: apiStatusSetoran,
         tanggalBayar: updatedTx.date,
-        catatan: updatedTx.description,
-        paidMonths: updatedTx.paidMonths
+        catatan: updatedTx.description
       });
 
       // Refresh list
-      const sppRes = await sppService.getAll("2026");
+      const sppRes = await sppService.getAll();
       const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
       setSppTransactions(mapSppTransactions(rawSpp));
 
       // Refresh Matriks
-      await loadSppMatriks("2026/2027");
+      await loadSppMatriks(activeAcademicYear);
 
       const studentName = students.find(s => s.id === updatedTx.studentId)?.name || "Siswa";
       const newLog = {
