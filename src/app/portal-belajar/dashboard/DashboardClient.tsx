@@ -1374,6 +1374,7 @@ const handleDeleteUser = (userId: number) => {
               {activeTab === "tabungan" && (
                 <TabunganTab
                   students={students}
+                  classes={classes}
                   savings={savings}
                   isAdminTransaksi={isAdminTransaksi}
                   adminName={session.name}
