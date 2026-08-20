@@ -19,15 +19,22 @@ export default function HomePage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("sgw_activities");
-      const activeActs = stored ? JSON.parse(stored) : initialActivities;
+      let activeActs = stored ? JSON.parse(stored) : initialActivities;
+      
+      // Fallback: If for some reason activeActs has no images, force fallback to initialActivities
+      const validImagesCount = activeActs.filter((act: any) => act.featuredImage && act.featuredImage.trim() !== "").length;
+      if (validImagesCount === 0) {
+        activeActs = initialActivities;
+      }
+
       const items = activeActs
-        .filter((act: any) => act.featuredImage)
+        .filter((act: any) => act.featuredImage && act.featuredImage.trim() !== "")
         .slice(0, 3) // Only pick top 3 items
         .map((act: any) => ({
           id: act.id,
           title: act.title,
           category: act.category,
-          image: act.featuredImage || "",
+          image: act.featuredImage,
           description: act.description,
           date: act.date
         }));
@@ -251,9 +258,12 @@ export default function HomePage() {
             <div className="bg-white p-8 rounded-[30px_15px_40px_20px]/[20px_40px_15px_30px] shadow-xs border-2 border-dashed border-primary-green/20 hover:border-solid hover:shadow-sm transition-all duration-300 group flex flex-col justify-between relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1.5 bg-secondary"></div>
               <div>
-                <svg className="w-10 h-10 text-secondary mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13" />
-                </svg>
+                <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center mb-5 text-secondary">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    {/* Opened Book with shining light path */}
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13m18-13C19.168 5.477 17.586 5 15.8 5c-1.747 0-3.332.477-4.5 1.253v13C12.5 18.5 14.086 18 15.8 18c1.74 0 3.33.477 4.5 1.253V6.253z" />
+                  </svg>
+                </div>
                 <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">Pembelajaran Mendalam (PM)</h3>
                 <p className="text-xs text-neutral-gray leading-relaxed font-semibold">
                   Pendekatan yang menekankan pada penciptaan suasana belajar yang berkesadaran, bermakna, dan menggembirakan secara terpadu.
@@ -265,9 +275,12 @@ export default function HomePage() {
             <div className="bg-white p-8 rounded-[20px_40px_15px_35px]/[35px_15px_40px_20px] shadow-xs border-2 border-dashed border-primary-green/20 hover:border-solid hover:shadow-sm transition-all duration-300 group flex flex-col justify-between relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1.5 bg-primary-green"></div>
               <div>
-                <svg className="w-10 h-10 text-primary-green mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <div className="w-12 h-12 rounded-2xl bg-primary-green/10 flex items-center justify-center mb-5 text-primary-green">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    {/* Creative thinking lightbulb path */}
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
                 <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">7 Kebiasaan Anak Indonesia Hebat</h3>
                 <p className="text-xs text-neutral-gray leading-relaxed font-semibold">
                   Menerapkan kerangka karakter praktis harian: bangun pagi, beribadah, berolahraga, makan sehat, gemar belajar, hingga bermasyarakat.
@@ -279,12 +292,15 @@ export default function HomePage() {
             <div className="bg-white p-8 rounded-[40px_20px_35px_15px]/[15px_35px_20px_40px] shadow-xs border-2 border-dashed border-primary-green/20 hover:border-solid hover:shadow-sm transition-all duration-300 group flex flex-col justify-between relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1.5 bg-accent"></div>
               <div>
-                <svg className="w-10 h-10 text-accent mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
+                <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center mb-5 text-accent">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    {/* Spiritual crescent moon and star / compass direction path */}
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                </div>
                 <h3 className="font-baloo text-xl font-bold mb-2 text-primary-dark">Program Unggulan Keagamaan</h3>
                 <p className="text-xs text-neutral-gray leading-relaxed font-semibold">
-                  Tahfidz Qur'an Yanbu'a dengan metode setoran "one day one ayat", sholat dhuha berjamaah, dan simulaasi manasik haji.
+                  Tahfidz Qur'an Yanbu'a dengan metode setoran "one day one ayat", sholat dhuha berjamaah, dan simulasi manasik haji.
                 </p>
               </div>
             </div>
@@ -327,8 +343,11 @@ export default function HomePage() {
                   {/* Photo Container */}
                   <div className="w-full aspect-[4/3] rounded-md overflow-hidden bg-stone-100 relative group">
                     <img
-                      src={item.image}
+                      src={item.image || "https://images.unsplash.com/photo-1590076214561-2679be15bb56?auto=format&fit=crop&q=80&w=800"}
                       alt={item.title}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1590076214561-2679be15bb56?auto=format&fit=crop&q=80&w=800";
+                      }}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     

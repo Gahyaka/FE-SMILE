@@ -797,6 +797,21 @@ const handleDeleteUser = (userId: number) => {
           };
           setLogs([newLog, ...logs]);
         }
+      } else if (actionType === ("delete_activity" as any)) {
+        const act = activities.find((a) => a.id === targetId);
+        if (act) {
+          const updated = activities.filter((a) => a.id !== targetId);
+          setActivities(updated);
+          localStorage.setItem("sgw_activities", JSON.stringify(updated));
+
+          const newLog = {
+            id: Date.now(),
+            time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            user: session.name,
+            action: `Menghapus dokumentasi kegiatan: ${act.title}`,
+          };
+          setLogs([newLog, ...logs]);
+        }
       }
     } finally {
       setIsConfirming(false);
@@ -832,6 +847,35 @@ const handleDeleteUser = (userId: number) => {
       action: `Menambahkan kegiatan: ${newAct.title} (Folder Google Drive terbuat otomatis)`,
     };
     setLogs([newLog, ...logs]);
+  };
+
+  const handleUpdateActivity = (updatedAct: any) => {
+    if (!isAdminAdministrasi && !isGuru) return;
+    const updated = activities.map((act) => (act.id === updatedAct.id ? updatedAct : act));
+    setActivities(updated);
+    localStorage.setItem("sgw_activities", JSON.stringify(updated));
+
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session.name,
+      action: `Memperbarui dokumentasi kegiatan: ${updatedAct.title}`,
+    };
+    setLogs([newLog, ...logs]);
+  };
+
+  const handleDeleteActivity = (actId: number) => {
+    if (!isAdminAdministrasi) return;
+    const act = activities.find(a => a.id === actId);
+    if (!act) return;
+
+    setConfirmModal({
+      isOpen: true,
+      title: "Konfirmasi Hapus Dokumentasi Kegiatan",
+      message: `Apakah Anda yakin ingin menghapus dokumentasi kegiatan "${act.title}" secara permanen dari arsip?`,
+      actionType: "delete_activity" as any,
+      targetId: actId
+    });
   };
 
   const handleUpdateProfile = (e: React.FormEvent) => {
@@ -1368,6 +1412,8 @@ const handleDeleteUser = (userId: number) => {
                   isAdminAdministrasi={isAdminAdministrasi}
                   isGuru={isGuru}
                   onAddActivity={handleAddActivity}
+                  onUpdateActivity={handleUpdateActivity}
+                  onDeleteActivity={handleDeleteActivity}
                 />
               )}
 

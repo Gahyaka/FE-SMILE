@@ -17,6 +17,8 @@ interface KegiatanTabProps {
   isAdminAdministrasi: boolean;
   isGuru: boolean;
   onAddActivity: (newActivity: Omit<Activity, "id">) => void;
+  onUpdateActivity?: (updatedActivity: Activity) => void;
+  onDeleteActivity?: (activityId: number) => void;
 }
 
 export default function KegiatanTab({
@@ -24,6 +26,8 @@ export default function KegiatanTab({
   isAdminAdministrasi,
   isGuru,
   onAddActivity,
+  onUpdateActivity,
+  onDeleteActivity,
 }: KegiatanTabProps) {
   // Dynamic year extraction
   const uniqueYears = Array.from(new Set(activities.map((act) => act.date.substring(0, 4))));
@@ -36,6 +40,8 @@ export default function KegiatanTab({
   const [selectedYear, setSelectedYear] = useState(uniqueYears[0]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showActivityForm, setShowActivityForm] = useState(false);
+  const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+  const [activeKebabId, setActiveKebabId] = useState<number | null>(null);
 
   // Form states for creating new activity
   const [newTitle, setNewTitle] = useState("");
@@ -106,6 +112,16 @@ export default function KegiatanTab({
     setShowActivityForm(false);
   };
 
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingActivity || !editingActivity.title || !editingActivity.date || !editingActivity.description) return;
+
+    if (onUpdateActivity) {
+      onUpdateActivity(editingActivity);
+    }
+    setEditingActivity(null);
+  };
+
   return (
     <div className="w-full space-y-6">
       
@@ -117,7 +133,7 @@ export default function KegiatanTab({
         </div>
         
         <div className="flex flex-wrap items-center gap-2">
-          {(isAdminAdministrasi || isGuru) && (
+          {isAdminAdministrasi && (
             <button
               type="button"
               onClick={() => setShowActivityForm(true)}
@@ -219,7 +235,54 @@ export default function KegiatanTab({
                   }`}>
                     {act.category}
                   </span>
-                  <span className="text-[9.5px] text-neutral-gray font-mono font-semibold">{act.date}</span>
+                  
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9.5px] text-neutral-gray font-mono font-semibold">{act.date}</span>
+                    {isAdminAdministrasi && (
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setActiveKebabId(activeKebabId === act.id ? null : act.id)}
+                          className="w-5 h-5 rounded-full hover:bg-neutral-gray/5 flex items-center justify-center text-neutral-dark font-extrabold cursor-pointer transition-colors text-xs"
+                        >
+                          ⋮
+                        </button>
+                        {activeKebabId === act.id && (
+                          <>
+                            <div className="fixed inset-0 z-20" onClick={() => setActiveKebabId(null)} />
+                            <div className="absolute right-0 mt-1 w-24 bg-white border border-neutral-gray/10 rounded-xl shadow-lg z-30 py-1 font-semibold text-[10px] text-neutral-dark">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingActivity({ ...act });
+                                  setActiveKebabId(null);
+                                }}
+                                className="w-full px-3 py-1.5 text-left hover:bg-soft-mint/30 cursor-pointer text-yellow-700 flex items-center gap-1.5"
+                              >
+                                <svg className="w-3 h-3 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                <span>Ubah</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (onDeleteActivity) onDeleteActivity(act.id);
+                                  setActiveKebabId(null);
+                                }}
+                                className="w-full px-3 py-1.5 text-left hover:bg-accent/10 cursor-pointer text-accent flex items-center gap-1.5"
+                              >
+                                <svg className="w-3 h-3 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                <span>Hapus</span>
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 {act.featuredImage && (
@@ -258,7 +321,7 @@ export default function KegiatanTab({
       )}
 
       {/* Upload Activity Sliding Side Drawer */}
-      {showActivityForm && (isAdminAdministrasi || isGuru) && (
+      {showActivityForm && isAdminAdministrasi && (
         <div className="fixed inset-0 z-50 overflow-hidden">
           {/* Backdrop Overlay */}
           <div 
@@ -430,6 +493,130 @@ export default function KegiatanTab({
                       setPreviewUrls([]);
                       setCoverIndex(0);
                     }}
+                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Edit Activity Sliding Side Drawer */}
+      {editingActivity && (isAdminAdministrasi || isGuru) && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            onClick={() => setEditingActivity(null)}
+          />
+          
+          {/* Drawer Container */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Edit Dokumentasi Kegiatan</h4>
+                <button
+                  type="button"
+                  onClick={() => setEditingActivity(null)}
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                >
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Form Content (Scrollable) */}
+              <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                <div>
+                  <label htmlFor="editTitle" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Kegiatan</label>
+                  <input
+                    type="text"
+                    id="editTitle"
+                    required
+                    value={editingActivity.title}
+                    onChange={(e) => setEditingActivity({ ...editingActivity, title: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-bold text-neutral-dark"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="editDate" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tanggal Pelaksanaan</label>
+                    <input
+                      type="date"
+                      id="editDate"
+                      required
+                      value={editingActivity.date}
+                      onChange={(e) => setEditingActivity({ ...editingActivity, date: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-semibold text-neutral-dark"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="editCategory" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kategori Kegiatan</label>
+                    <select
+                      id="editCategory"
+                      value={editingActivity.category}
+                      onChange={(e) => setEditingActivity({ ...editingActivity, category: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                    >
+                      <option value="Akademik">Akademik</option>
+                      <option value="Keagamaan">Keagamaan / Ke-NU-an</option>
+                      <option value="Ekstrakurikuler">Ekstrakurikuler</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="editDriveLink" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Link Google Drive</label>
+                  <input
+                    type="text"
+                    id="editDriveLink"
+                    value={editingActivity.driveLink}
+                    onChange={(e) => setEditingActivity({ ...editingActivity, driveLink: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-semibold"
+                    placeholder="Tautan Google Drive Dokumentasi"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="editFeaturedImage" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tautan Foto Sampul (Featured Image URL)</label>
+                  <input
+                    type="text"
+                    id="editFeaturedImage"
+                    value={editingActivity.featuredImage || ""}
+                    onChange={(e) => setEditingActivity({ ...editingActivity, featuredImage: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-semibold"
+                    placeholder="Tautan gambar eksternal (Unsplash, dsb.)"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="editDesc" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Deskripsi Singkat Kegiatan</label>
+                  <textarea
+                    id="editDesc"
+                    required
+                    rows={4}
+                    value={editingActivity.description}
+                    onChange={(e) => setEditingActivity({ ...editingActivity, description: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark resize-none leading-relaxed"
+                  ></textarea>
+                </div>
+
+                {/* Sticky buttons at bottom */}
+                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  >
+                    Simpan Perubahan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingActivity(null)}
                     className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
                   >
                     Batal
