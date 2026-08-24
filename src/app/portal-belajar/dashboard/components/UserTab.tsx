@@ -47,23 +47,6 @@ export default function UserTab({
   // Floating toast notification state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Helper to generate dynamic random password
-  const generateRandomPassword = () => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let generated = "";
-    for (let i = 0; i < 8; i++) {
-      generated += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return `sgw_${generated}`;
-  };
-
-  // Trigger password generation when add form is opened
-  React.useEffect(() => {
-    if (showAddForm) {
-      setNewPassword(generateRandomPassword());
-    }
-  }, [showAddForm]);
-
   // Auto-generate username from name & role
   React.useEffect(() => {
     if (!newName.trim()) {
@@ -224,36 +207,25 @@ export default function UserTab({
                 </div>
                 <div>
                   <label htmlFor="role" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Peran Akses (Role)</label>
-                  <select
+                  <input
+                    type="text"
                     id="role"
-                    value={newRole}
-                    onChange={(e) => setNewRole(e.target.value as any)}
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer bg-white"
-                  >
-                    <option value="guru">Guru (Pendidik Kelas)</option>
-                    <option value="admin_trx">Admin Transaksi (Bendahara Keuangan)</option>
-                    <option value="admin_adm">Admin Administrasi (Kepala Sekolah/Pengelola)</option>
-                  </select>
+                    disabled
+                    value="Guru (Pendidik Kelas)"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-bold bg-stone-50 text-stone-500 cursor-not-allowed"
+                  />
                 </div>
                 <div>
-                  <label htmlFor="pass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi (Otomatis)</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      id="pass"
-                      readOnly
-                      value={newPassword}
-                      className="flex-1 px-3.5 py-2.5 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-mono font-bold bg-stone-50 text-stone-600"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setNewPassword(generateRandomPassword())}
-                      className="px-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-extrabold text-[10px] rounded-xl border border-neutral-gray/10 transition-all cursor-pointer"
-                      title="Acak Ulang Kata Sandi"
-                    >
-                      Acak Ulang
-                    </button>
-                  </div>
+                  <label htmlFor="pass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi (Password)</label>
+                  <input
+                    type="text"
+                    id="pass"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Masukkan kata sandi untuk akun baru"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold select-text"
+                  />
                 </div>
 
                 {/* Sticky buttons at bottom */}
@@ -333,9 +305,9 @@ export default function UserTab({
                   <label htmlFor="editRole" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Peran Akses (Role)</label>
                   <select
                     id="editRole"
+                    disabled
                     value={editingUser.role}
-                    onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as any })}
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer bg-white"
+                    className="w-full px-3 py-2.5 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-bold bg-stone-50 text-stone-500 cursor-not-allowed"
                   >
                     <option value="guru">Guru (Pendidik Kelas)</option>
                     <option value="admin_trx">Admin Transaksi (Bendahara Keuangan)</option>
@@ -397,15 +369,7 @@ export default function UserTab({
                     {u.role === "admin_adm" ? "Admin Administrasi" :
                      u.role === "admin_trx" ? "Admin Transaksi" : "Guru Kelas"}
                   </span>
-                  
                   <div className="flex items-center gap-1.5">
-                    <span 
-                      className="text-[10px] text-neutral-gray font-mono font-bold cursor-help"
-                      title={`Lengkap: USR-${u.id}`}
-                    >
-                      ID: USR-{String(u.id).length > 8 ? `${String(u.id).substring(0, 8)}...` : u.id}
-                    </span>
-
                     {/* Kebab Dropdown Menu */}
                     <div className="relative">
                       <button
