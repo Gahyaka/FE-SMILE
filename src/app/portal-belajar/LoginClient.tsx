@@ -9,8 +9,10 @@ export default function LoginClient() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [errorDetails, setErrorDetails] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isServerOffline, setIsServerOffline] = useState(false);
 
   useEffect(() => {
     // Clear any existing session when returning to login page
@@ -28,9 +30,12 @@ export default function LoginClient() {
       localStorage.setItem("system_users", JSON.stringify(defaultUsers));
     }
   }, []);
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setErrorDetails("");
+    setIsServerOffline(false);
     setLoading(true);
 
     try {
@@ -79,8 +84,56 @@ export default function LoginClient() {
       router.push("/portal-belajar/dashboard");
     } catch (err: any) {
       console.error("Login API Error:", err);
-      const errMsg = err.response?.data?.message || err.message || "Gagal menghubungi server. Silakan hubungi admin.";
-      setError(errMsg === "Network Error" ? "Gagal terhubung ke server backend API." : errMsg);
+      
+      const status = err.response?.status;
+      const responseData = err.response?.data;
+      
+      if (err.message === "Network Error" || !err.response) {
+        // Backend offline / masalah jaringan
+        setIsServerOffline(true);
+        setError("Koneksi API Backend Terputus");
+        setErrorDetails("Server database sedang dalam pemeliharaan atau offline. Anda dapat menggunakan akun lokal untuk mengakses mode demo.");
+      } else if (status === 401 || status === 400) {
+        // Salah username / password
+        setError("Kredensial Salah");
+        setErrorDetails(responseData?.message || "Nama pengguna atau kata sandi yang Anda masukkan tidak terdaftar. Periksa kembali penulisan Anda.");
+      } else {
+        // Kesalahan server internal lainnya
+        setError("Kesalahan Sistem Server");
+        setErrorDetails(responseData?.message || err.message || "Terjadi kesalahan internal pada server backend. Silakan coba beberapa saat lagi.");
+      }
+      
+      setLoading(false);
+    }
+  };
+
+  // Fitur Fallback login lokal/demo ketika server offline
+  const handleOfflineBypass = () => {
+    setError("");
+    setErrorDetails("");
+    setLoading(true);
+
+    const localUsersRaw = localStorage.getItem("system_users");
+    const localUsers = localUsersRaw ? JSON.parse(localUsersRaw) : [];
+    
+    const userMatch = localUsers.find(
+      (u: any) => u.username === username && u.password === password
+    );
+
+    if (userMatch) {
+      // Simpan session lokal
+      localStorage.setItem("auth_token", "offline-mock-token-" + Date.now());
+      localStorage.setItem(
+        "user_session",
+        JSON.stringify({ 
+          role: userMatch.role, 
+          name: userMatch.name 
+        })
+      );
+      router.push("/portal-belajar/dashboard");
+    } else {
+      setError("Login Demo Gagal");
+      setErrorDetails("Kredensial lokal tidak terdaftar di database offline. Coba gunakan: admin_adm / admin123");
       setLoading(false);
     }
   };
@@ -109,8 +162,26 @@ export default function LoginClient() {
         <p className="text-xs text-neutral-gray font-bold text-center mb-8 relative z-10">Silakan masuk untuk mengakses sistem informasi sekolah.</p>
 
         {error && (
-          <div className="mb-5 p-3 rounded-lg bg-accent/10 border border-accent/25 text-xs text-accent font-bold text-center">
-            {error}
+          <div className="mb-5 p-4 rounded-2xl bg-accent-soft border-2 border-dashed border-accent/30 text-neutral-dark space-y-1 relative z-10">
+            <div className="flex items-center gap-2 text-accent font-black text-xs">
+              <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>{error}</span>
+            </div>
+            <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed pl-6">{errorDetails}</p>
+            
+            {isServerOffline && (
+              <div className="pt-2 pl-6">
+                <button
+                  type="button"
+                  onClick={handleOfflineBypass}
+                  className="py-1.5 px-3 bg-primary-green hover:bg-primary-dark text-white rounded-lg text-[9px] font-extrabold shadow-3xs cursor-pointer transition-all uppercase tracking-wider"
+                >
+                  Gunakan Mode Demo (Lokal)
+                </button>
+              </div>
+            )}
           </div>
         )}
 
