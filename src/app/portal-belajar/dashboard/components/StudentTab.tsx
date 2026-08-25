@@ -53,6 +53,7 @@ export default function StudentTab({
     isOpen: boolean;
     successCount: number;
     failCount: number;
+    duplicateCount: number;
     errorMessage?: string;
   } | null>(null);
 
@@ -109,6 +110,7 @@ export default function StudentTab({
         isOpen: true,
         successCount: 0,
         failCount: 0,
+        duplicateCount: 0,
         errorMessage: "Gagal mengekspor data ke Excel: " + err.message
       });
     }
@@ -133,6 +135,7 @@ export default function StudentTab({
             isOpen: true,
             successCount: 0,
             failCount: 0,
+            duplicateCount: 0,
             errorMessage: "Berkas Excel kosong atau format kolom tidak sesuai."
           });
           return;
@@ -140,29 +143,41 @@ export default function StudentTab({
 
         let successCount = 0;
         let failCount = 0;
+        let duplicateCount = 0;
 
         data.forEach((row: any) => {
           // Hilangkan baris instruksi/contoh template jika ada
           const name = row["Nama Lengkap"];
-          const nisn = String(row["NISN"] || "");
+          const nisn = String(row["NISN"] || "").trim();
           const classVal = row["Kelas"] || "KB";
 
           if (name && name !== "Masukkan Nama Murid Baru" && nisn) {
-            onAddStudent({
-              name: name,
-              nisn: nisn,
-              nis: String(row["NIS"] || ""),
-              parentName: row["Nama Orang Tua"] || "",
-              class: classVal,
-              semester: row["Semester"] || "Semester 1",
-              fase: row["Fase"] || "Fase Fondasi",
-              academicYear: row["Tahun Ajaran"] || "2026/2027",
-              height: Number(row["Tinggi Badan (cm)"] || 100),
-              weight: Number(row["Berat Badan (kg)"] || 16),
-              headCircumference: Number(row["Lingkar Kepala (cm)"] || 48),
-              address: row["Alamat"] || "Berbah, Sleman",
-            });
-            successCount++;
+            // Validasi duplikasi berdasarkan NISN atau Nama + Kelas
+            const isDuplicate = students.some(
+              (s) => 
+                (s.nisn && s.nisn.trim() === nisn) || 
+                (s.name.toLowerCase().trim() === name.toLowerCase().trim() && s.class === classVal)
+            );
+
+            if (isDuplicate) {
+              duplicateCount++;
+            } else {
+              onAddStudent({
+                name: name,
+                nisn: nisn,
+                nis: String(row["NIS"] || ""),
+                parentName: row["Nama Orang Tua"] || "",
+                class: classVal,
+                semester: row["Semester"] || "Semester 1",
+                fase: row["Fase"] || "Fase Fondasi",
+                academicYear: row["Tahun Ajaran"] || "2026/2027",
+                height: Number(row["Tinggi Badan (cm)"] || 100),
+                weight: Number(row["Berat Badan (kg)"] || 16),
+                headCircumference: Number(row["Lingkar Kepala (cm)"] || 48),
+                address: row["Alamat"] || "Berbah, Sleman",
+              });
+              successCount++;
+            }
           } else {
             failCount++;
           }
@@ -172,6 +187,7 @@ export default function StudentTab({
           isOpen: true,
           successCount,
           failCount,
+          duplicateCount,
         });
         e.target.value = ""; // Reset input file
       } catch (err: any) {
@@ -179,6 +195,7 @@ export default function StudentTab({
           isOpen: true,
           successCount: 0,
           failCount: 0,
+          duplicateCount: 0,
           errorMessage: "Gagal membaca atau memproses berkas Excel: " + err.message
         });
       }
@@ -342,8 +359,8 @@ export default function StudentTab({
                 <>
 
                   {/* Import Excel Trigger */}
-                  <label className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <label className="px-3.5 py-2 bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs">
+                    <svg className="w-3.5 h-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
                     <span>Impor Excel</span>
@@ -359,10 +376,10 @@ export default function StudentTab({
                   <button
                     type="button"
                     onClick={handleExportExcel}
-                    className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                    className="px-3.5 py-2 bg-white hover:bg-primary-green/5 text-primary-green border-2 border-dashed border-primary-green/30 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
                     title="Ekspor Data Siswa Terfilter ke Excel"
                   >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="w-3.5 h-3.5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     <span>Ekspor Excel</span>
@@ -1060,13 +1077,17 @@ export default function StudentTab({
             </div>
 
             {!importResult.errorMessage && (
-              <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-primary-green/5 space-y-2 text-xs font-semibold text-neutral-gray">
+              <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-primary-green/5 space-y-2.5 text-xs font-semibold text-neutral-gray">
                 <div className="flex justify-between items-center">
                   <span>Siswa Berhasil Ditambahkan:</span>
                   <span className="text-primary-green font-extrabold font-mono text-sm bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">{importResult.successCount}</span>
                 </div>
-                <div className="flex justify-between items-center border-t border-neutral-gray/5 pt-2">
-                  <span>Data Gagal / Tidak Valid:</span>
+                <div className="flex justify-between items-center border-t border-neutral-gray/5 pt-2.5">
+                  <span>Ditolak (Sudah Terdaftar/Duplikat):</span>
+                  <span className="text-yellow-700 font-extrabold font-mono text-sm bg-yellow-50 px-2 py-0.5 rounded-lg border border-yellow-100">{importResult.duplicateCount}</span>
+                </div>
+                <div className="flex justify-between items-center border-t border-neutral-gray/5 pt-2.5">
+                  <span>Gagal (Format Kolom Tidak Valid):</span>
                   <span className="text-accent font-extrabold font-mono text-sm bg-red-50 px-2 py-0.5 rounded-lg border border-red-100">{importResult.failCount}</span>
                 </div>
               </div>
