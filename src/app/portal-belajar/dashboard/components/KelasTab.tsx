@@ -52,7 +52,6 @@ export default function KelasTab({
   const [newFase, setNewFase] = useState("2026/2027");
   const [newTeacherName, setNewTeacherName] = useState("");
   const [newTeacherId, setNewTeacherId] = useState<string | number>("");
-  const [newDescription, setNewDescription] = useState("");
 
   const teachersList = users.filter((u) => {
     const role = (u.role || "").trim().toLowerCase();
@@ -90,7 +89,7 @@ export default function KelasTab({
       fase: newFase,
       teacherName: newTeacherName,
       teacherId: newTeacherId,
-      description: newDescription || "Tidak ada deskripsi",
+      description: "Tidak ada deskripsi",
     });
 
     // Reset Form
@@ -98,7 +97,6 @@ export default function KelasTab({
     setNewFase("2026/2027");
     setNewTeacherName("");
     setNewTeacherId("");
-    setNewDescription("");
     setShowAddForm(false);
   };
 
@@ -220,17 +218,6 @@ export default function KelasTab({
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
                   />
                 </div>
-                <div>
-                  <label htmlFor="description" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Deskripsi Singkat</label>
-                  <input
-                    type="text"
-                    id="description"
-                    value={newDescription}
-                    onChange={(e) => setNewDescription(e.target.value)}
-                    placeholder="Deskripsi tingkat umur atau detail kelas"
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                  />
-                </div>
 
                 {/* Sticky buttons at bottom */}
                 <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
@@ -325,16 +312,6 @@ export default function KelasTab({
                     required
                     value={editingClass.fase}
                     onChange={(e) => setEditingClass({ ...editingClass, fase: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="editDescription" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Deskripsi Singkat</label>
-                  <input
-                    type="text"
-                    id="editDescription"
-                    value={editingClass.description}
-                    onChange={(e) => setEditingClass({ ...editingClass, description: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
                   />
                 </div>
@@ -447,7 +424,6 @@ export default function KelasTab({
                     <h4 className="font-baloo text-base font-bold text-neutral-dark truncate leading-tight">
                       Kelas {cls.className}
                     </h4>
-                    <p className="text-[10px] text-neutral-gray truncate mt-0.5">{cls.description}</p>
                   </div>
                 </div>
 
