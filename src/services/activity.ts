@@ -65,10 +65,21 @@ export const activityService = {
   },
 
   /**
-   * Toggle status publikasi kegiatan ke profil luar
+   * Mengambil data galeri publik untuk landing page profil luar (tanpa token login)
    */
-  async togglePublic(id: string | number) {
-    const response = await api.put(`/api/v1/dokumentasi/${id}/toggle-public`);
+  async getPublicGallery() {
+    const response = await api.get("/api/v1/public/galeri");
+    return response.data;
+  },
+
+  /**
+   * Toggle status publikasi kegiatan ke profil luar (PATCH)
+   */
+  async togglePublic(idKegiatan: string | number, isPublic: boolean, thumbnailFotoId?: string) {
+    const response = await api.patch(`/api/v1/dokumentasi/${idKegiatan}/toggle-public`, {
+      isPublic,
+      thumbnailFotoId: thumbnailFotoId || ""
+    });
     return response.data;
   }
 };

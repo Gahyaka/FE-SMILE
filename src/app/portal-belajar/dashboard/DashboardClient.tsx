@@ -363,7 +363,6 @@ export default function DashboardClient() {
                   const scores: {[param: string]: string} = {};
                   
                   progressList.forEach((p: any) => {
-                    // Cari nama materi berdasarkan materiId
                     const materiInfo = rawMateri.find((m: any) => m.id === p.materiId);
                     if (materiInfo) {
                       scores[materiInfo.namaMateri] = p.predikat || "-";
@@ -371,7 +370,7 @@ export default function DashboardClient() {
                   });
                   updatedMurajaahData[String(st.id)] = scores;
                 } catch (stErr) {
-                  // Fallback jika satu siswa gagal load
+                  // Fallback
                 }
               })
             );
@@ -380,7 +379,14 @@ export default function DashboardClient() {
               setMurajaahData(updatedMurajaahData);
             }
           } catch (muroErr) {
-            console.warn("[SGW] Murojaah API sync failed. Using local mockup storage.");
+            console.warn("[SGW] Murojaah API sync failed / 404. Using local mockup storage.");
+            const stored = localStorage.getItem("sgw_murajaah_data");
+            if (stored) {
+              setMurajaahData(JSON.parse(stored));
+            } else {
+              setMurajaahData(initialMurajaah);
+              localStorage.setItem("sgw_murajaah_data", JSON.stringify(initialMurajaah));
+            }
           }
         } catch (err) {
           console.warn("Backend data fetch warning (using mock fallbacks):", err);
@@ -995,6 +1001,42 @@ const handleDeleteUser = (userId: number) => {
     setLogs([newLog, ...logs]);
   };
 
+  const handleTogglePublicActivity = async (actId: string | number, isPublic: boolean) => {
+    if (!isAdminAdministrasi && !isGuru) return;
+
+    try {
+      await activityService.togglePublic(actId, isPublic);
+      
+      const actRes = await activityService.getAll();
+      const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
+      const mappedAct = rawAct.map((item: any) => ({
+        id: item.id,
+        title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+        description: item.deskripsi || item.description || "",
+        date: item.tanggalKegiatan || item.date || "",
+        image: item.foto || item.image || "/images/hero-bg.jpg",
+        isPublic: item.isPublic !== undefined ? item.isPublic : true
+      }));
+      setActivities(mappedAct);
+      localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
+    } catch (err) {
+      const updated = activities.map((act) => 
+        act.id === actId ? { ...act, isPublic } : act
+      );
+      setActivities(updated);
+      localStorage.setItem("sgw_activities", JSON.stringify(updated));
+    }
+
+    const targetAct = activities.find(a => a.id === actId);
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session.name,
+      action: `Mengubah publikasi kegiatan '${targetAct?.title || "kegiatan"}' menjadi ${isPublic ? "Publik" : "Privat"}`,
+    };
+    setLogs([newLog, ...logs]);
+  };
+
   const handleDeleteActivity = (actId: number) => {
     if (!isAdminAdministrasi) return;
     const act = activities.find(a => a.id === actId);
@@ -1223,15 +1265,19 @@ const handleDeleteUser = (userId: number) => {
   const handleUpdateMurajaah = async (studentId: string | number, param: string, score: string) => {
     if (!isAdminAdministrasi && !isGuru) return;
     
+    let nextData: any = {};
     setMurajaahData(prev => {
       const studentData = prev[String(studentId)] || {};
-      return {
+      const updated = {
         ...prev,
         [String(studentId)]: {
           ...studentData,
           [param]: score
         }
       };
+      nextData = updated;
+      localStorage.setItem("sgw_murajaah_data", JSON.stringify(updated));
+      return updated;
     });
 
     try {
@@ -1249,7 +1295,9 @@ const handleDeleteUser = (userId: number) => {
         console.warn(`[SGW] Materi '${param}' tidak terdaftar di database backend. Tersimpan secara lokal saja.`);
       }
     } catch (err) {
-      console.warn("[SGW] Gagal menyimpan penilaian murojaah ke backend database:", err);
+      console.warn("[SGW] Gagal menyimpan penilaian murojaah ke backend database. Tersimpan secara lokal di browser.");
+      // Simpan paksa data lokal untuk memastikan kekokohan data
+      localStorage.setItem("sgw_murajaah_data", JSON.stringify(nextData));
     }
   };
 
@@ -1564,6 +1612,7 @@ const handleDeleteUser = (userId: number) => {
                   onAddActivity={handleAddActivity}
                   onUpdateActivity={handleUpdateActivity}
                   onDeleteActivity={handleDeleteActivity}
+                  onTogglePublic={handleTogglePublicActivity}
                 />
               )}
 

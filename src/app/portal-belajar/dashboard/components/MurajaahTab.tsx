@@ -214,8 +214,8 @@ export default function MurajaahTab({
           <h4 className="font-baloo text-base font-bold text-neutral-dark">1. Pilih Santri</h4>
         </div>
 
-        {/* Filter Kategori Kelas — Startup Segmented Control Style */}
-        <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-fit flex-wrap">
+        {/* Filter Kategori Kelas — Scrollable on mobile */}
+        <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-full sm:w-auto overflow-x-auto scrollbar-none whitespace-nowrap">
           <button
             type="button"
             onClick={() => setClassFilter("Semua")}
@@ -247,7 +247,25 @@ export default function MurajaahTab({
           })}
         </div>
 
-        {/* Search input — lebar penuh, sama persis dengan TabunganTab */}
+        {/* Mobile Dropdown Select for Student - Only visible on small screens */}
+        <div className="block sm:hidden">
+          <label htmlFor="studentSelect" className="block text-[9px] font-extrabold uppercase text-neutral-gray mb-1.5">Pilih Santri (Mobile Dropdown)</label>
+          <select
+            id="studentSelect"
+            value={murajaahStudentId}
+            onChange={(e) => setMurajaahStudentId(e.target.value)}
+            className="w-full px-3 py-2.5 rounded-xl border border-primary-green/15 text-xs font-semibold bg-[#FAF8F5] text-neutral-dark focus:outline-none"
+          >
+            {filteredStudents.map((st) => (
+              <option key={st.id} value={st.id}>
+                {st.name} ({st.class})
+              </option>
+            ))}
+            {filteredStudents.length === 0 && <option value="">Tidak ada murid</option>}
+          </select>
+        </div>
+
+        {/* Search input — lebar penuh */}
         <div className="relative">
           <svg className="w-3.5 h-3.5 text-neutral-gray absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -261,8 +279,8 @@ export default function MurajaahTab({
           />
         </div>
 
-        {/* Tabel Murid Bergulir — sama persis dengan TabunganTab */}
-        <div className="overflow-x-auto rounded-xl border border-neutral-gray/10 max-h-[200px] overflow-y-auto pr-1">
+        {/* Tabel Murid Bergulir — Hidden on mobile to save vertical space */}
+        <div className="hidden sm:block overflow-x-auto rounded-xl border border-neutral-gray/10 max-h-[200px] overflow-y-auto pr-1">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10 sticky top-0 z-10">
@@ -302,10 +320,10 @@ export default function MurajaahTab({
 
       </div>
 
-      {/* 2. Pilih Kategori Penilaian Panel */}
+      {/* 2. Pilih Kategori Penilaian Panel — Scrollable on mobile */}
       <div className="bg-white p-5 rounded-2xl border border-primary-green/10 shadow-3xs space-y-3">
         <h4 className="font-baloo text-base font-bold text-neutral-dark">2. Pilih Kategori Penilaian</h4>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex overflow-x-auto whitespace-nowrap scrollbar-none gap-2 py-1">
           {[
             { key: "suratPendek", label: "Surat Pendek" },
             { key: "doaSehariHari", label: "Doa Harian" },
@@ -318,7 +336,7 @@ export default function MurajaahTab({
               key={tab.key}
               type="button"
               onClick={() => setEditingCategory(tab.key as any)}
-              className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer inline-block ${
                 editingCategory === tab.key
                   ? "bg-primary-green text-white border-primary-green shadow-3xs"
                   : "bg-[#FAF8F5] text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
@@ -330,32 +348,34 @@ export default function MurajaahTab({
         </div>
       </div>
 
-      {/* 3. Lembar Kerja Murajaah Panel */}
       <div className="bg-white p-6 rounded-2xl border border-primary-green/10 shadow-3xs space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-neutral-gray/10 pb-3.5">
-          <h4 className="font-baloo text-base font-bold text-neutral-dark flex items-center gap-2 flex-wrap">
-            <span>3. Lembar Kerja Murajaah:</span>
-            <span className="text-primary-green font-black underline">{students.find(s => s.id === murajaahStudentId)?.name || "Santri"}</span>
+        <div className="flex flex-col gap-4 border-b border-neutral-gray/10 pb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-3">
+            <h4 className="font-baloo text-base font-bold text-neutral-dark flex flex-wrap items-center gap-1.5">
+              <span>3. Lembar Kerja Murajaah:</span>
+              <span className="text-primary-green underline decoration-2">{students.find(s => s.id === murajaahStudentId)?.name || "Santri"}</span>
+            </h4>
+            
             <button
               type="button"
               onClick={handleDownloadPDF}
-              className="ml-2 flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 font-extrabold text-[9px] uppercase rounded-lg border border-amber-200 transition-all cursor-pointer shadow-3xs"
+              className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 font-extrabold text-[10px] uppercase rounded-xl border border-amber-200 transition-all cursor-pointer shadow-3xs"
               title="Unduh Laporan Lengkap (PDF)"
             >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <span>Unduh PDF</span>
+              <span>Unduh Laporan PDF</span>
             </button>
-          </h4>
+          </div>
           
-          {/* Work tab toggler */}
-          <div className="flex bg-[#FAF8F5] border border-primary-green/10 rounded-lg p-0.5 text-[10px] font-extrabold text-neutral-gray">
+          {/* Work tab toggler — Melebar penuh di mobile */}
+          <div className="flex bg-[#FAF8F5] border border-primary-green/10 rounded-xl p-0.5 text-[10px] font-extrabold text-neutral-gray w-full sm:w-fit">
             <button
               type="button"
               onClick={() => setActiveWorkTab("input")}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded cursor-pointer transition-colors ${
-                activeWorkTab === "input" ? "bg-primary-green text-white" : "hover:text-neutral-dark"
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg cursor-pointer transition-colors ${
+                activeWorkTab === "input" ? "bg-primary-green text-white shadow-3xs" : "hover:text-neutral-dark"
               }`}
             >
               <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -366,8 +386,8 @@ export default function MurajaahTab({
             <button
               type="button"
               onClick={() => setActiveWorkTab("summary")}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded cursor-pointer transition-colors ${
-                activeWorkTab === "summary" ? "bg-primary-green text-white" : "hover:text-neutral-dark"
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg cursor-pointer transition-colors ${
+                activeWorkTab === "summary" ? "bg-primary-green text-white shadow-3xs" : "hover:text-neutral-dark"
               }`}
             >
               <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -386,15 +406,15 @@ export default function MurajaahTab({
                 {MURAJAAH_PARAMS[editingCategory].map((param) => {
                   const currentVal = (murajaahData[murajaahStudentId] && murajaahData[murajaahStudentId][param]) || "-";
                   return (
-                    <div key={param} className="flex items-center justify-between p-2.5 bg-[#FAF8F5] rounded-xl border border-neutral-gray/5 gap-3">
-                      <span className="text-[11px] font-bold text-neutral-dark flex-1 leading-normal break-words">{param}</span>
+                    <div key={param} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-[#FAF8F5] rounded-xl border border-neutral-gray/5 gap-2.5">
+                      <span className="text-[11px] font-bold text-neutral-dark leading-normal break-words">{param}</span>
                       
-                      <div className="flex gap-1 flex-shrink-0">
+                      <div className="flex justify-between sm:justify-start gap-1 flex-shrink-0 w-full sm:w-auto">
                         {["sb", "b", "c", "k", "-"].map((score) => (
                           <button
                             key={score}
                             onClick={() => onUpdateMurajaah(murajaahStudentId, param, score)}
-                            className={`w-6.5 h-6.5 rounded-full text-[9px] font-black uppercase flex items-center justify-center border transition-all cursor-pointer ${
+                            className={`w-8 h-8 sm:w-6.5 sm:h-6.5 rounded-full text-[10px] sm:text-[9px] font-black uppercase flex items-center justify-center border transition-all cursor-pointer ${
                               currentVal === score
                                 ? "bg-primary-green text-white border-primary-green"
                                 : "bg-white text-neutral-gray border-neutral-gray/20 hover:bg-neutral-gray/5"

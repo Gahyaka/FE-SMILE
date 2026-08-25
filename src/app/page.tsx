@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { initialActivities } from "@/app/portal-belajar/dashboard/mockData";
+import { activityService } from "@/services/activity";
 
 export default function HomePage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -17,29 +18,39 @@ export default function HomePage() {
   const [galleryItems, setGalleryItems] = useState<any[]>([]);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("sgw_activities");
-      let activeActs = stored ? JSON.parse(stored) : initialActivities;
-      
-      // Fallback: If for some reason activeActs has no images, force fallback to initialActivities
-      const validImagesCount = activeActs.filter((act: any) => act.featuredImage && act.featuredImage.trim() !== "").length;
-      if (validImagesCount === 0) {
-        activeActs = initialActivities;
+    const fetchActivities = async () => {
+      let activeActs = [];
+      try {
+        const res = await activityService.getPublicGallery();
+        const rawAct = Array.isArray(res) ? res : res?.data || [];
+        activeActs = rawAct.map((item: any) => ({
+          id: item.id,
+          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+          description: item.deskripsi || item.description || "",
+          date: item.tanggalKegiatan || item.date || "",
+          featuredImage: item.foto || item.image || "/images/hero-bg.jpg",
+          category: item.category || "Keagamaan"
+        }));
+      } catch (err) {
+        console.warn("[SGW] Failed to fetch activities from backend. Using mock fallback.");
+        const stored = localStorage.getItem("sgw_activities");
+        activeActs = stored ? JSON.parse(stored) : initialActivities;
       }
 
       const items = activeActs
-        .filter((act: any) => act.featuredImage && act.featuredImage.trim() !== "")
         .slice(0, 3) // Only pick top 3 items
         .map((act: any) => ({
           id: act.id,
           title: act.title,
-          category: act.category,
-          image: act.featuredImage,
+          category: act.category || "Keagamaan",
+          image: act.featuredImage || act.image || "",
           description: act.description,
           date: act.date
         }));
       setGalleryItems(items);
-    }
+    };
+
+    fetchActivities();
   }, []);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

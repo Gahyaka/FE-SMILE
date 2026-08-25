@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { initialActivities } from "@/app/portal-belajar/dashboard/mockData";
+import { activityService } from "@/services/activity";
 
 interface GalleryItem {
   id: number;
@@ -14,7 +15,6 @@ interface GalleryItem {
   date: string;
 }
 
-
 const categories = ["Semua", "Akademik", "Keagamaan", "Ekstrakurikuler"];
 
 export default function GaleriPage() {
@@ -22,23 +22,40 @@ export default function GaleriPage() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
 
-  // Sync with localStorage so activities uploaded in Portal Belajar show up here
   useEffect(() => {
-    const stored = localStorage.getItem("sgw_activities");
-    const activeActs = stored ? JSON.parse(stored) : initialActivities;
-    
-    // Map activities to gallery item format. We display items with featuredImage.
-    const items: GalleryItem[] = activeActs
-      .filter((act: any) => act.featuredImage)
-      .map((act: any) => ({
-        id: act.id,
-        title: act.title,
-        category: act.category,
-        image: act.featuredImage || "",
-        description: act.description,
-        date: act.date
-      }));
-    setGalleryItems(items);
+    const fetchActivities = async () => {
+      let activeActs = [];
+      try {
+        const res = await activityService.getPublicGallery();
+        const rawAct = Array.isArray(res) ? res : res?.data || [];
+        activeActs = rawAct.map((item: any) => ({
+          id: item.id,
+          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+          description: item.deskripsi || item.description || "",
+          date: item.tanggalKegiatan || item.date || "",
+          featuredImage: item.foto || item.image || "/images/hero-bg.jpg",
+          category: item.category || "Keagamaan"
+        }));
+      } catch (err) {
+        console.warn("[SGW] Failed to fetch activities from backend. Using mock fallback.");
+        const stored = localStorage.getItem("sgw_activities");
+        activeActs = stored ? JSON.parse(stored) : initialActivities;
+      }
+
+      // Map activities to gallery item format.
+      const items: GalleryItem[] = activeActs
+        .map((act: any) => ({
+          id: act.id,
+          title: act.title,
+          category: act.category || "Keagamaan",
+          image: act.featuredImage || act.image || "",
+          description: act.description,
+          date: act.date
+        }));
+      setGalleryItems(items);
+    };
+
+    fetchActivities();
   }, []);
 
   const filteredItems = selectedCategory === "Semua"
