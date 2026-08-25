@@ -3,7 +3,9 @@ import api from "@/lib/api";
 export interface ClassPayload {
   namaKelas: string;
   tahunAjaran: string;
-  waliKelas: string;
+  waliKelas?: string;
+  guru_id?: string | number;
+  guruId?: string | number;
 }
 
 export const classService = {

@@ -27,13 +27,16 @@ import {
 import { studentService } from "@/services/student";
 import { classService } from "@/services/class";
 import { userService } from "@/services/user";
+import { authService } from "@/services/auth";
 import { sppService } from "@/services/spp";
+import { activityService } from "@/services/activity";
+import { murojaahService } from "@/services/murojaah";
 
 type TabKey = "siswa" | "kelas" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "users" | "audit";
 
 function getDefaultTab(role: "admin_adm" | "admin_trx" | "guru"): TabKey {
   if (role === "admin_trx") return "spp";
-  if (role === "guru") return "kegiatan";
+  if (role === "guru") return "siswa";
   return "siswa"; // admin_adm
 }
 
@@ -61,17 +64,54 @@ function mapClassesData(rawClasses: any[]): any[] {
     id: c.id,
     className: c.namaKelas || c.nama_kelas || "Kelas Tanpa Nama",
     teacherName: c.waliKelas || c.wali_kelas || "Belum Ada Wali",
+    teacherId: c.guruId || c.guru_id || "",
     fase: c.tahunAjaran || c.tahun_ajaran || "2025/2026", // Map Academic Year here
     description: c.description || c.deskripsi || "Tidak ada deskripsi"
   }));
 }
 
+function parseLocalDateString(dateStr: string): string {
+  if (!dateStr) return "";
+  if (dateStr.includes("T")) {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) {
+      return dateStr.substring(0, 10);
+    }
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+  return dateStr.substring(0, 10);
+}
+
 function mapSppTransactions(rawTxs: any[]): any[] {
-  return rawTxs.map((tx: any) => {
-    const formattedDate = (tx.tanggalBayar || "").substring(0, 10);
+  const reverseMap: Record<string, string> = {
+    "JULI": "07",
+    "AGUSTUS": "08",
+    "SEPTEMBER": "09",
+    "OKTOBER": "10",
+    "NOVEMBER": "11",
+    "DESEMBER": "12",
+    "JANUARI": "01",
+    "FEBRUARI": "02",
+    "MARET": "03",
+    "APRIL": "04",
+    "MEI": "05",
+    "JUNI": "06"
+  };
+
+  const mapped = rawTxs.map((tx: any) => {
+    const formattedDate = parseLocalDateString(tx.tanggalBayar || "");
+    const year = formattedDate ? formattedDate.substring(0, 4) : new Date().getFullYear().toString();
+
+    // Map backend capitalized months back to YYYY-MM
+    let months = (tx.paidMonths || []).map((m: string) => {
+      const monthNum = reverseMap[m.toUpperCase()];
+      return monthNum ? `${year}-${monthNum}` : m;
+    });
     
     // Fallback: If backend does not provide paidMonths array, deduce month from payment date (format: "YYYY-MM")
-    let months = tx.paidMonths;
     if (!months || !Array.isArray(months) || months.length === 0) {
       if (formattedDate && formattedDate.length >= 7) {
         months = [formattedDate.substring(0, 7)];
@@ -92,6 +132,29 @@ function mapSppTransactions(rawTxs: any[]): any[] {
       paidMonths: months
     };
   });
+
+  // Group transactions that were posted in the same batch
+  const grouped: any[] = [];
+  const visitedKeys = new Set<string>();
+
+  mapped.forEach((tx) => {
+    const matchKey = `${tx.studentId}_${tx.date}_${tx.description}_${tx.spp}_${tx.les}`;
+    
+    if (!visitedKeys.has(matchKey)) {
+      visitedKeys.add(matchKey);
+      grouped.push(tx);
+    } else {
+      const existing = grouped.find(
+        (item) => `${item.studentId}_${item.date}_${item.description}_${item.spp}_${item.les}` === matchKey
+      );
+      if (existing) {
+        const mergedMonths = Array.from(new Set([...(existing.paidMonths || []), ...(tx.paidMonths || [])]));
+        existing.paidMonths = mergedMonths;
+      }
+    }
+  });
+
+  return grouped;
 }
 
 function mapUsersData(rawUsers: any[]): any[] {
@@ -107,21 +170,29 @@ function mapUsersData(rawUsers: any[]): any[] {
   return rawUsers
     .filter((u: any) => allowedRoles.includes((u.role || "").toUpperCase()))
     .filter((u: any) => !deletedUserIds.includes(u.id))
-    .map((u: any) => ({
-      id: u.id,
-      name: u.nama || u.name || "Petugas Madrasah",
-      username: u.username,
-      role: (u.role || "").toUpperCase() === "ADMIN_ADMINISTRASI" || (u.role || "").toUpperCase() === "ADMIN" 
+    .map((u: any) => {
+      const rawRole = (u.role || "").toUpperCase();
+      const mappedRole = rawRole === "ADMIN_ADMINISTRASI" || rawRole === "ADMIN" 
         ? "admin_adm" 
-        : (u.role || "").toUpperCase() === "ADMIN_TRANSAKSI" 
+        : rawRole === "ADMIN_TRANSAKSI" 
           ? "admin_trx" 
-          : "guru"
-    }));
+          : "guru";
+
+      // Gunakan username asli dari database — JANGAN override
+      // Override sebelumnya menyebabkan semua admin_trx tampil identik
+      // sehingga tidak bisa dibedakan saat reset password
+      return {
+        id: u.id,
+        name: u.nama || u.name || (mappedRole === "admin_adm" ? "Admin Administrasi" : mappedRole === "admin_trx" ? "Admin Transaksi" : "Guru"),
+        username: u.username,
+        role: mappedRole
+      };
+    });
 }
 
 export default function DashboardClient() {
   const router = useRouter();
-  const [session, setSession] = useState<{ role: "admin_adm" | "admin_trx" | "guru"; name: string } | null>(null);
+  const [session, setSession] = useState<{ role: "admin_adm" | "admin_trx" | "guru"; name: string; username?: string } | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>("siswa");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
@@ -137,8 +208,10 @@ export default function DashboardClient() {
   });
   const [activities, setActivities] = useState(initialActivities);
   const [sppTransactions, setSppTransactions] = useState(initialSppTransactions);
+  const [sppMatriksData, setSppMatriksData] = useState<any[]>([]);
   const [savings, setSavings] = useState(initialSavings);
-  const [murajaahData, setMurajaahData] = useState<{[studentId: number]: {[param: string]: string}}>(initialMurajaah);
+  const [murajaahData, setMurajaahData] = useState<{[studentId: string]: {[param: string]: string}}>(initialMurajaah);
+  const [murojaahMateriList, setMurojaahMateriList] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
 
   // Custom confirmation modal state
@@ -161,6 +234,21 @@ export default function DashboardClient() {
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [profilePassword, setProfilePassword] = useState("");
+  const [profileOldPassword, setProfileOldPassword] = useState("");
+  const [profileUpdateError, setProfileUpdateError] = useState<string | null>(null);
+  const [activeAcademicYear, setActiveAcademicYear] = useState("2026/2027");
+
+  const loadSppMatriks = async (tahunAjaran: string = "2026/2027") => {
+    try {
+      setActiveAcademicYear(tahunAjaran);
+      const res = await sppService.getMatriks(tahunAjaran);
+      if (res && res.success && Array.isArray(res.data)) {
+        setSppMatriksData(res.data);
+      }
+    } catch (err) {
+      console.warn("[SGW] Failed to fetch SPP Matriks from backend:", err);
+    }
+  };
 
   useEffect(() => {
     // Authenticate session on client side
@@ -197,15 +285,22 @@ export default function DashboardClient() {
           const rawStudents = Array.isArray(studentRes) ? studentRes : studentRes?.data || [];
           setStudents(mapStudentsData(rawStudents));
 
-          const classRes = await classService.getAll();
-          const rawClasses = Array.isArray(classRes) ? classRes : classRes?.data || [];
-          setClasses(mapClassesData(rawClasses));
+          try {
+            const classRes = await classService.getAll();
+            const rawClasses = Array.isArray(classRes) ? classRes : classRes?.data || [];
+            setClasses(mapClassesData(rawClasses));
+          } catch (classErr) {
+            console.warn("[SGW] Failed to fetch classes from backend. Using local mock/cache.", classErr);
+          }
 
           // Fetch SPP transactions from backend Adonis
           try {
-            const sppRes = await sppService.getAll("2026");
+            const sppRes = await sppService.getAll();
             const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
             setSppTransactions(mapSppTransactions(rawSpp));
+            
+            // Fetch Matriks monitoring SPP
+            await loadSppMatriks("2026/2027");
           } catch (sppErr) {
             console.warn("[SGW] Failed to fetch SPP transactions from backend. Using mock fallbacks.");
           }
@@ -230,6 +325,90 @@ export default function DashboardClient() {
             // Non-admin roles fallback to local store for UI compatibility
             const storedUsers = localStorage.getItem("system_users");
             setUsers(storedUsers ? JSON.parse(storedUsers) : initialUsers);
+          }
+
+          // Fetch Dokumentasi Kegiatan dari backend Adonis
+          try {
+            const actRes = await activityService.getAll();
+            const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
+            // Backend mengembalikan foto dalam array relasi: fotos: [{id, url, isDefault, ...}]
+            const mappedAct = rawAct.map((item: any) => {
+              const fotosArr = Array.isArray(item.foto) ? item.foto
+                : Array.isArray(item.fotos) ? item.fotos
+                : [];
+              const thumbnail = fotosArr.find((f: any) => f.isDefault || f.isThumbnail)
+                || fotosArr[0];
+              const imageUrl = thumbnail?.viewUrl || thumbnail?.url || thumbnail?.path || thumbnail?.foto
+                || (typeof item.foto === "string" ? item.foto : null)
+                || (typeof item.image === "string" ? item.image : null)
+                || "";
+
+              return {
+                id: item.id,
+                title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+                description: item.deskripsi || item.description || "",
+                date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
+                featuredImage: imageUrl,
+                driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
+                  || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
+                  || item.linkDrive || item.urlDrive || "",
+                category: item.category || "Keagamaan",
+                isPublic: item.isPublic !== undefined ? item.isPublic : true
+              };
+            });
+            if (mappedAct.length > 0) {
+              setActivities(mappedAct);
+              localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
+            }
+          } catch (actErr: any) {
+            console.warn("[SGW] Failed to fetch activities from backend. Using local storage.",
+              actErr?.response?.status, actErr?.response?.data || actErr?.message);
+            const stored = localStorage.getItem("sgw_activities");
+            if (stored) setActivities(JSON.parse(stored));
+          }
+
+          // Fetch Murojaah Kategori, Materi, & Penilaian dari backend Adonis
+          try {
+            const materiRes = await murojaahService.getMateri();
+            const rawMateri = Array.isArray(materiRes) ? materiRes : materiRes?.data || [];
+            setMurojaahMateriList(rawMateri);
+
+            // Fetch progress murojaah per siswa untuk data yang valid
+            const updatedMurajaahData: {[studentId: string]: {[param: string]: string}} = {};
+            
+            // Lakukan fetch paralel lembar murojaah untuk siswa yang terdaftar
+            await Promise.all(
+              rawStudents.map(async (st: any) => {
+                try {
+                  const lembarRes = await murojaahService.getLembarMurojaah(st.id);
+                  const progressList = Array.isArray(lembarRes) ? lembarRes : lembarRes?.data || [];
+                  const scores: {[param: string]: string} = {};
+                  
+                  progressList.forEach((p: any) => {
+                    const materiInfo = rawMateri.find((m: any) => m.id === p.materiId);
+                    if (materiInfo) {
+                      scores[materiInfo.namaMateri] = p.predikat || "-";
+                    }
+                  });
+                  updatedMurajaahData[String(st.id)] = scores;
+                } catch (stErr) {
+                  // Fallback
+                }
+              })
+            );
+
+            if (Object.keys(updatedMurajaahData).length > 0) {
+              setMurajaahData(updatedMurajaahData);
+            }
+          } catch (muroErr) {
+            console.warn("[SGW] Murojaah API sync failed / 404. Using local mockup storage.");
+            const stored = localStorage.getItem("sgw_murajaah_data");
+            if (stored) {
+              setMurajaahData(JSON.parse(stored));
+            } else {
+              setMurajaahData(initialMurajaah);
+              localStorage.setItem("sgw_murajaah_data", JSON.stringify(initialMurajaah));
+            }
           }
         } catch (err) {
           console.warn("Backend data fetch warning (using mock fallbacks):", err);
@@ -412,7 +591,9 @@ const handleAddClass = async (newClsData: any) => {
     await classService.create({
       namaKelas: newClsData.className,
       tahunAjaran: newClsData.fase, // Send selected academic year dynamically
-      waliKelas: newClsData.teacherName || "Bunda Guru"
+      waliKelas: newClsData.teacherName || "Bunda Guru", // Kirim nama guru (string) sesuai Kelas.json
+      guru_id: newClsData.teacherId,   // Backup ID guru (snake_case)
+      guruId: newClsData.teacherId     // Backup ID guru (camelCase)
     });
 
     // Refresh list
@@ -438,7 +619,9 @@ const handleUpdateClass = async (updatedCls: any) => {
     await classService.update(updatedCls.id, {
       namaKelas: updatedCls.className,
       tahunAjaran: updatedCls.fase, // Send updated academic year dynamically
-      waliKelas: updatedCls.teacherName || "Bunda Guru"
+      waliKelas: updatedCls.teacherName || "Bunda Guru", // Kirim nama guru (string) sesuai Kelas.json
+      guru_id: updatedCls.teacherId,   // Backup ID guru (snake_case)
+      guruId: updatedCls.teacherId     // Backup ID guru (camelCase)
     });
 
     // Refresh list
@@ -592,7 +775,8 @@ const handleUpdateUser = async (updatedUsr: any) => {
     };
     setLogs([newLog, ...logs]);
   } catch (err: any) {
-    alert("Gagal mereset password di backend: " + (err.response?.data?.message || err.message));
+    // Teruskan error ke component pemanggil agar ditampilkan di dalam modal
+    throw err;
   }
 };
 
@@ -670,9 +854,12 @@ const handleDeleteUser = (userId: number) => {
             await sppService.delete(targetId);
 
             // Refresh list
-            const sppRes = await sppService.getAll("2026");
+            const sppRes = await sppService.getAll();
             const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
             setSppTransactions(mapSppTransactions(rawSpp));
+
+            // Refresh Matriks
+            await loadSppMatriks(activeAcademicYear);
 
             const newLog = {
               id: Date.now(),
@@ -688,33 +875,44 @@ const handleDeleteUser = (userId: number) => {
       } else if (actionType === "delete_user") {
         const targetUser = users.find(u => u.id === targetId);
         if (targetUser) {
-          try {
-            // Coba hapus ke backend
-            await userService.delete(targetId);
-            
-            const userRes = await userService.getAll();
-            const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
-            setUsers(mapUsersData(rawUsers));
-          } catch {
-            // Fallback lokal jika backend tidak menyediakan rute delete user
-            // Catat ID di list local agar konsisten saat refresh
-            const raw = localStorage.getItem("deleted_user_ids");
-            const deletedUserIds = raw ? JSON.parse(raw) : [];
-            if (!deletedUserIds.includes(targetId)) {
-              deletedUserIds.push(targetId);
-              localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
-            }
-
-            const updated = users.filter(u => u.id !== targetId);
-            setUsers(updated);
-            localStorage.setItem("system_users", JSON.stringify(updated));
+          // Karena backend Adonis tidak menyediakan endpoint delete user (sesuai spesifikasi Users.json),
+          // kita lakukan penghapusan lokal secara aman agar console bersih dari error Axios 404.
+          const raw = localStorage.getItem("deleted_user_ids");
+          const deletedUserIds = raw ? JSON.parse(raw) : [];
+          if (!deletedUserIds.includes(targetId)) {
+            deletedUserIds.push(targetId);
+            localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
           }
+
+          const updated = users.filter(u => u.id !== targetId);
+          setUsers(updated);
+          localStorage.setItem("system_users", JSON.stringify(updated));
 
           const newLog = {
             id: Date.now(),
             time: new Date().toISOString().replace('T', ' ').substring(0, 16),
             user: session.name,
             action: `Menghapus akun pengguna: ${targetUser.name} (Lokal / Backend)`,
+          };
+          setLogs([newLog, ...logs]);
+        }
+      } else if (actionType === ("delete_activity" as any)) {
+        const act = activities.find((a) => a.id === targetId);
+        if (act) {
+          try {
+            await activityService.delete(targetId);
+          } catch (err) {
+            console.warn("Backend delete activity failed, falling back to local list update.");
+          }
+          const updated = activities.filter((a) => a.id !== targetId);
+          setActivities(updated);
+          localStorage.setItem("sgw_activities", JSON.stringify(updated));
+
+          const newLog = {
+            id: Date.now(),
+            time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            user: session.name,
+            action: `Menghapus dokumentasi kegiatan: ${act.title}`,
           };
           setLogs([newLog, ...logs]);
         }
@@ -731,87 +929,297 @@ const handleDeleteUser = (userId: number) => {
     }
   };
 
-  const handleAddActivity = (newActData: any) => {
+  const handleAddActivity = async (newActData: any) => {
     if (!isAdminAdministrasi && !isGuru) return;
     
-    // Auto-generate drive folder link based on activity title
-    const sanitizedTitle = (newActData.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    const newAct = {
-      ...newActData,
-      id: Date.now(),
-      driveLink: `https://drive.google.com/drive/folders/mock-${sanitizedTitle}-${Date.now()}`
-    };
-    
-    const updated = [newAct, ...activities];
-    setActivities(updated);
-    localStorage.setItem("sgw_activities", JSON.stringify(updated));
+    try {
+      // Buat FormData — kirim semua foto yang dipilih user ke backend
+      // Backend menerima field "foto" dan foto pertama otomatis jadi sampul
+      const formData = new FormData();
+      formData.append("namaKegiatan", newActData.title);
+      formData.append("deskripsi", newActData.description || "");
+      formData.append("tanggalKegiatan", newActData.date || new Date().toISOString().split("T")[0]);
+      // Kirim semua file dalam array imageFiles
+      const files: File[] = Array.isArray(newActData.imageFiles) ? newActData.imageFiles : [];
+      files.forEach((file) => formData.append("foto", file));
+
+      await activityService.create(formData);
+      
+      // Reload dari backend — mapping sesuai struktur respons Adonis (fotos: [{id,url,...}])
+      const actRes = await activityService.getAll();
+      const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
+      const mappedAct = rawAct.map((item: any) => {
+        const fotosArr = Array.isArray(item.foto) ? item.foto
+          : Array.isArray(item.fotos) ? item.fotos : [];
+        const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
+        const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
+        return {
+          id: item.id,
+          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+          description: item.deskripsi || item.description || "",
+          date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
+          featuredImage: imageUrl,
+          driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
+            || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
+            || item.linkDrive || item.urlDrive || "",
+          isPublic: item.isPublic !== undefined ? item.isPublic : true
+        };
+      });
+      setActivities(mappedAct);
+      localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
+    } catch (err) {
+      // Fallback lokal jika backend offline
+      const newAct = {
+        ...newActData,
+        id: Date.now(),
+        featuredImage: newActData.featuredImage || ""
+      };
+      const updated = [newAct, ...activities];
+      setActivities(updated);
+      localStorage.setItem("sgw_activities", JSON.stringify(updated));
+    }
 
     const newLog = {
       id: Date.now(),
       time: new Date().toISOString().replace('T', ' ').substring(0, 16),
       user: session.name,
-      action: `Menambahkan kegiatan: ${newAct.title} (Folder Google Drive terbuat otomatis)`,
+      action: `Menambahkan kegiatan: ${newActData.title}`,
     };
     setLogs([newLog, ...logs]);
   };
 
-  const handleUpdateProfile = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!session || !profileName) return;
-
-    // Cari user bersangkutan berdasarkan username login yang aktif
-    const activeUsername = session.role === "admin_adm" ? "admin_adm" : session.role === "admin_trx" ? "admin_trx" : "guru";
+  const handleUpdateActivity = async (updatedAct: any) => {
+    if (!isAdminAdministrasi && !isGuru) return;
     
-    // Perbarui password jika input password tidak kosong
-    setUsers(prev => prev.map(u => {
-      if (u.username === activeUsername) {
-        const updated = { ...u, name: profileName };
-        if (profilePassword) {
-          updated.password = profilePassword;
-        }
-        return updated;
-      }
-      return u;
-    }));
+    try {
+      const formData = new FormData();
+      formData.append("namaKegiatan", updatedAct.title);
+      formData.append("deskripsi", updatedAct.description || "");
+      formData.append("tanggalKegiatan", updatedAct.date || new Date().toISOString().split("T")[0]);
+      // Kirim file foto baru jika ada (dari edit form)
+      const files: File[] = Array.isArray(updatedAct.imageFiles) ? updatedAct.imageFiles : [];
+      if (updatedAct.imageFile) files.unshift(updatedAct.imageFile); // backward compat
+      files.forEach((file) => formData.append("foto", file));
 
-    // Perbarui session aktif
-    setSession({
-      ...session,
-      name: profileName
-    });
+      await activityService.update(updatedAct.id, formData);
+      
+      const actRes = await activityService.getAll();
+      const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
+      const mappedAct = rawAct.map((item: any) => {
+        const fotosArr = Array.isArray(item.foto) ? item.foto
+          : Array.isArray(item.fotos) ? item.fotos : [];
+        const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
+        const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
+        return {
+          id: item.id,
+          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+          description: item.deskripsi || item.description || "",
+          date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
+          featuredImage: imageUrl,
+          driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
+            || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
+            || item.linkDrive || item.urlDrive || "",
+          isPublic: item.isPublic !== undefined ? item.isPublic : true
+        };
+      });
+      setActivities(mappedAct);
+      localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
+    } catch (err) {
+      const updated = activities.map((act) => (act.id === updatedAct.id ? updatedAct : act));
+      setActivities(updated);
+      localStorage.setItem("sgw_activities", JSON.stringify(updated));
+    }
 
     const newLog = {
       id: Date.now(),
       time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: profileName,
-      action: `Memperbarui profil mandiri (Nama lengkap${profilePassword ? " & kata sandi" : ""})`,
+      user: session.name,
+      action: `Memperbarui dokumentasi kegiatan: ${updatedAct.title}`,
     };
     setLogs([newLog, ...logs]);
-    
-    setShowProfileDrawer(false);
-    setProfilePassword("");
+  };
+
+  const handleTogglePublicActivity = async (actId: string | number, isPublic: boolean) => {
+    if (!isAdminAdministrasi && !isGuru) return;
+
+    try {
+      await activityService.togglePublic(actId, isPublic);
+      
+      const actRes = await activityService.getAll();
+      const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
+      const mappedAct = rawAct.map((item: any) => {
+        const fotosArr = Array.isArray(item.foto) ? item.foto
+          : Array.isArray(item.fotos) ? item.fotos : [];
+        const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
+        const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
+        return {
+          id: item.id,
+          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+          description: item.deskripsi || item.description || "",
+          date: item.tanggalKegiatan || item.date || "",
+          featuredImage: imageUrl,
+          driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
+            || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
+            || item.linkDrive || item.urlDrive || "",
+          isPublic: item.isPublic !== undefined ? item.isPublic : true
+        };
+      });
+      setActivities(mappedAct);
+      localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
+    } catch (err) {
+      const updated = activities.map((act) => 
+        act.id === actId ? { ...act, isPublic } : act
+      );
+      setActivities(updated);
+      localStorage.setItem("sgw_activities", JSON.stringify(updated));
+    }
+
+    const targetAct = activities.find(a => a.id === actId);
+    const newLog = {
+      id: Date.now(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: session.name,
+      action: `Mengubah publikasi kegiatan '${targetAct?.title || "kegiatan"}' menjadi ${isPublic ? "Publik" : "Privat"}`,
+    };
+    setLogs([newLog, ...logs]);
+  };
+
+  const handleDeleteActivity = (actId: number) => {
+    if (!isAdminAdministrasi) return;
+    const act = activities.find(a => a.id === actId);
+    if (!act) return;
+
+    setConfirmModal({
+      isOpen: true,
+      title: "Konfirmasi Hapus Dokumentasi Kegiatan",
+      message: `Apakah Anda yakin ingin menghapus dokumentasi kegiatan "${act.title}" secara permanen dari arsip?`,
+      actionType: "delete_activity" as any,
+      targetId: actId
+    });
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session || !profileName) return;
+    setProfileUpdateError(null);
+
+    // Jika user ingin ganti password, wajib isi kata sandi lama
+    if (profilePassword && !profileOldPassword) {
+      setProfileUpdateError("Kata sandi lama wajib diisi untuk mengubah kata sandi.");
+      return;
+    }
+    if (profilePassword && profilePassword.length < 6) {
+      setProfileUpdateError("Kata sandi baru minimal 6 karakter.");
+      return;
+    }
+
+    try {
+      // Panggil API change-password jika password baru diisi
+      // Endpoint: PUT /api/v1/auth/change-password { oldPassword, newPassword }
+      if (profilePassword && profileOldPassword) {
+        await authService.changePassword({
+          oldPassword: profileOldPassword,
+          newPassword: profilePassword
+        });
+      }
+
+      // Perbarui nama di users list lokal
+      const activeUsername = session?.username || (session.role === "admin_adm" ? "admin_adm" : session.role === "admin_trx" ? "admin_trx" : "guru");
+      setUsers(prev => prev.map(u => {
+        if (u.username === activeUsername) {
+          return { ...u, name: profileName };
+        }
+        return u;
+      }));
+
+      // Perbarui session aktif (simpan nama baru)
+      const updatedSession = { ...session, name: profileName };
+      setSession(updatedSession);
+      localStorage.setItem("user_session", JSON.stringify(updatedSession));
+
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: profileName,
+        action: `Memperbarui profil mandiri (Nama lengkap${profilePassword ? " & kata sandi" : ""})`,
+      };
+      setLogs([newLog, ...logs]);
+
+      setShowProfileDrawer(false);
+      setProfilePassword("");
+      setProfileOldPassword("");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Terjadi kesalahan pada server.";
+      setProfileUpdateError(`Gagal memperbarui profil: ${msg}`);
+    }
   };
 
 
+
+  const mapFrontendMonthsToBackend = (months: string[]): string[] => {
+    if (!months || !Array.isArray(months)) return [];
+    const monthMap: Record<string, string> = {
+      "07": "JULI",
+      "08": "AGUSTUS",
+      "09": "SEPTEMBER",
+      "10": "OKTOBER",
+      "11": "NOVEMBER",
+      "12": "DESEMBER",
+      "01": "JANUARI",
+      "02": "FEBRUARI",
+      "03": "MARET",
+      "04": "APRIL",
+      "05": "MEI",
+      "06": "JUNI"
+    };
+    return months.map(m => {
+      const parts = m.split("-");
+      const monthNum = parts.length > 1 ? parts[1] : parts[0];
+      return monthMap[monthNum] || m;
+    });
+  };
 
   const handleAddSppLesPayment = async (newTxData: any) => {
     if (!isAdminTransaksi) return;
     try {
       const apiStatusSetoran = newTxData.depositStatus === "Sudah Disetor" ? "SUDAH" : "BELUM";
-      await sppService.create({
-        siswaId: String(newTxData.studentId),
-        tanggalBayar: newTxData.date,
-        nominalSpp: Number(newTxData.spp),
-        nominalLes: Number(newTxData.les),
-        catatan: newTxData.description,
-        statusSetoran: apiStatusSetoran,
-        paidMonths: newTxData.paidMonths || []
+      const selectedMonths = newTxData.paidMonths || [];
+
+      // Format bulanList to match backend expectations: Array<{ bulan: number, tahun: number }>
+      const bulanList = selectedMonths.map((m: string) => {
+        const [yearStr, monthStr] = m.split("-");
+        return {
+          bulan: Number(monthStr),
+          tahun: Number(yearStr)
+        };
       });
 
+      const payload: any = {
+        siswaId: String(newTxData.studentId),
+        tanggalBayar: newTxData.date,
+        tahunAjaran: activeAcademicYear,
+        nominalSpp: Number(newTxData.spp) * Math.max(1, selectedMonths.length),
+        nominalLes: Number(newTxData.les),
+        catatan: newTxData.description,
+        statusSetoran: apiStatusSetoran
+      };
+
+      // Add bulanList to payload if multi-months are selected
+      if (bulanList.length > 0) {
+        payload.bulanList = bulanList;
+      }
+
+      console.log("[SGW Debug] Posting SPP Payload to Backend:", JSON.stringify(payload, null, 2));
+
+      await sppService.create(payload);
+
       // Refresh list
-      const sppRes = await sppService.getAll("2026");
+      const sppRes = await sppService.getAll();
       const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
       setSppTransactions(mapSppTransactions(rawSpp));
+
+      // Refresh Matriks
+      await loadSppMatriks(activeAcademicYear);
 
       const studentName = students.find(s => s.id === newTxData.studentId)?.name || "Siswa";
       const newLog = {
@@ -822,7 +1230,9 @@ const handleDeleteUser = (userId: number) => {
       };
       setLogs([newLog, ...logs]);
     } catch (err: any) {
-      alert("Gagal mencatat pembayaran SPP ke backend: " + (err.response?.data?.message || err.message));
+      console.error("[SGW Debug] Failed SPP post details:", err.response?.data || err);
+      const errorMsg = err.response?.data?.message || (err.response?.data ? JSON.stringify(err.response.data) : err.message);
+      alert("Gagal mencatat pembayaran SPP ke backend: " + errorMsg);
     }
   };
 
@@ -830,19 +1240,23 @@ const handleDeleteUser = (userId: number) => {
     if (!isAdminTransaksi) return;
     try {
       const apiStatusSetoran = updatedTx.depositStatus === "Sudah Disetor" ? "SUDAH" : "BELUM";
+      const apiPaidMonths = mapFrontendMonthsToBackend(updatedTx.paidMonths || []);
+
       await sppService.update(updatedTx.id, {
         nominalSpp: Number(updatedTx.spp),
         nominalLes: Number(updatedTx.les),
         statusSetoran: apiStatusSetoran,
         tanggalBayar: updatedTx.date,
-        catatan: updatedTx.description,
-        paidMonths: updatedTx.paidMonths
+        catatan: updatedTx.description
       });
 
       // Refresh list
-      const sppRes = await sppService.getAll("2026");
+      const sppRes = await sppService.getAll();
       const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
       setSppTransactions(mapSppTransactions(rawSpp));
+
+      // Refresh Matriks
+      await loadSppMatriks(activeAcademicYear);
 
       const studentName = students.find(s => s.id === updatedTx.studentId)?.name || "Siswa";
       const newLog = {
@@ -914,18 +1328,43 @@ const handleDeleteUser = (userId: number) => {
     return true;
   };
 
-  const handleUpdateMurajaah = (studentId: number, param: string, score: string) => {
+  const handleUpdateMurajaah = async (studentId: string | number, param: string, score: string) => {
     if (!isAdminAdministrasi && !isGuru) return;
+    
+    let nextData: any = {};
     setMurajaahData(prev => {
-      const studentData = prev[studentId] || {};
-      return {
+      const studentData = prev[String(studentId)] || {};
+      const updated = {
         ...prev,
-        [studentId]: {
+        [String(studentId)]: {
           ...studentData,
           [param]: score
         }
       };
+      nextData = updated;
+      localStorage.setItem("sgw_murajaah_data", JSON.stringify(updated));
+      return updated;
     });
+
+    try {
+      const materiInfo = murojaahMateriList.find(
+        (m) => m.namaMateri.toLowerCase().trim() === param.toLowerCase().trim()
+      );
+
+      if (materiInfo) {
+        await murojaahService.savePenilaian({
+          siswaId: studentId,
+          materiId: materiInfo.id,
+          predikat: score
+        });
+      } else {
+        console.warn(`[SGW] Materi '${param}' tidak terdaftar di database backend. Tersimpan secara lokal saja.`);
+      }
+    } catch (err) {
+      console.warn("[SGW] Gagal menyimpan penilaian murojaah ke backend database. Tersimpan secara lokal di browser.");
+      // Simpan paksa data lokal untuk memastikan kekokohan data
+      localStorage.setItem("sgw_murajaah_data", JSON.stringify(nextData));
+    }
   };
 
   return (
@@ -970,8 +1409,8 @@ const handleDeleteUser = (userId: number) => {
           <nav className="space-y-1.5">
             <span className="text-[9px] text-primary-green/60 font-extrabold uppercase tracking-widest block mb-2 px-3">Menu Utama</span>
 
-            {/* Data Siswa — Admin Administrasi only */}
-            {isAdminAdministrasi && (
+            {/* Data Siswa — Admin Administrasi & Guru */}
+            {(isAdminAdministrasi || isGuru) && (
               <button
                 onClick={() => { setActiveTab("siswa"); setSidebarOpen(false); }}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
@@ -987,8 +1426,8 @@ const handleDeleteUser = (userId: number) => {
               </button>
             )}
 
-            {/* Data Kelas — Admin Administrasi & Guru */}
-            {(isAdminAdministrasi || isGuru) && (
+            {/* Data Kelas — Admin Administrasi only */}
+            {isAdminAdministrasi && (
               <button
                 onClick={() => { setActiveTab("kelas"); setSidebarOpen(false); }}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
@@ -1113,7 +1552,8 @@ const handleDeleteUser = (userId: number) => {
           {/* Clickable Sidebar User Profile Card */}
           <div 
             onClick={() => {
-              setProfileName(session.name);
+              const currentDbUser = users.find(u => u.username === session?.username);
+              setProfileName(currentDbUser ? currentDbUser.name : (session?.name || ""));
               setProfilePassword("");
               setShowProfileDrawer(true);
             }}
@@ -1124,7 +1564,12 @@ const handleDeleteUser = (userId: number) => {
               {isAdminAdministrasi ? "AA" : isAdminTransaksi ? "AT" : "GR"}
             </div>
             <div className="overflow-hidden">
-              <p className="text-[10px] text-neutral-dark font-bold leading-tight truncate">{session.name}</p>
+              <p className="text-[10px] text-neutral-dark font-bold leading-tight truncate">
+                {(() => {
+                  const currentDbUser = users.find(u => u.username === session?.username);
+                  return currentDbUser ? currentDbUser.name : (session?.name || "Guru Madrasah");
+                })()}
+              </p>
               <span className="text-[8px] text-primary-green font-bold uppercase mt-1 block">
                 {isAdminAdministrasi ? "Admin Administrasi" : isAdminTransaksi ? "Admin Transaksi" : "Guru"}
               </span>
@@ -1182,22 +1627,52 @@ const handleDeleteUser = (userId: number) => {
             <SkeletonLoader type={activeTab as any} />
           ) : (
             <>
-              {activeTab === "siswa" && (
-                <StudentTab
-                  students={students}
-                  classes={classes}
-                  isAdminAdministrasi={isAdminAdministrasi}
-                  onAddStudent={handleAddStudent}
-                  onUpdateStudent={handleUpdateStudent}
-                  onDeleteStudent={handleDeleteStudent}
-                  onUpdateStudentStatus={handleUpdateStudentStatus}
-                />
-              )}
+              {activeTab === "siswa" && (() => {
+                // Mendapatkan ID user dari sesi login cached di localStorage
+                let cachedUserId: string | number = "";
+                if (typeof window !== "undefined") {
+                  try {
+                    const localSess = localStorage.getItem("user_session");
+                    if (localSess) cachedUserId = JSON.parse(localSess).id || "";
+                  } catch {}
+                }
+
+                const guruClassNames = classes
+                  .filter((c) => {
+                    const tName = (c.teacherName || "").trim().toLowerCase();
+                    const sName = (session?.name || "").trim().toLowerCase();
+                    const cTeacherId = String(c.teacherId || "").trim();
+                    const currentId = String(cachedUserId || "").trim();
+                    
+                    // Lakukan pencocokan berdasarkan ID guru OR kesamaan nama mengandung substring
+                    return (
+                      (cTeacherId !== "" && currentId !== "" && cTeacherId === currentId) ||
+                      (tName !== "" && sName !== "" && (tName.includes(sName) || sName.includes(tName)))
+                    );
+                  })
+                  .map((c) => c.className);
+                const displayedStudents = isGuru
+                  ? students.filter((st) => guruClassNames.includes(st.class))
+                  : students;
+                return (
+                  <StudentTab
+                    students={displayedStudents}
+                    classes={classes}
+                    isAdminAdministrasi={isAdminAdministrasi}
+                    isGuru={isGuru}
+                    onAddStudent={handleAddStudent}
+                    onUpdateStudent={handleUpdateStudent}
+                    onDeleteStudent={handleDeleteStudent}
+                    onUpdateStudentStatus={handleUpdateStudentStatus}
+                  />
+                );
+              })()}
 
               {activeTab === "kelas" && (
                 <KelasTab
                   students={students}
                   classes={classes}
+                  users={users}
                   isAdminAdministrasi={isAdminAdministrasi}
                   isGuru={isGuru}
                   currentUserDisplayName={session.name}
@@ -1223,6 +1698,9 @@ const handleDeleteUser = (userId: number) => {
                   isAdminAdministrasi={isAdminAdministrasi}
                   isGuru={isGuru}
                   onAddActivity={handleAddActivity}
+                  onUpdateActivity={handleUpdateActivity}
+                  onDeleteActivity={handleDeleteActivity}
+                  onTogglePublic={handleTogglePublicActivity}
                 />
               )}
 
@@ -1231,16 +1709,19 @@ const handleDeleteUser = (userId: number) => {
                   students={students}
                   classes={classes}
                   sppTransactions={sppTransactions}
+                  sppMatriksData={sppMatriksData}
                   isAdminTransaksi={isAdminTransaksi}
                   onAddSppLesPayment={handleAddSppLesPayment}
                   onUpdateSppLesPayment={handleUpdateSppPayment}
                   onDeleteSppLesPayment={handleDeleteSppPayment}
+                  onRefreshMatriks={loadSppMatriks}
                 />
               )}
 
               {activeTab === "tabungan" && (
                 <TabunganTab
                   students={students}
+                  classes={classes}
                   savings={savings}
                   isAdminTransaksi={isAdminTransaksi}
                   adminName={session.name}
@@ -1248,15 +1729,28 @@ const handleDeleteUser = (userId: number) => {
                 />
               )}
 
-              {activeTab === "murajaah" && (
-                <MurajaahTab
-                  students={students}
-                  murajaahData={murajaahData}
-                  isAdminAdministrasi={isAdminAdministrasi}
-                  isGuru={isGuru}
-                  onUpdateMurajaah={handleUpdateMurajaah}
-                />
-              )}
+              {activeTab === "murajaah" && (() => {
+                const guruClassNames = classes
+                  .filter((c) => {
+                    const tName = (c.teacherName || "").trim().toLowerCase();
+                    const sName = (session?.name || "").trim().toLowerCase();
+                    return tName === sName && tName !== "";
+                  })
+                  .map((c) => c.className);
+                const displayedStudents = isGuru
+                  ? students.filter((st) => guruClassNames.includes(st.class))
+                  : students;
+                return (
+                  <MurajaahTab
+                    students={displayedStudents}
+                    classes={classes}
+                    murajaahData={murajaahData}
+                    isAdminAdministrasi={isAdminAdministrasi}
+                    isGuru={isGuru}
+                    onUpdateMurajaah={handleUpdateMurajaah}
+                  />
+                );
+              })()}
 
               {activeTab === "audit" && (
                 <AuditTab logs={logs} />
@@ -1347,7 +1841,12 @@ const handleDeleteUser = (userId: number) => {
                     {session.role === "admin_adm" ? "AA" : session.role === "admin_trx" ? "AT" : "GR"}
                   </div>
                   <div>
-                    <h5 className="font-baloo text-sm font-bold text-neutral-dark">{session.name}</h5>
+                    <h5 className="font-baloo text-sm font-bold text-neutral-dark">
+                      {(() => {
+                        const currentDbUser = users.find(u => u.username === session?.username);
+                        return currentDbUser ? currentDbUser.name : (session?.name || "Guru Madrasah");
+                      })()}
+                    </h5>
                     <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 bg-amber-50 text-amber-700 rounded border border-amber-200 mt-1 inline-block">
                       {session.role === "admin_adm" ? "Admin Administrasi" : session.role === "admin_trx" ? "Admin Transaksi" : "Guru Kelas"}
                     </span>
@@ -1373,7 +1872,7 @@ const handleDeleteUser = (userId: number) => {
                   <input
                     type="text"
                     readOnly
-                    value={session.role === "admin_adm" ? "admin_adm" : session.role === "admin_trx" ? "admin_trx" : "guru"}
+                    value={session?.username || (session?.role === "admin_adm" ? "admin_adm" : session?.role === "admin_trx" ? "admin_trx" : "guru")}
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-neutral-gray/10 bg-neutral-gray/5 text-neutral-gray text-xs font-mono focus:outline-none cursor-not-allowed"
                     title="Username login tidak dapat diubah demi alasan keamanan"
                   />
@@ -1397,6 +1896,22 @@ const handleDeleteUser = (userId: number) => {
                   </span>
                 </div>
 
+                {/* Input Kata Sandi Lama — muncul hanya jika user mulai isi password baru */}
+                <div>
+                  <label htmlFor="profOldPass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">
+                    Kata Sandi Lama
+                    {!profilePassword && <span className="text-neutral-gray/50 font-normal ml-1">(isi jika ingin ganti sandi)</span>}
+                  </label>
+                  <input
+                    type="password"
+                    id="profOldPass"
+                    value={profileOldPassword}
+                    onChange={(e) => { setProfileOldPassword(e.target.value); setProfileUpdateError(null); }}
+                    placeholder="Masukkan kata sandi Anda yang sekarang"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+
                 {/* Input Password Baru */}
                 <div>
                   <label htmlFor="profPass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi Baru</label>
@@ -1404,11 +1919,19 @@ const handleDeleteUser = (userId: number) => {
                     type="password"
                     id="profPass"
                     value={profilePassword}
-                    onChange={(e) => setProfilePassword(e.target.value)}
+                    onChange={(e) => { setProfilePassword(e.target.value); setProfileUpdateError(null); }}
                     placeholder="Kosongkan jika tidak ingin mengubah kata sandi saat ini"
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
                   />
                 </div>
+
+                {/* Error Banner Profil */}
+                {profileUpdateError && (
+                  <div className="flex items-start gap-2.5 px-3.5 py-3 bg-red-50 border border-red-200 rounded-xl animate-pulse">
+                    <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <p className="text-[10px] text-red-700 font-semibold leading-snug">{profileUpdateError}</p>
+                  </div>
+                )}
 
                 {/* Sticky buttons at bottom */}
                 <div className="flex gap-2 pt-4 border-t border-neutral-gray/10 sticky bottom-0 bg-white">

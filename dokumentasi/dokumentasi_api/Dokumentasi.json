@@ -1,0 +1,511 @@
+{
+  "info": {
+    "_postman_id": "e3566906-06f2-4ed2-a77e-d5ae173d8e62",
+    "name": "KB RA Sahabat",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52385280",
+    "_collection_link": "https://go.postman.co/collection/52385280-e3566906-06f2-4ed2-a77e-d5ae173d8e62?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Dokumentasi",
+      "item": [
+        {
+          "name": "Tambah Dokumentasi",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7"
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd"
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Data kegiatan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7"
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd"
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Kegiatan Dan Foto Didalamnya",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7"
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd"
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi/:idKegiatan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi",
+                ":idKegiatan"
+              ],
+              "variable": [
+                {
+                  "key": "idKegiatan",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Foto By Id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7"
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd"
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi/foto/:fotoID",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi",
+                "foto",
+                ":fotoID"
+              ],
+              "variable": [
+                {
+                  "key": "fotoID",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All dokumentasi",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7",
+                  "disabled": true
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd",
+                  "disabled": true
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75",
+                  "disabled": true
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Detail Kegiatan",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7"
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd"
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Public Galery",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"isPublic\": true,\r\n  \"thumbnailFotoId\": \"ID_FOTO_PILIHAN_ADMIN\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi/:idKegiatan/toggle-public",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi",
+                ":idKegiatan",
+                "toggle-public"
+              ],
+              "variable": [
+                {
+                  "key": "idKegiatan",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Public galery",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7"
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd"
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/galeri",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "public",
+                "galeri"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

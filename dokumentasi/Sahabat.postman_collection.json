@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "248ab4fc-bffa-4d55-9f7a-7d9a2d9186b1",
+    "_postman_id": "e3566906-06f2-4ed2-a77e-d5ae173d8e62",
     "name": "KB RA Sahabat",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "52385280",
-    "_collection_link": "https://go.postman.co/collection/52385280-248ab4fc-bffa-4d55-9f7a-7d9a2d9186b1?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/52385280-e3566906-06f2-4ed2-a77e-d5ae173d8e62?source=collection_link"
   },
   "item": [
     {
@@ -1134,7 +1134,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzA0OTQ2NSwiZXhwIjoxNzg3MTM1ODY1fQ.qkfh5x4aPJ2nUZvIjDB-sZ_kNQIQl64OJDUcv6q93h4",
                   "type": "string"
                 }
               ]
@@ -1143,7 +1143,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"siswaId\": \"8e3e8e24-25db-430b-8263-6a7ebfc189a6\",\r\n  \"tanggalBayar\": \"2026-08-14\",\r\n  \"nominalSpp\": 75000,\r\n  \"nominalLes\": 40000,\r\n  \"catatan\": \"Pembayaran SPP + Les - Agustus 2026\",\r\n  \"statusSetoran\": \"SUDAH\"\r\n}",
+              "raw": "{\r\n    //bulan batch\r\n  \"siswaId\": \"0e6d80e5-43c2-4547-a996-fb79b4ed7972\",\r\n  \"tanggalBayar\": \"2026-08-18\",\r\n  \"tahunAjaran\": \"2026/2027\",\r\n  \"nominalSpp\": 150000,\r\n  \"nominalLes\": 50000,\r\n  \"statusSetoran\": \"BELUM\",\r\n  \"catatan\": \"Pelunasan SPP & Les Juli s/d September 2026\",\r\n  \"bulanList\": [\r\n    { \"bulan\": 7, \"tahun\": 2026 },\r\n    { \"bulan\": 8, \"tahun\": 2026 },\r\n    { \"bulan\": 9, \"tahun\": 2026 }\r\n  ]\r\n\r\n  //bulan tunggal\r\n//   {\r\n//   \"siswaId\": \"0e6d80e5-43c2-4547-a996-fb79b4ed7972\",\r\n//   \"tanggalBayar\": \"2026-08-18\",\r\n//   \"tahunAjaran\": \"2026/2027\",\r\n//   \"nominalSpp\": 150000,\r\n//   \"nominalLes\": 50000,\r\n//   \"statusSetoran\": \"BELUM\",\r\n//   \"catatan\": \"Pembayaran SPP & Les Agustus 2026\"\r\n// }\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1172,7 +1172,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzA0OTQ2NSwiZXhwIjoxNzg3MTM1ODY1fQ.qkfh5x4aPJ2nUZvIjDB-sZ_kNQIQl64OJDUcv6q93h4",
                   "type": "string"
                 }
               ]
@@ -1327,6 +1327,42 @@
                 {
                   "key": "idSPP",
                   "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Matriks Pembayaran Tahunan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2NWExZjY3LTczYWUtNDAwZi1hNDcyLWVmZThkNmI4YjAwZSIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzAyNTU2NywiZXhwIjoxNzg3MTExOTY3fQ.TFQXYjFFdDSl5j5TKA3E3Wo0sKFNxFT9NNrl_jmRKwg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les/matriks?tahunAjaran=2026/2027",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les",
+                "matriks"
+              ],
+              "query": [
+                {
+                  "key": "tahunAjaran",
+                  "value": "2026/2027"
                 }
               ]
             }

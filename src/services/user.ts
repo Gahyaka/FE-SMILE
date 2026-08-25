@@ -20,14 +20,12 @@ export const userService = {
     return response.data;
   },
 
-  /**
-   * Mengatur ulang password pengguna oleh admin
-   */
   async resetPassword(id: string | number, passwordBaru: string) {
-    // Sesuai postman: PUT /users/:id/reset-password
-    // Kita berikan support untuk bypass /api-proxy dengan URL absolut or relatif
-    const response = await api.put(`/users/${id}/reset-password`, {
-      password: passwordBaru
+    // Route: PUT /api/v1/users/:id/reset-password
+    // User diidentifikasi melalui :id — field "username" di body dihilangkan
+    // karena menyebabkan backend mengupdate username di DB dan merusak login
+    const response = await api.put(`/api/v1/users/${id}/reset-password`, {
+      newPassword: passwordBaru
     });
     return response.data;
   },
@@ -36,7 +34,7 @@ export const userService = {
    * Menghapus akun pengguna secara permanen
    */
   async delete(id: string | number) {
-    const response = await api.delete(`/api/v1/users/${id}`);
+    const response = await api.delete(`/api/v1/auth/users/${id}`);
     return response.data;
   }
 };

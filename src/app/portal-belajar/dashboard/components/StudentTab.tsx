@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import * as XLSX from "xlsx";
 
 interface Student {
   id: number;
@@ -22,6 +23,7 @@ interface Student {
 interface StudentTabProps {
   students: Student[];
   isAdminAdministrasi: boolean;
+  isGuru?: boolean;
   onAddStudent: (newStudent: Omit<Student, "id" | "activeStatus">) => void;
   onUpdateStudent: (updatedStudent: Student) => void;
   onDeleteStudent: (studentId: number) => void;
@@ -32,6 +34,7 @@ interface StudentTabProps {
 export default function StudentTab({
   students,
   isAdminAdministrasi,
+  isGuru = false,
   onAddStudent,
   onUpdateStudent,
   onDeleteStudent,
@@ -46,6 +49,164 @@ export default function StudentTab({
   const [activeDetailStudent, setActiveDetailStudent] = useState<Student | null>(null);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [showStudentForm, setShowStudentForm] = useState(false);
+  const [importResult, setImportResult] = useState<{
+    isOpen: boolean;
+    successCount: number;
+    failCount: number;
+    duplicateCount: number;
+    errorMessage?: string;
+  } | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // 1. Ekspor Data Siswa ke Excel (Bisa menjadi template jika data kosong)
+  const handleExportExcel = () => {
+    try {
+      const dataToExport = filteredStudents.length > 0 
+        ? filteredStudents.map((st, index) => ({
+            "No": index + 1,
+            "Nama Lengkap": st.name,
+            "NISN": st.nisn,
+            "NIS": st.nis || "",
+            "Nama Orang Tua": st.parentName || "",
+            "Kelas": st.class,
+            "Semester": st.semester,
+            "Fase": st.fase,
+            "Tahun Ajaran": st.academicYear,
+            "Tinggi Badan (cm)": st.height,
+            "Berat Badan (kg)": st.weight,
+            "Lingkar Kepala (cm)": st.headCircumference,
+            "Alamat": st.address,
+            "Status Sesi": st.activeStatus || "Aktif",
+          }))
+        : [
+            {
+              "No": 1,
+              "Nama Lengkap": "Masukkan Nama Murid Baru",
+              "NISN": "1234567890",
+              "NIS": "112233",
+              "Nama Orang Tua": "Budi Santoso",
+              "Kelas": "RA (A)",
+              "Semester": "Semester 1",
+              "Fase": "Fase Fondasi",
+              "Tahun Ajaran": "2026/2027",
+              "Tinggi Badan (cm)": 100,
+              "Berat Badan (kg)": 16,
+              "Lingkar Kepala (cm)": 48,
+              "Alamat": "Tegaltirto, Berbah, Sleman",
+              "Status Sesi": "Aktif",
+            }
+          ];
+
+      const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Data Siswa");
+
+      // Auto-fit column widths
+      const maxLens = Object.keys(dataToExport[0] || {}).map(key => ({ wch: key.length + 5 }));
+      worksheet["!cols"] = maxLens;
+
+      XLSX.writeFile(workbook, `Data_Siswa_RA_Sahabat_${selectedFilterClass}_${selectedYear.replace("/", "-")}.xlsx`);
+      
+      // Visual feedback toast
+      setToastMessage("Data siswa berhasil diekspor ke Excel!");
+      setTimeout(() => setToastMessage(null), 3000);
+    } catch (err: any) {
+      setImportResult({
+        isOpen: true,
+        successCount: 0,
+        failCount: 0,
+        duplicateCount: 0,
+        errorMessage: "Gagal mengekspor data ke Excel: " + err.message
+      });
+    }
+  };
+
+  // 2. Impor Data Siswa dari File Excel
+  const handleImportExcel = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const workbook = XLSX.read(bstr, { type: "binary" });
+        const wsname = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(worksheet) as any[];
+
+        if (data.length === 0) {
+          setImportResult({
+            isOpen: true,
+            successCount: 0,
+            failCount: 0,
+            duplicateCount: 0,
+            errorMessage: "Berkas Excel kosong atau format kolom tidak sesuai."
+          });
+          return;
+        }
+
+        let successCount = 0;
+        let failCount = 0;
+        let duplicateCount = 0;
+
+        data.forEach((row: any) => {
+          // Hilangkan baris instruksi/contoh template jika ada
+          const name = row["Nama Lengkap"];
+          const nisn = String(row["NISN"] || "").trim();
+          const classVal = row["Kelas"] || "KB";
+
+          if (name && name !== "Masukkan Nama Murid Baru" && nisn) {
+            // Validasi duplikasi berdasarkan NISN atau Nama + Kelas
+            const isDuplicate = students.some(
+              (s) => 
+                (s.nisn && s.nisn.trim() === nisn) || 
+                (s.name.toLowerCase().trim() === name.toLowerCase().trim() && s.class === classVal)
+            );
+
+            if (isDuplicate) {
+              duplicateCount++;
+            } else {
+              onAddStudent({
+                name: name,
+                nisn: nisn,
+                nis: String(row["NIS"] || ""),
+                parentName: row["Nama Orang Tua"] || "",
+                class: classVal,
+                semester: row["Semester"] || "Semester 1",
+                fase: row["Fase"] || "Fase Fondasi",
+                academicYear: row["Tahun Ajaran"] || "2026/2027",
+                height: Number(row["Tinggi Badan (cm)"] || 100),
+                weight: Number(row["Berat Badan (kg)"] || 16),
+                headCircumference: Number(row["Lingkar Kepala (cm)"] || 48),
+                address: row["Alamat"] || "Berbah, Sleman",
+              });
+              successCount++;
+            }
+          } else {
+            failCount++;
+          }
+        });
+
+        setImportResult({
+          isOpen: true,
+          successCount,
+          failCount,
+          duplicateCount,
+        });
+        e.target.value = ""; // Reset input file
+      } catch (err: any) {
+        setImportResult({
+          isOpen: true,
+          successCount: 0,
+          failCount: 0,
+          duplicateCount: 0,
+          errorMessage: "Gagal membaca atau memproses berkas Excel: " + err.message
+        });
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
 
   // Local Form States (Offline Registration)
   const [newStudentName, setNewStudentName] = useState("");
@@ -125,29 +286,36 @@ export default function StudentTab({
         <div className="space-y-6">
           
           {/* Kelas & Tahun Ajaran filter badges — Startup Segmented Control Style */}
-          <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs">
-            <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-fit">
-              {["Semua", ...classes.map((c: any) => c.className)].map((cls) => {
-                const isActive = selectedFilterClass === cls;
-                return (
-                  <button
-                    key={cls}
-                    type="button"
-                    onClick={() => setSelectedFilterClass(cls)}
-                    className={`px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all duration-200 cursor-pointer ${
-                      isActive
-                        ? "bg-primary-green text-white shadow-xs"
-                        : "text-neutral-gray hover:text-neutral-dark"
-                    }`}
-                  >
-                    {cls} <span className={`ml-1 px-1.5 py-0.5 rounded text-[8px] font-black ${isActive ? "bg-white/20 text-white" : "bg-neutral-gray/10 text-neutral-gray"}`}>{getStudentCount(cls)}</span>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs">
+            {!isGuru ? (
+              <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-full sm:w-auto overflow-x-auto scrollbar-none whitespace-nowrap">
+                {["Semua", ...classes.map((c: any) => c.className)].map((cls) => {
+                  const isActive = selectedFilterClass === cls;
+                  return (
+                    <button
+                      key={cls}
+                      type="button"
+                      onClick={() => setSelectedFilterClass(cls)}
+                      className={`px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all duration-200 cursor-pointer ${
+                        isActive
+                          ? "bg-primary-green text-white shadow-xs"
+                          : "text-neutral-gray hover:text-neutral-dark"
+                      }`}
+                    >
+                      {cls} <span className={`ml-1 px-1.5 py-0.5 rounded text-[8px] font-black ${isActive ? "bg-white/20 text-white" : "bg-neutral-gray/10 text-neutral-gray"}`}>{getStudentCount(cls)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-[10px] font-bold text-neutral-gray uppercase px-2 flex items-center gap-1.5 py-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary-green" />
+                <span>Peserta Didik Kelas Anda</span>
+              </div>
+            )}
 
-            <div className="flex items-center gap-2 border-t md:border-t-0 pt-2 md:pt-0 border-neutral-gray/10">
-              <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Tahun Ajaran:</span>
+            <div className="flex items-center justify-between sm:justify-start gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-neutral-gray/10">
+              <span className="text-[10px] font-bold text-neutral-gray uppercase">Tahun Ajaran:</span>
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
@@ -161,8 +329,8 @@ export default function StudentTab({
           </div>
 
           {/* Search Bar & Registration Trigger */}
-          <div className="bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
-            <div className="relative flex-1 flex items-center gap-2">
+          <div className="bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
+            <div className="relative flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <div className="relative flex-1">
                 <svg className="w-4 h-4 text-neutral-gray absolute left-3.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -184,24 +352,54 @@ export default function StudentTab({
                     setSelectedFilterClass("Semua");
                     setSelectedYear("2026/2027");
                   }}
-                  className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-[10px] uppercase rounded-xl transition-colors cursor-pointer whitespace-nowrap shadow-3xs"
+                  className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-[10px] uppercase rounded-xl transition-colors cursor-pointer whitespace-nowrap shadow-3xs text-center"
                 >
                   Reset Filter
                 </button>
               )}
             </div>
 
-            <div className="flex gap-2 justify-end">
+            <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2 w-full lg:w-auto justify-stretch sm:justify-end items-center">
               {isAdminAdministrasi && (
-                <button
-                  onClick={() => setShowStudentForm(!showStudentForm)}
-                  className="px-4 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span>Daftarkan Offline</span>
-                </button>
+                <>
+                  {/* Import Excel Trigger */}
+                  <label className="px-3.5 py-2.5 bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-3xs text-center">
+                    <svg className="w-3.5 h-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span>Impor Excel</span>
+                    <input
+                      type="file"
+                      accept=".xlsx, .xls"
+                      onChange={handleImportExcel}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {/* Export Excel Button */}
+                  <button
+                    type="button"
+                    onClick={handleExportExcel}
+                    className="px-3.5 py-2.5 bg-white hover:bg-primary-green/5 text-primary-green border-2 border-dashed border-primary-green/30 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-3xs"
+                    title="Ekspor Data Siswa Terfilter ke Excel"
+                  >
+                    <svg className="w-3.5 h-3.5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Ekspor Excel</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowStudentForm(!showStudentForm)}
+                    className="col-span-2 sm:col-span-1 px-4 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-3xs"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Daftarkan Offline</span>
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -848,6 +1046,74 @@ export default function StudentTab({
               </form>
             </div>
           </div>
+        </div>
+      )}
+      {/* Import/Export Excel Result Notification Dialog */}
+      {importResult && importResult.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs select-none p-4 animate-fade-in">
+          <div className="w-full max-w-sm bg-white rounded-3xl border border-primary-green/10 shadow-2xl p-6 space-y-4 animate-scale-in text-neutral-dark">
+            <div className="text-center space-y-3">
+              {importResult.errorMessage ? (
+                <>
+                  <div className="mx-auto w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-600 shadow-3xs">
+                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <h4 className="font-baloo text-base font-bold text-red-600 leading-tight">Proses Gagal</h4>
+                  <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
+                    {importResult.errorMessage}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="mx-auto w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 shadow-3xs animate-pulse">
+                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h4 className="font-baloo text-base font-bold text-primary-green leading-tight">Proses Impor Selesai!</h4>
+                  <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
+                    Sinkronisasi berkas Excel ke database berhasil diselesaikan.
+                  </p>
+                </>
+              )}
+            </div>
+
+            {!importResult.errorMessage && (
+              <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-primary-green/5 space-y-2.5 text-xs font-semibold text-neutral-gray">
+                <div className="flex justify-between items-center">
+                  <span>Siswa Berhasil Ditambahkan:</span>
+                  <span className="text-primary-green font-extrabold font-mono text-sm bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">{importResult.successCount}</span>
+                </div>
+                <div className="flex justify-between items-center border-t border-neutral-gray/5 pt-2.5">
+                  <span>Ditolak (Sudah Terdaftar/Duplikat):</span>
+                  <span className="text-yellow-700 font-extrabold font-mono text-sm bg-yellow-50 px-2 py-0.5 rounded-lg border border-yellow-100">{importResult.duplicateCount}</span>
+                </div>
+                <div className="flex justify-between items-center border-t border-neutral-gray/5 pt-2.5">
+                  <span>Gagal (Format Kolom Tidak Valid):</span>
+                  <span className="text-accent font-extrabold font-mono text-sm bg-red-50 px-2 py-0.5 rounded-lg border border-red-100">{importResult.failCount}</span>
+                </div>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setImportResult(null)}
+              className="w-full py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+            >
+              Selesai & Tutup
+            </button>
+          </div>
+        </div>
+      )}
+      {/* 5. Custom Floating Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-[#2D6A4F] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-[11px] font-extrabold border border-emerald-500/20 animate-fade-in">
+          <svg className="w-4 h-4 text-emerald-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          <span>{toastMessage}</span>
         </div>
       )}
     </div>

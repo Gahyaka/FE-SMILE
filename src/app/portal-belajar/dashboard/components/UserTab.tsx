@@ -14,7 +14,7 @@ interface UserTabProps {
   users: User[];
   localPasswords?: Record<string, string>;
   onAddUser: (newUser: Omit<User, "id">) => void;
-  onUpdateUser: (updatedUser: User) => void;
+  onUpdateUser: (updatedUser: User) => Promise<void>;
   onDeleteUser: (userId: number) => void;
 }
 
@@ -26,7 +26,8 @@ export default function UserTab({
   onDeleteUser,
 }: UserTabProps) {
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [resetPasswordUser, setResetPasswordUser] = useState<User | null>(null);
+  const [newPasswordValue, setNewPasswordValue] = useState("");
   const [activeDropdownId, setActiveDropdownId] = useState<number | null>(null);
 
   // Form states
@@ -47,44 +48,15 @@ export default function UserTab({
   // Floating toast notification state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Helper to generate dynamic random password
-  const generateRandomPassword = () => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let generated = "";
-    for (let i = 0; i < 8; i++) {
-      generated += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return `sgw_${generated}`;
-  };
-
-  // Trigger password generation when add form is opened
-  React.useEffect(() => {
-    if (showAddForm) {
-      setNewPassword(generateRandomPassword());
-    }
-  }, [showAddForm]);
-
   // Auto-generate username from name & role
   React.useEffect(() => {
-    if (!newName.trim()) {
+    if (!newName) {
       setNewUsername("");
       return;
     }
-    
-    // Clean and split name
-    const sanitized = newName
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, "")
-      .trim();
-    const parts = sanitized.split(/\s+/);
-    // Prefer first or second word if "bunda" is used
-    let base = parts[0];
-    if ((base === "bunda" || base === "ibu" || base === "pak") && parts.length > 1) {
-      base = parts[1];
-    }
-
-    const roleSuffix = newRole === "admin_adm" ? "adm" : newRole === "admin_trx" ? "trx" : "guru";
-    const suggestedBase = `${base}_${roleSuffix}`;
+    const base = newName.toLowerCase().trim().replace(/\s+/g, "_");
+    const roleSuffix = newRole === "admin_adm" ? "adm" : newRole === "admin_trx" ? "trx" : "";
+    const suggestedBase = roleSuffix ? `${base}_${roleSuffix}` : base;
 
     // Deduplicate username dynamically against current user list to prevent 409 Conflict
     let finalUsername = suggestedBase;
@@ -132,11 +104,37 @@ export default function UserTab({
     setShowAddForm(false);
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
+  const [resetError, setResetError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleResetPasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingUser || !editingUser.name || !editingUser.username) return;
-    onUpdateUser(editingUser);
-    setEditingUser(null);
+    setResetError(null);
+    if (!resetPasswordUser || !newPasswordValue.trim()) return;
+
+    const trimmedPassword = newPasswordValue.trim();
+    if (trimmedPassword.length < 6) {
+      setResetError("Gagal mereset password di backend: Password baru wajib diisi dan minimal 6 karakter");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await onUpdateUser({
+        ...resetPasswordUser,
+        password: trimmedPassword
+      });
+
+      setToastMessage(`Sandi untuk ${resetPasswordUser.name} berhasil diperbarui secara manual!`);
+      setTimeout(() => setToastMessage(null), 3000);
+      setResetPasswordUser(null);
+      setNewPasswordValue("");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Terjadi kesalahan pada server.";
+      setResetError(`Gagal mereset password di backend: ${msg}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -159,7 +157,7 @@ export default function UserTab({
 
         <button
           onClick={() => {
-            setEditingUser(null);
+            setResetPasswordUser(null);
             setShowAddForm(!showAddForm);
           }}
           className="px-4 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-3xs whitespace-nowrap"
@@ -224,36 +222,25 @@ export default function UserTab({
                 </div>
                 <div>
                   <label htmlFor="role" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Peran Akses (Role)</label>
-                  <select
+                  <input
+                    type="text"
                     id="role"
-                    value={newRole}
-                    onChange={(e) => setNewRole(e.target.value as any)}
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer bg-white"
-                  >
-                    <option value="guru">Guru (Pendidik Kelas)</option>
-                    <option value="admin_trx">Admin Transaksi (Bendahara Keuangan)</option>
-                    <option value="admin_adm">Admin Administrasi (Kepala Sekolah/Pengelola)</option>
-                  </select>
+                    disabled
+                    value="Guru (Pendidik Kelas)"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-bold bg-stone-50 text-stone-500 cursor-not-allowed"
+                  />
                 </div>
                 <div>
-                  <label htmlFor="pass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi (Otomatis)</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      id="pass"
-                      readOnly
-                      value={newPassword}
-                      className="flex-1 px-3.5 py-2.5 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-mono font-bold bg-stone-50 text-stone-600"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setNewPassword(generateRandomPassword())}
-                      className="px-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-extrabold text-[10px] rounded-xl border border-neutral-gray/10 transition-all cursor-pointer"
-                      title="Acak Ulang Kata Sandi"
-                    >
-                      Acak Ulang
-                    </button>
-                  </div>
+                  <label htmlFor="pass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi (Password)</label>
+                  <input
+                    type="text"
+                    id="pass"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Masukkan kata sandi untuk akun baru"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold select-text"
+                  />
                 </div>
 
                 {/* Sticky buttons at bottom */}
@@ -278,100 +265,95 @@ export default function UserTab({
         </div>
       )}
 
-      {editingUser && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Backdrop Overlay */}
-          <div 
-            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
-            onClick={() => setEditingUser(null)}
-          />
-          
-          {/* Drawer Container */}
-          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
-            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
-              {/* Header */}
-              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">
-                  Ubah Akun: <span className="text-primary-green">{editingUser.name}</span>
-                </h4>
-                <button
-                  type="button"
-                  onClick={() => setEditingUser(null)}
-                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
-                >
-                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+      {/* 2b. Reset Password Modal Dialog */}
+      {resetPasswordUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
+          <div className="w-full max-w-sm bg-white rounded-3xl border border-primary-green/10 shadow-2xl p-6 space-y-4 animate-scale-in text-neutral-dark">
+            <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m-5 0a1 1 0 011 1v3a1 1 0 001 1h3a1 1 0 011 1v3a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h5a2 2 0 012 2v2z" />
                   </svg>
-                </button>
+                </div>
+                <div>
+                  <h4 className="font-baloo text-sm font-bold leading-tight">Reset Sandi Pengguna</h4>
+                  <p className="text-[9px] text-neutral-gray font-bold uppercase mt-0.5">{resetPasswordUser.name}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setResetPasswordUser(null);
+                  setNewPasswordValue("");
+                  setResetError(null);
+                }}
+                className="w-6 h-6 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-500 hover:text-stone-700 cursor-pointer transition-colors text-xs font-black"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Banner Error Premium */}
+            {resetError && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-[10px] leading-relaxed font-bold animate-pulse flex items-start gap-2">
+                <svg className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span className="flex-1">{resetError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleResetPasswordSubmit} className="space-y-4 text-xs font-semibold text-neutral-gray">
+              <div className="space-y-1">
+                <label htmlFor="newPass" className="block text-[9px] font-extrabold uppercase tracking-wider">Kata Sandi Baru</label>
+                <input
+                  type="text"
+                  id="newPass"
+                  required
+                  disabled={isSubmitting}
+                  value={newPasswordValue}
+                  onChange={(e) => {
+                    setNewPasswordValue(e.target.value);
+                    setResetError(null);
+                  }}
+                  placeholder="Ketikkan sandi manual baru..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/15 focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark bg-stone-50/50 focus:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                />
               </div>
 
-              {/* Form Content (Scrollable) */}
-              <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
-                <div>
-                  <label htmlFor="editName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Lengkap</label>
-                  <input
-                    type="text"
-                    id="editName"
-                    required
-                    value={editingUser.name}
-                    onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="editUsername" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Username Login</label>
-                  <input
-                    type="text"
-                    id="editUsername"
-                    required
-                    value={editingUser.username}
-                    onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="editRole" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Peran Akses (Role)</label>
-                  <select
-                    id="editRole"
-                    value={editingUser.role}
-                    onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as any })}
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold cursor-pointer bg-white"
-                  >
-                    <option value="guru">Guru (Pendidik Kelas)</option>
-                    <option value="admin_trx">Admin Transaksi (Bendahara Keuangan)</option>
-                    <option value="admin_adm">Admin Administrasi (Kepala Sekolah/Pengelola)</option>
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="editPass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Ubah Sandi Baru (Opsional)</label>
-                  <input
-                    type="text"
-                    id="editPass"
-                    value={editingUser.password || ""}
-                    onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
-                    placeholder="Kosongkan jika tidak ingin mengubah password"
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                  />
-                </div>
-
-                {/* Sticky buttons at bottom */}
-                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
-                  <button
-                    type="submit"
-                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
-                  >
-                    Simpan Perubahan
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditingUser(null)}
-                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
-                  >
-                    Batal
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      <span>Menyimpan...</span>
+                    </>
+                  ) : (
+                    <span>Simpan Sandi Baru</span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    setResetPasswordUser(null);
+                    setNewPasswordValue("");
+                    setResetError(null);
+                  }}
+                  className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                >
+                  Batal
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -397,15 +379,7 @@ export default function UserTab({
                     {u.role === "admin_adm" ? "Admin Administrasi" :
                      u.role === "admin_trx" ? "Admin Transaksi" : "Guru Kelas"}
                   </span>
-                  
                   <div className="flex items-center gap-1.5">
-                    <span 
-                      className="text-[10px] text-neutral-gray font-mono font-bold cursor-help"
-                      title={`Lengkap: USR-${u.id}`}
-                    >
-                      ID: USR-{String(u.id).length > 8 ? `${String(u.id).substring(0, 8)}...` : u.id}
-                    </span>
-
                     {/* Kebab Dropdown Menu */}
                     <div className="relative">
                       <button
@@ -428,34 +402,38 @@ export default function UserTab({
                               setActiveDropdownId(null);
                             }}
                           />
-                          <div className="absolute right-0 mt-1 w-28 bg-white border border-neutral-gray/10 rounded-xl shadow-lg z-30 py-1.5 font-semibold text-xs text-neutral-dark">
+                          <div className="absolute right-0 mt-1 w-32 bg-white border border-neutral-gray/10 rounded-xl shadow-lg z-30 py-1.5 font-semibold text-xs text-neutral-dark">
+                            {/* Reset Sandi Button (Semua akun bisa direset sandinya oleh Admin) */}
                             <button
                               type="button"
                               onClick={() => {
-                                setShowAddForm(false);
-                                setEditingUser({ ...u });
+                                setResetPasswordUser(u);
+                                setNewPasswordValue("");
                                 setActiveDropdownId(null);
                               }}
-                              className="w-full px-3 py-1.5 text-left hover:bg-soft-mint/30 cursor-pointer text-yellow-700 flex items-center gap-1.5"
+                              className="w-full px-3 py-1.5 text-left hover:bg-soft-mint/30 cursor-pointer text-yellow-700 flex items-center gap-1.5 border-b border-neutral-gray/5"
                             >
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m-5 0a1 1 0 011 1v3a1 1 0 001 1h3a1 1 0 011 1v3a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h5a2 2 0 012 2v2z" />
                               </svg>
-                              <span>Ubah</span>
+                              <span>Reset Sandi</span>
                             </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                onDeleteUser(u.id);
-                                setActiveDropdownId(null);
-                              }}
-                              className="w-full px-3 py-1.5 text-left hover:bg-accent/10 cursor-pointer text-accent flex items-center gap-1.5"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                              <span>Hapus</span>
-                            </button>
+
+                            {u.role !== "admin_adm" && u.role !== "admin_trx" && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  onDeleteUser(u.id);
+                                  setActiveDropdownId(null);
+                                }}
+                                className="w-full px-3 py-1.5 text-left hover:bg-accent/10 cursor-pointer text-accent flex items-center gap-1.5"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                <span>Hapus</span>
+                              </button>
+                            )}
                           </div>
                         </>
                       )}
@@ -474,45 +452,15 @@ export default function UserTab({
                     </h4>
                     <p className="text-[10px] text-neutral-gray truncate mt-0.5">Username: {u.username}</p>
                   </div>
-                </div>
-
-                {/* Informasi Kredensial */}
+                </div>                {/* Informasi Kredensial */}
                 <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5 space-y-1.5 text-[11px] font-semibold text-neutral-gray">
                   <div className="flex justify-between items-center">
                     <span>Kata Sandi:</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-mono text-neutral-gray font-bold tracking-widest text-[9px] select-none bg-stone-100/50 px-1.5 py-0.5 rounded">
-                        ••••••••
-                      </span>
-                      {localPasswords[u.username] ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(localPasswords[u.username]);
-                            setToastMessage(`Kata sandi ${u.name} berhasil disalin!`);
-                            setTimeout(() => setToastMessage(null), 3000);
-                          }}
-                          className="p-1 rounded-lg hover:bg-stone-100 text-primary-green transition-colors cursor-pointer flex items-center justify-center border border-neutral-gray/5"
-                          title="Salin Kata Sandi ke Clipboard"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                          </svg>
-                        </button>
-                      ) : (
-                        <span
-                          className="p-1 rounded-lg text-neutral-gray/40 flex items-center justify-center border border-neutral-gray/5 cursor-not-allowed"
-                          title="Kata sandi tidak tersedia — gunakan fitur Ubah untuk reset password"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                          </svg>
-                        </span>
-                      )}
-                    </div>
+                    <span className="font-mono text-neutral-gray/50 font-bold tracking-widest text-[9px] select-none bg-stone-100/50 px-2 py-0.5 rounded">
+                      ••••••••
+                    </span>
                   </div>
-                </div>
-              </div>
+                </div>              </div>
             </div>
           );
         })}

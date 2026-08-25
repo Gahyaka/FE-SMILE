@@ -14,8 +14,9 @@ export const sppService = {
   /**
    * Mengambil daftar transaksi pembayaran SPP & Les
    */
-  async getAll(tahun: string = "2026") {
-    const response = await api.get(`/api/v1/pembayaran-spp-les?tahun=${tahun}`);
+  async getAll(tahun?: string) {
+    const url = tahun ? `/api/v1/pembayaran-spp-les?tahun=${tahun}` : "/api/v1/pembayaran-spp-les";
+    const response = await api.get(url);
     return response.data;
   },
 
@@ -40,6 +41,14 @@ export const sppService = {
    */
   async delete(id: string | number) {
     const response = await api.delete(`/api/v1/pembayaran-spp-les/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Mengambil matriks pembayaran SPP tahunan
+   */
+  async getMatriks(tahunAjaran: string) {
+    const response = await api.get(`/api/v1/pembayaran-spp-les/matriks?tahunAjaran=${encodeURIComponent(tahunAjaran)}`);
     return response.data;
   }
 };

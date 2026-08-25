@@ -15,12 +15,14 @@ interface ClassData {
   className: string;
   fase: string;
   teacherName: string;
+  teacherId?: string | number; // ID Guru pengampu untuk Wali Kelas
   description: string;
 }
 
 interface KelasTabProps {
   students: Student[];
   classes: ClassData[];
+  users: any[];
   isAdminAdministrasi: boolean;
   isGuru: boolean;
   currentUserDisplayName: string;
@@ -32,6 +34,7 @@ interface KelasTabProps {
 export default function KelasTab({
   students,
   classes,
+  users = [],
   isAdminAdministrasi,
   isGuru,
   currentUserDisplayName,
@@ -48,7 +51,12 @@ export default function KelasTab({
   const [newClassName, setNewClassName] = useState("");
   const [newFase, setNewFase] = useState("2026/2027");
   const [newTeacherName, setNewTeacherName] = useState("");
-  const [newDescription, setNewDescription] = useState("");
+  const [newTeacherId, setNewTeacherId] = useState<string | number>("");
+
+  const teachersList = users.filter((u) => {
+    const role = (u.role || "").trim().toLowerCase();
+    return role === "guru";
+  });
 
   // Search filter
   const [searchQuery, setSearchQuery] = useState("");
@@ -74,20 +82,21 @@ export default function KelasTab({
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newClassName || !newTeacherName) return;
+    if (!newClassName || !newTeacherName || !newTeacherId) return;
 
     onAddClass({
       className: newClassName,
       fase: newFase,
       teacherName: newTeacherName,
-      description: newDescription || "Tidak ada deskripsi",
+      teacherId: newTeacherId,
+      description: "Tidak ada deskripsi",
     });
 
     // Reset Form
     setNewClassName("");
     setNewFase("2026/2027");
     setNewTeacherName("");
-    setNewDescription("");
+    setNewTeacherId("");
     setShowAddForm(false);
   };
 
@@ -179,15 +188,23 @@ export default function KelasTab({
                 </div>
                 <div>
                   <label htmlFor="teacherName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Guru Pengampu</label>
-                  <input
-                    type="text"
+                  <select
                     id="teacherName"
                     required
-                    value={newTeacherName}
-                    onChange={(e) => setNewTeacherName(e.target.value)}
-                    placeholder="Contoh: Bunda Rahma"
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                  />
+                    value={newTeacherId}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setNewTeacherId(selectedId);
+                      const tObj = teachersList.find((t) => String(t.id) === selectedId);
+                      setNewTeacherName(tObj ? tObj.name : "");
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white cursor-pointer"
+                  >
+                    <option value="">-- Pilih Guru Pengampu --</option>
+                    {teachersList.map((t) => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label htmlFor="fase" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Tahun Ajaran</label>
@@ -198,17 +215,6 @@ export default function KelasTab({
                     value={newFase}
                     onChange={(e) => setNewFase(e.target.value)}
                     placeholder="Contoh: 2025/2026"
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="description" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Deskripsi Singkat</label>
-                  <input
-                    type="text"
-                    id="description"
-                    value={newDescription}
-                    onChange={(e) => setNewDescription(e.target.value)}
-                    placeholder="Deskripsi tingkat umur atau detail kelas"
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
                   />
                 </div>
@@ -277,14 +283,26 @@ export default function KelasTab({
                 </div>
                 <div>
                   <label htmlFor="editTeacherName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Guru Pengampu</label>
-                  <input
-                    type="text"
+                  <select
                     id="editTeacherName"
                     required
-                    value={editingClass.teacherName}
-                    onChange={(e) => setEditingClass({ ...editingClass, teacherName: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                  />
+                    value={editingClass.teacherId || ""}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      const tObj = teachersList.find((t) => String(t.id) === selectedId);
+                      setEditingClass({
+                        ...editingClass,
+                        teacherId: selectedId,
+                        teacherName: tObj ? tObj.name : ""
+                      });
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white cursor-pointer"
+                  >
+                    <option value="">-- Pilih Guru Pengampu --</option>
+                    {teachersList.map((t) => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label htmlFor="editFase" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Tahun Ajaran</label>
@@ -294,16 +312,6 @@ export default function KelasTab({
                     required
                     value={editingClass.fase}
                     onChange={(e) => setEditingClass({ ...editingClass, fase: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="editDescription" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Deskripsi Singkat</label>
-                  <input
-                    type="text"
-                    id="editDescription"
-                    value={editingClass.description}
-                    onChange={(e) => setEditingClass({ ...editingClass, description: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
                   />
                 </div>
@@ -347,12 +355,7 @@ export default function KelasTab({
                   <span className="text-[9px] font-extrabold px-2.5 py-1 bg-primary-green/10 text-primary-green rounded-full">
                     {cls.fase}
                   </span>
-                  
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] text-neutral-gray font-mono font-bold" title={`ID Kelas Lengkap: ${cls.id}`}>
-                      ID: CLS-{cls.id.toString().length > 12 ? `${cls.id.toString().substring(0, 8)}...` : cls.id}
-                    </span>
-
                     {/* Kebab Dropdown Menu untuk Admin Administrasi */}
                     {isAdminAdministrasi && (
                       <div className="relative">
@@ -421,7 +424,6 @@ export default function KelasTab({
                     <h4 className="font-baloo text-base font-bold text-neutral-dark truncate leading-tight">
                       Kelas {cls.className}
                     </h4>
-                    <p className="text-[10px] text-neutral-gray truncate mt-0.5">{cls.description}</p>
                   </div>
                 </div>
 

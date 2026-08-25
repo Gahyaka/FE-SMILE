@@ -1,0 +1,495 @@
+{
+  "info": {
+    "_postman_id": "e3566906-06f2-4ed2-a77e-d5ae173d8e62",
+    "name": "KB RA Sahabat",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52385280",
+    "_collection_link": "https://go.postman.co/collection/52385280-e3566906-06f2-4ed2-a77e-d5ae173d8e62?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Murojaah",
+      "item": [
+        {
+          "name": "Kategori",
+          "item": [
+            {
+              "name": "Update Kategori",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"nama\": \"Doa Harian & Adab\",\r\n  \"urutan\": 2\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/kategori/:idkategori",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "kategori",
+                    ":idkategori"
+                  ],
+                  "variable": [
+                    {
+                      "key": "idkategori",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Tambah Kategori",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"nama\": \"Doa Sehari hari\",\r\n  \"urutan\": 2\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/kategori",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "kategori"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Kategori",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/kategori/:idkategori",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "kategori",
+                    ":idkategori"
+                  ],
+                  "variable": [
+                    {
+                      "key": "idkategori",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Show All Kategori dan materi",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/kelas/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "kelas",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Penilaian",
+          "item": [
+            {
+              "name": "Update Penilaian",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"namaKelas\": \"Kelas B - Bintang\",\r\n  \"tahunAjaran\": \"2025/2026\",\r\n  \"waliKelas\": \"Mariya Arteni Nur, S.Pd\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/kelas/5813f4cf-81a6-47b3-a764-52121a5ad0a6",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "kelas",
+                    "5813f4cf-81a6-47b3-a764-52121a5ad0a6"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Tambah Penilaian",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"siswaId\": \"0e6d80e5-43c2-4547-a996-fb79b4ed7972\",\r\n  \"materiId\": \"5e169ad6-094b-48f5-bc8f-02f1d6a9e792\",\r\n  \"predikat\": \"B\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/penilaian",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "penilaian"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Kategori",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/kelas/:idPenilaian",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "kelas",
+                    ":idPenilaian"
+                  ],
+                  "variable": [
+                    {
+                      "key": "idPenilaian",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Show All Kategori dan materi",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/kelas/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "kelas",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Materi",
+          "item": [
+            {
+              "name": "Update Materi",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"kategoriId\": \"71851949-e424-4c67-813d-d55ef84ec9d5\",\r\n  \"nama\": \"Doa Kedua orang tua\",\r\n  \"urutan\": 8\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/materi/:idMateri",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "materi",
+                    ":idMateri"
+                  ],
+                  "variable": [
+                    {
+                      "key": "idMateri",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Tambah Materi",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"kategoriId\": \"e69ace5c-518d-404f-8506-8f5fad0570b2\",\r\n  \"nama\": \"Doa Makan\",\r\n  \"urutan\": 2\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/materi",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "materi"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Materi",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/materi/:idMateri",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "materi",
+                    ":idMateri"
+                  ],
+                  "variable": [
+                    {
+                      "key": "idMateri",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Get Lembar Murojaah",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/murojaah/siswa/:idSiswa",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "murojaah",
+                "siswa",
+                ":idSiswa"
+              ],
+              "variable": [
+                {
+                  "key": "idSiswa",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -9,36 +9,56 @@ export default function LoginClient() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [errorDetails, setErrorDetails] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isServerOffline, setIsServerOffline] = useState(false);
 
   useEffect(() => {
     // Clear any existing session when returning to login page
     localStorage.removeItem("user_session");
     localStorage.removeItem("auth_token");
 
-    // Initialize mock users into localStorage if they don't exist yet
-    const existingUsers = localStorage.getItem("system_users");
-    if (!existingUsers) {
-      const defaultUsers = [
-        { id: 1, name: "Admin Administrasi (Bunda Nisa)", username: "admin_adm", password: "admin123", role: "admin_adm" },
-        { id: 2, name: "Admin Transaksi (Bunda Ajeng)", username: "admin_trx", password: "admin123", role: "admin_trx" },
-        { id: 3, name: "Guru Kelas (Bunda Rahma)", username: "guru", password: "guru123", role: "guru" }
-      ];
+    // Initialize or force-reset mock users in localStorage to enforce correct credentials
+    const defaultUsers = [
+      { id: 1, name: "Admin Administrasi (Bunda Nisa)", username: "admin_adm", password: "admin123", role: "admin_adm" },
+      { id: 2, name: "Admin Transaksi (Bunda Ajeng)", username: "admin_trx", password: "admin123", role: "admin_trx" },
+      { id: 3, name: "Guru Kelas (Bunda Rahma)", username: "guru", password: "guru123", role: "guru" }
+    ];
+
+    const existingUsersStr = localStorage.getItem("system_users");
+    if (!existingUsersStr) {
       localStorage.setItem("system_users", JSON.stringify(defaultUsers));
+    } else {
+      try {
+        const parsed = JSON.parse(existingUsersStr);
+        // If we detect legacy randomized data (like admin_trx70 or sgw_QpNyn83v), override it
+        const hasStaleData = parsed.some((u: any) => 
+          u.username.startsWith("admin_trx") && u.username !== "admin_trx" ||
+          u.password !== "admin123" && (u.role === "admin_adm" || u.role === "admin_trx")
+        );
+        if (hasStaleData) {
+          localStorage.setItem("system_users", JSON.stringify(defaultUsers));
+        }
+      } catch (e) {
+        localStorage.setItem("system_users", JSON.stringify(defaultUsers));
+      }
     }
   }, []);
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setErrorDetails("");
+    setIsServerOffline(false);
     setLoading(true);
 
     try {
       // 1. Kirim request login ke backend Railway
       const loginRes = await authService.login({ username, password });
-      
-      // Ambil token dari respon (menyesuaikan format umum backend: token / data.token)
-      const token = loginRes?.token || loginRes?.data?.token || loginRes?.accessToken;
+
+      // Struktur backend: { success, message, data: { token, user: { id, username, nama, role } } }
+      const token = loginRes?.data?.token || loginRes?.token || loginRes?.accessToken;
       if (!token) {
         throw new Error("Token autentikasi tidak ditemukan dari server.");
       }
@@ -46,16 +66,12 @@ export default function LoginClient() {
       // 2. Simpan token JWT di localStorage
       localStorage.setItem("auth_token", token);
 
-      // 3. Ambil data identitas profil riil dari token JWT
-      const profileRes = await authService.getMe();
-      const user = profileRes?.data || profileRes; // Sesuaikan jika data bersarang
-
-      if (!user) {
-        throw new Error("Gagal memuat profil pengguna dari server.");
-      }
+      // 3. Ambil data user langsung dari respons login (lebih lengkap dari getMe)
+      //    loginRes.data.user sudah mengandung: id, username, nama, role
+      const loginUser = loginRes?.data?.user;
 
       // 4. Map Peran (Role) backend ke format state frontend
-      const rawRole = (user.role || "").toUpperCase();
+      const rawRole = (loginUser?.role || "").toUpperCase();
       let mappedRole: "admin_adm" | "admin_trx" | "guru" = "guru";
 
       if (rawRole === "ADMIN_ADMINISTRASI" || rawRole === "ADMIN") {
@@ -66,12 +82,18 @@ export default function LoginClient() {
         mappedRole = "guru";
       }
 
+      // Ambil nama lengkap riil dari data user dalam respons login
+      // Catatan: /auth/me hanya mengembalikan JWT claim (tanpa nama), 
+      //          sehingga sumber nama terpercaya adalah loginRes.data.user.nama
+      const realName = loginUser?.nama || loginUser?.name || username;
+
       // 5. Simpan session user yang sudah dimapping
       localStorage.setItem(
         "user_session",
         JSON.stringify({ 
           role: mappedRole, 
-          name: user.nama || user.name || "Petugas Madrasah" 
+          name: realName,
+          username: loginUser?.username || username
         })
       );
 
@@ -79,8 +101,57 @@ export default function LoginClient() {
       router.push("/portal-belajar/dashboard");
     } catch (err: any) {
       console.error("Login API Error:", err);
-      const errMsg = err.response?.data?.message || err.message || "Gagal menghubungi server. Silakan hubungi admin.";
-      setError(errMsg === "Network Error" ? "Gagal terhubung ke server backend API." : errMsg);
+      
+      const status = err.response?.status;
+      const responseData = err.response?.data;
+      
+      if (err.message === "Network Error" || !err.response) {
+        // Backend offline / masalah jaringan
+        setIsServerOffline(true);
+        setError("Koneksi API Backend Terputus");
+        setErrorDetails("Server database sedang dalam pemeliharaan atau offline. Anda dapat menggunakan akun lokal untuk mengakses mode demo.");
+      } else if (status === 401 || status === 400) {
+        // Salah username / password
+        setError("Kredensial Salah");
+        setErrorDetails(responseData?.message || "Nama pengguna atau kata sandi yang Anda masukkan tidak terdaftar. Periksa kembali penulisan Anda.");
+      } else {
+        // Kesalahan server internal lainnya
+        setError("Kesalahan Sistem Server");
+        setErrorDetails(responseData?.message || err.message || "Terjadi kesalahan internal pada server backend. Silakan coba beberapa saat lagi.");
+      }
+      
+      setLoading(false);
+    }
+  };
+
+  // Fitur Fallback login lokal/demo ketika server offline
+  const handleOfflineBypass = () => {
+    setError("");
+    setErrorDetails("");
+    setLoading(true);
+
+    const localUsersRaw = localStorage.getItem("system_users");
+    const localUsers = localUsersRaw ? JSON.parse(localUsersRaw) : [];
+    
+    const userMatch = localUsers.find(
+      (u: any) => u.username === username && u.password === password
+    );
+
+    if (userMatch) {
+      // Simpan session lokal
+      localStorage.setItem("auth_token", "offline-mock-token-" + Date.now());
+      localStorage.setItem(
+        "user_session",
+        JSON.stringify({ 
+          role: userMatch.role, 
+          name: userMatch.name,
+          username: userMatch.username // Simpan username login asli
+        })
+      );
+      router.push("/portal-belajar/dashboard");
+    } else {
+      setError("Login Demo Gagal");
+      setErrorDetails("Kredensial lokal tidak terdaftar di database offline. Coba gunakan: admin_adm / admin123");
       setLoading(false);
     }
   };
@@ -109,8 +180,26 @@ export default function LoginClient() {
         <p className="text-xs text-neutral-gray font-bold text-center mb-8 relative z-10">Silakan masuk untuk mengakses sistem informasi sekolah.</p>
 
         {error && (
-          <div className="mb-5 p-3 rounded-lg bg-accent/10 border border-accent/25 text-xs text-accent font-bold text-center">
-            {error}
+          <div className="mb-5 p-4 rounded-2xl bg-accent-soft border-2 border-dashed border-accent/30 text-neutral-dark space-y-1 relative z-10">
+            <div className="flex items-center gap-2 text-accent font-black text-xs">
+              <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>{error}</span>
+            </div>
+            <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed pl-6">{errorDetails}</p>
+            
+            {isServerOffline && (
+              <div className="pt-2 pl-6">
+                <button
+                  type="button"
+                  onClick={handleOfflineBypass}
+                  className="py-1.5 px-3 bg-primary-green hover:bg-primary-dark text-white rounded-lg text-[9px] font-extrabold shadow-3xs cursor-pointer transition-all uppercase tracking-wider"
+                >
+                  Gunakan Mode Demo (Lokal)
+                </button>
+              </div>
+            )}
           </div>
         )}
 

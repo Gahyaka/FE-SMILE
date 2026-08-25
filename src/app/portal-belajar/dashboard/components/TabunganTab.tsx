@@ -21,6 +21,7 @@ interface SavingTransaction {
 
 interface TabunganTabProps {
   students: Student[];
+  classes: any[];
   savings: SavingTransaction[];
   isAdminTransaksi: boolean;
   adminName: string;
@@ -29,6 +30,7 @@ interface TabunganTabProps {
 
 export default function TabunganTab({
   students,
+  classes = [],
   savings,
   isAdminTransaksi,
   adminName,
@@ -254,18 +256,29 @@ export default function TabunganTab({
           {/* Filter Kategori Kelas */}
           <div className="flex flex-wrap items-center gap-2 bg-[#FAF8F5] p-3 rounded-2xl border border-primary-green/10">
             <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Kategori Kelas:</span>
-            {["Semua", "KB", "RA (A)", "RA (B)"].map((cls) => (
+            <button
+              type="button"
+              onClick={() => setClassFilter("Semua")}
+              className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer ${
+                classFilter === "Semua"
+                  ? "bg-primary-green text-white border-primary-green shadow-3xs"
+                  : "bg-white text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
+              }`}
+            >
+              Semua
+            </button>
+            {classes.map((c: any) => (
               <button
-                key={cls}
+                key={c.id || c.className}
                 type="button"
-                onClick={() => setClassFilter(cls)}
+                onClick={() => setClassFilter(c.className)}
                 className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer ${
-                  classFilter === cls
+                  classFilter === c.className
                     ? "bg-primary-green text-white border-primary-green shadow-3xs"
                     : "bg-white text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
                 }`}
               >
-                {cls}
+                {c.className}
               </button>
             ))}
           </div>
