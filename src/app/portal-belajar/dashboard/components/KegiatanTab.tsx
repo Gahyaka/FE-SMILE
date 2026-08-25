@@ -11,6 +11,7 @@ interface Activity {
   description: string;
   featuredImage?: string;
   isPublic?: boolean;
+  imageFiles?: File[];  // File asli untuk dikirim ke backend (tidak disimpan di DB)
 }
 
 interface KegiatanTabProps {
@@ -51,7 +52,6 @@ export default function KegiatanTab({
   const [newDesc, setNewDesc] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [coverIndex, setCoverIndex] = useState<number>(0);
 
   const filteredActivities = activities.filter((act) => {
     const matchesYear = selectedYear === "Semua" || act.date.startsWith(selectedYear);
@@ -73,32 +73,23 @@ export default function KegiatanTab({
 
   const handleRemoveImage = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-    // Revoke object URL to avoid memory leak
     URL.revokeObjectURL(previewUrls[index]);
     setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
-    
-    // Adjust coverIndex if removed image was the cover or after it
-    if (coverIndex === index) {
-      setCoverIndex(0);
-    } else if (coverIndex > index) {
-      setCoverIndex((prev) => prev - 1);
-    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle || !newDate || !newDesc) return;
 
-    // Use the manually selected cover image, or fallback to default
-    const coverImage = previewUrls[coverIndex] || previewUrls[0] || "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800";
-
+    // Sertakan array File asli agar DashboardClient bisa kirim ke backend
     onAddActivity({
       title: newTitle,
       date: newDate,
       category: "Keagamaan",
       driveLink: "",
       description: newDesc,
-      featuredImage: coverImage
+      featuredImage: previewUrls[0] || "",
+      imageFiles: selectedFiles   // <-- semua file yang dipilih user
     });
 
     // Reset form
@@ -107,7 +98,6 @@ export default function KegiatanTab({
     setNewDesc("");
     setSelectedFiles([]);
     setPreviewUrls([]);
-    setCoverIndex(0);
     setShowActivityForm(false);
   };
 
@@ -289,17 +279,26 @@ export default function KegiatanTab({
               </div>
 
               <div className="mt-4 pt-3 border-t border-neutral-gray/5 flex justify-between items-center">
-                <a
-                  href={act.driveLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[10px] font-extrabold text-primary-green hover:text-primary-dark hover:underline flex items-center gap-1.5 cursor-pointer"
-                >
-                  <svg className="w-4 h-4 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                  </svg>
-                  <span>Buka Folder Drive</span>
-                </a>
+                {act.driveLink && act.driveLink.startsWith("http") ? (
+                  <a
+                    href={act.driveLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] font-extrabold text-primary-green hover:text-primary-dark hover:underline flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <svg className="w-4 h-4 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                    <span>Buka Folder Drive</span>
+                  </a>
+                ) : (
+                  <span className="text-[10px] font-semibold text-neutral-gray/40 flex items-center gap-1.5 cursor-not-allowed">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                    <span>Folder belum tersedia</span>
+                  </span>
+                )}
                 <span className="text-[9px] text-primary-green/80 font-bold bg-soft-mint px-2 py-0.5 rounded border border-primary-green/10">
                   Akreditasi Ready
                 </span>
@@ -319,7 +318,6 @@ export default function KegiatanTab({
               setShowActivityForm(false);
               setSelectedFiles([]);
               setPreviewUrls([]);
-              setCoverIndex(0);
             }}
           />
           
@@ -335,7 +333,6 @@ export default function KegiatanTab({
                     setShowActivityForm(false);
                     setSelectedFiles([]);
                     setPreviewUrls([]);
-                    setCoverIndex(0);
                   }}
                   className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
                 >
@@ -397,43 +394,32 @@ export default function KegiatanTab({
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center">
                       <span className="block text-[8px] text-neutral-gray/60 uppercase tracking-wider font-bold">Pratinjau Foto ({previewUrls.length})</span>
-                      <span className="text-[8.5px] text-primary-green font-bold uppercase tracking-wider">Klik foto untuk menjadikannya sampul galeri</span>
+                      <span className="text-[8px] text-primary-green/70 font-semibold">★ Foto pertama otomatis jadi sampul</span>
                     </div>
                     
                     <div className="flex gap-2.5 overflow-x-auto pb-2 pr-1 max-w-full">
-                      {previewUrls.map((url, idx) => {
-                        const isCover = coverIndex === idx;
-                        return (
-                          <div 
-                            key={idx} 
-                            onClick={() => setCoverIndex(idx)}
-                            className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 cursor-pointer flex-shrink-0 transition-all duration-200 ${
-                              isCover 
-                                ? "border-primary-green shadow-xs scale-98" 
-                                : "border-neutral-gray/10 hover:border-neutral-gray/30"
-                            }`}
-                          >
-                            <img src={url} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
-                            
-                            {isCover && (
-                              <div className="absolute inset-x-0 bottom-0 bg-primary-green text-white text-[7px] font-black py-0.5 text-center tracking-wider uppercase">
-                                <span>Sampul</span>
-                              </div>
-                            )}
+                      {previewUrls.map((url, idx) => (
+                        <div 
+                          key={idx}
+                          className="relative w-16 h-16 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all duration-200 border-neutral-gray/10"
+                        >
+                          <img src={url} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                          
+                          {idx === 0 && (
+                            <div className="absolute inset-x-0 bottom-0 bg-primary-green text-white text-[7px] font-black py-0.5 text-center tracking-wider uppercase">
+                              Sampul
+                            </div>
+                          )}
 
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation(); // Avoid triggering cover selection
-                                handleRemoveImage(idx);
-                              }}
-                              className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-[8px] hover:bg-red-600 transition-colors cursor-pointer"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        );
-                      })}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(idx)}
+                            className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-[8px] hover:bg-red-600 transition-colors cursor-pointer"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -465,7 +451,6 @@ export default function KegiatanTab({
                       setShowActivityForm(false);
                       setSelectedFiles([]);
                       setPreviewUrls([]);
-                      setCoverIndex(0);
                     }}
                     className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
                   >

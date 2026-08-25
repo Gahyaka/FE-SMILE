@@ -328,21 +328,40 @@ export default function DashboardClient() {
           try {
             const actRes = await activityService.getAll();
             const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
-            // Map data dari backend ke format model frontend
-            const mappedAct = rawAct.map((item: any) => ({
-              id: item.id,
-              title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
-              description: item.deskripsi || item.description || "",
-              date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
-              image: item.foto || item.image || "/images/hero-bg.jpg",
-              isPublic: item.isPublic !== undefined ? item.isPublic : true
-            }));
+            // Backend mengembalikan foto dalam array relasi: fotos: [{id, url, isDefault, ...}]
+            const mappedAct = rawAct.map((item: any) => {
+              const fotosArr = Array.isArray(item.fotos) ? item.fotos
+                : Array.isArray(item.foto) ? item.foto
+                : [];
+              const thumbnail = fotosArr.find((f: any) => f.isDefault || f.isThumbnail)
+                || fotosArr[0];
+              const imageUrl = thumbnail?.url || thumbnail?.path || thumbnail?.foto
+                || (typeof item.foto === "string" ? item.foto : null)
+                || (typeof item.image === "string" ? item.image : null)
+                || "";
+
+              return {
+                id: item.id,
+                title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+                description: item.deskripsi || item.description || "",
+                date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
+                featuredImage: imageUrl,
+                driveLink: item.driveLink || item.folderUrl || item.driveFolderUrl
+                  || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
+                  || item.linkDrive || item.urlDrive || "",
+                category: item.category || "Keagamaan",
+                isPublic: item.isPublic !== undefined ? item.isPublic : true
+              };
+            });
             if (mappedAct.length > 0) {
               setActivities(mappedAct);
               localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
             }
-          } catch (actErr) {
-            console.warn("[SGW] Failed to fetch activities from backend. Using mock/local storage.");
+          } catch (actErr: any) {
+            console.warn("[SGW] Failed to fetch activities from backend. Using local storage.",
+              actErr?.response?.status, actErr?.response?.data || actErr?.message);
+            const stored = localStorage.getItem("sgw_activities");
+            if (stored) setActivities(JSON.parse(stored));
           }
 
           // Fetch Murojaah Kategori, Materi, & Penilaian dari backend Adonis
@@ -915,28 +934,38 @@ const handleDeleteUser = (userId: number) => {
     if (!isAdminAdministrasi && !isGuru) return;
     
     try {
-      // Buat FormData untuk mengirim berkas gambar ke backend
+      // Buat FormData — kirim semua foto yang dipilih user ke backend
+      // Backend menerima field "foto" dan foto pertama otomatis jadi sampul
       const formData = new FormData();
       formData.append("namaKegiatan", newActData.title);
       formData.append("deskripsi", newActData.description || "");
       formData.append("tanggalKegiatan", newActData.date || new Date().toISOString().split("T")[0]);
-      if (newActData.imageFile) {
-        formData.append("foto", newActData.imageFile);
-      }
+      // Kirim semua file dalam array imageFiles
+      const files: File[] = Array.isArray(newActData.imageFiles) ? newActData.imageFiles : [];
+      files.forEach((file) => formData.append("foto", file));
 
       await activityService.create(formData);
       
-      // Reload dari backend
+      // Reload dari backend — mapping sesuai struktur respons Adonis (fotos: [{id,url,...}])
       const actRes = await activityService.getAll();
       const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
-      const mappedAct = rawAct.map((item: any) => ({
-        id: item.id,
-        title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
-        description: item.deskripsi || item.description || "",
-        date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
-        image: item.foto || item.image || "/images/hero-bg.jpg",
-        isPublic: item.isPublic !== undefined ? item.isPublic : true
-      }));
+      const mappedAct = rawAct.map((item: any) => {
+        const fotosArr = Array.isArray(item.fotos) ? item.fotos
+          : Array.isArray(item.foto) ? item.foto : [];
+        const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
+        const imageUrl = thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
+        return {
+          id: item.id,
+          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+          description: item.deskripsi || item.description || "",
+          date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
+          featuredImage: imageUrl,
+          driveLink: item.driveLink || item.folderUrl || item.driveFolderUrl
+            || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
+            || item.linkDrive || item.urlDrive || "",
+          isPublic: item.isPublic !== undefined ? item.isPublic : true
+        };
+      });
       setActivities(mappedAct);
       localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
     } catch (err) {
@@ -944,7 +973,7 @@ const handleDeleteUser = (userId: number) => {
       const newAct = {
         ...newActData,
         id: Date.now(),
-        image: newActData.image || "/images/hero-bg.jpg"
+        featuredImage: newActData.featuredImage || ""
       };
       const updated = [newAct, ...activities];
       setActivities(updated);
@@ -968,22 +997,32 @@ const handleDeleteUser = (userId: number) => {
       formData.append("namaKegiatan", updatedAct.title);
       formData.append("deskripsi", updatedAct.description || "");
       formData.append("tanggalKegiatan", updatedAct.date || new Date().toISOString().split("T")[0]);
-      if (updatedAct.imageFile) {
-        formData.append("foto", updatedAct.imageFile);
-      }
+      // Kirim file foto baru jika ada (dari edit form)
+      const files: File[] = Array.isArray(updatedAct.imageFiles) ? updatedAct.imageFiles : [];
+      if (updatedAct.imageFile) files.unshift(updatedAct.imageFile); // backward compat
+      files.forEach((file) => formData.append("foto", file));
 
       await activityService.update(updatedAct.id, formData);
       
       const actRes = await activityService.getAll();
       const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
-      const mappedAct = rawAct.map((item: any) => ({
-        id: item.id,
-        title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
-        description: item.deskripsi || item.description || "",
-        date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
-        image: item.foto || item.image || "/images/hero-bg.jpg",
-        isPublic: item.isPublic !== undefined ? item.isPublic : true
-      }));
+      const mappedAct = rawAct.map((item: any) => {
+        const fotosArr = Array.isArray(item.fotos) ? item.fotos
+          : Array.isArray(item.foto) ? item.foto : [];
+        const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
+        const imageUrl = thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
+        return {
+          id: item.id,
+          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+          description: item.deskripsi || item.description || "",
+          date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
+          featuredImage: imageUrl,
+          driveLink: item.driveLink || item.folderUrl || item.driveFolderUrl
+            || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
+            || item.linkDrive || item.urlDrive || "",
+          isPublic: item.isPublic !== undefined ? item.isPublic : true
+        };
+      });
       setActivities(mappedAct);
       localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
     } catch (err) {
@@ -1009,14 +1048,23 @@ const handleDeleteUser = (userId: number) => {
       
       const actRes = await activityService.getAll();
       const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
-      const mappedAct = rawAct.map((item: any) => ({
-        id: item.id,
-        title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
-        description: item.deskripsi || item.description || "",
-        date: item.tanggalKegiatan || item.date || "",
-        image: item.foto || item.image || "/images/hero-bg.jpg",
-        isPublic: item.isPublic !== undefined ? item.isPublic : true
-      }));
+      const mappedAct = rawAct.map((item: any) => {
+        const fotosArr = Array.isArray(item.fotos) ? item.fotos
+          : Array.isArray(item.foto) ? item.foto : [];
+        const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
+        const imageUrl = thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
+        return {
+          id: item.id,
+          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+          description: item.deskripsi || item.description || "",
+          date: item.tanggalKegiatan || item.date || "",
+          featuredImage: imageUrl,
+          driveLink: item.driveLink || item.folderUrl || item.driveFolderUrl
+            || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
+            || item.linkDrive || item.urlDrive || "",
+          isPublic: item.isPublic !== undefined ? item.isPublic : true
+        };
+      });
       setActivities(mappedAct);
       localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
     } catch (err) {
