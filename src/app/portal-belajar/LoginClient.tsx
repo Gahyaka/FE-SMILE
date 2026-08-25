@@ -56,9 +56,9 @@ export default function LoginClient() {
     try {
       // 1. Kirim request login ke backend Railway
       const loginRes = await authService.login({ username, password });
-      
-      // Ambil token dari respon (menyesuaikan format umum backend: token / data.token)
-      const token = loginRes?.token || loginRes?.data?.token || loginRes?.accessToken;
+
+      // Struktur backend: { success, message, data: { token, user: { id, username, nama, role } } }
+      const token = loginRes?.data?.token || loginRes?.token || loginRes?.accessToken;
       if (!token) {
         throw new Error("Token autentikasi tidak ditemukan dari server.");
       }
@@ -66,16 +66,12 @@ export default function LoginClient() {
       // 2. Simpan token JWT di localStorage
       localStorage.setItem("auth_token", token);
 
-      // 3. Ambil data identitas profil riil dari token JWT
-      const profileRes = await authService.getMe();
-      const user = profileRes?.data || profileRes; // Sesuaikan jika data bersarang
-
-      if (!user) {
-        throw new Error("Gagal memuat profil pengguna dari server.");
-      }
+      // 3. Ambil data user langsung dari respons login (lebih lengkap dari getMe)
+      //    loginRes.data.user sudah mengandung: id, username, nama, role
+      const loginUser = loginRes?.data?.user;
 
       // 4. Map Peran (Role) backend ke format state frontend
-      const rawRole = (user.role || "").toUpperCase();
+      const rawRole = (loginUser?.role || "").toUpperCase();
       let mappedRole: "admin_adm" | "admin_trx" | "guru" = "guru";
 
       if (rawRole === "ADMIN_ADMINISTRASI" || rawRole === "ADMIN") {
@@ -86,12 +82,18 @@ export default function LoginClient() {
         mappedRole = "guru";
       }
 
+      // Ambil nama lengkap riil dari data user dalam respons login
+      // Catatan: /auth/me hanya mengembalikan JWT claim (tanpa nama), 
+      //          sehingga sumber nama terpercaya adalah loginRes.data.user.nama
+      const realName = loginUser?.nama || loginUser?.name || username;
+
       // 5. Simpan session user yang sudah dimapping
       localStorage.setItem(
         "user_session",
         JSON.stringify({ 
           role: mappedRole, 
-          name: user.nama || user.name || "Petugas Madrasah" 
+          name: realName,
+          username: loginUser?.username || username
         })
       );
 
@@ -142,7 +144,8 @@ export default function LoginClient() {
         "user_session",
         JSON.stringify({ 
           role: userMatch.role, 
-          name: userMatch.name 
+          name: userMatch.name,
+          username: userMatch.username // Simpan username login asli
         })
       );
       router.push("/portal-belajar/dashboard");

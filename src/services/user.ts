@@ -21,7 +21,8 @@ export const userService = {
   },
 
   async resetPassword(id: string | number, username: string, passwordBaru: string) {
-    // Sesuai postman: PUT /users/:id/reset-password
+    // Sesuai postman: PUT /users/:id/reset-password (tanpa /api/v1)
+    // Dilewatkan melalui base URL axios (/api-proxy) secara otomatis
     const response = await api.put(`/users/${id}/reset-password`, {
       username: username,
       password: passwordBaru

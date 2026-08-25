@@ -15,12 +15,25 @@ export const murojaahService = {
     return response.data;
   },
 
-  /**
-   * Mengambil semua daftar materi hafalan (surah/doa/hadits)
-   */
   async getMateri() {
-    const response = await api.get("/api/v1/murojaah/materi");
-    return response.data;
+    // Karena backend Adonis tidak menyediakan endpoint materi mandiri, 
+    // kita fetch data Kategori yang sudah include array materi di dalamnya.
+    const response = await api.get("/api/v1/murojaah/kategori");
+    const categories = Array.isArray(response.data) ? response.data : response.data?.data || [];
+    
+    // Satukan/Flatten semua list materi dari setiap kategori
+    const allMaterials = categories.reduce((acc: any[], cat: any) => {
+      const materiList = cat.materi || cat.materis || [];
+      const mapped = materiList.map((m: any) => ({
+        ...m,
+        namaMateri: m.nama || m.namaMateri || "Materi Hafalan", // Pastikan key namaMateri terisi
+        kategoriId: cat.id,
+        kategoriNama: cat.nama
+      }));
+      return [...acc, ...mapped];
+    }, []);
+
+    return allMaterials;
   },
 
   /**

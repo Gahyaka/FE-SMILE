@@ -14,7 +14,7 @@ interface UserTabProps {
   users: User[];
   localPasswords?: Record<string, string>;
   onAddUser: (newUser: Omit<User, "id">) => void;
-  onUpdateUser: (updatedUser: User) => void;
+  onUpdateUser: (updatedUser: User) => Promise<void>;
   onDeleteUser: (userId: number) => void;
 }
 
@@ -104,19 +104,37 @@ export default function UserTab({
     setShowAddForm(false);
   };
 
-  const handleResetPasswordSubmit = (e: React.FormEvent) => {
+  const [resetError, setResetError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleResetPasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setResetError(null);
     if (!resetPasswordUser || !newPasswordValue.trim()) return;
 
-    onUpdateUser({
-      ...resetPasswordUser,
-      password: newPasswordValue.trim()
-    });
+    const trimmedPassword = newPasswordValue.trim();
+    if (trimmedPassword.length < 6) {
+      setResetError("Gagal mereset password di backend: Password baru wajib diisi dan minimal 6 karakter");
+      return;
+    }
 
-    setToastMessage(`Sandi untuk ${resetPasswordUser.name} berhasil diperbarui secara manual!`);
-    setTimeout(() => setToastMessage(null), 3000);
-    setResetPasswordUser(null);
-    setNewPasswordValue("");
+    try {
+      setIsSubmitting(true);
+      await onUpdateUser({
+        ...resetPasswordUser,
+        password: trimmedPassword
+      });
+
+      setToastMessage(`Sandi untuk ${resetPasswordUser.name} berhasil diperbarui secara manual!`);
+      setTimeout(() => setToastMessage(null), 3000);
+      setResetPasswordUser(null);
+      setNewPasswordValue("");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Terjadi kesalahan pada server.";
+      setResetError(`Gagal mereset password di backend: ${msg}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -268,12 +286,23 @@ export default function UserTab({
                 onClick={() => {
                   setResetPasswordUser(null);
                   setNewPasswordValue("");
+                  setResetError(null);
                 }}
                 className="w-6 h-6 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-500 hover:text-stone-700 cursor-pointer transition-colors text-xs font-black"
               >
                 ✕
               </button>
             </div>
+
+            {/* Banner Error Premium */}
+            {resetError && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-[10px] leading-relaxed font-bold animate-pulse flex items-start gap-2">
+                <svg className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span className="flex-1">{resetError}</span>
+              </div>
+            )}
 
             <form onSubmit={handleResetPasswordSubmit} className="space-y-4 text-xs font-semibold text-neutral-gray">
               <div className="space-y-1">
@@ -282,25 +311,42 @@ export default function UserTab({
                   type="text"
                   id="newPass"
                   required
+                  disabled={isSubmitting}
                   value={newPasswordValue}
-                  onChange={(e) => setNewPasswordValue(e.target.value)}
+                  onChange={(e) => {
+                    setNewPasswordValue(e.target.value);
+                    setResetError(null);
+                  }}
                   placeholder="Ketikkan sandi manual baru..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/15 focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark bg-stone-50/50 focus:bg-white transition-all"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/15 focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark bg-stone-50/50 focus:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
               <div className="flex gap-2 pt-2">
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                  disabled={isSubmitting}
+                  className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Simpan Sandi Baru
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      <span>Menyimpan...</span>
+                    </>
+                  ) : (
+                    <span>Simpan Sandi Baru</span>
+                  )}
                 </button>
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => {
                     setResetPasswordUser(null);
                     setNewPasswordValue("");
+                    setResetError(null);
                   }}
                   className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
                 >

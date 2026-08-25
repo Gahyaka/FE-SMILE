@@ -196,7 +196,7 @@ function mapUsersData(rawUsers: any[]): any[] {
 
 export default function DashboardClient() {
   const router = useRouter();
-  const [session, setSession] = useState<{ role: "admin_adm" | "admin_trx" | "guru"; name: string } | null>(null);
+  const [session, setSession] = useState<{ role: "admin_adm" | "admin_trx" | "guru"; name: string; username?: string } | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>("siswa");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
@@ -777,7 +777,8 @@ const handleUpdateUser = async (updatedUsr: any) => {
     };
     setLogs([newLog, ...logs]);
   } catch (err: any) {
-    alert("Gagal mereset password di backend: " + (err.response?.data?.message || err.message));
+    // Teruskan error ke component pemanggil agar ditampilkan di dalam modal
+    throw err;
   }
 };
 
@@ -1534,7 +1535,8 @@ const handleDeleteUser = (userId: number) => {
           {/* Clickable Sidebar User Profile Card */}
           <div 
             onClick={() => {
-              setProfileName(session.name);
+              const currentDbUser = users.find(u => u.username === session?.username);
+              setProfileName(currentDbUser ? currentDbUser.name : (session?.name || ""));
               setProfilePassword("");
               setShowProfileDrawer(true);
             }}
@@ -1545,7 +1547,12 @@ const handleDeleteUser = (userId: number) => {
               {isAdminAdministrasi ? "AA" : isAdminTransaksi ? "AT" : "GR"}
             </div>
             <div className="overflow-hidden">
-              <p className="text-[10px] text-neutral-dark font-bold leading-tight truncate">{session.name}</p>
+              <p className="text-[10px] text-neutral-dark font-bold leading-tight truncate">
+                {(() => {
+                  const currentDbUser = users.find(u => u.username === session?.username);
+                  return currentDbUser ? currentDbUser.name : (session?.name || "Guru Madrasah");
+                })()}
+              </p>
               <span className="text-[8px] text-primary-green font-bold uppercase mt-1 block">
                 {isAdminAdministrasi ? "Admin Administrasi" : isAdminTransaksi ? "Admin Transaksi" : "Guru"}
               </span>
@@ -1604,11 +1611,27 @@ const handleDeleteUser = (userId: number) => {
           ) : (
             <>
               {activeTab === "siswa" && (() => {
+                // Mendapatkan ID user dari sesi login cached di localStorage
+                let cachedUserId: string | number = "";
+                if (typeof window !== "undefined") {
+                  try {
+                    const localSess = localStorage.getItem("user_session");
+                    if (localSess) cachedUserId = JSON.parse(localSess).id || "";
+                  } catch {}
+                }
+
                 const guruClassNames = classes
                   .filter((c) => {
                     const tName = (c.teacherName || "").trim().toLowerCase();
                     const sName = (session?.name || "").trim().toLowerCase();
-                    return tName === sName && tName !== "";
+                    const cTeacherId = String(c.teacherId || "").trim();
+                    const currentId = String(cachedUserId || "").trim();
+                    
+                    // Lakukan pencocokan berdasarkan ID guru OR kesamaan nama mengandung substring
+                    return (
+                      (cTeacherId !== "" && currentId !== "" && cTeacherId === currentId) ||
+                      (tName !== "" && sName !== "" && (tName.includes(sName) || sName.includes(tName)))
+                    );
                   })
                   .map((c) => c.className);
                 const displayedStudents = isGuru
@@ -1801,7 +1824,12 @@ const handleDeleteUser = (userId: number) => {
                     {session.role === "admin_adm" ? "AA" : session.role === "admin_trx" ? "AT" : "GR"}
                   </div>
                   <div>
-                    <h5 className="font-baloo text-sm font-bold text-neutral-dark">{session.name}</h5>
+                    <h5 className="font-baloo text-sm font-bold text-neutral-dark">
+                      {(() => {
+                        const currentDbUser = users.find(u => u.username === session?.username);
+                        return currentDbUser ? currentDbUser.name : (session?.name || "Guru Madrasah");
+                      })()}
+                    </h5>
                     <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 bg-amber-50 text-amber-700 rounded border border-amber-200 mt-1 inline-block">
                       {session.role === "admin_adm" ? "Admin Administrasi" : session.role === "admin_trx" ? "Admin Transaksi" : "Guru Kelas"}
                     </span>
@@ -1827,7 +1855,7 @@ const handleDeleteUser = (userId: number) => {
                   <input
                     type="text"
                     readOnly
-                    value={session.role === "admin_adm" ? "admin_adm" : session.role === "admin_trx" ? "admin_trx" : "guru"}
+                    value={session?.username || (session?.role === "admin_adm" ? "admin_adm" : session?.role === "admin_trx" ? "admin_trx" : "guru")}
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-neutral-gray/10 bg-neutral-gray/5 text-neutral-gray text-xs font-mono focus:outline-none cursor-not-allowed"
                     title="Username login tidak dapat diubah demi alasan keamanan"
                   />
