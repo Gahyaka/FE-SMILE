@@ -1,0 +1,300 @@
+{
+  "info": {
+    "_postman_id": "e3566906-06f2-4ed2-a77e-d5ae173d8e62",
+    "name": "KB RA Sahabat",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52385280",
+    "_collection_link": "https://go.postman.co/collection/52385280-e3566906-06f2-4ed2-a77e-d5ae173d8e62?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "SPP",
+      "item": [
+        {
+          "name": "Get List Transaksi",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tambah Pembayaran SPP",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzA0OTQ2NSwiZXhwIjoxNzg3MTM1ODY1fQ.qkfh5x4aPJ2nUZvIjDB-sZ_kNQIQl64OJDUcv6q93h4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    //bulan batch\r\n  \"siswaId\": \"0e6d80e5-43c2-4547-a996-fb79b4ed7972\",\r\n  \"tanggalBayar\": \"2026-08-18\",\r\n  \"tahunAjaran\": \"2026/2027\",\r\n  \"nominalSpp\": 150000,\r\n  \"nominalLes\": 50000,\r\n  \"statusSetoran\": \"BELUM\",\r\n  \"catatan\": \"Pelunasan SPP & Les Juli s/d September 2026\",\r\n  \"bulanList\": [\r\n    { \"bulan\": 7, \"tahun\": 2026 },\r\n    { \"bulan\": 8, \"tahun\": 2026 },\r\n    { \"bulan\": 9, \"tahun\": 2026 }\r\n  ]\r\n\r\n  //bulan tunggal\r\n//   {\r\n//   \"siswaId\": \"0e6d80e5-43c2-4547-a996-fb79b4ed7972\",\r\n//   \"tanggalBayar\": \"2026-08-18\",\r\n//   \"tahunAjaran\": \"2026/2027\",\r\n//   \"nominalSpp\": 150000,\r\n//   \"nominalLes\": 50000,\r\n//   \"statusSetoran\": \"BELUM\",\r\n//   \"catatan\": \"Pembayaran SPP & Les Agustus 2026\"\r\n// }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Pembayaran SPP",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzA0OTQ2NSwiZXhwIjoxNzg3MTM1ODY1fQ.qkfh5x4aPJ2nUZvIjDB-sZ_kNQIQl64OJDUcv6q93h4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nominalSpp\": 10000,\r\n  \"nominalLes\": 4000,\r\n  \"statusSetoran\": \"SUDAH\",\r\n  \"tanggalBayar\": \"2026-08-14\",\r\n  \"catatan\": \"Pembayaran lunas SPP + Les bulan Agustus\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les/:idSPP",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les",
+                ":idSPP"
+              ],
+              "variable": [
+                {
+                  "key": "idSPP",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Restore Pembayaran SPP",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"siswaId\": \"8e3e8e24-25db-430b-8263-6a7ebfc189a6\",\r\n  \"tanggalBayar\": \"2026-08-14\",\r\n  \"nominalSpp\": 75000,\r\n  \"nominalLes\": 40000,\r\n  \"catatan\": \"Pembayaran SPP + Les - Agustus 2026\",\r\n  \"statusSetoran\": \"SUDAH\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les/:idSpp/restore",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les",
+                ":idSpp",
+                "restore"
+              ],
+              "variable": [
+                {
+                  "key": "idSpp",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ringkasan Kas Sumarry",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les?tahun=2026",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les"
+              ],
+              "query": [
+                {
+                  "key": "tahun",
+                  "value": "2026"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Transaksi",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjEwMjQ3MSwiZXhwIjoxNzg2MTg4ODcxfQ.pzUxkObPLe_Ah4SGgjz5TyAMCPmqbbe3zOOuLba-rA4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les/:idSPP",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les",
+                ":idSPP"
+              ],
+              "variable": [
+                {
+                  "key": "idSPP",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Matriks Pembayaran Tahunan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2NWExZjY3LTczYWUtNDAwZi1hNDcyLWVmZThkNmI4YjAwZSIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzAyNTU2NywiZXhwIjoxNzg3MTExOTY3fQ.TFQXYjFFdDSl5j5TKA3E3Wo0sKFNxFT9NNrl_jmRKwg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les/matriks?tahunAjaran=2026/2027",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les",
+                "matriks"
+              ],
+              "query": [
+                {
+                  "key": "tahunAjaran",
+                  "value": "2026/2027"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

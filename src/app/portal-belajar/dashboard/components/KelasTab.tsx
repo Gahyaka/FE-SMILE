@@ -15,6 +15,7 @@ interface ClassData {
   className: string;
   fase: string;
   teacherName: string;
+  teacherId?: string | number; // ID Guru pengampu untuk Wali Kelas
   description: string;
 }
 
@@ -50,6 +51,7 @@ export default function KelasTab({
   const [newClassName, setNewClassName] = useState("");
   const [newFase, setNewFase] = useState("2026/2027");
   const [newTeacherName, setNewTeacherName] = useState("");
+  const [newTeacherId, setNewTeacherId] = useState<string | number>("");
   const [newDescription, setNewDescription] = useState("");
 
   const teachersList = users.filter((u) => {
@@ -81,12 +83,13 @@ export default function KelasTab({
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newClassName || !newTeacherName) return;
+    if (!newClassName || !newTeacherName || !newTeacherId) return;
 
     onAddClass({
       className: newClassName,
       fase: newFase,
       teacherName: newTeacherName,
+      teacherId: newTeacherId,
       description: newDescription || "Tidak ada deskripsi",
     });
 
@@ -94,6 +97,7 @@ export default function KelasTab({
     setNewClassName("");
     setNewFase("2026/2027");
     setNewTeacherName("");
+    setNewTeacherId("");
     setNewDescription("");
     setShowAddForm(false);
   };
@@ -189,13 +193,18 @@ export default function KelasTab({
                   <select
                     id="teacherName"
                     required
-                    value={newTeacherName}
-                    onChange={(e) => setNewTeacherName(e.target.value)}
+                    value={newTeacherId}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setNewTeacherId(selectedId);
+                      const tObj = teachersList.find((t) => String(t.id) === selectedId);
+                      setNewTeacherName(tObj ? tObj.name : "");
+                    }}
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white cursor-pointer"
                   >
                     <option value="">-- Pilih Guru Pengampu --</option>
                     {teachersList.map((t) => (
-                      <option key={t.id} value={t.name}>{t.name}</option>
+                      <option key={t.id} value={t.id}>{t.name}</option>
                     ))}
                   </select>
                 </div>
@@ -290,13 +299,21 @@ export default function KelasTab({
                   <select
                     id="editTeacherName"
                     required
-                    value={editingClass.teacherName}
-                    onChange={(e) => setEditingClass({ ...editingClass, teacherName: e.target.value })}
+                    value={editingClass.teacherId || ""}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      const tObj = teachersList.find((t) => String(t.id) === selectedId);
+                      setEditingClass({
+                        ...editingClass,
+                        teacherId: selectedId,
+                        teacherName: tObj ? tObj.name : ""
+                      });
+                    }}
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold bg-white cursor-pointer"
                   >
                     <option value="">-- Pilih Guru Pengampu --</option>
                     {teachersList.map((t) => (
-                      <option key={t.id} value={t.name}>{t.name}</option>
+                      <option key={t.id} value={t.id}>{t.name}</option>
                     ))}
                   </select>
                 </div>

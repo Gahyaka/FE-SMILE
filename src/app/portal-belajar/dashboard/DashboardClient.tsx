@@ -63,6 +63,7 @@ function mapClassesData(rawClasses: any[]): any[] {
     id: c.id,
     className: c.namaKelas || c.nama_kelas || "Kelas Tanpa Nama",
     teacherName: c.waliKelas || c.wali_kelas || "Belum Ada Wali",
+    teacherId: c.guruId || c.guru_id || "",
     fase: c.tahunAjaran || c.tahun_ajaran || "2025/2026", // Map Academic Year here
     description: c.description || c.deskripsi || "Tidak ada deskripsi"
   }));
@@ -592,7 +593,9 @@ const handleAddClass = async (newClsData: any) => {
     await classService.create({
       namaKelas: newClsData.className,
       tahunAjaran: newClsData.fase, // Send selected academic year dynamically
-      waliKelas: newClsData.teacherName || "Bunda Guru"
+      waliKelas: newClsData.teacherName || "Bunda Guru", // Kirim nama guru (string) sesuai Kelas.json
+      guru_id: newClsData.teacherId,   // Backup ID guru (snake_case)
+      guruId: newClsData.teacherId     // Backup ID guru (camelCase)
     });
 
     // Refresh list
@@ -618,7 +621,9 @@ const handleUpdateClass = async (updatedCls: any) => {
     await classService.update(updatedCls.id, {
       namaKelas: updatedCls.className,
       tahunAjaran: updatedCls.fase, // Send updated academic year dynamically
-      waliKelas: updatedCls.teacherName || "Bunda Guru"
+      waliKelas: updatedCls.teacherName || "Bunda Guru", // Kirim nama guru (string) sesuai Kelas.json
+      guru_id: updatedCls.teacherId,   // Backup ID guru (snake_case)
+      guruId: updatedCls.teacherId     // Backup ID guru (camelCase)
     });
 
     // Refresh list
@@ -750,7 +755,7 @@ const handleUpdateUser = async (updatedUsr: any) => {
   if (!isAdminAdministrasi) return;
   try {
     if (updatedUsr.password) {
-      await userService.resetPassword(updatedUsr.id, updatedUsr.password);
+      await userService.resetPassword(updatedUsr.id, updatedUsr.username, updatedUsr.password);
     }
 
     // Refresh list locally/API
@@ -871,27 +876,18 @@ const handleDeleteUser = (userId: number) => {
       } else if (actionType === "delete_user") {
         const targetUser = users.find(u => u.id === targetId);
         if (targetUser) {
-          try {
-            // Coba hapus ke backend
-            await userService.delete(targetId);
-            
-            const userRes = await userService.getAll();
-            const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
-            setUsers(mapUsersData(rawUsers));
-          } catch {
-            // Fallback lokal jika backend tidak menyediakan rute delete user
-            // Catat ID di list local agar konsisten saat refresh
-            const raw = localStorage.getItem("deleted_user_ids");
-            const deletedUserIds = raw ? JSON.parse(raw) : [];
-            if (!deletedUserIds.includes(targetId)) {
-              deletedUserIds.push(targetId);
-              localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
-            }
-
-            const updated = users.filter(u => u.id !== targetId);
-            setUsers(updated);
-            localStorage.setItem("system_users", JSON.stringify(updated));
+          // Karena backend Adonis tidak menyediakan endpoint delete user (sesuai spesifikasi Users.json),
+          // kita lakukan penghapusan lokal secara aman agar console bersih dari error Axios 404.
+          const raw = localStorage.getItem("deleted_user_ids");
+          const deletedUserIds = raw ? JSON.parse(raw) : [];
+          if (!deletedUserIds.includes(targetId)) {
+            deletedUserIds.push(targetId);
+            localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
           }
+
+          const updated = users.filter(u => u.id !== targetId);
+          setUsers(updated);
+          localStorage.setItem("system_users", JSON.stringify(updated));
 
           const newLog = {
             id: Date.now(),
