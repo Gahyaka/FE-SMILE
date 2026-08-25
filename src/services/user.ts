@@ -21,11 +21,12 @@ export const userService = {
   },
 
   async resetPassword(id: string | number, username: string, passwordBaru: string) {
-    // Sesuai postman: PUT /users/:id/reset-password (tanpa /api/v1)
-    // Dilewatkan melalui base URL axios (/api-proxy) secara otomatis
-    const response = await api.put(`/users/${id}/reset-password`, {
+    // Route: PUT /api/v1/users/:id/reset-password
+    // Backend validator mengecek field "newPassword" (bukan "password")
+    // Terbukti dari pesan error: "Password baru wajib diisi dan minimal 6 karakter"
+    const response = await api.put(`/api/v1/users/${id}/reset-password`, {
       username: username,
-      password: passwordBaru
+      newPassword: passwordBaru
     });
     return response.data;
   },

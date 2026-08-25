@@ -27,6 +27,7 @@ import {
 import { studentService } from "@/services/student";
 import { classService } from "@/services/class";
 import { userService } from "@/services/user";
+import { authService } from "@/services/auth";
 import { sppService } from "@/services/spp";
 import { activityService } from "@/services/activity";
 import { murojaahService } from "@/services/murojaah";
@@ -238,6 +239,8 @@ export default function DashboardClient() {
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [profilePassword, setProfilePassword] = useState("");
+  const [profileOldPassword, setProfileOldPassword] = useState("");
+  const [profileUpdateError, setProfileUpdateError] = useState<string | null>(null);
   const [activeAcademicYear, setActiveAcademicYear] = useState("2026/2027");
 
   const loadSppMatriks = async (tahunAjaran: string = "2026/2027") => {
@@ -1100,41 +1103,60 @@ const handleDeleteUser = (userId: number) => {
     });
   };
 
-  const handleUpdateProfile = (e: React.FormEvent) => {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!session || !profileName) return;
+    setProfileUpdateError(null);
 
-    // Cari user bersangkutan berdasarkan username login yang aktif
-    const activeUsername = session.role === "admin_adm" ? "admin_adm" : session.role === "admin_trx" ? "admin_trx" : "guru";
-    
-    // Perbarui password jika input password tidak kosong
-    setUsers(prev => prev.map(u => {
-      if (u.username === activeUsername) {
-        const updated = { ...u, name: profileName };
-        if (profilePassword) {
-          updated.password = profilePassword;
-        }
-        return updated;
+    // Jika user ingin ganti password, wajib isi kata sandi lama
+    if (profilePassword && !profileOldPassword) {
+      setProfileUpdateError("Kata sandi lama wajib diisi untuk mengubah kata sandi.");
+      return;
+    }
+    if (profilePassword && profilePassword.length < 6) {
+      setProfileUpdateError("Kata sandi baru minimal 6 karakter.");
+      return;
+    }
+
+    try {
+      // Panggil API change-password jika password baru diisi
+      // Endpoint: PUT /api/v1/auth/change-password { oldPassword, newPassword }
+      if (profilePassword && profileOldPassword) {
+        await authService.changePassword({
+          oldPassword: profileOldPassword,
+          newPassword: profilePassword
+        });
       }
-      return u;
-    }));
 
-    // Perbarui session aktif
-    setSession({
-      ...session,
-      name: profileName
-    });
+      // Perbarui nama di users list lokal
+      const activeUsername = session?.username || (session.role === "admin_adm" ? "admin_adm" : session.role === "admin_trx" ? "admin_trx" : "guru");
+      setUsers(prev => prev.map(u => {
+        if (u.username === activeUsername) {
+          return { ...u, name: profileName };
+        }
+        return u;
+      }));
 
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: profileName,
-      action: `Memperbarui profil mandiri (Nama lengkap${profilePassword ? " & kata sandi" : ""})`,
-    };
-    setLogs([newLog, ...logs]);
-    
-    setShowProfileDrawer(false);
-    setProfilePassword("");
+      // Perbarui session aktif (simpan nama baru)
+      const updatedSession = { ...session, name: profileName };
+      setSession(updatedSession);
+      localStorage.setItem("user_session", JSON.stringify(updatedSession));
+
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: profileName,
+        action: `Memperbarui profil mandiri (Nama lengkap${profilePassword ? " & kata sandi" : ""})`,
+      };
+      setLogs([newLog, ...logs]);
+
+      setShowProfileDrawer(false);
+      setProfilePassword("");
+      setProfileOldPassword("");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Terjadi kesalahan pada server.";
+      setProfileUpdateError(`Gagal memperbarui profil: ${msg}`);
+    }
   };
 
 
@@ -1879,6 +1901,22 @@ const handleDeleteUser = (userId: number) => {
                   </span>
                 </div>
 
+                {/* Input Kata Sandi Lama — muncul hanya jika user mulai isi password baru */}
+                <div>
+                  <label htmlFor="profOldPass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">
+                    Kata Sandi Lama
+                    {!profilePassword && <span className="text-neutral-gray/50 font-normal ml-1">(isi jika ingin ganti sandi)</span>}
+                  </label>
+                  <input
+                    type="password"
+                    id="profOldPass"
+                    value={profileOldPassword}
+                    onChange={(e) => { setProfileOldPassword(e.target.value); setProfileUpdateError(null); }}
+                    placeholder="Masukkan kata sandi Anda yang sekarang"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                  />
+                </div>
+
                 {/* Input Password Baru */}
                 <div>
                   <label htmlFor="profPass" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Kata Sandi Baru</label>
@@ -1886,11 +1924,19 @@ const handleDeleteUser = (userId: number) => {
                     type="password"
                     id="profPass"
                     value={profilePassword}
-                    onChange={(e) => setProfilePassword(e.target.value)}
+                    onChange={(e) => { setProfilePassword(e.target.value); setProfileUpdateError(null); }}
                     placeholder="Kosongkan jika tidak ingin mengubah kata sandi saat ini"
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
                   />
                 </div>
+
+                {/* Error Banner Profil */}
+                {profileUpdateError && (
+                  <div className="flex items-start gap-2.5 px-3.5 py-3 bg-red-50 border border-red-200 rounded-xl animate-pulse">
+                    <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <p className="text-[10px] text-red-700 font-semibold leading-snug">{profileUpdateError}</p>
+                  </div>
+                )}
 
                 {/* Sticky buttons at bottom */}
                 <div className="flex gap-2 pt-4 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
