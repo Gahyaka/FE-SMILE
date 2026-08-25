@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import * as XLSX from "xlsx";
 
 interface Student {
   id: number;
@@ -48,6 +49,142 @@ export default function StudentTab({
   const [activeDetailStudent, setActiveDetailStudent] = useState<Student | null>(null);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [showStudentForm, setShowStudentForm] = useState(false);
+  const [importResult, setImportResult] = useState<{
+    isOpen: boolean;
+    successCount: number;
+    failCount: number;
+    errorMessage?: string;
+  } | null>(null);
+
+  // 1. Ekspor Data Siswa ke Excel (Bisa menjadi template jika data kosong)
+  const handleExportExcel = () => {
+    try {
+      const dataToExport = filteredStudents.length > 0 
+        ? filteredStudents.map((st, index) => ({
+            "No": index + 1,
+            "Nama Lengkap": st.name,
+            "NISN": st.nisn,
+            "NIS": st.nis || "",
+            "Nama Orang Tua": st.parentName || "",
+            "Kelas": st.class,
+            "Semester": st.semester,
+            "Fase": st.fase,
+            "Tahun Ajaran": st.academicYear,
+            "Tinggi Badan (cm)": st.height,
+            "Berat Badan (kg)": st.weight,
+            "Lingkar Kepala (cm)": st.headCircumference,
+            "Alamat": st.address,
+            "Status Sesi": st.activeStatus || "Aktif",
+          }))
+        : [
+            {
+              "No": 1,
+              "Nama Lengkap": "Masukkan Nama Murid Baru",
+              "NISN": "1234567890",
+              "NIS": "112233",
+              "Nama Orang Tua": "Budi Santoso",
+              "Kelas": "RA (A)",
+              "Semester": "Semester 1",
+              "Fase": "Fase Fondasi",
+              "Tahun Ajaran": "2026/2027",
+              "Tinggi Badan (cm)": 100,
+              "Berat Badan (kg)": 16,
+              "Lingkar Kepala (cm)": 48,
+              "Alamat": "Tegaltirto, Berbah, Sleman",
+              "Status Sesi": "Aktif",
+            }
+          ];
+
+      const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Data Siswa");
+
+      // Auto-fit column widths
+      const maxLens = Object.keys(dataToExport[0] || {}).map(key => ({ wch: key.length + 5 }));
+      worksheet["!cols"] = maxLens;
+
+      XLSX.writeFile(workbook, `Data_Siswa_RA_Sahabat_${selectedFilterClass}_${selectedYear.replace("/", "-")}.xlsx`);
+    } catch (err: any) {
+      setImportResult({
+        isOpen: true,
+        successCount: 0,
+        failCount: 0,
+        errorMessage: "Gagal mengekspor data ke Excel: " + err.message
+      });
+    }
+  };
+
+  // 2. Impor Data Siswa dari File Excel
+  const handleImportExcel = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const workbook = XLSX.read(bstr, { type: "binary" });
+        const wsname = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(worksheet) as any[];
+
+        if (data.length === 0) {
+          setImportResult({
+            isOpen: true,
+            successCount: 0,
+            failCount: 0,
+            errorMessage: "Berkas Excel kosong atau format kolom tidak sesuai."
+          });
+          return;
+        }
+
+        let successCount = 0;
+        let failCount = 0;
+
+        data.forEach((row: any) => {
+          // Hilangkan baris instruksi/contoh template jika ada
+          const name = row["Nama Lengkap"];
+          const nisn = String(row["NISN"] || "");
+          const classVal = row["Kelas"] || "KB";
+
+          if (name && name !== "Masukkan Nama Murid Baru" && nisn) {
+            onAddStudent({
+              name: name,
+              nisn: nisn,
+              nis: String(row["NIS"] || ""),
+              parentName: row["Nama Orang Tua"] || "",
+              class: classVal,
+              semester: row["Semester"] || "Semester 1",
+              fase: row["Fase"] || "Fase Fondasi",
+              academicYear: row["Tahun Ajaran"] || "2026/2027",
+              height: Number(row["Tinggi Badan (cm)"] || 100),
+              weight: Number(row["Berat Badan (kg)"] || 16),
+              headCircumference: Number(row["Lingkar Kepala (cm)"] || 48),
+              address: row["Alamat"] || "Berbah, Sleman",
+            });
+            successCount++;
+          } else {
+            failCount++;
+          }
+        });
+
+        setImportResult({
+          isOpen: true,
+          successCount,
+          failCount,
+        });
+        e.target.value = ""; // Reset input file
+      } catch (err: any) {
+        setImportResult({
+          isOpen: true,
+          successCount: 0,
+          failCount: 0,
+          errorMessage: "Gagal membaca atau memproses berkas Excel: " + err.message
+        });
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
 
   // Local Form States (Offline Registration)
   const [newStudentName, setNewStudentName] = useState("");
@@ -200,17 +337,48 @@ export default function StudentTab({
               )}
             </div>
 
-            <div className="flex gap-2 justify-end">
+            <div className="flex flex-wrap gap-2 justify-end">
               {isAdminAdministrasi && (
-                <button
-                  onClick={() => setShowStudentForm(!showStudentForm)}
-                  className="px-4 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span>Daftarkan Offline</span>
-                </button>
+                <>
+
+                  {/* Import Excel Trigger */}
+                  <label className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span>Impor Excel</span>
+                    <input
+                      type="file"
+                      accept=".xlsx, .xls"
+                      onChange={handleImportExcel}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {/* Export Excel Button */}
+                  <button
+                    type="button"
+                    onClick={handleExportExcel}
+                    className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                    title="Ekspor Data Siswa Terfilter ke Excel"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Ekspor Excel</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowStudentForm(!showStudentForm)}
+                    className="px-4 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Daftarkan Offline</span>
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -856,6 +1024,61 @@ export default function StudentTab({
                 </div>
               </form>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Import/Export Excel Result Notification Dialog */}
+      {importResult && importResult.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs select-none p-4 animate-fade-in">
+          <div className="w-full max-w-sm bg-white rounded-3xl border border-primary-green/10 shadow-2xl p-6 space-y-4 animate-scale-in text-neutral-dark">
+            <div className="text-center space-y-3">
+              {importResult.errorMessage ? (
+                <>
+                  <div className="mx-auto w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-600 shadow-3xs">
+                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <h4 className="font-baloo text-base font-bold text-red-600 leading-tight">Proses Gagal</h4>
+                  <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
+                    {importResult.errorMessage}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="mx-auto w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 shadow-3xs animate-pulse">
+                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h4 className="font-baloo text-base font-bold text-primary-green leading-tight">Proses Impor Selesai!</h4>
+                  <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed">
+                    Sinkronisasi berkas Excel ke database berhasil diselesaikan.
+                  </p>
+                </>
+              )}
+            </div>
+
+            {!importResult.errorMessage && (
+              <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-primary-green/5 space-y-2 text-xs font-semibold text-neutral-gray">
+                <div className="flex justify-between items-center">
+                  <span>Siswa Berhasil Ditambahkan:</span>
+                  <span className="text-primary-green font-extrabold font-mono text-sm bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">{importResult.successCount}</span>
+                </div>
+                <div className="flex justify-between items-center border-t border-neutral-gray/5 pt-2">
+                  <span>Data Gagal / Tidak Valid:</span>
+                  <span className="text-accent font-extrabold font-mono text-sm bg-red-50 px-2 py-0.5 rounded-lg border border-red-100">{importResult.failCount}</span>
+                </div>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setImportResult(null)}
+              className="w-full py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+            >
+              Selesai & Tutup
+            </button>
           </div>
         </div>
       )}
