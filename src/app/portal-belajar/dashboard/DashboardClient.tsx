@@ -28,6 +28,8 @@ import { studentService } from "@/services/student";
 import { classService } from "@/services/class";
 import { userService } from "@/services/user";
 import { sppService } from "@/services/spp";
+import { activityService } from "@/services/activity";
+import { murojaahService } from "@/services/murojaah";
 
 type TabKey = "siswa" | "kelas" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "users" | "audit";
 
@@ -212,6 +214,7 @@ export default function DashboardClient() {
   const [sppMatriksData, setSppMatriksData] = useState<any[]>([]);
   const [savings, setSavings] = useState(initialSavings);
   const [murajaahData, setMurajaahData] = useState<{[studentId: string]: {[param: string]: string}}>(initialMurajaah);
+  const [murojaahMateriList, setMurojaahMateriList] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
 
   // Custom confirmation modal state
@@ -319,6 +322,65 @@ export default function DashboardClient() {
             // Non-admin roles fallback to local store for UI compatibility
             const storedUsers = localStorage.getItem("system_users");
             setUsers(storedUsers ? JSON.parse(storedUsers) : initialUsers);
+          }
+
+          // Fetch Dokumentasi Kegiatan dari backend Adonis
+          try {
+            const actRes = await activityService.getAll();
+            const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
+            // Map data dari backend ke format model frontend
+            const mappedAct = rawAct.map((item: any) => ({
+              id: item.id,
+              title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+              description: item.deskripsi || item.description || "",
+              date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
+              image: item.foto || item.image || "/images/hero-bg.jpg",
+              isPublic: item.isPublic !== undefined ? item.isPublic : true
+            }));
+            if (mappedAct.length > 0) {
+              setActivities(mappedAct);
+              localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
+            }
+          } catch (actErr) {
+            console.warn("[SGW] Failed to fetch activities from backend. Using mock/local storage.");
+          }
+
+          // Fetch Murojaah Kategori, Materi, & Penilaian dari backend Adonis
+          try {
+            const materiRes = await murojaahService.getMateri();
+            const rawMateri = Array.isArray(materiRes) ? materiRes : materiRes?.data || [];
+            setMurojaahMateriList(rawMateri);
+
+            // Fetch progress murojaah per siswa untuk data yang valid
+            const updatedMurajaahData: {[studentId: string]: {[param: string]: string}} = {};
+            
+            // Lakukan fetch paralel lembar murojaah untuk siswa yang terdaftar
+            await Promise.all(
+              rawStudents.map(async (st: any) => {
+                try {
+                  const lembarRes = await murojaahService.getLembarMurojaah(st.id);
+                  const progressList = Array.isArray(lembarRes) ? lembarRes : lembarRes?.data || [];
+                  const scores: {[param: string]: string} = {};
+                  
+                  progressList.forEach((p: any) => {
+                    // Cari nama materi berdasarkan materiId
+                    const materiInfo = rawMateri.find((m: any) => m.id === p.materiId);
+                    if (materiInfo) {
+                      scores[materiInfo.namaMateri] = p.predikat || "-";
+                    }
+                  });
+                  updatedMurajaahData[String(st.id)] = scores;
+                } catch (stErr) {
+                  // Fallback jika satu siswa gagal load
+                }
+              })
+            );
+
+            if (Object.keys(updatedMurajaahData).length > 0) {
+              setMurajaahData(updatedMurajaahData);
+            }
+          } catch (muroErr) {
+            console.warn("[SGW] Murojaah API sync failed. Using local mockup storage.");
           }
         } catch (err) {
           console.warn("Backend data fetch warning (using mock fallbacks):", err);
@@ -813,6 +875,11 @@ const handleDeleteUser = (userId: number) => {
       } else if (actionType === ("delete_activity" as any)) {
         const act = activities.find((a) => a.id === targetId);
         if (act) {
+          try {
+            await activityService.delete(targetId);
+          } catch (err) {
+            console.warn("Backend delete activity failed, falling back to local list update.");
+          }
           const updated = activities.filter((a) => a.id !== targetId);
           setActivities(updated);
           localStorage.setItem("sgw_activities", JSON.stringify(updated));
@@ -838,35 +905,86 @@ const handleDeleteUser = (userId: number) => {
     }
   };
 
-  const handleAddActivity = (newActData: any) => {
+  const handleAddActivity = async (newActData: any) => {
     if (!isAdminAdministrasi && !isGuru) return;
     
-    // Auto-generate drive folder link based on activity title
-    const sanitizedTitle = (newActData.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    const newAct = {
-      ...newActData,
-      id: Date.now(),
-      driveLink: `https://drive.google.com/drive/folders/mock-${sanitizedTitle}-${Date.now()}`
-    };
-    
-    const updated = [newAct, ...activities];
-    setActivities(updated);
-    localStorage.setItem("sgw_activities", JSON.stringify(updated));
+    try {
+      // Buat FormData untuk mengirim berkas gambar ke backend
+      const formData = new FormData();
+      formData.append("namaKegiatan", newActData.title);
+      formData.append("deskripsi", newActData.description || "");
+      formData.append("tanggalKegiatan", newActData.date || new Date().toISOString().split("T")[0]);
+      if (newActData.imageFile) {
+        formData.append("foto", newActData.imageFile);
+      }
+
+      await activityService.create(formData);
+      
+      // Reload dari backend
+      const actRes = await activityService.getAll();
+      const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
+      const mappedAct = rawAct.map((item: any) => ({
+        id: item.id,
+        title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+        description: item.deskripsi || item.description || "",
+        date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
+        image: item.foto || item.image || "/images/hero-bg.jpg",
+        isPublic: item.isPublic !== undefined ? item.isPublic : true
+      }));
+      setActivities(mappedAct);
+      localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
+    } catch (err) {
+      // Fallback lokal jika backend offline
+      const newAct = {
+        ...newActData,
+        id: Date.now(),
+        image: newActData.image || "/images/hero-bg.jpg"
+      };
+      const updated = [newAct, ...activities];
+      setActivities(updated);
+      localStorage.setItem("sgw_activities", JSON.stringify(updated));
+    }
 
     const newLog = {
       id: Date.now(),
       time: new Date().toISOString().replace('T', ' ').substring(0, 16),
       user: session.name,
-      action: `Menambahkan kegiatan: ${newAct.title} (Folder Google Drive terbuat otomatis)`,
+      action: `Menambahkan kegiatan: ${newActData.title}`,
     };
     setLogs([newLog, ...logs]);
   };
 
-  const handleUpdateActivity = (updatedAct: any) => {
+  const handleUpdateActivity = async (updatedAct: any) => {
     if (!isAdminAdministrasi && !isGuru) return;
-    const updated = activities.map((act) => (act.id === updatedAct.id ? updatedAct : act));
-    setActivities(updated);
-    localStorage.setItem("sgw_activities", JSON.stringify(updated));
+    
+    try {
+      const formData = new FormData();
+      formData.append("namaKegiatan", updatedAct.title);
+      formData.append("deskripsi", updatedAct.description || "");
+      formData.append("tanggalKegiatan", updatedAct.date || new Date().toISOString().split("T")[0]);
+      if (updatedAct.imageFile) {
+        formData.append("foto", updatedAct.imageFile);
+      }
+
+      await activityService.update(updatedAct.id, formData);
+      
+      const actRes = await activityService.getAll();
+      const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
+      const mappedAct = rawAct.map((item: any) => ({
+        id: item.id,
+        title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+        description: item.deskripsi || item.description || "",
+        date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
+        image: item.foto || item.image || "/images/hero-bg.jpg",
+        isPublic: item.isPublic !== undefined ? item.isPublic : true
+      }));
+      setActivities(mappedAct);
+      localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
+    } catch (err) {
+      const updated = activities.map((act) => (act.id === updatedAct.id ? updatedAct : act));
+      setActivities(updated);
+      localStorage.setItem("sgw_activities", JSON.stringify(updated));
+    }
 
     const newLog = {
       id: Date.now(),
@@ -1102,8 +1220,9 @@ const handleDeleteUser = (userId: number) => {
     return true;
   };
 
-  const handleUpdateMurajaah = (studentId: string | number, param: string, score: string) => {
+  const handleUpdateMurajaah = async (studentId: string | number, param: string, score: string) => {
     if (!isAdminAdministrasi && !isGuru) return;
+    
     setMurajaahData(prev => {
       const studentData = prev[String(studentId)] || {};
       return {
@@ -1114,6 +1233,24 @@ const handleDeleteUser = (userId: number) => {
         }
       };
     });
+
+    try {
+      const materiInfo = murojaahMateriList.find(
+        (m) => m.namaMateri.toLowerCase().trim() === param.toLowerCase().trim()
+      );
+
+      if (materiInfo) {
+        await murojaahService.savePenilaian({
+          siswaId: studentId,
+          materiId: materiInfo.id,
+          predikat: score
+        });
+      } else {
+        console.warn(`[SGW] Materi '${param}' tidak terdaftar di database backend. Tersimpan secara lokal saja.`);
+      }
+    } catch (err) {
+      console.warn("[SGW] Gagal menyimpan penilaian murojaah ke backend database:", err);
+    }
   };
 
   return (
