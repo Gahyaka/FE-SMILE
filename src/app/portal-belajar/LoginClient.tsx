@@ -19,15 +19,30 @@ export default function LoginClient() {
     localStorage.removeItem("user_session");
     localStorage.removeItem("auth_token");
 
-    // Initialize mock users into localStorage if they don't exist yet
-    const existingUsers = localStorage.getItem("system_users");
-    if (!existingUsers) {
-      const defaultUsers = [
-        { id: 1, name: "Admin Administrasi (Bunda Nisa)", username: "admin_adm", password: "admin123", role: "admin_adm" },
-        { id: 2, name: "Admin Transaksi (Bunda Ajeng)", username: "admin_trx", password: "admin123", role: "admin_trx" },
-        { id: 3, name: "Guru Kelas (Bunda Rahma)", username: "guru", password: "guru123", role: "guru" }
-      ];
+    // Initialize or force-reset mock users in localStorage to enforce correct credentials
+    const defaultUsers = [
+      { id: 1, name: "Admin Administrasi (Bunda Nisa)", username: "admin_adm", password: "admin123", role: "admin_adm" },
+      { id: 2, name: "Admin Transaksi (Bunda Ajeng)", username: "admin_trx", password: "admin123", role: "admin_trx" },
+      { id: 3, name: "Guru Kelas (Bunda Rahma)", username: "guru", password: "guru123", role: "guru" }
+    ];
+
+    const existingUsersStr = localStorage.getItem("system_users");
+    if (!existingUsersStr) {
       localStorage.setItem("system_users", JSON.stringify(defaultUsers));
+    } else {
+      try {
+        const parsed = JSON.parse(existingUsersStr);
+        // If we detect legacy randomized data (like admin_trx70 or sgw_QpNyn83v), override it
+        const hasStaleData = parsed.some((u: any) => 
+          u.username.startsWith("admin_trx") && u.username !== "admin_trx" ||
+          u.password !== "admin123" && (u.role === "admin_adm" || u.role === "admin_trx")
+        );
+        if (hasStaleData) {
+          localStorage.setItem("system_users", JSON.stringify(defaultUsers));
+        }
+      } catch (e) {
+        localStorage.setItem("system_users", JSON.stringify(defaultUsers));
+      }
     }
   }, []);
 

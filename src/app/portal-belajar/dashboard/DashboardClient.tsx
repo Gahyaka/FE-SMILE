@@ -166,16 +166,29 @@ function mapUsersData(rawUsers: any[]): any[] {
   return rawUsers
     .filter((u: any) => allowedRoles.includes((u.role || "").toUpperCase()))
     .filter((u: any) => !deletedUserIds.includes(u.id))
-    .map((u: any) => ({
-      id: u.id,
-      name: u.nama || u.name || "Petugas Madrasah",
-      username: u.username,
-      role: (u.role || "").toUpperCase() === "ADMIN_ADMINISTRASI" || (u.role || "").toUpperCase() === "ADMIN" 
+    .map((u: any) => {
+      const rawRole = (u.role || "").toUpperCase();
+      const mappedRole = rawRole === "ADMIN_ADMINISTRASI" || rawRole === "ADMIN" 
         ? "admin_adm" 
-        : (u.role || "").toUpperCase() === "ADMIN_TRANSAKSI" 
+        : rawRole === "ADMIN_TRANSAKSI" 
           ? "admin_trx" 
-          : "guru"
-    }));
+          : "guru";
+
+      // Paksa override username ke default kesepakatan agar sinkron
+      let finalUsername = u.username;
+      if (mappedRole === "admin_adm") {
+        finalUsername = "admin_adm";
+      } else if (mappedRole === "admin_trx") {
+        finalUsername = "admin_trx";
+      }
+
+      return {
+        id: u.id,
+        name: u.nama || u.name || (mappedRole === "admin_adm" ? "Admin Administrasi (Bunda Nisa)" : "Admin Transaksi (Bunda Ajeng)"),
+        username: finalUsername,
+        role: mappedRole
+      };
+    });
 }
 
 export default function DashboardClient() {
