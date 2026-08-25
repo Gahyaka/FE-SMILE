@@ -52,7 +52,10 @@ export default function KelasTab({
   const [newTeacherName, setNewTeacherName] = useState("");
   const [newDescription, setNewDescription] = useState("");
 
-  const teachersList = users.filter((u) => u.role === "guru" || u.role === "GURU" || u.role === "admin_trx");
+  const teachersList = users.filter((u) => {
+    const role = (u.role || "").trim().toLowerCase();
+    return role === "guru";
+  });
 
   // Search filter
   const [searchQuery, setSearchQuery] = useState("");
@@ -358,12 +361,7 @@ export default function KelasTab({
                   <span className="text-[9px] font-extrabold px-2.5 py-1 bg-primary-green/10 text-primary-green rounded-full">
                     {cls.fase}
                   </span>
-                  
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] text-neutral-gray font-mono font-bold" title={`ID Kelas Lengkap: ${cls.id}`}>
-                      ID: CLS-{cls.id.toString().length > 12 ? `${cls.id.toString().substring(0, 8)}...` : cls.id}
-                    </span>
-
                     {/* Kebab Dropdown Menu untuk Admin Administrasi */}
                     {isAdminAdministrasi && (
                       <div className="relative">
