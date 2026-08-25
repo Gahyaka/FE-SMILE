@@ -286,9 +286,13 @@ export default function DashboardClient() {
           const rawStudents = Array.isArray(studentRes) ? studentRes : studentRes?.data || [];
           setStudents(mapStudentsData(rawStudents));
 
-          const classRes = await classService.getAll();
-          const rawClasses = Array.isArray(classRes) ? classRes : classRes?.data || [];
-          setClasses(mapClassesData(rawClasses));
+          try {
+            const classRes = await classService.getAll();
+            const rawClasses = Array.isArray(classRes) ? classRes : classRes?.data || [];
+            setClasses(mapClassesData(rawClasses));
+          } catch (classErr) {
+            console.warn("[SGW] Failed to fetch classes from backend. Using local mock/cache.", classErr);
+          }
 
           // Fetch SPP transactions from backend Adonis
           try {
@@ -330,12 +334,12 @@ export default function DashboardClient() {
             const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
             // Backend mengembalikan foto dalam array relasi: fotos: [{id, url, isDefault, ...}]
             const mappedAct = rawAct.map((item: any) => {
-              const fotosArr = Array.isArray(item.fotos) ? item.fotos
-                : Array.isArray(item.foto) ? item.foto
+              const fotosArr = Array.isArray(item.foto) ? item.foto
+                : Array.isArray(item.fotos) ? item.fotos
                 : [];
               const thumbnail = fotosArr.find((f: any) => f.isDefault || f.isThumbnail)
                 || fotosArr[0];
-              const imageUrl = thumbnail?.url || thumbnail?.path || thumbnail?.foto
+              const imageUrl = thumbnail?.viewUrl || thumbnail?.url || thumbnail?.path || thumbnail?.foto
                 || (typeof item.foto === "string" ? item.foto : null)
                 || (typeof item.image === "string" ? item.image : null)
                 || "";
@@ -346,7 +350,7 @@ export default function DashboardClient() {
                 description: item.deskripsi || item.description || "",
                 date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
                 featuredImage: imageUrl,
-                driveLink: item.driveLink || item.folderUrl || item.driveFolderUrl
+                driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
                   || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
                   || item.linkDrive || item.urlDrive || "",
                 category: item.category || "Keagamaan",
@@ -950,17 +954,17 @@ const handleDeleteUser = (userId: number) => {
       const actRes = await activityService.getAll();
       const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
       const mappedAct = rawAct.map((item: any) => {
-        const fotosArr = Array.isArray(item.fotos) ? item.fotos
-          : Array.isArray(item.foto) ? item.foto : [];
+        const fotosArr = Array.isArray(item.foto) ? item.foto
+          : Array.isArray(item.fotos) ? item.fotos : [];
         const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
-        const imageUrl = thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
+        const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
         return {
           id: item.id,
           title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
           description: item.deskripsi || item.description || "",
           date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
           featuredImage: imageUrl,
-          driveLink: item.driveLink || item.folderUrl || item.driveFolderUrl
+          driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
             || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
             || item.linkDrive || item.urlDrive || "",
           isPublic: item.isPublic !== undefined ? item.isPublic : true
@@ -1007,17 +1011,17 @@ const handleDeleteUser = (userId: number) => {
       const actRes = await activityService.getAll();
       const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
       const mappedAct = rawAct.map((item: any) => {
-        const fotosArr = Array.isArray(item.fotos) ? item.fotos
-          : Array.isArray(item.foto) ? item.foto : [];
+        const fotosArr = Array.isArray(item.foto) ? item.foto
+          : Array.isArray(item.fotos) ? item.fotos : [];
         const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
-        const imageUrl = thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
+        const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
         return {
           id: item.id,
           title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
           description: item.deskripsi || item.description || "",
           date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
           featuredImage: imageUrl,
-          driveLink: item.driveLink || item.folderUrl || item.driveFolderUrl
+          driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
             || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
             || item.linkDrive || item.urlDrive || "",
           isPublic: item.isPublic !== undefined ? item.isPublic : true
@@ -1049,17 +1053,17 @@ const handleDeleteUser = (userId: number) => {
       const actRes = await activityService.getAll();
       const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
       const mappedAct = rawAct.map((item: any) => {
-        const fotosArr = Array.isArray(item.fotos) ? item.fotos
-          : Array.isArray(item.foto) ? item.foto : [];
+        const fotosArr = Array.isArray(item.foto) ? item.foto
+          : Array.isArray(item.fotos) ? item.fotos : [];
         const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
-        const imageUrl = thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
+        const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
         return {
           id: item.id,
           title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
           description: item.deskripsi || item.description || "",
           date: item.tanggalKegiatan || item.date || "",
           featuredImage: imageUrl,
-          driveLink: item.driveLink || item.folderUrl || item.driveFolderUrl
+          driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
             || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
             || item.linkDrive || item.urlDrive || "",
           isPublic: item.isPublic !== undefined ? item.isPublic : true

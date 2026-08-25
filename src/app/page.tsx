@@ -19,35 +19,55 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchActivities = async () => {
-      let activeActs = [];
       try {
         const res = await activityService.getPublicGallery();
-        const rawAct = Array.isArray(res) ? res : res?.data || [];
-        activeActs = rawAct.map((item: any) => ({
-          id: item.id,
-          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
-          description: item.deskripsi || item.description || "",
-          date: item.tanggalKegiatan || item.date || "",
-          featuredImage: item.foto || item.image || "/images/hero-bg.jpg",
-          category: item.category || "Keagamaan"
-        }));
+        const rawAct = res && Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
+        const items = rawAct.map((item: any) => {
+          // Cari URL gambar cover
+          const imageUrl = item.cover?.viewUrl || item.cover?.url || item.cover?.path
+            || "https://images.unsplash.com/photo-1590076214561-2679be15bb56?auto=format&fit=crop&q=80&w=800";
+
+          // Format tanggal ke format profesional Indonesia: contoh "25 Agustus 2026"
+          let formattedDate = "";
+          const rawDateStr = item.tanggalKegiatan || item.date;
+          if (rawDateStr) {
+            try {
+              const cleanDateStr = rawDateStr.split("T")[0];
+              formattedDate = new Date(cleanDateStr).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+              });
+            } catch (dateErr) {
+              formattedDate = rawDateStr.split("T")[0];
+            }
+          }
+
+          return {
+            id: item.id,
+            title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+            description: item.deskripsi || item.description || "",
+            date: formattedDate,
+            image: imageUrl,
+            category: item.category || "Keagamaan",
+            driveLink: item.folderGdriveUrl || item.gdriveFolderUrl || item.driveLink || ""
+          };
+        });
+        setGalleryItems(items.slice(0, 3));
       } catch (err) {
         console.warn("[SGW] Failed to fetch activities from backend. Using mock fallback.");
         const stored = localStorage.getItem("sgw_activities");
-        activeActs = stored ? JSON.parse(stored) : initialActivities;
-      }
-
-      const items = activeActs
-        .slice(0, 3) // Only pick top 3 items
-        .map((act: any) => ({
+        const activeActs = stored ? JSON.parse(stored) : initialActivities;
+        const items = activeActs.slice(0, 3).map((act: any) => ({
           id: act.id,
-          title: act.title,
+          title: act.title || act.namaKegiatan || "Kegiatan Madrasah",
           category: act.category || "Keagamaan",
-          image: act.featuredImage || act.image || "",
-          description: act.description,
-          date: act.date
+          image: act.featuredImage || act.image || "https://images.unsplash.com/photo-1590076214561-2679be15bb56?auto=format&fit=crop&q=80&w=800",
+          description: act.description || act.deskripsi || "",
+          date: act.date || act.tanggalKegiatan || ""
         }));
-      setGalleryItems(items);
+        setGalleryItems(items);
+      }
     };
 
     fetchActivities();

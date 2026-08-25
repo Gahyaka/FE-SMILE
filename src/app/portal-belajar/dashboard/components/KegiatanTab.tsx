@@ -195,20 +195,21 @@ export default function KegiatanTab({
           {filteredActivities.map((act) => (
             <div key={act.id} className="bg-white p-5 rounded-2xl border border-primary-green/10 shadow-3xs relative flex flex-col justify-between hover:shadow-xs transition-all min-h-[190px]">
               <div>
-                <div className="flex justify-between items-start gap-2">
-                  <div className="flex-1" />
+                <div className="flex justify-between items-center gap-2">
+                  {/* Tanggal di pojok kiri atas (hanya YYYY-MM-DD) */}
+                  <span className="text-[9.5px] text-neutral-gray font-mono font-bold bg-[#FAF8F5] px-2 py-0.5 rounded-md border border-neutral-gray/10">
+                    {act.date.split("T")[0]}
+                  </span>
                   
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[9.5px] text-neutral-gray font-mono font-semibold">{act.date}</span>
-                    {isAdminAdministrasi && (
-                      <div className="relative">
-                        <button
-                          type="button"
-                          onClick={() => setActiveKebabId(activeKebabId === act.id ? null : act.id)}
-                          className="w-5 h-5 rounded-full hover:bg-neutral-gray/5 flex items-center justify-center text-neutral-dark font-extrabold cursor-pointer transition-colors text-xs"
-                        >
-                          ⋮
-                        </button>
+                  {isAdminAdministrasi && (
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setActiveKebabId(activeKebabId === act.id ? null : act.id)}
+                        className="w-5 h-5 rounded-full hover:bg-neutral-gray/5 flex items-center justify-center text-neutral-dark font-extrabold cursor-pointer transition-colors text-xs"
+                      >
+                        ⋮
+                      </button>
                         {activeKebabId === act.id && (
                           <>
                             <div className="fixed inset-0 z-20" onClick={() => setActiveKebabId(null)} />
@@ -259,9 +260,8 @@ export default function KegiatanTab({
                             </div>
                           </>
                         )}
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
                 
                 {act.featuredImage && (
@@ -299,9 +299,33 @@ export default function KegiatanTab({
                     <span>Folder belum tersedia</span>
                   </span>
                 )}
-                <span className="text-[9px] text-primary-green/80 font-bold bg-soft-mint px-2 py-0.5 rounded border border-primary-green/10">
-                  Akreditasi Ready
-                </span>
+                {isAdminAdministrasi || isGuru ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onTogglePublic) {
+                        onTogglePublic(act.id, !act.isPublic);
+                      }
+                    }}
+                    className={`text-[9px] font-extrabold px-2.5 py-1 rounded-full border transition-all cursor-pointer flex items-center gap-1 ${
+                      act.isPublic
+                        ? "bg-[#E8F5E9] text-[#2E7D32] border-[#C8E6C9] hover:bg-[#C8E6C9]"
+                        : "bg-[#F5F5F5] text-[#616161] border-[#E0E0E0] hover:bg-[#E0E0E0]"
+                    }`}
+                    title={act.isPublic ? "Klik untuk jadikan privat" : "Klik untuk jadikan publik"}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${act.isPublic ? "bg-[#4CAF50]" : "bg-[#9E9E9E]"}`} />
+                    <span>{act.isPublic ? "Publik" : "Privat"}</span>
+                  </button>
+                ) : (
+                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${
+                    act.isPublic
+                      ? "bg-[#E8F5E9] text-[#2E7D32] border-[#C8E6C9]"
+                      : "bg-[#F5F5F5] text-[#616161] border-[#E0E0E0]"
+                  }`}>
+                    {act.isPublic ? "Publik" : "Privat"}
+                  </span>
+                )}
               </div>
             </div>
           ))}
