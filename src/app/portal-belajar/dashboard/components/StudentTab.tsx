@@ -56,6 +56,7 @@ export default function StudentTab({
     duplicateCount: number;
     errorMessage?: string;
   } | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // 1. Ekspor Data Siswa ke Excel (Bisa menjadi template jika data kosong)
   const handleExportExcel = () => {
@@ -105,6 +106,10 @@ export default function StudentTab({
       worksheet["!cols"] = maxLens;
 
       XLSX.writeFile(workbook, `Data_Siswa_RA_Sahabat_${selectedFilterClass}_${selectedYear.replace("/", "-")}.xlsx`);
+      
+      // Visual feedback toast
+      setToastMessage("Data siswa berhasil diekspor ke Excel!");
+      setTimeout(() => setToastMessage(null), 3000);
     } catch (err: any) {
       setImportResult({
         isOpen: true,
@@ -281,9 +286,9 @@ export default function StudentTab({
         <div className="space-y-6">
           
           {/* Kelas & Tahun Ajaran filter badges — Startup Segmented Control Style */}
-          <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs">
             {!isGuru ? (
-              <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-fit flex-wrap">
+              <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-full sm:w-auto overflow-x-auto scrollbar-none whitespace-nowrap">
                 {["Semua", ...classes.map((c: any) => c.className)].map((cls) => {
                   const isActive = selectedFilterClass === cls;
                   return (
@@ -303,14 +308,14 @@ export default function StudentTab({
                 })}
               </div>
             ) : (
-              <div className="text-[10px] font-bold text-neutral-gray uppercase px-2 flex items-center gap-1.5">
+              <div className="text-[10px] font-bold text-neutral-gray uppercase px-2 flex items-center gap-1.5 py-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary-green" />
                 <span>Peserta Didik Kelas Anda</span>
               </div>
             )}
 
-            <div className="flex items-center gap-2 border-t md:border-t-0 pt-2 md:pt-0 border-neutral-gray/10">
-              <span className="text-[10px] font-bold text-neutral-gray uppercase px-2">Tahun Ajaran:</span>
+            <div className="flex items-center justify-between sm:justify-start gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-neutral-gray/10">
+              <span className="text-[10px] font-bold text-neutral-gray uppercase">Tahun Ajaran:</span>
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
@@ -324,8 +329,8 @@ export default function StudentTab({
           </div>
 
           {/* Search Bar & Registration Trigger */}
-          <div className="bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
-            <div className="relative flex-1 flex items-center gap-2">
+          <div className="bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
+            <div className="relative flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <div className="relative flex-1">
                 <svg className="w-4 h-4 text-neutral-gray absolute left-3.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -347,19 +352,18 @@ export default function StudentTab({
                     setSelectedFilterClass("Semua");
                     setSelectedYear("2026/2027");
                   }}
-                  className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-[10px] uppercase rounded-xl transition-colors cursor-pointer whitespace-nowrap shadow-3xs"
+                  className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-[10px] uppercase rounded-xl transition-colors cursor-pointer whitespace-nowrap shadow-3xs text-center"
                 >
                   Reset Filter
                 </button>
               )}
             </div>
 
-            <div className="flex flex-wrap gap-2 justify-end">
+            <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2 w-full lg:w-auto justify-stretch sm:justify-end items-center">
               {isAdminAdministrasi && (
                 <>
-
                   {/* Import Excel Trigger */}
-                  <label className="px-3.5 py-2 bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs">
+                  <label className="px-3.5 py-2.5 bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-3xs text-center">
                     <svg className="w-3.5 h-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
@@ -376,7 +380,7 @@ export default function StudentTab({
                   <button
                     type="button"
                     onClick={handleExportExcel}
-                    className="px-3.5 py-2 bg-white hover:bg-primary-green/5 text-primary-green border-2 border-dashed border-primary-green/30 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                    className="px-3.5 py-2.5 bg-white hover:bg-primary-green/5 text-primary-green border-2 border-dashed border-primary-green/30 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-3xs"
                     title="Ekspor Data Siswa Terfilter ke Excel"
                   >
                     <svg className="w-3.5 h-3.5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -388,7 +392,7 @@ export default function StudentTab({
                   <button
                     type="button"
                     onClick={() => setShowStudentForm(!showStudentForm)}
-                    className="px-4 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                    className="col-span-2 sm:col-span-1 px-4 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-3xs"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -1101,6 +1105,15 @@ export default function StudentTab({
               Selesai & Tutup
             </button>
           </div>
+        </div>
+      )}
+      {/* 5. Custom Floating Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-[#2D6A4F] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-[11px] font-extrabold border border-emerald-500/20 animate-fade-in">
+          <svg className="w-4 h-4 text-emerald-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          <span>{toastMessage}</span>
         </div>
       )}
     </div>
