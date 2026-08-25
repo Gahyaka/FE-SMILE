@@ -20,12 +20,11 @@ export const userService = {
     return response.data;
   },
 
-  async resetPassword(id: string | number, username: string, passwordBaru: string) {
+  async resetPassword(id: string | number, passwordBaru: string) {
     // Route: PUT /api/v1/users/:id/reset-password
-    // Backend validator mengecek field "newPassword" (bukan "password")
-    // Terbukti dari pesan error: "Password baru wajib diisi dan minimal 6 karakter"
+    // User diidentifikasi melalui :id — field "username" di body dihilangkan
+    // karena menyebabkan backend mengupdate username di DB dan merusak login
     const response = await api.put(`/api/v1/users/${id}/reset-password`, {
-      username: username,
       newPassword: passwordBaru
     });
     return response.data;

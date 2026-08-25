@@ -178,18 +178,13 @@ function mapUsersData(rawUsers: any[]): any[] {
           ? "admin_trx" 
           : "guru";
 
-      // Paksa override username ke default kesepakatan agar sinkron
-      let finalUsername = u.username;
-      if (mappedRole === "admin_adm") {
-        finalUsername = "admin_adm";
-      } else if (mappedRole === "admin_trx") {
-        finalUsername = "admin_trx";
-      }
-
+      // Gunakan username asli dari database — JANGAN override
+      // Override sebelumnya menyebabkan semua admin_trx tampil identik
+      // sehingga tidak bisa dibedakan saat reset password
       return {
         id: u.id,
-        name: u.nama || u.name || (mappedRole === "admin_adm" ? "Admin Administrasi (Bunda Nisa)" : "Admin Transaksi (Bunda Ajeng)"),
-        username: finalUsername,
+        name: u.nama || u.name || (mappedRole === "admin_adm" ? "Admin Administrasi" : mappedRole === "admin_trx" ? "Admin Transaksi" : "Guru"),
+        username: u.username,
         role: mappedRole
       };
     });
@@ -758,7 +753,7 @@ const handleUpdateUser = async (updatedUsr: any) => {
   if (!isAdminAdministrasi) return;
   try {
     if (updatedUsr.password) {
-      await userService.resetPassword(updatedUsr.id, updatedUsr.username, updatedUsr.password);
+      await userService.resetPassword(updatedUsr.id, updatedUsr.password);
     }
 
     // Refresh list locally/API
