@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "e3566906-06f2-4ed2-a77e-d5ae173d8e62",
+    "_postman_id": "4b4552b8-0371-44b6-aeb1-ccb351bb3cca",
     "name": "KB RA Sahabat",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "52385280",
-    "_collection_link": "https://go.postman.co/collection/52385280-e3566906-06f2-4ed2-a77e-d5ae173d8e62?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/52385280-4b4552b8-0371-44b6-aeb1-ccb351bb3cca?source=collection_link"
   },
   "item": [
     {
@@ -183,7 +183,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzYzODQ2OSwiZXhwIjoxNzg3NzI0ODY5fQ.IQw-OKtsrBF0fMKms9mDIct3-3KZ0MYyzSLpwfEwQEc",
                   "type": "string"
                 }
               ]
@@ -192,7 +192,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"namaKelas\": \"Kelas A - Bintang\",\r\n  \"tahunAjaran\": \"2025/2026\",\r\n  \"waliKelas\": \"Ibu Ratna, S.Pd\"\r\n}",
+              "raw": "{\r\n  \"namaKelas\": \"Kelas B (Melati)\",\r\n  \"tahunAjaran\": \"2026/2027\",\r\n  \"guruId\": \"b8909db0-126a-4e69-858e-a145a3f38ad6\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -221,7 +221,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI4YzZlMjc5LWJlZDYtNGZhNi1iZGIxLTNmMWQ2ZTEzYTE4NSIsInVzZXJuYW1lIjoieWF5YSIsInJvbGUiOiJHVVJVIiwiaWF0IjoxNzg1OTkyMzQ3LCJleHAiOjE3ODYwNzg3NDd9.608Fj_o29cNv09aA30jip_klh8CXh9CRhb02C42jBls",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzYzODQ2OSwiZXhwIjoxNzg3NzI0ODY5fQ.IQw-OKtsrBF0fMKms9mDIct3-3KZ0MYyzSLpwfEwQEc",
                   "type": "string"
                 }
               ]
@@ -230,7 +230,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"namaKelas\": \"Kelas B - Bintang\",\r\n  \"tahunAjaran\": \"2025/2026\",\r\n  \"waliKelas\": \"Nur, S.Pd\"\r\n}",
+              "raw": "{\r\n  \"namaKelas\": \"Kelas B - Bintang\",\r\n  \"tahunAjaran\": \"2025/2026\",\r\n  \"guruId\": \"ea8b0f79-844f-4934-83c2-c9aa7c1fdddb\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -888,6 +888,53 @@
           "response": []
         },
         {
+          "name": "Tambah Siswa By Excel",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4Nzc0NTY5MywiZXhwIjoxNzg3ODMyMDkzfQ.86lUrnyix0Op6lExwLwVoISCiUBPSWAiFmsKN6KOOeQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "kelasId",
+                  "value": "17a3c344-2e4f-4a37-854a-fda766503a45",
+                  "type": "text",
+                  "uuid": "b5706580-97ae-4314-8ce2-26e09ccdf4ee"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "uuid": "b62fcbaf-eff2-4de0-bc3a-5c78ccd04e09",
+                  "src": "/C:/Users/ADVAN/Downloads/template_import_siswa_filled.xlsx"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/siswas/import",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "siswas",
+                "import"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Update Siswa",
           "request": {
             "auth": {
@@ -895,7 +942,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzAyMzMwMSwiZXhwIjoxNzg3MTA5NzAxfQ.kszqFWkqLPkVHFYDVQLc3nA6aRFC4WCphp0jUNVildg",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4Nzc0NTY5MywiZXhwIjoxNzg3ODMyMDkzfQ.86lUrnyix0Op6lExwLwVoISCiUBPSWAiFmsKN6KOOeQ",
                   "type": "string"
                 }
               ]
@@ -904,7 +951,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"namaLengkap\": \"Ahmad Fauzi\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"nisn\": \"001234567\",\r\n  \"nis\": \"202600\",\r\n  \"kelasId\": null,\r\n  \"alamat\": \"Jl. Kaliurang KM 5, Yogyakarta\",\r\n  \"tinggiBadan\": 100,\r\n  \"beratBadan\": 16,\r\n  \"lingkarKepala\": 48,\r\n  \"semester\": \"Semester 1 (Ganjil)\",\r\n  \"tahunAjaran\": \"2026/2027\"\r\n}",
+              "raw": "{\r\n  \"namaLengkap\": \"Ahmad Fauzi\",\r\n  \"jenisKelamin\": \"PEREMPUAN\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"nisn\": \"001234567\",\r\n  \"nis\": \"202600\",\r\n  \"kelasId\": null,\r\n  \"alamat\": \"Jl. Kaliurang KM 5, Yogyakarta\",\r\n  \"tinggiBadan\": 100,\r\n  \"beratBadan\": 16,\r\n  \"lingkarKepala\": 48,\r\n  \"semester\": \"Semester 1 (Ganjil)\",\r\n  \"tahunAjaran\": \"2026/2027\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -992,6 +1039,36 @@
           "response": []
         },
         {
+          "name": "Get Template Excel",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4Nzc0NTY5MywiZXhwIjoxNzg3ODMyMDkzfQ.86lUrnyix0Op6lExwLwVoISCiUBPSWAiFmsKN6KOOeQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/siswas/template",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "siswas",
+                "template"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Show Siswa By Id",
           "request": {
             "auth": {
@@ -1043,6 +1120,42 @@
     {
       "name": "Users",
       "item": [
+        {
+          "name": "Delete User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwYjViNTdkLWY1ZTItNGZjMi04NzZlLTBjNzUwNjlmZDNjMSIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzgwMTQzMywiZXhwIjoxNzg3ODg3ODMzfQ.Yi5SXn4LGS_Xhc6h7uasUvF--dTesxVUORruwNP9qco",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:idUser",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                ":idUser"
+              ],
+              "variable": [
+                {
+                  "key": "idUser",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
         {
           "name": "Change Password By Admin",
           "request": {
@@ -1134,7 +1247,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzA0OTQ2NSwiZXhwIjoxNzg3MTM1ODY1fQ.qkfh5x4aPJ2nUZvIjDB-sZ_kNQIQl64OJDUcv6q93h4",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwYjViNTdkLWY1ZTItNGZjMi04NzZlLTBjNzUwNjlmZDNjMSIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzgwMTQzMywiZXhwIjoxNzg3ODg3ODMzfQ.Yi5SXn4LGS_Xhc6h7uasUvF--dTesxVUORruwNP9qco",
                   "type": "string"
                 }
               ]
@@ -1143,7 +1256,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    //bulan batch\r\n  \"siswaId\": \"0e6d80e5-43c2-4547-a996-fb79b4ed7972\",\r\n  \"tanggalBayar\": \"2026-08-18\",\r\n  \"tahunAjaran\": \"2026/2027\",\r\n  \"nominalSpp\": 150000,\r\n  \"nominalLes\": 50000,\r\n  \"statusSetoran\": \"BELUM\",\r\n  \"catatan\": \"Pelunasan SPP & Les Juli s/d September 2026\",\r\n  \"bulanList\": [\r\n    { \"bulan\": 7, \"tahun\": 2026 },\r\n    { \"bulan\": 8, \"tahun\": 2026 },\r\n    { \"bulan\": 9, \"tahun\": 2026 }\r\n  ]\r\n\r\n  //bulan tunggal\r\n//   {\r\n//   \"siswaId\": \"0e6d80e5-43c2-4547-a996-fb79b4ed7972\",\r\n//   \"tanggalBayar\": \"2026-08-18\",\r\n//   \"tahunAjaran\": \"2026/2027\",\r\n//   \"nominalSpp\": 150000,\r\n//   \"nominalLes\": 50000,\r\n//   \"statusSetoran\": \"BELUM\",\r\n//   \"catatan\": \"Pembayaran SPP & Les Agustus 2026\"\r\n// }\r\n}",
+              "raw": "// {\r\n    //bulan batch\r\n//   \"siswaId\": \"03be56fb-e7be-4ca1-88c0-b7fb440289f5\",\r\n//   \"tanggalBayar\": \"2026-08-18\",\r\n//   \"tahunAjaran\": \"2026/2027\",\r\n//   \"nominalSpp\": 150000,\r\n//   \"nominalLes\": 50000,\r\n//   \"statusSetoran\": \"BELUM\",\r\n//   \"catatan\": \"Pelunasan SPP & Les Juli s/d September 2026\",\r\n//   \"bulanList\": [\r\n//     { \"bulan\": 7, \"tahun\": 2026 },\r\n//     { \"bulan\": 8, \"tahun\": 2026 },\r\n//     { \"bulan\": 9, \"tahun\": 2026 }\r\n//   ]\r\n// }\r\n  //bulan tunggal\r\n  {\r\n  \"siswaId\": \"03be56fb-e7be-4ca1-88c0-b7fb440289f5\",\r\n  \"tanggalBayar\": \"2026-09-18\",\r\n  \"tahunAjaran\": \"2026/2027\",\r\n  \"nominalSpp\": 150000,\r\n  \"nominalLes\": 50000,\r\n  \"statusSetoran\": \"BELUM\",\r\n  \"catatan\": \"Pembayaran SPP & Les Agustus 2026\"\r\n}\r\n",
               "options": {
                 "raw": {
                   "language": "json"

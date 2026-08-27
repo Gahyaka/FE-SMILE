@@ -11,6 +11,42 @@
       "name": "Users",
       "item": [
         {
+          "name": "Delete User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwYjViNTdkLWY1ZTItNGZjMi04NzZlLTBjNzUwNjlmZDNjMSIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzgwMTQzMywiZXhwIjoxNzg3ODg3ODMzfQ.Yi5SXn4LGS_Xhc6h7uasUvF--dTesxVUORruwNP9qco",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:idUser",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                ":idUser"
+              ],
+              "variable": [
+                {
+                  "key": "idUser",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Change Password By Admin",
           "request": {
             "auth": {
