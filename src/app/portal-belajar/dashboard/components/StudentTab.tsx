@@ -59,6 +59,19 @@ export default function StudentTab({
   const [importYear, setImportYear] = useState("2026/2027");
   const [importFile, setImportFile] = useState<File | null>(null);
 
+  // Custom Local Confirmation State
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    action: (() => void) | null;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    action: null,
+  });
+
   // Feedback states
   const [importResult, setImportResult] = useState<{
     isOpen: boolean;
@@ -74,8 +87,17 @@ export default function StudentTab({
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const triggerConfirm = (title: string, message: string, action: () => void) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      action,
+    });
+  };
+
   // ── 1. Ekspor Data Siswa ke Excel ─────────────────────────────────
-  const handleExportExcel = () => {
+  const executeExportExcel = () => {
     try {
       const dataToExport =
         filteredStudents.length > 0
@@ -135,6 +157,15 @@ export default function StudentTab({
     }
   };
 
+  const handleExportExcel = () => {
+    const totalCount = filteredStudents.length;
+    triggerConfirm(
+      "Ekspor Data ke Excel",
+      `Apakah Anda yakin ingin mengekspor ${totalCount} data siswa (Kelas: ${selectedFilterClass}, TA: ${selectedYear}) ke dalam file Excel?`,
+      executeExportExcel
+    );
+  };
+
   // ── 2. Download Template Kosong untuk Import ──────────────────────
   const handleDownloadTemplate = () => {
     const template = [
@@ -160,13 +191,8 @@ export default function StudentTab({
   };
 
   // ── 3. Proses Import dari Drawer (kelas sudah dipilih) ────────────
-  const handleImportFromDrawer = () => {
+  const executeImportFromDrawer = () => {
     if (!importFile) return;
-    if (!importClass) {
-      showToast("Pilih kelas terlebih dahulu sebelum mengimpor!");
-      return;
-    }
-
     const reader = new FileReader();
     reader.onload = (evt) => {
       try {
@@ -211,7 +237,7 @@ export default function StudentTab({
                 nisn,
                 nis: String(row["NIS"] || ""),
                 parentName: row["Nama Orang Tua"] || "",
-                class: importClass, // ← dari pilihan drawer, bukan dari kolom Excel
+                class: importClass,
                 semester: importSemester,
                 fase: "Fase Fondasi",
                 academicYear: importYear,
@@ -241,6 +267,15 @@ export default function StudentTab({
       }
     };
     reader.readAsBinaryString(importFile);
+  };
+
+  const handleImportFromDrawer = () => {
+    if (!importFile || !importClass) return;
+    triggerConfirm(
+      "Konfirmasi Impor Data Siswa",
+      `Apakah Anda yakin ingin memproses impor berkas "${importFile.name}" ke Kelas "${importClass}" (TA: ${importYear})?`,
+      executeImportFromDrawer
+    );
   };
 
   // ── Local Form States (Jalur 1: Manual) ──────────────────────────
@@ -315,6 +350,15 @@ export default function StudentTab({
     setImportClass(classes.length > 0 ? classes[0].className : "KB");
     setImportFile(null);
     setShowImportDrawer(true);
+  };
+
+  // Status Change Confirmation wrapper
+  const handleStatusChange = (studentId: number, studentName: string, newStatus: string) => {
+    triggerConfirm(
+      "Ubah Status Siswa",
+      `Apakah Anda yakin ingin mengubah status aktif untuk "${studentName}" menjadi "${newStatus}"?`,
+      () => onUpdateStudentStatus(studentId, newStatus)
+    );
   };
 
   // ── Render ────────────────────────────────────────────────────────
@@ -612,7 +656,7 @@ export default function StudentTab({
                     <select
                       disabled={!isAdminAdministrasi}
                       value={st.activeStatus}
-                      onChange={(e) => onUpdateStudentStatus(st.id, e.target.value)}
+                      onChange={(e) => handleStatusChange(st.id, st.name, e.target.value)}
                       className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold border focus:outline-none transition-colors max-w-[100px] text-center ${
                         !isAdminAdministrasi
                           ? "bg-neutral-gray/5 border-neutral-gray/10 cursor-not-allowed text-neutral-gray"
@@ -935,6 +979,44 @@ export default function StudentTab({
                   Batal
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Custom Confirmation Modal Pop-up ─────────────────────────── */}
+      {confirmDialog.isOpen && (
+        <div className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-sm p-6 relative shadow-2xl text-center space-y-4 animate-scale-in text-neutral-dark">
+            <div className="mx-auto w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="space-y-1.5">
+              <h4 className="font-baloo text-base font-bold text-neutral-dark">{confirmDialog.title}</h4>
+              <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed px-2">
+                {confirmDialog.message}
+              </p>
+            </div>
+            <div className="flex gap-2.5 pt-2 select-none">
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirmDialog.action) confirmDialog.action();
+                  setConfirmDialog({ isOpen: false, title: "", message: "", action: null });
+                }}
+                className="flex-1 py-2.5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-3xs"
+              >
+                Ya, Konfirmasi
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDialog({ isOpen: false, title: "", message: "", action: null })}
+                className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Batal
+              </button>
             </div>
           </div>
         </div>
