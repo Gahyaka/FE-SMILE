@@ -159,6 +159,7 @@ function mapSppTransactions(rawTxs: any[]): any[] {
 
 function mapUsersData(rawUsers: any[]): any[] {
   const allowedRoles = ["ADMIN", "ADMIN_ADMINISTRASI", "ADMIN_TRANSAKSI", "GURU"];
+  const whitelistedUsernames = ["admin_adm", "admin_trx", "guru123"];
   
   // Read locally deleted user IDs to filter them out from backend response
   let deletedUserIds: any[] = [];
@@ -170,6 +171,7 @@ function mapUsersData(rawUsers: any[]): any[] {
   return rawUsers
     .filter((u: any) => allowedRoles.includes((u.role || "").toUpperCase()))
     .filter((u: any) => !deletedUserIds.includes(u.id))
+    .filter((u: any) => whitelistedUsernames.includes(u.username))
     .map((u: any) => {
       const rawRole = (u.role || "").toUpperCase();
       const mappedRole = rawRole === "ADMIN_ADMINISTRASI" || rawRole === "ADMIN" 
