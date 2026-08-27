@@ -196,14 +196,11 @@ export default function SppTab({
     .filter((tx) => tx.depositStatus === "Belum Disetor")
     .reduce((sum, tx) => sum + tx.les, 0);
 
-  const getTxCount = (cls: string) => {
-    return sppTransactions.filter((tx) => {
-      const matchesYear = selectedPeriod === "Semua" ? getAcademicYearFromDate(tx.date) === selectedAcademicYear : true;
-      const matchesPeriod = selectedPeriod === "Semua" ? true : isInPeriod(tx.date);
-      const student = students.find((s) => s.id === tx.studentId);
-      if (!student) return false;
-      const matchesClass = cls === "Semua" || student.class === cls;
-      return matchesYear && matchesPeriod && matchesClass;
+  const getStudentCount = (cls: string) => {
+    return students.filter((s) => {
+      const matchesClass = cls === "Semua" || s.class === cls;
+      const isAktif = s.activeStatus === "Aktif";
+      return matchesClass && isAktif;
     }).length;
   };
 
@@ -430,7 +427,7 @@ export default function SppTab({
                     : "bg-white text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
                 }`}
               >
-                {cls} ({getTxCount(cls)})
+                {cls} ({getStudentCount(cls)})
               </button>
             ))}
           </div>
@@ -963,7 +960,17 @@ export default function SppTab({
                           );
                           
                           const monthNameUpper = m.name.toUpperCase();
-                          const isPaid = studentMatrix?.matriks?.[monthNameUpper] === true;
+                          
+                          // Fallback check against local sppTransactions array to bypass naming typos from database matrix
+                          const hasTxInLocal = sppTransactions.some((tx) => {
+                            if (String(tx.studentId) !== String(student.id)) return false;
+                            return (tx.paidMonths || []).some((pm) => {
+                              const [yr, mo] = pm.split("-");
+                              return mo === m.value && yr === labelYear;
+                            });
+                          });
+
+                          const isPaid = (studentMatrix?.matriks?.[monthNameUpper] === true) || hasTxInLocal;
 
                           return (
                             <td key={m.value} className="py-2 px-1 text-center">

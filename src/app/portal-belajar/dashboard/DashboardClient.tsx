@@ -220,7 +220,7 @@ export default function DashboardClient() {
   const [activities, setActivities] = useState(initialActivities);
   const [sppTransactions, setSppTransactions] = useState(initialSppTransactions);
   const [sppMatriksData, setSppMatriksData] = useState<any[]>([]);
-  const [savings, setSavings] = useState(initialSavings);
+  const [savings, setSavings] = useState<any[]>(initialSavings);
   const [murajaahData, setMurajaahData] = useState<{[studentId: string]: {[param: string]: string}}>(initialMurajaah);
   const [murojaahMateriList, setMurojaahMateriList] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
@@ -1222,8 +1222,9 @@ const handleDeleteUser = (userId: number) => {
         statusSetoran: apiStatusSetoran
       };
 
-      // Add bulanList to payload if multi-months are selected
-      if (bulanList.length > 0) {
+      // Sesuai dokumentasi SPP.json: bulanList HANYA dikirim jika transaksi bersifat BATCH / RAPEL (lebih dari 1 bulan)
+      // Jika hanya 1 bulan, biarkan kosong agar backend memprosesnya sebagai transaksi SPP bulan tunggal.
+      if (bulanList.length > 1) {
         payload.bulanList = bulanList;
       }
 
@@ -1304,7 +1305,7 @@ const handleDeleteUser = (userId: number) => {
   };
 
   const handleAddSavingsTransaction = (data: {
-    studentId: number;
+    studentId: string | number;
     description: string;
     debet: number;
     kredit: number;
@@ -1315,7 +1316,7 @@ const handleDeleteUser = (userId: number) => {
 
     // Check Penarikan Saldo
     if (data.transType === "Penarikan") {
-      const studentTrans = savings.filter(t => t.studentId === data.studentId);
+      const studentTrans = savings.filter(t => String(t.studentId) === String(data.studentId));
       const currentSaldo = studentTrans.reduce((total, trans) => total + trans.debet - trans.kredit, 0);
       if (data.amountNum > currentSaldo) {
         alert("Saldo tidak cukup untuk melakukan penarikan!");
@@ -1335,7 +1336,7 @@ const handleDeleteUser = (userId: number) => {
 
     setSavings([newTrans, ...savings]);
 
-    const studentName = students.find(s => s.id === data.studentId)?.name || "Anak";
+    const studentName = students.find(s => String(s.id) === String(data.studentId))?.name || "Anak";
     const newLog = {
       id: Date.now(),
       time: new Date().toISOString().replace('T', ' ').substring(0, 16),

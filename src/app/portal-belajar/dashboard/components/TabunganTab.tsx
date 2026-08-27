@@ -3,15 +3,15 @@
 import React, { useState, useEffect } from "react";
 
 interface Student {
-  id: number;
+  id: string | number;
   name: string;
   class: string;
   activeStatus?: string;
 }
 
 interface SavingTransaction {
-  id: number;
-  studentId: number;
+  id: string | number;
+  studentId: string | number;
   date: string;
   description: string;
   debet: number;
@@ -36,12 +36,12 @@ export default function TabunganTab({
   adminName,
   onAddTransaction,
 }: TabunganTabProps) {
-  // Form states
-  const [selectedStudentId, setSelectedStudentId] = useState<number>(0);
+  // Form states (mendukung UUID String & Number)
+  const [selectedStudentId, setSelectedStudentId] = useState<string | number>("");
   const [transDesc, setTransDesc] = useState("Setoran rutin");
   const [transType, setTransType] = useState<"Setoran" | "Penarikan">("Setoran");
   const [transAmount, setTransAmount] = useState("");
-  const [savingFilterStudentId, setSavingFilterStudentId] = useState<number>(students.filter(s => s.activeStatus === "Aktif")[0]?.id || 1);
+  const [savingFilterStudentId, setSavingFilterStudentId] = useState<string | number>(students.filter(s => s.activeStatus === "Aktif")[0]?.id || "");
   const [showMutasiForm, setShowMutasiForm] = useState(false);
 
   // Form Filter Kelas (baru untuk mencegah loading berat)
@@ -68,21 +68,21 @@ export default function TabunganTab({
     if (formFilteredStudents.length > 0) {
       setSelectedStudentId(formFilteredStudents[0].id);
     } else {
-      setSelectedStudentId(0);
+      setSelectedStudentId("");
     }
   }, [formSelectedClass, students]);
 
   // Helper: Calculate total saldo for a student dynamically (Debet - Kredit)
-  const getStudentSaldo = (studentId: number) => {
-    const studentTrans = savings.filter((t) => t.studentId === studentId);
+  const getStudentSaldo = (studentId: string | number) => {
+    const studentTrans = savings.filter((t) => String(t.studentId) === String(studentId));
     return studentTrans.reduce((total, trans) => {
       return total + trans.debet - trans.kredit;
     }, 0);
   };
 
   // Helper: Get chronological savings list with running balance
-  const getStudentTabunganRows = (studentId: number) => {
-    const studentTrans = [...savings].filter((t) => t.studentId === studentId).reverse(); // Oldest first for calculation
+  const getStudentTabunganRows = (studentId: string | number) => {
+    const studentTrans = [...savings].filter((t) => String(t.studentId) === String(studentId)).reverse(); // Oldest first for calculation
     let runningSaldo = 0;
     const mapped = studentTrans.map((t) => {
       runningSaldo = runningSaldo + t.debet - t.kredit;
@@ -190,8 +190,8 @@ export default function TabunganTab({
                     <label htmlFor="selectedStudent" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1">Langkah 2: Pilih Siswa Kelas {formSelectedClass}</label>
                     <select
                       id="selectedStudent"
-                      value={selectedStudentId}
-                      onChange={(e) => setSelectedStudentId(Number(e.target.value))}
+                      value={selectedStudentId || ""}
+                      onChange={(e) => setSelectedStudentId(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none bg-white cursor-pointer"
                     >
                       <option value="">-- Pilih Murid --</option>
@@ -350,7 +350,7 @@ export default function TabunganTab({
               <tbody className="divide-y divide-neutral-gray/5 font-semibold text-neutral-dark">
                 {filteredStudents.map((st) => {
                   const saldo = getStudentSaldo(st.id);
-                  const isActive = savingFilterStudentId === st.id;
+                  const isActive = String(savingFilterStudentId) === String(st.id);
                   return (
                     <tr
                       key={st.id}
@@ -386,7 +386,7 @@ export default function TabunganTab({
         <div className="bg-white p-5 rounded-2xl border border-primary-green/10 shadow-3xs space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-neutral-gray/10">
             <h4 className="font-baloo text-base font-bold text-neutral-dark">
-              Buku Rekening Tabungan Personal: <span className="text-primary-green underline font-black">{students.find(s => s.id === savingFilterStudentId)?.name || "Murid"}</span>
+              Buku Rekening Tabungan Personal: <span className="text-primary-green underline font-black">{students.find(s => String(s.id) === String(savingFilterStudentId))?.name || "Murid"}</span>
             </h4>
           </div>
 
