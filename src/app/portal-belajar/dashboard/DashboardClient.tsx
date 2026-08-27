@@ -159,7 +159,18 @@ function mapSppTransactions(rawTxs: any[]): any[] {
 
 function mapUsersData(rawUsers: any[]): any[] {
   const allowedRoles = ["ADMIN", "ADMIN_ADMINISTRASI", "ADMIN_TRANSAKSI", "GURU"];
-  const whitelistedUsernames = ["admin_adm", "admin_trx", "guru123"];
+  
+  // Sembunyikan akun dummy legacy bawaan backend agar tabel bersih.
+  // Tapi tetap loloskan akun utama (admin_adm, admin_trx, guru123) serta semua akun baru yang dibuat user.
+  const dummyUsernames = [
+    "admin_trx70",
+    "admin_trx27",
+    "admin_trx31",
+    "admin_trx53",
+    "echa_guru16",
+    "fariz_guru37",
+    "fariz_guru27"
+  ];
   
   // Read locally deleted user IDs to filter them out from backend response
   let deletedUserIds: any[] = [];
@@ -171,7 +182,7 @@ function mapUsersData(rawUsers: any[]): any[] {
   return rawUsers
     .filter((u: any) => allowedRoles.includes((u.role || "").toUpperCase()))
     .filter((u: any) => !deletedUserIds.includes(u.id))
-    .filter((u: any) => whitelistedUsernames.includes(u.username))
+    .filter((u: any) => !dummyUsernames.includes(u.username))
     .map((u: any) => {
       const rawRole = (u.role || "").toUpperCase();
       const mappedRole = rawRole === "ADMIN_ADMINISTRASI" || rawRole === "ADMIN" 
@@ -181,8 +192,6 @@ function mapUsersData(rawUsers: any[]): any[] {
           : "guru";
 
       // Gunakan username asli dari database — JANGAN override
-      // Override sebelumnya menyebabkan semua admin_trx tampil identik
-      // sehingga tidak bisa dibedakan saat reset password
       return {
         id: u.id,
         name: u.nama || u.name || (mappedRole === "admin_adm" ? "Admin Administrasi" : mappedRole === "admin_trx" ? "Admin Transaksi" : "Guru"),

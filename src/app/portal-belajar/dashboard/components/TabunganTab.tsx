@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface Student {
   id: number;
@@ -37,12 +37,15 @@ export default function TabunganTab({
   onAddTransaction,
 }: TabunganTabProps) {
   // Form states
-  const [selectedStudentId, setSelectedStudentId] = useState<number>(students.filter(s => s.activeStatus === "Aktif")[0]?.id || 1);
+  const [selectedStudentId, setSelectedStudentId] = useState<number>(0);
   const [transDesc, setTransDesc] = useState("Setoran rutin");
   const [transType, setTransType] = useState<"Setoran" | "Penarikan">("Setoran");
   const [transAmount, setTransAmount] = useState("");
   const [savingFilterStudentId, setSavingFilterStudentId] = useState<number>(students.filter(s => s.activeStatus === "Aktif")[0]?.id || 1);
   const [showMutasiForm, setShowMutasiForm] = useState(false);
+
+  // Form Filter Kelas (baru untuk mencegah loading berat)
+  const [formSelectedClass, setFormSelectedClass] = useState(classes[0]?.className || "KB");
 
   // Filters for summary lists
   const [classFilter, setClassFilter] = useState("Semua");
@@ -54,6 +57,20 @@ export default function TabunganTab({
     const isAktif = st.activeStatus === "Aktif";
     return matchesClass && matchesSearch && isAktif;
   });
+
+  // Filter students based on chosen class in Form
+  const formFilteredStudents = students.filter(
+    (st) => st.activeStatus === "Aktif" && st.class === formSelectedClass
+  );
+
+  // Auto set first student when form class filter changes
+  useEffect(() => {
+    if (formFilteredStudents.length > 0) {
+      setSelectedStudentId(formFilteredStudents[0].id);
+    } else {
+      setSelectedStudentId(0);
+    }
+  }, [formSelectedClass, students]);
 
   // Helper: Calculate total saldo for a student dynamically (Debet - Kredit)
   const getStudentSaldo = (studentId: number) => {
@@ -76,6 +93,7 @@ export default function TabunganTab({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedStudentId) return;
     if (!transAmount || isNaN(Number(transAmount)) || Number(transAmount) <= 0) return;
 
     const amountNum = Number(transAmount);
@@ -151,18 +169,39 @@ export default function TabunganTab({
 
                 {/* Form Content (Scrollable) */}
                 <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                  
+                  {/* 1. Pemilihan Kelas (Baru - Filter Awal Murid) */}
                   <div>
-                    <label htmlFor="selectedStudent" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1">Pilih Siswa</label>
+                    <label htmlFor="formClassSelect" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1">Langkah 1: Filter Kelas Dahulu</label>
+                    <select
+                      id="formClassSelect"
+                      value={formSelectedClass}
+                      onChange={(e) => setFormSelectedClass(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border-2 border-primary-green/30 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark cursor-pointer"
+                    >
+                      {classes.map((c) => (
+                        <option key={c.id} value={c.className}>{c.className}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* 2. Pemilihan Murid Terfilter */}
+                  <div>
+                    <label htmlFor="selectedStudent" className="block text-[10px] font-extrabold text-neutral-gray uppercase tracking-wide mb-1">Langkah 2: Pilih Siswa Kelas {formSelectedClass}</label>
                     <select
                       id="selectedStudent"
                       value={selectedStudentId}
                       onChange={(e) => setSelectedStudentId(Number(e.target.value))}
                       className="w-full px-3 py-2 rounded-lg border-2 border-primary-green/15 focus:border-primary-green focus:outline-none bg-white cursor-pointer"
                     >
-                      {students.filter(st => st.activeStatus === "Aktif").map((st) => (
-                        <option key={st.id} value={st.id}>{st.name} ({st.class})</option>
+                      <option value="">-- Pilih Murid --</option>
+                      {formFilteredStudents.map((st) => (
+                        <option key={st.id} value={st.id}>{st.name}</option>
                       ))}
                     </select>
+                    {formFilteredStudents.length === 0 && (
+                      <span className="text-[9px] text-rose-500 font-semibold block mt-1">Belum ada murid aktif di kelas ini.</span>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -226,7 +265,8 @@ export default function TabunganTab({
                   <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
                     <button
                       type="submit"
-                      className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                      disabled={!selectedStudentId}
+                      className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Simpan Transaksi
                     </button>
