@@ -34,7 +34,7 @@ export const userService = {
    * Menghapus akun pengguna secara permanen
    */
   async delete(id: string | number) {
-    const response = await api.delete(`/api/v1/auth/users/${id}`);
+    const response = await api.delete(`/api/v1/users/${id}`);
     return response.data;
   }
 };

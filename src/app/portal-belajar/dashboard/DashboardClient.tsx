@@ -870,17 +870,21 @@ const handleDeleteUser = (userId: number) => {
       } else if (actionType === "delete_user") {
         const targetUser = users.find(u => u.id === targetId);
         if (targetUser) {
+          let backendDeleted = false;
           try {
             await userService.delete(targetId);
+            backendDeleted = true;
           } catch (err) {
             console.warn("Backend user deletion failed/unsupported. Falling back to local storage deletion.");
           }
 
-          const raw = localStorage.getItem("deleted_user_ids");
-          const deletedUserIds = raw ? JSON.parse(raw) : [];
-          if (!deletedUserIds.includes(targetId)) {
-            deletedUserIds.push(targetId);
-            localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
+          if (!backendDeleted) {
+            const raw = localStorage.getItem("deleted_user_ids");
+            const deletedUserIds = raw ? JSON.parse(raw) : [];
+            if (!deletedUserIds.includes(targetId)) {
+              deletedUserIds.push(targetId);
+              localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
+            }
           }
 
           const updated = users.filter(u => u.id !== targetId);
