@@ -1,30 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-
-const MURAJAAH_PARAMS = {
-  suratPendek: ["Al-Fatihah", "Al-Ikhlas", "Al-Falaq", "An-Nas", "Al-Asr", "An-Nasr", "Al-Kafirun", "Al-Kautsar", "Al-Quraisy", "Al-Lahab"],
-  doaSehariHari: ["Kedua orang tua", "Keselamatan dunia akhirat", "Sebelum belajar", "Haq dan batil", "Masuk masjid", "Setelah adzan", "Sebelum makan", "Sesudah makan", "Turun hujan", "Bangun tidur", "Adzan/iqamah", "Masuk WC", "Bercermin", "Keluar rumah", "Berkendara"],
-  haditsPilihan: ["Niat", "Jangan marah", "Kebersihan", "Masjid rumah kaum mukmin", "Surga di bawah kaki ibu", "Persaudaraan", "Malu", "Menuntut ilmu", "Asmaul Husna (60)"],
-  ekskul: ["Drumband", "Angklung", "Calistung"],
-  pai: ["Rukun iman", "Rukun islam", "Tarikh (Nabi Muhammad)", "10 Malaikat", "Mufradat (32)", "Hafalan tambahan", "Al-Humazah"],
-  sholatDhuha: ["Takbiratul ihram", "Ruku", "Iktidal", "Sujud", "Duduk di antara 2 sujud", "Tahiyatul"]
-};
-
-const CATEGORY_TABS = [
-  { key: "suratPendek",  label: "Surat Pendek",  icon: "📖" },
-  { key: "doaSehariHari", label: "Doa Harian",   icon: "🤲" },
-  { key: "haditsPilihan", label: "Hadits",        icon: "📜" },
-  { key: "pai",           label: "PAI",           icon: "🕌" },
-  { key: "sholatDhuha",   label: "Sholat Dhuha",  icon: "🧎" },
-  { key: "ekskul",        label: "Ekskul",        icon: "🎵" },
-];
-
-const CAT_LABEL: Record<string, string> = {
-  suratPendek: "Surat Pendek", doaSehariHari: "Doa Harian",
-  haditsPilihan: "Hadits Pilihan", ekskul: "Ekstrakurikuler",
-  pai: "Pendidikan Agama Islam (PAI)", sholatDhuha: "Sholat Dhuha",
-};
+import React, { useState, useMemo, useEffect } from "react";
 
 const SCORE_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   sb: { label: "Sangat Baik", color: "text-emerald-700", bg: "bg-emerald-500", dot: "bg-emerald-500" },
@@ -42,6 +18,25 @@ const BADGE: Record<string, string> = {
   "-":"bg-stone-100 text-stone-500 border-stone-200",
 };
 
+// Hardcoded fallback data in case database categories are empty or failed to load
+const FALLBACK_PARAMS = {
+  suratPendek: ["Al-Fatihah", "Al-Ikhlas", "Al-Falaq", "An-Nas", "Al-Asr", "An-Nasr", "Al-Kafirun", "Al-Kautsar", "Al-Quraisy", "Al-Lahab"],
+  doaSehariHari: ["Kedua orang tua", "Keselamatan dunia akhirat", "Sebelum belajar", "Haq dan batil", "Masuk masjid", "Setelah adzan", "Sebelum makan", "Sesudah makan", "Turun hujan", "Bangun tidur", "Adzan/iqamah", "Masuk WC", "Bercermin", "Keluar rumah", "Berkendara"],
+  haditsPilihan: ["Niat", "Jangan marah", "Kebersihan", "Masjid rumah kaum mukmin", "Surga di bawah kaki ibu", "Persaudaraan", "Malu", "Menuntut ilmu", "Asmaul Husna (60)"],
+  ekskul: ["Drumband", "Angklung", "Calistung"],
+  pai: ["Rukun iman", "Rukun islam", "Tarikh (Nabi Muhammad)", "10 Malaikat", "Mufradat (32)", "Hafalan tambahan", "Al-Humazah"],
+  sholatDhuha: ["Takbiratul ihram", "Ruku", "Iktidal", "Sujud", "Duduk di antara 2 sujud", "Tahiyatul"]
+};
+
+const FALLBACK_CATEGORY_TABS = [
+  { key: "suratPendek",  label: "Surat Pendek",  icon: "📖" },
+  { key: "doaSehariHari", label: "Doa Harian",   icon: "🤲" },
+  { key: "haditsPilihan", label: "Hadits",        icon: "📜" },
+  { key: "pai",           label: "PAI",           icon: "🕌" },
+  { key: "sholatDhuha",   label: "Sholat Dhuha",  icon: "🧎" },
+  { key: "ekskul",        label: "Ekskul",        icon: "🎵" },
+];
+
 interface Student {
   id: string | number;
   name: string;
@@ -57,6 +52,7 @@ interface MurajaahTabProps {
   students: Student[];
   classes: any[];
   murajaahData: { [studentId: string]: { [param: string]: string } };
+  murojaahCategories?: any[];
   isAdminAdministrasi: boolean;
   isGuru: boolean;
   onUpdateMurajaah: (studentId: string | number, param: string, score: string) => void;
@@ -66,15 +62,55 @@ export default function MurajaahTab({
   students,
   classes = [],
   murajaahData,
+  murojaahCategories = [],
   isAdminAdministrasi,
   isGuru,
   onUpdateMurajaah,
 }: MurajaahTabProps) {
   const [murajaahStudentId, setMurajaahStudentId] = useState<string | number>(students[0]?.id || "");
-  const [editingCategory, setEditingCategory] = useState<keyof typeof MURAJAAH_PARAMS>("suratPendek");
+  const [editingCategory, setEditingCategory] = useState<string>("");
   const [classFilter, setClassFilter] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeWorkTab, setActiveWorkTab] = useState<"input" | "summary">("input");
+
+  // Mouse-dragging & smooth scrolling controls for category tabs
+  const tabsRef = React.useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!tabsRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - tabsRef.current.offsetLeft);
+    setScrollLeft(tabsRef.current.scrollLeft);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !tabsRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - tabsRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5; // Scroll speed multiplier
+    tabsRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const scrollTabs = (direction: "left" | "right") => {
+    if (tabsRef.current) {
+      const scrollAmount = 180;
+      tabsRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth"
+      });
+    }
+  };
 
   const currentStudent = students.find(s => String(s.id) === String(murajaahStudentId));
 
@@ -84,18 +120,61 @@ export default function MurajaahTab({
     return matchesClass && matchesSearch;
   });
 
-  // Progress stats for current student
-  const studentScores = useMemo(() => murajaahData[murajaahStudentId] || {}, [murajaahData, murajaahStudentId]);
-  const allParams = useMemo(() => Object.values(MURAJAAH_PARAMS).flat(), []);
-  const filled = useMemo(() => allParams.filter(p => studentScores[p] && studentScores[p] !== "-").length, [allParams, studentScores]);
-  const pct = allParams.length > 0 ? Math.round((filled / allParams.length) * 100) : 0;
-  const catParams = MURAJAAH_PARAMS[editingCategory];
-  const catFilled = catParams.filter(p => studentScores[p] && studentScores[p] !== "-").length;
+  // Reconstruct categories dynamically from backend murojaahCategories
+  const categoriesList = useMemo(() => {
+    if (!murojaahCategories || murojaahCategories.length === 0) {
+      return FALLBACK_CATEGORY_TABS.map(tab => {
+        const key = tab.key as keyof typeof FALLBACK_PARAMS;
+        return {
+          id: tab.key,
+          nama: tab.label,
+          icon: tab.icon,
+          materi: FALLBACK_PARAMS[key] || []
+        };
+      });
+    }
 
-  // Score distribution for current student
+    return murojaahCategories.map(cat => {
+      const nameLower = cat.nama.toLowerCase();
+      let icon = "📖";
+      if (nameLower.includes("doa")) icon = "🤲";
+      else if (nameLower.includes("hadits") || nameLower.includes("hadist")) icon = "📜";
+      else if (nameLower.includes("pai") || nameLower.includes("agama")) icon = "🕌";
+      else if (nameLower.includes("sholat") || nameLower.includes("shalat") || nameLower.includes("dhuha")) icon = "🧎";
+      else if (nameLower.includes("ekskul") || nameLower.includes("musik") || nameLower.includes("seni") || nameLower.includes("olahraga")) icon = "🎵";
+
+      const materiList = cat.materi || cat.materis || [];
+      return {
+        id: String(cat.id),
+        nama: cat.nama,
+        icon: icon,
+        materi: materiList.map((m: any) => m.nama || m.namaMateri || "")
+      };
+    });
+  }, [murojaahCategories]);
+
+  // Set default selected category once categoriesList is loaded
+  useEffect(() => {
+    if (categoriesList.length > 0 && (!editingCategory || !categoriesList.some(c => c.id === editingCategory))) {
+      setEditingCategory(categoriesList[0].id);
+    }
+  }, [categoriesList, editingCategory]);
+
+  const activeCategoryObj = useMemo(() => {
+    return categoriesList.find(c => c.id === editingCategory) || categoriesList[0];
+  }, [categoriesList, editingCategory]);
+
+  const studentScores = useMemo(() => murajaahData[murajaahStudentId] || {}, [murajaahData, murajaahStudentId]);
+  const allParams = useMemo(() => categoriesList.flatMap(c => c.materi), [categoriesList]);
+  const filled = useMemo(() => allParams.filter((p: string) => studentScores[p] && studentScores[p] !== "-").length, [allParams, studentScores]);
+  const pct = allParams.length > 0 ? Math.round((filled / allParams.length) * 100) : 0;
+  
+  const catParams = activeCategoryObj?.materi || [];
+  const catFilled = catParams.filter((p: string) => studentScores[p] && studentScores[p] !== "-").length;
+
   const scoreCounts = useMemo(() => {
     const counts: Record<string, number> = { sb: 0, b: 0, c: 0, k: 0, "-": 0 };
-    allParams.forEach(p => { const s = studentScores[p] || "-"; counts[s] = (counts[s] || 0) + 1; });
+    allParams.forEach((p: string) => { const s = studentScores[p] || "-"; counts[s] = (counts[s] || 0) + 1; });
     return counts;
   }, [allParams, studentScores]);
 
@@ -105,10 +184,10 @@ export default function MurajaahTab({
     if (!printWindow) return;
 
     let tablesHtml = "";
-    Object.keys(MURAJAAH_PARAMS).forEach((catKey) => {
-      const params = MURAJAAH_PARAMS[catKey as keyof typeof MURAJAAH_PARAMS];
+    categoriesList.forEach((cat) => {
+      const params = cat.materi;
       let rowsHtml = "";
-      params.forEach((param, idx) => {
+      params.forEach((param: string, idx: number) => {
         const s = studentScores[param] || "-";
         const scoreColor = s === "sb" ? "#15803d" : s === "b" ? "#1d4ed8" : s === "c" ? "#b45309" : s === "k" ? "#be123c" : "#9ca3af";
         rowsHtml += `<tr style="border-bottom:1px solid #e5e7eb">
@@ -118,7 +197,7 @@ export default function MurajaahTab({
         </tr>`;
       });
       tablesHtml += `<div style="margin-top:14px;page-break-inside:avoid">
-        <h4 style="margin:0 0 5px;font-size:10px;text-transform:uppercase;color:#15803d;border-left:3px solid #15803d;padding-left:6px;letter-spacing:0.5px">${CAT_LABEL[catKey]}</h4>
+        <h4 style="margin:0 0 5px;font-size:10px;text-transform:uppercase;color:#15803d;border-left:3px solid #15803d;padding-left:6px;letter-spacing:0.5px">${cat.nama}</h4>
         <table style="width:100%;border-collapse:collapse">
           <thead><tr style="background:#f9fafb">
             <th style="width:8%;text-align:center;padding:5px 8px;font-size:9px;border-bottom:1px solid #e5e7eb">No</th>
@@ -247,7 +326,7 @@ export default function MurajaahTab({
           </div>
 
           {/* Student list */}
-          <div className="overflow-y-auto max-h-[400px] lg:max-h-[520px]">
+          <div className="overflow-y-auto max-h-[300px] lg:max-h-[520px]">
             {filteredStudents.length === 0 ? (
               <div className="py-12 text-center text-xs text-neutral-gray font-medium">Tidak ada santri</div>
             ) : (
@@ -281,8 +360,8 @@ export default function MurajaahTab({
                       {/* Mini progress */}
                       <div className="w-full h-1 bg-stone-100 rounded-full mt-1.5 overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-500 ${stPct === 100 ? "bg-emerald-500" : stPct > 50 ? "bg-amber-400" : "bg-primary-green/50"}`}
-                          style={{ width: `${stPct}%` }}
+                           className={`h-full rounded-full transition-all duration-500 ${stPct === 100 ? "bg-emerald-500" : stPct > 50 ? "bg-amber-400" : "bg-primary-green/50"}`}
+                           style={{ width: `${stPct}%` }}
                         />
                       </div>
                     </div>
@@ -294,7 +373,7 @@ export default function MurajaahTab({
         </div>
 
         {/* RIGHT — Workspace ────────────────────────────── */}
-        <div className="flex-1 min-w-0 space-y-4">
+        <div className="flex-1 min-w-0 space-y-4 w-full">
 
           {/* Student summary card */}
           {currentStudent && (
@@ -376,38 +455,77 @@ export default function MurajaahTab({
             </div>
 
             {/* Category tabs — only shown in input mode */}
-            {activeWorkTab === "input" && (
+            {activeWorkTab === "input" && activeCategoryObj && (
               <div className="px-5 pt-4">
-                <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
-                  {CATEGORY_TABS.map((tab) => {
-                    const params = MURAJAAH_PARAMS[tab.key as keyof typeof MURAJAAH_PARAMS];
-                    const done = params.filter(p => studentScores[p] && studentScores[p] !== "-").length;
-                    const isActive = editingCategory === tab.key;
-                    return (
-                      <button
-                        key={tab.key}
-                        type="button"
-                        onClick={() => setEditingCategory(tab.key as any)}
-                        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-bold whitespace-nowrap border transition-all cursor-pointer flex-shrink-0 ${
-                          isActive
-                            ? "bg-primary-green text-white border-primary-green shadow-sm"
-                            : "bg-stone-50 text-neutral-gray border-neutral-gray/12 hover:border-primary-green/30 hover:text-neutral-dark"
-                        }`}
-                      >
-                        <span>{tab.icon}</span>
-                        <span>{tab.label}</span>
-                        <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-md ${isActive ? "bg-white/20 text-white" : "bg-stone-200 text-neutral-gray"}`}>
-                          {done}/{params.length}
-                        </span>
-                      </button>
-                    );
-                  })}
+                {/* Scrollable Container with Left/Right Buttons and Drag-to-Scroll support */}
+                <div className="relative flex items-center group/nav">
+                  {/* Left Scroll Button */}
+                  <button
+                    type="button"
+                    onClick={() => scrollTabs("left")}
+                    className="absolute left-0 z-10 w-7 h-7 bg-white/90 hover:bg-white border border-neutral-gray/12 shadow-sm rounded-full flex items-center justify-center text-neutral-gray hover:text-primary-green opacity-0 group-hover/nav:opacity-100 transition-opacity duration-200 -left-2.5 cursor-pointer hidden md:flex"
+                    title="Scroll Kiri"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+
+                  <div
+                    ref={tabsRef}
+                    onMouseDown={handleMouseDown}
+                    onMouseLeave={handleMouseLeave}
+                    onMouseUp={handleMouseUp}
+                    onMouseMove={handleMouseMove}
+                    className={`flex gap-2 overflow-x-auto scrollbar-none pb-1 flex-1 select-none ${
+                      isDragging ? "cursor-grabbing" : "cursor-grab"
+                    }`}
+                    style={{ scrollBehavior: isDragging ? "auto" : "smooth" }}
+                  >
+                    {categoriesList.map((tab) => {
+                      const done = tab.materi.filter((p: string) => studentScores[p] && studentScores[p] !== "-").length;
+                      const isActive = editingCategory === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => {
+                            // Only trigger select if not dragging
+                            if (!isDragging) setEditingCategory(tab.id);
+                          }}
+                          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-bold whitespace-nowrap border transition-all cursor-pointer flex-shrink-0 select-none ${
+                            isActive
+                              ? "bg-primary-green text-white border-primary-green shadow-sm"
+                              : "bg-stone-50 text-neutral-gray border-neutral-gray/12 hover:border-primary-green/30 hover:text-neutral-dark"
+                          }`}
+                        >
+                          <span>{tab.icon}</span>
+                          <span>{tab.nama}</span>
+                          <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-md ${isActive ? "bg-white/20 text-white" : "bg-stone-200 text-neutral-gray"}`}>
+                            {done}/{tab.materi.length}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Right Scroll Button */}
+                  <button
+                    type="button"
+                    onClick={() => scrollTabs("right")}
+                    className="absolute right-0 z-10 w-7 h-7 bg-white/90 hover:bg-white border border-neutral-gray/12 shadow-sm rounded-full flex items-center justify-center text-neutral-gray hover:text-primary-green opacity-0 group-hover/nav:opacity-100 transition-opacity duration-200 -right-2.5 cursor-pointer hidden md:flex"
+                    title="Scroll Kanan"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
                 </div>
 
                 {/* Category progress bar */}
                 <div className="mt-3 mb-1">
                   <div className="flex justify-between text-[9px] font-semibold text-neutral-gray mb-1">
-                    <span className="capitalize">{CAT_LABEL[editingCategory]}</span>
+                    <span className="capitalize">{activeCategoryObj.nama}</span>
                     <span>{catFilled}/{catParams.length} selesai</span>
                   </div>
                   <div className="w-full h-1.5 bg-stone-100 rounded-full overflow-hidden">
@@ -421,44 +539,49 @@ export default function MurajaahTab({
             )}
 
             {/* Content area */}
-            <div className="p-5">
+            <div className="p-4 sm:p-5">
               {activeWorkTab === "input" ? (
                 (isAdminAdministrasi || isGuru) ? (
-                  <div className="space-y-2.5">
-                    {catParams.map((param, idx) => {
+                  <div className="space-y-3">
+                    {catParams.map((param: string, idx: number) => {
                       const currentVal = studentScores[param] || "-";
                       const cfg = SCORE_CONFIG[currentVal];
                       return (
-                        <div key={param} className="flex items-center gap-3 p-3.5 bg-stone-50 hover:bg-stone-100/70 rounded-xl border border-neutral-gray/6 transition-colors group">
-                          {/* Row number */}
-                          <span className="text-[9px] font-black text-neutral-gray/40 w-4 text-center flex-shrink-0">{idx + 1}</span>
-                          {/* Param name */}
-                          <span className="flex-1 text-[11.5px] font-semibold text-neutral-dark leading-snug">{param}</span>
-                          {/* Score buttons */}
-                          <div className="flex gap-1.5 flex-shrink-0">
-                            {["sb", "b", "c", "k", "-"].map((score) => {
-                              const isSelected = currentVal === score;
-                              const sc = SCORE_CONFIG[score];
-                              return (
-                                <button
-                                  key={score}
-                                  type="button"
-                                  onClick={() => onUpdateMurajaah(murajaahStudentId, param, score)}
-                                  title={sc.label}
-                                  className={`w-8 h-8 rounded-lg text-[9.5px] font-black uppercase flex items-center justify-center transition-all cursor-pointer ${
-                                    isSelected
-                                      ? `${sc.bg} text-white shadow-sm scale-110`
-                                      : "bg-white border border-neutral-gray/15 text-neutral-gray/50 hover:border-neutral-gray/30 hover:text-neutral-gray"
-                                  }`}
-                                >
-                                  {score}
-                                </button>
-                              );
-                            })}
+                        <div key={param} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-stone-50 hover:bg-stone-100/70 rounded-xl border border-neutral-gray/6 transition-colors group">
+                          {/* Left Column (Index + Name) */}
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <span className="text-[9.5px] font-black text-neutral-gray/40 w-4 text-center flex-shrink-0">{idx + 1}</span>
+                            <span className="text-[11.5px] font-bold text-neutral-dark leading-snug break-words">{param}</span>
                           </div>
-                          {/* Current badge */}
-                          <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 ${cfg.bg}`}>
-                            <span className="text-[7px] font-black text-white uppercase">{currentVal}</span>
+
+                          {/* Right Column (Control Buttons + Current status badge) */}
+                          <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto mt-1 sm:mt-0 pt-2.5 sm:pt-0 border-t sm:border-t-0 border-dashed border-neutral-gray/12 flex-shrink-0">
+                            {/* Score selection buttons */}
+                            <div className="flex gap-1.5">
+                              {["sb", "b", "c", "k", "-"].map((score) => {
+                                const isSelected = currentVal === score;
+                                const sc = SCORE_CONFIG[score];
+                                return (
+                                  <button
+                                    key={score}
+                                    type="button"
+                                    onClick={() => onUpdateMurajaah(murajaahStudentId, param, score)}
+                                    title={sc.label}
+                                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-[9.5px] sm:text-[10px] font-black uppercase flex items-center justify-center transition-all cursor-pointer ${
+                                      isSelected
+                                        ? `${sc.bg} text-white shadow-md scale-105 z-10 font-black`
+                                        : "bg-white border border-neutral-gray/15 text-neutral-gray/60 hover:border-neutral-gray/30 hover:text-neutral-dark"
+                                    }`}
+                                  >
+                                    {score}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {/* Status badge preview */}
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${cfg.bg} shadow-sm border border-white/20`}>
+                              <span className="text-[8.5px] font-black text-white uppercase">{currentVal}</span>
+                            </div>
                           </div>
                         </div>
                       );
@@ -480,35 +603,34 @@ export default function MurajaahTab({
                   </div>
                 )
               ) : (
-                /* Summary view */
-                <div className="space-y-4">
-                  {Object.keys(MURAJAAH_PARAMS).map((catKey) => {
-                    const params = MURAJAAH_PARAMS[catKey as keyof typeof MURAJAAH_PARAMS];
-                    const done = params.filter(p => studentScores[p] && studentScores[p] !== "-").length;
-                    const catPct = Math.round((done / params.length) * 100);
+                /* Summary view - Grid layout (responsive on mobile) */
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {categoriesList.map((cat) => {
+                    const done = cat.materi.filter((p: string) => studentScores[p] && studentScores[p] !== "-").length;
+                    const catPct = Math.round((done / cat.materi.length) * 100);
                     return (
-                      <div key={catKey} className="rounded-xl border border-neutral-gray/8 overflow-hidden">
+                      <div key={cat.id} className="rounded-xl border border-neutral-gray/8 overflow-hidden bg-white shadow-3xs flex flex-col">
                         {/* Category header */}
-                        <div className="px-4 py-3 bg-stone-50 border-b border-neutral-gray/6 flex items-center justify-between">
-                          <span className="text-[10px] font-extrabold text-neutral-dark uppercase tracking-wide">{CAT_LABEL[catKey]}</span>
+                        <div className="px-4 py-3 bg-stone-50 border-b border-neutral-gray/6 flex items-center justify-between flex-shrink-0">
+                          <span className="text-[10px] font-extrabold text-neutral-dark uppercase tracking-wide truncate max-w-[130px] sm:max-w-none">{cat.nama}</span>
                           <div className="flex items-center gap-2">
-                            <div className="w-20 h-1.5 bg-stone-200 rounded-full overflow-hidden">
-                              <div className={`h-full rounded-full ${catPct === 100 ? "bg-emerald-500" : "bg-primary-green"}`} style={{ width: `${catPct}%` }} />
+                            <div className="w-16 sm:w-20 h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                              <div className={`h-full rounded-full transition-all duration-300 ${catPct === 100 ? "bg-emerald-500" : "bg-primary-green"}`} style={{ width: `${catPct}%` }} />
                             </div>
-                            <span className="text-[9px] font-bold text-neutral-gray">{done}/{params.length}</span>
+                            <span className="text-[9px] font-black text-neutral-gray">{done}/{cat.materi.length}</span>
                           </div>
                         </div>
                         {/* Items grid */}
-                        <div className="divide-y divide-neutral-gray/5">
-                          {params.map((p, idx) => {
+                        <div className="divide-y divide-neutral-gray/5 overflow-y-auto max-h-[220px] scrollbar-thin">
+                          {cat.materi.map((p: string, idx: number) => {
                             const score = studentScores[p] || "-";
                             return (
                               <div key={p} className="px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-stone-50/50 transition-colors">
-                                <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="flex items-center gap-2 min-w-0">
                                   <span className="text-[8.5px] text-neutral-gray/40 font-bold w-4 text-center flex-shrink-0">{idx + 1}</span>
                                   <span className="text-[11px] font-semibold text-neutral-dark truncate">{p}</span>
                                 </div>
-                                <span className={`text-[8.5px] font-extrabold px-2 py-0.5 rounded-md border flex-shrink-0 uppercase ${BADGE[score]}`}>
+                                <span className={`text-[8px] sm:text-[8.5px] font-extrabold px-2 py-0.5 rounded-md border flex-shrink-0 uppercase ${BADGE[score]} shadow-3xs`}>
                                   {score}
                                 </span>
                               </div>

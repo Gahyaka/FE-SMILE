@@ -151,16 +151,33 @@ export default function KegiatanTab({
   const getPhotoUrl = (foto: FotoItem) => {
     const rawUrl = foto.viewUrl || foto.url || foto.path || foto.foto || "";
     if (!rawUrl) return "";
+
+    // Jika link Google Drive (lh3.googleusercontent.com / drive.google.com), gunakan server-side proxy
+    if (rawUrl.includes("googleusercontent.com") || rawUrl.includes("drive.google.com")) {
+      return `/api/proxy-image?url=${encodeURIComponent(rawUrl)}`;
+    }
     
-    // Jika sudah memiliki prefix proxy /api-proxy atau link eksternal http
-    if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://") || rawUrl.startsWith("/api-proxy")) {
+    // Jika mengandung host backend local atau production
+    if (rawUrl.includes("localhost:3333") || rawUrl.includes("127.0.0.1:3333") || rawUrl.includes("be-smile-production.up.railway.app")) {
+      const pathOnly = rawUrl.replace(/^https?:\/\/[^\/]+/, "");
+      return `/api-proxy${pathOnly.startsWith("/") ? pathOnly : `/${pathOnly}`}`;
+    }
+
+    // Jika sudah memiliki prefix proxy /api-proxy
+    if (rawUrl.startsWith("/api-proxy")) {
       return rawUrl;
     }
 
-    // Jika path bertipe local uploads dari Adonis
+    // Jika mengandung uploads/
     if (rawUrl.includes("uploads/")) {
-      const cleanPath = rawUrl.startsWith("/") ? rawUrl : `/${rawUrl}`;
+      const pathOnly = rawUrl.includes("http") ? rawUrl.replace(/^https?:\/\/[^\/]+/, "") : rawUrl;
+      const cleanPath = pathOnly.startsWith("/") ? pathOnly : `/${pathOnly}`;
       return `/api-proxy${cleanPath}`;
+    }
+
+    // Jika link eksternal http (seperti google drive atau unsplash)
+    if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) {
+      return rawUrl;
     }
 
     // Jika berawalan / tapi tidak memiliki prefix proxy
@@ -353,11 +370,6 @@ export default function KegiatanTab({
                         <>
                           <div className="fixed inset-0 z-20" onClick={() => setActiveKebabId(null)} />
                           <div className="absolute right-0 mt-1 w-48 bg-white border border-neutral-gray/10 rounded-xl shadow-xl z-30 py-1.5 overflow-hidden">
-                            <button type="button" onClick={() => { openDetail(act); setActiveKebabId(null); }}
-                              className="w-full px-3.5 py-2 text-left hover:bg-stone-50 cursor-pointer text-[11px] font-semibold text-neutral-dark flex items-center gap-2.5 transition-colors">
-                              <svg className="w-3.5 h-3.5 text-primary-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                              Kelola Foto
-                            </button>
                             <button type="button" onClick={() => { setEditingActivity({ ...act }); setActiveKebabId(null); }}
                               className="w-full px-3.5 py-2 text-left hover:bg-stone-50 cursor-pointer text-[11px] font-semibold text-neutral-dark flex items-center gap-2.5 transition-colors">
                               <svg className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
@@ -368,11 +380,11 @@ export default function KegiatanTab({
                               <svg className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" /></svg>
                               {act.isPublic ? "Jadikan Privat" : "Jadikan Publik"}
                             </button>
-                            {/* Hapus Kegiatan — Admin Administrasi & Guru */}
-                            {(isAdminAdministrasi || isGuru) && (
+                            {/* Hapus Kegiatan — Hanya Admin Administrasi */}
+                            {isAdminAdministrasi && onDeleteActivity && (
                               <>
                                 <div className="mx-3 my-1 h-px bg-neutral-gray/8" />
-                                <button type="button" onClick={() => { if (onDeleteActivity) onDeleteActivity(act.id); setActiveKebabId(null); }}
+                                <button type="button" onClick={() => { onDeleteActivity(act.id); setActiveKebabId(null); }}
                                   className="w-full px-3.5 py-2 text-left hover:bg-red-50 cursor-pointer text-[11px] font-semibold text-red-600 flex items-center gap-2.5 transition-colors">
                                   <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                   Hapus Kegiatan

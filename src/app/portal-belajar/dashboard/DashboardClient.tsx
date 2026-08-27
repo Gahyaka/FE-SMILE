@@ -206,6 +206,7 @@ export default function DashboardClient() {
   const [savings, setSavings] = useState<any[]>(initialSavings);
   const [murajaahData, setMurajaahData] = useState<{[studentId: string]: {[param: string]: string}}>(initialMurajaah);
   const [murojaahMateriList, setMurojaahMateriList] = useState<any[]>([]);
+  const [murojaahCategories, setMurojaahCategories] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
 
   // Custom confirmation modal state
@@ -360,6 +361,7 @@ export default function DashboardClient() {
               };
             });
             if (mappedAct.length > 0) {
+              console.log("=== SGW DEBUG: mappedAct ===", JSON.stringify(mappedAct, null, 2));
               setActivities(mappedAct);
               localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
             }
@@ -372,8 +374,20 @@ export default function DashboardClient() {
 
           // Fetch Murojaah Kategori, Materi, & Penilaian dari backend Adonis
           try {
-            const materiRes = await murojaahService.getMateri();
-            const rawMateri = Array.isArray(materiRes) ? materiRes : materiRes?.data || [];
+            const kategoriRes = await murojaahService.getKategori();
+            const rawKategori = Array.isArray(kategoriRes) ? kategoriRes : kategoriRes?.data || [];
+            setMurojaahCategories(rawKategori);
+
+            const rawMateri = rawKategori.reduce((acc: any[], cat: any) => {
+              const materiList = cat.materi || cat.materis || [];
+              const mapped = materiList.map((m: any) => ({
+                ...m,
+                namaMateri: m.nama || m.namaMateri || "Materi Hafalan",
+                kategoriId: cat.id,
+                kategoriNama: cat.nama
+              }));
+              return [...acc, ...mapped];
+            }, []);
             setMurojaahMateriList(rawMateri);
 
             // Fetch progress murojaah per siswa untuk data yang valid
@@ -1193,7 +1207,7 @@ const handleDeleteUser = (userId: number) => {
   };
 
   const handleDeleteActivity = (actId: string | number) => {
-    if (!isAdminAdministrasi && !isGuru) return;
+    if (!isAdminAdministrasi) return;
     const act = activities.find(a => a.id === actId);
     if (!act) return;
 
@@ -1856,6 +1870,7 @@ const handleDeleteUser = (userId: number) => {
                     students={displayedStudents}
                     classes={classes}
                     murajaahData={murajaahData}
+                    murojaahCategories={murojaahCategories}
                     isAdminAdministrasi={isAdminAdministrasi}
                     isGuru={isGuru}
                     onUpdateMurajaah={handleUpdateMurajaah}
