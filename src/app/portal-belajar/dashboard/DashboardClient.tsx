@@ -344,6 +344,7 @@ export default function DashboardClient() {
                 description: item.deskripsi || item.description || "",
                 date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
                 featuredImage: imageUrl,
+                fotos: fotosArr,
                 driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
                   || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
                   || item.linkDrive || item.urlDrive || "",
@@ -980,6 +981,7 @@ const handleDeleteUser = (userId: number) => {
           description: item.deskripsi || item.description || "",
           date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
           featuredImage: imageUrl,
+          fotos: fotosArr,
           driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
             || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
             || item.linkDrive || item.urlDrive || "",
@@ -1007,6 +1009,33 @@ const handleDeleteUser = (userId: number) => {
       action: `Menambahkan kegiatan: ${newActData.title}`,
     };
     setLogs([newLog, ...logs]);
+  };
+
+  const handleDeletePhoto = async (photoId: string | number, activityId: string | number) => {
+    if (!isAdminAdministrasi && !isGuru) return;
+    try {
+      await activityService.deletePhoto(photoId);
+      // Refresh foto array dari backend untuk kegiatan ini
+      const detail = await activityService.getById(activityId);
+      const item: any = Array.isArray(detail) ? detail[0] : detail?.data || detail;
+      const fotosArr = Array.isArray(item.foto) ? item.foto
+        : Array.isArray(item.fotos) ? item.fotos : [];
+      const thumb = fotosArr.length > 0 ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0]) : null;
+      const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || "";
+      setActivities(prev => prev.map(a => a.id === activityId
+        ? { ...a, featuredImage: imageUrl, fotos: fotosArr }
+        : a
+      ));
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Menghapus foto di kegiatan ID ${activityId}`,
+      };
+      setLogs([newLog, ...logs]);
+    } catch (err: any) {
+      alert("Gagal menghapus foto: " + (err.response?.data?.message || err.message));
+    }
   };
 
   const handleUpdateActivity = async (updatedAct: any) => {
@@ -1109,7 +1138,7 @@ const handleDeleteUser = (userId: number) => {
     setLogs([newLog, ...logs]);
   };
 
-  const handleDeleteActivity = (actId: number) => {
+  const handleDeleteActivity = (actId: string | number) => {
     if (!isAdminAdministrasi) return;
     const act = activities.find(a => a.id === actId);
     if (!act) return;
@@ -1728,6 +1757,7 @@ const handleDeleteUser = (userId: number) => {
                   onUpdateActivity={handleUpdateActivity}
                   onDeleteActivity={handleDeleteActivity}
                   onTogglePublic={handleTogglePublicActivity}
+                  onDeletePhoto={handleDeletePhoto}
                 />
               )}
 
