@@ -336,8 +336,9 @@ export default function DashboardClient() {
               const fotosArr = Array.isArray(item.foto) ? item.foto
                 : Array.isArray(item.fotos) ? item.fotos
                 : [];
-              const thumbnail = fotosArr.find((f: any) => f.isDefault || f.isThumbnail)
-                || fotosArr[0];
+              const thumbnail = (fotosArr && fotosArr.length > 0) 
+                ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0]) 
+                : null;
               const imageUrl = thumbnail?.viewUrl || thumbnail?.url || thumbnail?.path || thumbnail?.foto
                 || (typeof item.foto === "string" ? item.foto : null)
                 || (typeof item.image === "string" ? item.image : null)
@@ -951,7 +952,9 @@ const handleDeleteUser = (userId: number) => {
       const mappedAct = rawAct.map((item: any) => {
         const fotosArr = Array.isArray(item.foto) ? item.foto
           : Array.isArray(item.fotos) ? item.fotos : [];
-        const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
+        const thumb = (fotosArr && fotosArr.length > 0)
+          ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
+          : null;
         const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
         return {
           id: item.id,
@@ -1008,7 +1011,9 @@ const handleDeleteUser = (userId: number) => {
       const mappedAct = rawAct.map((item: any) => {
         const fotosArr = Array.isArray(item.foto) ? item.foto
           : Array.isArray(item.fotos) ? item.fotos : [];
-        const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
+        const thumb = (fotosArr && fotosArr.length > 0)
+          ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
+          : null;
         const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
         return {
           id: item.id,
@@ -1050,7 +1055,9 @@ const handleDeleteUser = (userId: number) => {
       const mappedAct = rawAct.map((item: any) => {
         const fotosArr = Array.isArray(item.foto) ? item.foto
           : Array.isArray(item.fotos) ? item.fotos : [];
-        const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
+        const thumb = (fotosArr && fotosArr.length > 0)
+          ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
+          : null;
         const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
         return {
           id: item.id,

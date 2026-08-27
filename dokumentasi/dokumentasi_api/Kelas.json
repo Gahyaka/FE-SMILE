@@ -18,7 +18,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzYzODQ2OSwiZXhwIjoxNzg3NzI0ODY5fQ.IQw-OKtsrBF0fMKms9mDIct3-3KZ0MYyzSLpwfEwQEc",
                   "type": "string"
                 }
               ]
@@ -27,7 +27,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"namaKelas\": \"Kelas A - Bintang\",\r\n  \"tahunAjaran\": \"2025/2026\",\r\n  \"waliKelas\": \"Ibu Ratna, S.Pd\"\r\n}",
+              "raw": "{\r\n  \"namaKelas\": \"Kelas B (Melati)\",\r\n  \"tahunAjaran\": \"2026/2027\",\r\n  \"guruId\": \"b8909db0-126a-4e69-858e-a145a3f38ad6\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -56,7 +56,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI4YzZlMjc5LWJlZDYtNGZhNi1iZGIxLTNmMWQ2ZTEzYTE4NSIsInVzZXJuYW1lIjoieWF5YSIsInJvbGUiOiJHVVJVIiwiaWF0IjoxNzg1OTkyMzQ3LCJleHAiOjE3ODYwNzg3NDd9.608Fj_o29cNv09aA30jip_klh8CXh9CRhb02C42jBls",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzYzODQ2OSwiZXhwIjoxNzg3NzI0ODY5fQ.IQw-OKtsrBF0fMKms9mDIct3-3KZ0MYyzSLpwfEwQEc",
                   "type": "string"
                 }
               ]
@@ -65,7 +65,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"namaKelas\": \"Kelas B - Bintang\",\r\n  \"tahunAjaran\": \"2025/2026\",\r\n  \"waliKelas\": \"Nur, S.Pd\"\r\n}",
+              "raw": "{\r\n  \"namaKelas\": \"Kelas B - Bintang\",\r\n  \"tahunAjaran\": \"2025/2026\",\r\n  \"guruId\": \"ea8b0f79-844f-4934-83c2-c9aa7c1fdddb\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
