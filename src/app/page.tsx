@@ -6,6 +6,45 @@ import { motion, AnimatePresence } from "framer-motion";
 import { initialActivities } from "@/app/portal-belajar/dashboard/mockData";
 import { activityService } from "@/services/activity";
 
+const getPhotoUrl = (rawUrl: string) => {
+  if (!rawUrl) return "";
+
+  // Jika link Google Drive (lh3.googleusercontent.com / drive.google.com), gunakan server-side proxy
+  if (rawUrl.includes("googleusercontent.com") || rawUrl.includes("drive.google.com")) {
+    return `/api/proxy-image?url=${encodeURIComponent(rawUrl)}`;
+  }
+  
+  // Jika mengandung host backend local atau production
+  if (rawUrl.includes("localhost:3333") || rawUrl.includes("127.0.0.1:3333") || rawUrl.includes("be-smile-production.up.railway.app")) {
+    const pathOnly = rawUrl.replace(/^https?:\/\/[^\/]+/, "");
+    return `/api-proxy${pathOnly.startsWith("/") ? pathOnly : `/${pathOnly}`}`;
+  }
+
+  // Jika sudah memiliki prefix proxy /api-proxy
+  if (rawUrl.startsWith("/api-proxy")) {
+    return rawUrl;
+  }
+
+  // Jika mengandung uploads/
+  if (rawUrl.includes("uploads/")) {
+    const pathOnly = rawUrl.includes("http") ? rawUrl.replace(/^https?:\/\/[^\/]+/, "") : rawUrl;
+    const cleanPath = pathOnly.startsWith("/") ? pathOnly : `/${pathOnly}`;
+    return `/api-proxy${cleanPath}`;
+  }
+
+  // Jika link eksternal http (seperti google drive atau unsplash)
+  if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) {
+    return rawUrl;
+  }
+
+  // Jika berawalan / tapi tidak memiliki prefix proxy
+  if (rawUrl.startsWith("/") && !rawUrl.startsWith("/api-proxy")) {
+    return `/api-proxy${rawUrl}`;
+  }
+
+  return rawUrl;
+};
+
 export default function HomePage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,9 +62,18 @@ export default function HomePage() {
         const res = await activityService.getPublicGallery();
         const rawAct = res && Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
         const items = rawAct.map((item: any) => {
-          // Cari URL gambar cover
-          const imageUrl = item.cover?.viewUrl || item.cover?.url || item.cover?.path
-            || "https://images.unsplash.com/photo-1590076214561-2679be15bb56?auto=format&fit=crop&q=80&w=800";
+          // Cari URL gambar cover dari relasi fotos
+          const fotosArr = Array.isArray(item.foto) ? item.foto
+            : Array.isArray(item.fotos) ? item.fotos
+            : [];
+          const thumbnail = (fotosArr && fotosArr.length > 0) 
+            ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0]) 
+            : null;
+          const rawCoverUrl = thumbnail?.viewUrl || thumbnail?.url || thumbnail?.path || thumbnail?.foto || item.foto || item.image || "";
+          
+          const imageUrl = rawCoverUrl 
+            ? getPhotoUrl(rawCoverUrl)
+            : "https://images.unsplash.com/photo-1590076214561-2679be15bb56?auto=format&fit=crop&q=80&w=800";
 
           // Format tanggal ke format profesional Indonesia: contoh "25 Agustus 2026"
           let formattedDate = "";
@@ -49,7 +97,7 @@ export default function HomePage() {
             description: item.deskripsi || item.description || "",
             date: formattedDate,
             image: imageUrl,
-            category: item.category || "Keagamaan",
+            category: item.kategori || item.category || "AGENDA TAHUNAN",
             driveLink: item.folderGdriveUrl || item.gdriveFolderUrl || item.driveLink || ""
           };
         });

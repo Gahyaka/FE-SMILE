@@ -156,10 +156,7 @@ function mapSppTransactions(rawTxs: any[]): any[] {
 
   return grouped;
 }
-
 function mapUsersData(rawUsers: any[]): any[] {
-  const allowedRoles = ["ADMIN", "ADMIN_ADMINISTRASI", "ADMIN_TRANSAKSI", "GURU"];
-  
   // Read locally deleted user IDs to filter them out from backend response
   let deletedUserIds: any[] = [];
   if (typeof window !== "undefined") {
@@ -168,7 +165,6 @@ function mapUsersData(rawUsers: any[]): any[] {
   }
 
   return rawUsers
-    .filter((u: any) => allowedRoles.includes((u.role || "").toUpperCase()))
     .filter((u: any) => !deletedUserIds.includes(u.id))
     .map((u: any) => {
       const rawRole = (u.role || "").toUpperCase();
@@ -179,8 +175,6 @@ function mapUsersData(rawUsers: any[]): any[] {
           : "guru";
 
       // Gunakan username asli dari database — JANGAN override
-      // Override sebelumnya menyebabkan semua admin_trx tampil identik
-      // sehingga tidak bisa dibedakan saat reset password
       return {
         id: u.id,
         name: u.nama || u.name || (mappedRole === "admin_adm" ? "Admin Administrasi" : mappedRole === "admin_trx" ? "Admin Transaksi" : "Guru"),
@@ -206,12 +200,13 @@ export default function DashboardClient() {
     if (typeof window === "undefined") return {};
     try { return JSON.parse(localStorage.getItem("sgw_local_passwords") || "{}"); } catch { return {}; }
   });
-  const [activities, setActivities] = useState(initialActivities);
+  const [activities, setActivities] = useState<any[]>(initialActivities);
   const [sppTransactions, setSppTransactions] = useState(initialSppTransactions);
   const [sppMatriksData, setSppMatriksData] = useState<any[]>([]);
-  const [savings, setSavings] = useState(initialSavings);
+  const [savings, setSavings] = useState<any[]>(initialSavings);
   const [murajaahData, setMurajaahData] = useState<{[studentId: string]: {[param: string]: string}}>(initialMurajaah);
   const [murojaahMateriList, setMurojaahMateriList] = useState<any[]>([]);
+  const [murojaahCategories, setMurojaahCategories] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
 
   // Custom confirmation modal state
@@ -219,7 +214,7 @@ export default function DashboardClient() {
     isOpen: boolean;
     title: string;
     message: string;
-    actionType: "delete_student" | "delete_class" | "delete_spp" | "delete_user" | null;
+    actionType: "delete_student" | "delete_class" | "delete_spp" | "delete_user" | "delete_activity" | null;
     targetId: string | number | null;
   }>({
     isOpen: false,
@@ -336,11 +331,15 @@ export default function DashboardClient() {
               const fotosArr = Array.isArray(item.foto) ? item.foto
                 : Array.isArray(item.fotos) ? item.fotos
                 : [];
-              const thumbnail = fotosArr.find((f: any) => f.isDefault || f.isThumbnail)
-                || fotosArr[0];
-              const imageUrl = thumbnail?.viewUrl || thumbnail?.url || thumbnail?.path || thumbnail?.foto
-                || (typeof item.foto === "string" ? item.foto : null)
-                || (typeof item.image === "string" ? item.image : null)
+              const thumbnail = (fotosArr && fotosArr.length > 0) 
+                ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0]) 
+                : null;
+              const imageUrl = thumbnail?.viewUrl 
+                || (thumbnail?.url ? (thumbnail.url.startsWith("http") ? thumbnail.url : `/api-proxy/${thumbnail.url.replace(/^\//, "")}`) : null)
+                || (thumbnail?.path ? (thumbnail.path.startsWith("http") ? thumbnail.path : `/api-proxy/${thumbnail.path.replace(/^\//, "")}`) : null)
+                || (thumbnail?.foto ? (thumbnail.foto.startsWith("http") ? thumbnail.foto : `/api-proxy/${thumbnail.foto.replace(/^\//, "")}`) : null)
+                || (typeof item.foto === "string" ? (item.foto.startsWith("http") ? item.foto : `/api-proxy/${item.foto.replace(/^\//, "")}`) : null)
+                || (typeof item.image === "string" ? (item.image.startsWith("http") ? item.image : `/api-proxy/${item.image.replace(/^\//, "")}`) : null)
                 || "";
 
               return {
@@ -349,14 +348,20 @@ export default function DashboardClient() {
                 description: item.deskripsi || item.description || "",
                 date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
                 featuredImage: imageUrl,
+                fotos: fotosArr.map((f: any) => ({
+                  ...f,
+                  url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
+                  viewUrl: f.viewUrl || ""
+                })),
                 driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
                   || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
                   || item.linkDrive || item.urlDrive || "",
-                category: item.category || "Keagamaan",
+                category: item.kategori || item.category || "AGENDA TAHUNAN",
                 isPublic: item.isPublic !== undefined ? item.isPublic : true
               };
             });
             if (mappedAct.length > 0) {
+              console.log("=== SGW DEBUG: mappedAct ===", JSON.stringify(mappedAct, null, 2));
               setActivities(mappedAct);
               localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
             }
@@ -369,8 +374,20 @@ export default function DashboardClient() {
 
           // Fetch Murojaah Kategori, Materi, & Penilaian dari backend Adonis
           try {
-            const materiRes = await murojaahService.getMateri();
-            const rawMateri = Array.isArray(materiRes) ? materiRes : materiRes?.data || [];
+            const kategoriRes = await murojaahService.getKategori();
+            const rawKategori = Array.isArray(kategoriRes) ? kategoriRes : kategoriRes?.data || [];
+            setMurojaahCategories(rawKategori);
+
+            const rawMateri = rawKategori.reduce((acc: any[], cat: any) => {
+              const materiList = cat.materi || cat.materis || [];
+              const mapped = materiList.map((m: any) => ({
+                ...m,
+                namaMateri: m.nama || m.namaMateri || "Materi Hafalan",
+                kategoriId: cat.id,
+                kategoriNama: cat.nama
+              }));
+              return [...acc, ...mapped];
+            }, []);
             setMurojaahMateriList(rawMateri);
 
             // Fetch progress murojaah per siswa untuk data yang valid
@@ -570,6 +587,22 @@ export default function DashboardClient() {
       setLogs([newLog, ...logs]);
     } catch (err: any) {
       alert("Gagal memperbarui status keaktifan di backend: " + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const handleDownloadStudentTemplate = async () => {
+    try {
+      const blobData = await studentService.getTemplate();
+      const url = window.URL.createObjectURL(new Blob([blobData]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "Template_Import_Siswa_RA_Sahabat.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (err: any) {
+      console.error("Gagal mendownload template dari server backend:", err);
+      throw err;
     }
   };
 
@@ -875,13 +908,21 @@ const handleDeleteUser = (userId: number) => {
       } else if (actionType === "delete_user") {
         const targetUser = users.find(u => u.id === targetId);
         if (targetUser) {
-          // Karena backend Adonis tidak menyediakan endpoint delete user (sesuai spesifikasi Users.json),
-          // kita lakukan penghapusan lokal secara aman agar console bersih dari error Axios 404.
-          const raw = localStorage.getItem("deleted_user_ids");
-          const deletedUserIds = raw ? JSON.parse(raw) : [];
-          if (!deletedUserIds.includes(targetId)) {
-            deletedUserIds.push(targetId);
-            localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
+          let backendDeleted = false;
+          try {
+            await userService.delete(targetId);
+            backendDeleted = true;
+          } catch (err) {
+            console.warn("Backend user deletion failed/unsupported. Falling back to local storage deletion.");
+          }
+
+          if (!backendDeleted) {
+            const raw = localStorage.getItem("deleted_user_ids");
+            const deletedUserIds = raw ? JSON.parse(raw) : [];
+            if (!deletedUserIds.includes(targetId)) {
+              deletedUserIds.push(targetId);
+              localStorage.setItem("deleted_user_ids", JSON.stringify(deletedUserIds));
+            }
           }
 
           const updated = users.filter(u => u.id !== targetId);
@@ -892,11 +933,11 @@ const handleDeleteUser = (userId: number) => {
             id: Date.now(),
             time: new Date().toISOString().replace('T', ' ').substring(0, 16),
             user: session.name,
-            action: `Menghapus akun pengguna: ${targetUser.name} (Lokal / Backend)`,
+            action: `Menghapus akun pengguna: ${targetUser.name}`,
           };
           setLogs([newLog, ...logs]);
         }
-      } else if (actionType === ("delete_activity" as any)) {
+      } else if (actionType === "delete_activity") {
         const act = activities.find((a) => a.id === targetId);
         if (act) {
           try {
@@ -934,34 +975,45 @@ const handleDeleteUser = (userId: number) => {
     
     try {
       // Buat FormData — kirim semua foto yang dipilih user ke backend
-      // Backend menerima field "foto" dan foto pertama otomatis jadi sampul
       const formData = new FormData();
       formData.append("namaKegiatan", newActData.title);
       formData.append("deskripsi", newActData.description || "");
       formData.append("tanggalKegiatan", newActData.date || new Date().toISOString().split("T")[0]);
+      formData.append("kategori", newActData.category || "AGENDA TAHUNAN");
       // Kirim semua file dalam array imageFiles
       const files: File[] = Array.isArray(newActData.imageFiles) ? newActData.imageFiles : [];
       files.forEach((file) => formData.append("foto", file));
 
       await activityService.create(formData);
       
-      // Reload dari backend — mapping sesuai struktur respons Adonis (fotos: [{id,url,...}])
+      // Reload dari backend
       const actRes = await activityService.getAll();
       const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
       const mappedAct = rawAct.map((item: any) => {
         const fotosArr = Array.isArray(item.foto) ? item.foto
           : Array.isArray(item.fotos) ? item.fotos : [];
-        const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
-        const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
+        const thumb = (fotosArr && fotosArr.length > 0)
+          ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
+          : null;
+        const imageUrl = thumb?.viewUrl 
+          || (thumb?.url ? (thumb.url.startsWith("http") ? thumb.url : `/api-proxy/${thumb.url.replace(/^\//, "")}`) : null)
+          || (thumb?.path ? (thumb.path.startsWith("http") ? thumb.path : `/api-proxy/${thumb.path.replace(/^\//, "")}`) : null)
+          || (typeof item.foto === "string" ? (item.foto.startsWith("http") ? item.foto : `/api-proxy/${item.foto.replace(/^\//, "")}`) : "");
         return {
           id: item.id,
           title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
           description: item.deskripsi || item.description || "",
           date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
           featuredImage: imageUrl,
+          fotos: fotosArr.map((f: any) => ({
+            ...f,
+            url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
+            viewUrl: f.viewUrl || ""
+          })),
           driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
             || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
             || item.linkDrive || item.urlDrive || "",
+          category: item.kategori || item.category || "AGENDA TAHUNAN",
           isPublic: item.isPublic !== undefined ? item.isPublic : true
         };
       });
@@ -981,11 +1033,68 @@ const handleDeleteUser = (userId: number) => {
 
     const newLog = {
       id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Menambahkan kegiatan: ${newActData.title}`,
+      time: new Date().toLocaleString("id-ID"),
+      user: isAdminAdministrasi ? "Admin Administrasi" : "Guru",
+      action: `Mengunggah dokumentasi kegiatan "${newActData.title}"`
     };
     setLogs([newLog, ...logs]);
+  };
+
+  const handleDeletePhoto = async (photoId: string | number, activityId: string | number) => {
+    if (!isAdminAdministrasi && !isGuru) return;
+    try {
+      // 1. Hapus foto dari backend
+      await activityService.deletePhoto(photoId);
+
+      // 2. Langsung update state lokal terlebih dahulu (optimistic update)
+      //    agar UI tetap akurat meskipun refresh getById gagal
+      setActivities(prev => prev.map(a => {
+        if (a.id !== activityId) return a;
+        const newFotos = (a.fotos || []).filter((f: any) => f.id !== photoId);
+        const thumb = newFotos.length > 0
+          ? (newFotos.find((f: any) => f.isDefault || f.isThumbnail) || newFotos[0])
+          : null;
+        const rawUrl = thumb?.viewUrl || thumb?.url || thumb?.path || "";
+        const imageUrl = rawUrl && !rawUrl.startsWith("http") && !rawUrl.startsWith("/api-proxy")
+          ? `/api-proxy${rawUrl.startsWith("/") ? rawUrl : `/${rawUrl}`}`
+          : rawUrl;
+        return { ...a, featuredImage: imageUrl, fotos: newFotos };
+      }));
+
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Menghapus foto di kegiatan ID ${activityId}`,
+      };
+      setLogs([newLog, ...logs]);
+
+      // 3. Coba refresh dari backend secara background (opsional, abaikan jika gagal)
+      activityService.getById(activityId).then((detail: any) => {
+        const item: any = Array.isArray(detail) ? detail[0] : detail?.data || detail;
+        const fotosArr = Array.isArray(item?.foto) ? item.foto
+          : Array.isArray(item?.fotos) ? item.fotos : null;
+        if (!fotosArr) return; // backend belum mengembalikan data yang valid, skip
+        const thumb = fotosArr.length > 0
+          ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
+          : null;
+        const rawUrl = thumb?.viewUrl || thumb?.url || thumb?.path || "";
+        const imageUrl = rawUrl && !rawUrl.startsWith("http") && !rawUrl.startsWith("/api-proxy")
+          ? `/api-proxy${rawUrl.startsWith("/") ? rawUrl : `/${rawUrl}`}`
+          : rawUrl;
+        setActivities(prev => prev.map(a => a.id === activityId
+          ? { ...a, featuredImage: imageUrl, fotos: fotosArr }
+          : a
+        ));
+      }).catch(() => {
+        // Backend 500 setelah hapus foto — abaikan, state lokal sudah benar
+        console.warn("[handleDeletePhoto] Refresh getById gagal (backend 500), state lokal dipertahankan.");
+      });
+    } catch (err: any) {
+      // Hanya tampilkan alert jika deletePhoto sendiri yang gagal
+      const msg = err.response?.data?.message || err.message || "Terjadi kesalahan";
+      alert("Gagal menghapus foto: " + msg);
+    }
   };
 
   const handleUpdateActivity = async (updatedAct: any) => {
@@ -1008,7 +1117,9 @@ const handleDeleteUser = (userId: number) => {
       const mappedAct = rawAct.map((item: any) => {
         const fotosArr = Array.isArray(item.foto) ? item.foto
           : Array.isArray(item.fotos) ? item.fotos : [];
-        const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
+        const thumb = (fotosArr && fotosArr.length > 0)
+          ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
+          : null;
         const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
         return {
           id: item.id,
@@ -1050,17 +1161,28 @@ const handleDeleteUser = (userId: number) => {
       const mappedAct = rawAct.map((item: any) => {
         const fotosArr = Array.isArray(item.foto) ? item.foto
           : Array.isArray(item.fotos) ? item.fotos : [];
-        const thumb = fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0];
-        const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
+        const thumb = (fotosArr && fotosArr.length > 0)
+          ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
+          : null;
+        const imageUrl = thumb?.viewUrl 
+          || (thumb?.url ? (thumb.url.startsWith("http") ? thumb.url : `/api-proxy/${thumb.url.replace(/^\//, "")}`) : null)
+          || (thumb?.path ? (thumb.path.startsWith("http") ? thumb.path : `/api-proxy/${thumb.path.replace(/^\//, "")}`) : null)
+          || (typeof item.foto === "string" ? (item.foto.startsWith("http") ? item.foto : `/api-proxy/${item.foto.replace(/^\//, "")}`) : "");
         return {
           id: item.id,
           title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
           description: item.deskripsi || item.description || "",
           date: item.tanggalKegiatan || item.date || "",
           featuredImage: imageUrl,
+          fotos: fotosArr.map((f: any) => ({
+            ...f,
+            url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
+            viewUrl: f.viewUrl || ""
+          })),
           driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
             || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
             || item.linkDrive || item.urlDrive || "",
+          category: item.kategori || item.category || "AGENDA TAHUNAN",
           isPublic: item.isPublic !== undefined ? item.isPublic : true
         };
       });
@@ -1084,7 +1206,7 @@ const handleDeleteUser = (userId: number) => {
     setLogs([newLog, ...logs]);
   };
 
-  const handleDeleteActivity = (actId: number) => {
+  const handleDeleteActivity = (actId: string | number) => {
     if (!isAdminAdministrasi) return;
     const act = activities.find(a => a.id === actId);
     if (!act) return;
@@ -1093,7 +1215,7 @@ const handleDeleteUser = (userId: number) => {
       isOpen: true,
       title: "Konfirmasi Hapus Dokumentasi Kegiatan",
       message: `Apakah Anda yakin ingin menghapus dokumentasi kegiatan "${act.title}" secara permanen dari arsip?`,
-      actionType: "delete_activity" as any,
+      actionType: "delete_activity",
       targetId: actId
     });
   };
@@ -1204,8 +1326,9 @@ const handleDeleteUser = (userId: number) => {
         statusSetoran: apiStatusSetoran
       };
 
-      // Add bulanList to payload if multi-months are selected
-      if (bulanList.length > 0) {
+      // Sesuai dokumentasi SPP.json: bulanList HANYA dikirim jika transaksi bersifat BATCH / RAPEL (lebih dari 1 bulan)
+      // Jika hanya 1 bulan, biarkan kosong agar backend memprosesnya sebagai transaksi SPP bulan tunggal.
+      if (bulanList.length > 1) {
         payload.bulanList = bulanList;
       }
 
@@ -1286,7 +1409,7 @@ const handleDeleteUser = (userId: number) => {
   };
 
   const handleAddSavingsTransaction = (data: {
-    studentId: number;
+    studentId: string | number;
     description: string;
     debet: number;
     kredit: number;
@@ -1297,7 +1420,7 @@ const handleDeleteUser = (userId: number) => {
 
     // Check Penarikan Saldo
     if (data.transType === "Penarikan") {
-      const studentTrans = savings.filter(t => t.studentId === data.studentId);
+      const studentTrans = savings.filter(t => String(t.studentId) === String(data.studentId));
       const currentSaldo = studentTrans.reduce((total, trans) => total + trans.debet - trans.kredit, 0);
       if (data.amountNum > currentSaldo) {
         alert("Saldo tidak cukup untuk melakukan penarikan!");
@@ -1317,7 +1440,7 @@ const handleDeleteUser = (userId: number) => {
 
     setSavings([newTrans, ...savings]);
 
-    const studentName = students.find(s => s.id === data.studentId)?.name || "Anak";
+    const studentName = students.find(s => String(s.id) === String(data.studentId))?.name || "Anak";
     const newLog = {
       id: Date.now(),
       time: new Date().toISOString().replace('T', ' ').substring(0, 16),
@@ -1664,6 +1787,7 @@ const handleDeleteUser = (userId: number) => {
                     onUpdateStudent={handleUpdateStudent}
                     onDeleteStudent={handleDeleteStudent}
                     onUpdateStudentStatus={handleUpdateStudentStatus}
+                    onDownloadTemplate={handleDownloadStudentTemplate}
                   />
                 );
               })()}
@@ -1701,6 +1825,7 @@ const handleDeleteUser = (userId: number) => {
                   onUpdateActivity={handleUpdateActivity}
                   onDeleteActivity={handleDeleteActivity}
                   onTogglePublic={handleTogglePublicActivity}
+                  onDeletePhoto={handleDeletePhoto}
                 />
               )}
 
@@ -1745,6 +1870,7 @@ const handleDeleteUser = (userId: number) => {
                     students={displayedStudents}
                     classes={classes}
                     murajaahData={murajaahData}
+                    murojaahCategories={murojaahCategories}
                     isAdminAdministrasi={isAdminAdministrasi}
                     isGuru={isGuru}
                     onUpdateMurajaah={handleUpdateMurajaah}

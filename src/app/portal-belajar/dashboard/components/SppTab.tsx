@@ -69,7 +69,11 @@ export default function SppTab({
   const [selectedClass, setSelectedClass] = useState("Semua");
   const [selectedPeriod, setSelectedPeriod] = useState<"Hari Ini" | "Minggu Ini" | "Bulan Ini" | "Semester 1" | "Semester 2" | "Semua">("Semua");
   const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
-  const [payStudentId, setPayStudentId] = useState<string | number>(students[0]?.id || "");
+
+  // Form Filter Kelas
+  const [formSelectedClass, setFormSelectedClass] = useState(classes[0]?.className || "KB");
+
+  const [payStudentId, setPayStudentId] = useState<string | number>("");
   const [payDate, setPayDate] = useState(new Date().toISOString().substring(0, 10));
   const [paySpp, setPaySpp] = useState("75000");
   const [payLes, setPayLes] = useState("40000");
@@ -82,6 +86,28 @@ export default function SppTab({
   
   // Sub-tab state
   const [activeSubTab, setActiveSubTab] = useState<"buku-kas" | "matriks-monitoring">("buku-kas");
+
+  // Custom Local Confirmation State
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    action: (() => void) | null;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    action: null,
+  });
+
+  const triggerConfirm = (title: string, message: string, action: () => void) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      action,
+    });
+  };
 
   useEffect(() => {
     if (onRefreshMatriks && selectedAcademicYear) {
@@ -107,6 +133,20 @@ export default function SppTab({
     { value: "05", name: "Mei" },
     { value: "06", name: "Juni" },
   ];
+
+  // Filter students based on chosen class in Form
+  const formFilteredStudents = students.filter(
+    (st) => st.activeStatus === "Aktif" && st.class === formSelectedClass
+  );
+
+  // Auto set first student when form selected class changes
+  useEffect(() => {
+    if (formFilteredStudents.length > 0) {
+      setPayStudentId(formFilteredStudents[0].id);
+    } else {
+      setPayStudentId("");
+    }
+  }, [formSelectedClass, students]);
 
   // Helper: check if a date string (YYYY-MM-DD) falls within the selected period
   const isInPeriod = (dateStr: string): boolean => {
@@ -170,7 +210,7 @@ export default function SppTab({
     return isInPeriod(tx.date);
   });
 
-  const totalSppTerbayar = periodFilteredAll.reduce((sum, tx) => sum + tx.spp, 0);
+  const totalSppTerbayarVal = periodFilteredAll.reduce((sum, tx) => sum + tx.spp, 0);
   const totalLesSudahDisetor = periodFilteredAll
     .filter((tx) => tx.depositStatus === "Sudah Disetor")
     .reduce((sum, tx) => sum + tx.les, 0);
@@ -178,14 +218,11 @@ export default function SppTab({
     .filter((tx) => tx.depositStatus === "Belum Disetor")
     .reduce((sum, tx) => sum + tx.les, 0);
 
-  const getTxCount = (cls: string) => {
-    return sppTransactions.filter((tx) => {
-      const matchesYear = selectedPeriod === "Semua" ? getAcademicYearFromDate(tx.date) === selectedAcademicYear : true;
-      const matchesPeriod = selectedPeriod === "Semua" ? true : isInPeriod(tx.date);
-      const student = students.find((s) => s.id === tx.studentId);
-      if (!student) return false;
-      const matchesClass = cls === "Semua" || student.class === cls;
-      return matchesYear && matchesPeriod && matchesClass;
+  const getStudentCount = (cls: string) => {
+    return students.filter((s) => {
+      const matchesClass = cls === "Semua" || s.class === cls;
+      const isAktif = s.activeStatus === "Aktif";
+      return matchesClass && isAktif;
     }).length;
   };
 
@@ -286,6 +323,10 @@ export default function SppTab({
 
   // Reset paidMonths and Auto-select first unpaid month when switching student
   useEffect(() => {
+    if (!payStudentId) {
+      setPayPaidMonths([]);
+      return;
+    }
     const student = students.find((s) => s.id === payStudentId);
     if (!student) return;
 
@@ -311,10 +352,7 @@ export default function SppTab({
     }
   }, [payStudentId, selectedAcademicYear]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!paySpp || !payLes) return;
-
+  const executeAddSppPayment = () => {
     onAddSppLesPayment({
       studentId: payStudentId,
       date: payDate,
@@ -325,12 +363,25 @@ export default function SppTab({
       paidMonths: payPaidMonths,
     });
 
-    // Reset Form to defaults
     setPaySpp("75000");
     setPayLes("40000");
     setPayPaidMonths([]);
     setNewDepositStatus("Belum Disetor");
     setShowSppForm(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!payStudentId || !paySpp || !payLes) return;
+
+    const studentName = students.find(s => s.id === payStudentId)?.name || "Siswa";
+    const totalPayment = (Number(paySpp) * Math.max(1, payPaidMonths.length)) + Number(payLes);
+    
+    triggerConfirm(
+      "Catat Pembayaran SPP & Les",
+      `Apakah Anda yakin ingin mencatat pembayaran baru untuk "${studentName}" sebesar Rp ${totalPayment.toLocaleString()}?`,
+      executeAddSppPayment
+    );
   };
 
   return (
@@ -342,7 +393,7 @@ export default function SppTab({
         <div className="bg-white p-4 rounded-2xl border border-neutral-gray/10 flex items-center justify-between shadow-3xs hover:shadow-xs transition-shadow duration-300">
           <div className="space-y-1">
             <span className="text-[10px] text-neutral-gray font-extrabold uppercase tracking-wider">Total Kas SPP (Yayasan)</span>
-            <h4 className="font-mono text-xl font-bold text-neutral-dark">Rp {totalSppTerbayar.toLocaleString()}</h4>
+            <h4 className="font-mono text-xl font-bold text-neutral-dark">Rp {totalSppTerbayarVal.toLocaleString()}</h4>
           </div>
           <div className="w-10 h-10 rounded-xl bg-stone-50 border border-neutral-gray/10 flex items-center justify-center text-stone-500 flex-shrink-0">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -383,7 +434,7 @@ export default function SppTab({
           </div>
         </div>
       </div>
-      {/* Active period label below widgets */}
+
       <div className="flex items-center justify-between flex-wrap gap-3 bg-[#FAF8F5] p-3 rounded-2xl border border-primary-green/10">
         <div className="flex items-center gap-2">
           <svg className="w-3.5 h-3.5 text-primary-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -394,7 +445,6 @@ export default function SppTab({
           </span>
         </div>
         
-        {/* Filter Kategori Kelas (Global) */}
         <div className="flex items-center gap-1">
           <span className="text-[9px] font-extrabold text-neutral-gray uppercase mr-1">Kelas:</span>
           <div className="flex items-center gap-1">
@@ -409,14 +459,13 @@ export default function SppTab({
                     : "bg-white text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
                 }`}
               >
-                {cls} ({getTxCount(cls)})
+                {cls} ({getStudentCount(cls)})
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Sub-tab Selector */}
       <div className="flex border-b border-neutral-gray/10 pb-px gap-6">
         <button
           onClick={() => setActiveSubTab("buku-kas")}
@@ -466,7 +515,6 @@ export default function SppTab({
             </div>
 
             <div className="flex items-center gap-3.5 flex-wrap sm:flex-nowrap">
-              {/* Dropdown Filter Tahun Ajaran - only visible on 'Semua' period */}
               {selectedPeriod === "Semua" && (
                 <div className="flex items-center gap-1.5 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-primary-green/10">
                   <span className="text-[9px] font-extrabold text-neutral-gray uppercase">Tahun Ajaran:</span>
@@ -496,7 +544,6 @@ export default function SppTab({
             </div>
           </div>
 
-          {/* Filter Periode - Dropdown Popover */}
           <div className="relative">
             <button
               type="button"
@@ -511,19 +558,17 @@ export default function SppTab({
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <span>Periode: <span className="font-black">{selectedPeriod === "Semua" ? `Semua (${selectedAcademicYear})` : selectedPeriod}</span></span>
-              <svg className={`w-3 h-3 transition-transform flex-shrink-0 ${showPeriodDropdown ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <svg className={`w-3.5 h-3.5 transition-transform flex-shrink-0 ${showPeriodDropdown ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
 
             {showPeriodDropdown && (
               <>
-                {/* Backdrop */}
                 <div
                   className="fixed inset-0 z-30"
                   onClick={() => setShowPeriodDropdown(false)}
                 />
-                {/* Dropdown Panel */}
                 <div className="absolute left-0 top-10 z-40 bg-white rounded-2xl border border-primary-green/10 shadow-lg p-3 min-w-[200px] space-y-1 animate-fade-in">
                   <p className="text-[8px] font-extrabold text-neutral-gray uppercase tracking-wider px-2 pb-1 border-b border-neutral-gray/10">Pilih Rentang Waktu</p>
 
@@ -604,7 +649,7 @@ export default function SppTab({
                         }`}>
                           {tx.spp === 0 ? (
                             <span className="inline-flex items-center gap-1">
-                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                               <svg className="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                               Rp 0
                             </span>
                           ) : `Rp ${tx.spp.toLocaleString()}`}
@@ -614,7 +659,7 @@ export default function SppTab({
                         }`}>
                           {tx.les === 0 ? (
                             <span className="inline-flex items-center gap-1">
-                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                               <svg className="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                               Rp 0
                             </span>
                           ) : `Rp ${tx.les.toLocaleString()}`}
@@ -849,523 +894,549 @@ export default function SppTab({
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                   className="px-2.5 py-1 rounded-lg text-[9px] font-extrabold border border-neutral-gray/15 bg-[#FAF8F5] text-neutral-gray hover:bg-primary-green/10 hover:text-primary-green transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  Next ›
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages}
-                  className="px-2 py-1 rounded-lg text-[9px] font-extrabold border border-neutral-gray/15 bg-[#FAF8F5] text-neutral-gray hover:bg-primary-green/10 hover:text-primary-green transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                  title="Halaman terakhir"
-                >
-                  »
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      ) : (
-        /* Matriks Monitoring SPP */
-        <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border border-primary-green/10 shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
-            <div>
-              <h3 className="font-baloo text-xl font-bold text-neutral-dark">Matriks Monitoring SPP</h3>
-              <p className="text-[11px] text-neutral-gray font-semibold mt-1">
-                Melacak lunas/tidaknya SPP tiap murid berdasarkan tahun pembukuan yang dipilih.
-              </p>
-            </div>
-              {/* Quick stats on the right */}
-            <div className="flex items-center gap-3 bg-[#FAF8F5] px-4 py-2.5 rounded-xl border border-primary-green/10">
-              <div className="text-center border-r border-neutral-gray/10 pr-3">
-                <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold">Total Murid</span>
-                <span className="font-mono text-xs font-black text-neutral-dark">
-                  {students.filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif").length}
-                </span>
-              </div>
-              <div className="text-center pr-3 border-r border-neutral-gray/10">
-                <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold text-emerald-600">Lunas SPP</span>
-                <span className="font-mono text-xs font-black text-emerald-600">
-                  {
-                    sppMatriksData
-                      .filter((item: any) => {
-                        const originalStudent = students.find(s => String(s.id) === String(item.siswaId));
-                        return originalStudent && (selectedClass === "Semua" || originalStudent.class === selectedClass) && originalStudent.activeStatus === "Aktif";
-                      })
-                      .filter((item: any) => Number(item.totalTunggakanBulan) === 0).length
-                  }
-                </span>
-              </div>
-              <div className="text-center">
-                <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold text-rose-600">Tunggakan</span>
-                <span className="font-mono text-xs font-black text-rose-600">
-                  {
-                    sppMatriksData
-                      .filter((item: any) => {
-                        const originalStudent = students.find(s => String(s.id) === String(item.siswaId));
-                        return originalStudent && (selectedClass === "Semua" || originalStudent.class === selectedClass) && originalStudent.activeStatus === "Aktif";
-                      })
-                      .filter((item: any) => Number(item.totalTunggakanBulan) > 0).length
-                  }
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="overflow-x-auto rounded-xl border border-neutral-gray/10">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10">
-                  <th className="py-3 px-4 min-w-[150px]">Nama Murid (Kelas)</th>
-                  {academicMonths.map(m => {
-                    const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
-                    const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
-                    return (
-                      <th key={m.value} className="py-3 px-2 text-center whitespace-nowrap">
-                        {m.name} <span className="block text-[8px] text-neutral-gray/50">{labelYear}</span>
-                      </th>
-                    );
-                  })}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-gray/5 font-semibold text-neutral-dark">
-                {students
-                  .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
-                  .map(student => {
-                    return (
-                      <tr key={student.id} className="hover:bg-soft-mint/30 transition-colors">
-                        <td className="py-2.5 px-4 font-bold">
-                          {student.name}
-                          <span className="block text-[9px] font-bold text-neutral-gray">{student.class}</span>
-                        </td>
-                        {academicMonths.map(m => {
-                          const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
-                          const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
-                          
-                          // Look up the student record from backend-provided sppMatriksData array
-                          const studentMatrix = sppMatriksData.find(
-                            (item: any) => String(item.siswaId) === String(student.id)
-                          );
-                          
-                          // The backend matrix keys are capitalized English/Indonesian month names: e.g. "JULI", "AGUSTUS"
-                          const monthNameUpper = m.name.toUpperCase();
-                          const isPaid = studentMatrix?.matriks?.[monthNameUpper] === true;
-
-                          return (
-                            <td key={m.value} className="py-2 px-1 text-center">
-                              <div className="flex justify-center">
-                                {isPaid ? (
-                                  <span 
-                                    className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200/50 shadow-3xs" 
-                                    title={`Lunas SPP ${m.name} ${labelYear}`}
-                                  >
-                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                  </span>
-                                ) : (
-                                  <span 
-                                    className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-rose-50 text-rose-400 border border-rose-100 shadow-3xs" 
-                                    title={`Belum Bayar SPP ${m.name} ${labelYear}`}
-                                  >
-                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Form Input Pembayaran SPP & Les Sliding Side Drawer */}
-      {showSppForm && isAdminTransaksi && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Backdrop Overlay */}
-          <div 
-            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
-            onClick={() => setShowSppForm(false)}
-          />
-          
-          {/* Drawer Container */}
-          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
-            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
-              {/* Header */}
-              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Catat Pembayaran SPP & Les</h4>
-                <button
-                  type="button"
-                  onClick={() => setShowSppForm(false)}
-                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
-                >
-                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Form Content (Scrollable) */}
-              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
-                <div>
-                  <label htmlFor="payStudent" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Pilih Siswa</label>
-                  <select
-                    id="payStudent"
-                    value={payStudentId}
-                    onChange={(e) => setPayStudentId(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
                   >
-                    {students.filter(st => st.activeStatus === "Aktif").map((st) => (
-                      <option key={st.id} value={st.id}>{st.name} ({st.class})</option>
-                    ))}
-                  </select>
+                    Next ›
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className="px-2 py-1 rounded-lg text-[9px] font-extrabold border border-neutral-gray/15 bg-[#FAF8F5] text-neutral-gray hover:bg-primary-green/10 hover:text-primary-green transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    title="Halaman terakhir"
+                  >
+                    »
+                  </button>
                 </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="payDate" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tanggal Bayar</label>
-                    <input
-                      type="date"
-                      id="payDate"
-                      value={payDate}
-                      onChange={(e) => setPayDate(e.target.value)}
-                      required
-                      className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Total (Otomatis)</label>
-                    <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
-                      Rp {((Number(paySpp || 0) * Math.max(1, payPaidMonths.length)) + Number(payLes || 0)).toLocaleString()}
-                    </div>
-                  </div>
+              </div>
+            )}
+          </div>
+        </div>
+        ) : (
+          /* Matriks Monitoring SPP */
+          <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border border-primary-green/10 shadow-xs space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
+              <div>
+                <h3 className="font-baloo text-xl font-bold text-neutral-dark">Matriks Monitoring SPP</h3>
+                <p className="text-[11px] text-neutral-gray font-semibold mt-1">
+                  Melacak lunas/tidaknya SPP tiap murid berdasarkan tahun pembukuan yang dipilih.
+                </p>
+              </div>
+              <div className="flex items-center gap-3 bg-[#FAF8F5] px-4 py-2.5 rounded-xl border border-primary-green/10">
+                <div className="text-center border-r border-neutral-gray/10 pr-3">
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold">Total Murid</span>
+                  <span className="font-mono text-xs font-black text-neutral-dark">
+                    {students.filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif").length}
+                  </span>
                 </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="paySpp" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal SPP (Rp)</label>
-                    <input
-                      type="number"
-                      id="paySpp"
-                      min="0"
-                      value={paySpp}
-                      onChange={(e) => setPaySpp(e.target.value)}
-                      required
-                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
-                      placeholder="Default 75000"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="payLes" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal Les (Rp)</label>
-                    <input
-                      type="number"
-                      id="payLes"
-                      min="0"
-                      value={payLes}
-                      onChange={(e) => setPayLes(e.target.value)}
-                      required
-                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
-                      placeholder="Default 40000"
-                    />
-                  </div>
+                <div className="text-center pr-3 border-r border-neutral-gray/10">
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold text-emerald-600">Lunas SPP</span>
+                  <span className="font-mono text-xs font-black text-emerald-600">
+                    {
+                      sppMatriksData
+                        .filter((item: any) => {
+                          const originalStudent = students.find(s => String(s.id) === String(item.siswaId));
+                          return originalStudent && (selectedClass === "Semua" || originalStudent.class === selectedClass) && originalStudent.activeStatus === "Aktif";
+                        })
+                        .filter((item: any) => Number(item.totalTunggakanBulan) === 0).length
+                    }
+                  </span>
                 </div>
-
-                {/* Tombol Pintasan Preset Nominal */}
-                <div>
-                  <span className="block text-[8px] text-neutral-gray/60 uppercase mb-1.5 font-bold tracking-wide">Pilih Pintasan Nominal (Hemat Waktu)</span>
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPaySpp("75000");
-                        setPayLes("40000");
-                      }}
-                      className="py-2 px-1 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-[9px] font-black rounded-xl border-2 border-emerald-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center"
-                    >
-                      SPP+Les (115k)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPaySpp("75000");
-                        setPayLes("0");
-                      }}
-                      className="py-2 px-1 bg-sky-50 hover:bg-sky-600 hover:text-white text-sky-700 text-[9px] font-black rounded-xl border-2 border-sky-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center"
-                    >
-                      SPP (75k)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPaySpp("0");
-                        setPayLes("40000");
-                      }}
-                      className="py-2 px-1 bg-fuchsia-50 hover:bg-fuchsia-600 hover:text-white text-fuchsia-700 text-[9px] font-black rounded-xl border-2 border-fuchsia-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center"
-                    >
-                      Les (40k)
-                    </button>
-                  </div>
+                <div className="text-center">
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold text-rose-600">Tunggakan</span>
+                  <span className="font-mono text-xs font-black text-rose-600">
+                    {
+                      sppMatriksData
+                        .filter((item: any) => {
+                          const originalStudent = students.find(s => String(s.id) === String(item.siswaId));
+                          return originalStudent && (selectedClass === "Semua" || originalStudent.class === selectedClass) && originalStudent.activeStatus === "Aktif";
+                        })
+                        .filter((item: any) => Number(item.totalTunggakanBulan) > 0).length
+                    }
+                  </span>
                 </div>
-
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Pilih Bulan Pembayaran SPP (Bisa Rapel)</label>
-                  <div className="grid grid-cols-2 gap-2 bg-[#FAF8F5] p-3 rounded-lg border border-primary-green/10 max-h-[140px] overflow-y-auto">
-                    {academicMonths.map((m) => {
+              </div>
+            </div>
+            
+            <div className="overflow-x-auto rounded-xl border border-neutral-gray/10">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10">
+                    <th className="py-3 px-4 min-w-[150px]">Nama Murid (Kelas)</th>
+                    {academicMonths.map(m => {
                       const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
                       const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
-                      const monthKey = `${labelYear}-${m.value}`;
-                      
-                      const alreadyPaid = getPaidMonthsForStudent(payStudentId);
-                      const isPaid = alreadyPaid.includes(monthKey);
-                      const isChecked = payPaidMonths.includes(monthKey);
-                      
                       return (
-                        <label key={monthKey} className={`flex items-center gap-1.5 select-none ${isPaid ? "cursor-not-allowed text-neutral-gray/50" : "cursor-pointer text-neutral-dark"}`}>
-                          <input
-                            type="checkbox"
-                            checked={isChecked || isPaid}
-                            disabled={isPaid}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setPayPaidMonths([...payPaidMonths, monthKey]);
-                              } else {
-                                setPayPaidMonths(payPaidMonths.filter(x => x !== monthKey));
-                              }
-                            }}
-                            className="rounded text-primary-green focus:ring-primary-green disabled:opacity-50"
-                          />
-                          <span className="text-[10px] font-bold">
-                            {m.name} <span className="text-[8px] opacity-75">'{labelYear.substring(2)}</span>
-                            {isPaid && <span className="text-[8px] text-emerald-600 block font-semibold">(Lunas)</span>}
-                          </span>
-                        </label>
+                        <th key={m.value} className="py-3 px-2 text-center whitespace-nowrap">
+                          {m.name} <span className="block text-[8px] text-neutral-gray/50">{labelYear}</span>
+                        </th>
                       );
                     })}
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="payDesc" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Keterangan / Uraian</label>
-                  <input
-                    type="text"
-                    id="payDesc"
-                    value={payDesc}
-                    onChange={(e) => setPayDesc(e.target.value)}
-                    required
-                    className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                    placeholder="Contoh: Pembayaran SPP Agustus + Les"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="newDepositStatus" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Status Setoran Uang Fisik</label>
-                  <select
-                    id="newDepositStatus"
-                    value={newDepositStatus}
-                    onChange={(e) => setNewDepositStatus(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
-                  >
-                    <option value="Belum Disetor">Belum Disetor (Kas Pending)</option>
-                    <option value="Sudah Disetor">Sudah Disetor (Kas Fisik Riil)</option>
-                  </select>
-                </div>
-
-                {/* Submit / Action buttons fixed at bottom of scrollable drawer */}
-                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
-                  <button
-                    type="submit"
-                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
-                  >
-                    Simpan Pembayaran
-                  </button>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-gray/5 font-semibold text-neutral-dark">
+                  {students
+                    .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
+                    .map(student => {
+                      return (
+                        <tr key={student.id} className="hover:bg-soft-mint/30 transition-colors">
+                          <td className="py-2.5 px-4 font-bold">
+                            {student.name}
+                            <span className="block text-[9px] font-bold text-neutral-gray">{student.class}</span>
+                          </td>
+                          {academicMonths.map(m => {
+                            const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
+                            const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
+                            
+                            const studentMatrix = sppMatriksData.find(
+                              (item: any) => String(item.siswaId) === String(student.id)
+                            );
+                            
+                            const monthNameUpper = m.name.toUpperCase();
+                            
+                            // Fallback check against local sppTransactions array to bypass naming typos from database matrix
+                            const hasTxInLocal = sppTransactions.some((tx) => {
+                              if (String(tx.studentId) !== String(student.id)) return false;
+                              return (tx.paidMonths || []).some((pm) => {
+                                const [yr, mo] = pm.split("-");
+                                return mo === m.value && yr === labelYear;
+                              });
+                            });
+  
+                            const isPaid = (studentMatrix?.matriks?.[monthNameUpper] === true) || hasTxInLocal;
+  
+                            return (
+                              <td key={m.value} className="py-2 px-1 text-center">
+                                <div className="flex justify-center">
+                                  {isPaid ? (
+                                    <span 
+                                      className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200/50 shadow-3xs" 
+                                      title={`Lunas SPP ${m.name} ${labelYear}`}
+                                    >
+                                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                      </svg>
+                                    </span>
+                                  ) : (
+                                    <span 
+                                      className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-rose-50 text-rose-400 border border-rose-100 shadow-3xs" 
+                                      title={`Belum Bayar SPP ${m.name} ${labelYear}`}
+                                    >
+                                      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                      </svg>
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+  
+        {/* Form Input Pembayaran SPP & Les Sliding Side Drawer */}
+        {showSppForm && isAdminTransaksi && (
+          <div className="fixed inset-0 z-50 overflow-hidden">
+            <div 
+              className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+              onClick={() => setShowSppForm(false)}
+            />
+            
+            <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+              <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+                <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark">Catat Pembayaran SPP & Les</h4>
                   <button
                     type="button"
                     onClick={() => setShowSppForm(false)}
-                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                    className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
                   >
-                    Batal
+                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit SppTransaction Sliding Side Drawer */}
-      {editingTx && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Backdrop Overlay */}
-          <div 
-            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
-            onClick={() => setEditingTx(null)}
-          />
-          
-          {/* Drawer Container */}
-          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
-            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
-              {/* Header */}
-              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
-                <h4 className="font-baloo text-base font-bold text-neutral-dark">Ubah Transaksi SPP & Les</h4>
-                <button
-                  type="button"
-                  onClick={() => setEditingTx(null)}
-                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
-                >
-                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Form Content (Scrollable) */}
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  onUpdateSppLesPayment({
-                    ...editingTx,
-                    total: Number(editingTx.spp) + Number(editingTx.les)
-                  });
-                  setEditingTx(null);
-                }}
-                className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark"
-              >
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Siswa</label>
-                  <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-neutral-dark">
-                    {students.find(s => s.id === editingTx.studentId)?.name || "Siswa"}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
+  
+                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
+                  {/* 1. Pemilihan Kelas */}
                   <div>
-                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tanggal Bayar</label>
-                    <input
-                      type="date"
-                      required
-                      value={editingTx.date}
-                      onChange={(e) => setEditingTx({ ...editingTx, date: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                    />
+                    <label htmlFor="formClassSelect" className="block text-[9px] text-neutral-gray/60 uppercase mb-1 font-bold">Langkah 1: Filter Kelas Dahulu</label>
+                    <select
+                      id="formClassSelect"
+                      value={formSelectedClass}
+                      onChange={(e) => setFormSelectedClass(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border-2 border-primary-green/30 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark cursor-pointer"
+                    >
+                      {classes.map((c) => (
+                        <option key={c.id} value={c.className}>{c.className}</option>
+                      ))}
+                    </select>
                   </div>
+  
+                  {/* 2. Pemilihan Murid Terfilter */}
                   <div>
-                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Total</label>
-                    <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
-                      Rp {(Number(editingTx.spp) + Number(editingTx.les)).toLocaleString()}
+                    <label htmlFor="payStudent" className="block text-[9px] text-neutral-gray/60 uppercase mb-1 font-bold">Langkah 2: Pilih Siswa Kelas {formSelectedClass}</label>
+                    <select
+                      id="payStudent"
+                      value={payStudentId}
+                      onChange={(e) => setPayStudentId(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                    >
+                      <option value="">-- Pilih Murid --</option>
+                      {formFilteredStudents.map((st) => (
+                        <option key={st.id} value={st.id}>{st.name}</option>
+                      ))}
+                    </select>
+                    {formFilteredStudents.length === 0 && (
+                      <span className="text-[9px] text-rose-500 font-semibold block mt-1">Belum ada murid aktif di kelas ini.</span>
+                    )}
+                  </div>
+  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label htmlFor="payDate" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tanggal Bayar</label>
+                      <input
+                        type="date"
+                        id="payDate"
+                        value={payDate}
+                        onChange={(e) => setPayDate(e.target.value)}
+                        required
+                        className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Total (Otomatis)</label>
+                      <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
+                        Rp {((Number(paySpp || 0) * Math.max(1, payPaidMonths.length)) + Number(payLes || 0)).toLocaleString()}
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
+  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label htmlFor="paySpp" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal SPP (Rp)</label>
+                      <input
+                        type="number"
+                        id="paySpp"
+                        min="0"
+                        value={paySpp}
+                        onChange={(e) => setPaySpp(e.target.value)}
+                        required
+                        className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                        placeholder="Default 75000"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="payLes" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal Les (Rp)</label>
+                      <input
+                        type="number"
+                        id="payLes"
+                        min="0"
+                        value={payLes}
+                        onChange={(e) => setPayLes(e.target.value)}
+                        required
+                        className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                        placeholder="Default 40000"
+                      />
+                    </div>
+                  </div>
+  
                   <div>
-                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal SPP (Rp)</label>
+                    <span className="block text-[8px] text-neutral-gray/60 uppercase mb-1.5 font-bold tracking-wide">Pilih Pintasan Nominal (Hemat Waktu)</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPaySpp("75000");
+                          setPayLes("40000");
+                        }}
+                        className="py-2 px-1 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-[9px] font-black rounded-xl border-2 border-emerald-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center"
+                      >
+                        SPP+Les (115k)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPaySpp("75000");
+                          setPayLes("0");
+                        }}
+                        className="py-2 px-1 bg-sky-50 hover:bg-sky-600 hover:text-white text-sky-700 text-[9px] font-black rounded-xl border-2 border-sky-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center"
+                      >
+                        SPP (75k)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPaySpp("0");
+                          setPayLes("40000");
+                        }}
+                        className="py-2 px-1 bg-fuchsia-50 hover:bg-fuchsia-600 hover:text-white text-fuchsia-700 text-[9px] font-black rounded-xl border-2 border-fuchsia-200/60 shadow-3xs transition-all active:scale-95 duration-200 cursor-pointer text-center"
+                      >
+                        Les (40k)
+                      </button>
+                    </div>
+                  </div>
+  
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Pilih Bulan Pembayaran SPP (Bisa Rapel)</label>
+                    <div className="grid grid-cols-2 gap-2 bg-[#FAF8F5] p-3 rounded-lg border border-primary-green/10 max-h-[140px] overflow-y-auto">
+                      {academicMonths.map((m) => {
+                        const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
+                        const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
+                        const monthKey = `${labelYear}-${m.value}`;
+                        
+                        const alreadyPaid = getPaidMonthsForStudent(payStudentId);
+                        const isPaid = alreadyPaid.includes(monthKey);
+                        const isChecked = payPaidMonths.includes(monthKey);
+                        
+                        return (
+                          <label key={monthKey} className={`flex items-center gap-1.5 select-none ${isPaid ? "cursor-not-allowed text-neutral-gray/50" : "cursor-pointer text-neutral-dark"}`}>
+                            <input
+                              type="checkbox"
+                              checked={isChecked || isPaid}
+                              disabled={isPaid}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setPayPaidMonths([...payPaidMonths, monthKey]);
+                                } else {
+                                  setPayPaidMonths(payPaidMonths.filter(x => x !== monthKey));
+                                }
+                              }}
+                              className="rounded text-primary-green focus:ring-primary-green disabled:opacity-50"
+                            />
+                            <span className="text-[10px] font-bold">
+                              {m.name} <span className="text-[8px] opacity-75">'{labelYear.substring(2)}</span>
+                              {isPaid && <span className="text-[8px] text-emerald-600 block font-semibold">(Lunas)</span>}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+  
+                  <div>
+                    <label htmlFor="payDesc" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Keterangan / Uraian</label>
                     <input
-                      type="number"
+                      type="text"
+                      id="payDesc"
+                      value={payDesc}
+                      onChange={(e) => setPayDesc(e.target.value)}
                       required
-                      min="0"
-                      value={editingTx.spp}
-                      onChange={(e) => setEditingTx({ ...editingTx, spp: Number(e.target.value) })}
-                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                      className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                      placeholder="Contoh: Pembayaran SPP Agustus + Les"
                     />
                   </div>
+  
                   <div>
-                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal Les (Rp)</label>
-                    <input
-                      type="number"
-                      required
-                      min="0"
-                      value={editingTx.les}
-                      onChange={(e) => setEditingTx({ ...editingTx, les: Number(e.target.value) })}
-                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
-                    />
+                    <label htmlFor="newDepositStatus" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Status Setoran Uang Fisik</label>
+                    <select
+                      id="newDepositStatus"
+                      value={newDepositStatus}
+                      onChange={(e) => setNewDepositStatus(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                    >
+                      <option value="Belum Disetor">Belum Disetor (Kas Pending)</option>
+                      <option value="Sudah Disetor">Sudah Disetor (Kas Fisik Riil)</option>
+                    </select>
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1 font-bold">Bulan Pembayaran SPP</label>
-                  <div className="grid grid-cols-2 gap-2 bg-[#FAF8F5] p-3 rounded-lg border border-primary-green/10 max-h-[140px] overflow-y-auto">
-                    {academicMonths.map((m) => {
-                      const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
-                      const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
-                      const monthKey = `${labelYear}-${m.value}`;
-                      
-                      const alreadyPaid = getPaidMonthsForStudent(editingTx.studentId);
-                      const isPaidInOtherTx = alreadyPaid.includes(monthKey) && !(editingTx.paidMonths || []).includes(monthKey);
-                      const isChecked = editingTx.paidMonths?.includes(monthKey) || false;
-                      
-                      return (
-                        <label key={monthKey} className={`flex items-center gap-1.5 select-none ${isPaidInOtherTx ? "cursor-not-allowed text-neutral-gray/50" : "cursor-pointer text-neutral-dark"}`}>
-                          <input
-                            type="checkbox"
-                            checked={isChecked || isPaidInOtherTx}
-                            disabled={isPaidInOtherTx}
-                            onChange={(e) => {
-                              const currentPaid = editingTx.paidMonths || [];
-                              const updatedPaid = e.target.checked
-                                ? [...currentPaid, monthKey]
-                                : currentPaid.filter(x => x !== monthKey);
-                              setEditingTx({ ...editingTx, paidMonths: updatedPaid });
-                            }}
-                            className="rounded text-primary-green focus:ring-primary-green disabled:opacity-50"
-                          />
-                          <span className="text-[10px] font-bold">
-                            {m.name} <span className="text-[8px] opacity-75">'{labelYear.substring(2)}</span>
-                            {isPaidInOtherTx && <span className="text-[8px] text-emerald-600 block font-semibold">(Lunas)</span>}
-                          </span>
-                        </label>
-                      );
-                    })}
+  
+                  <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                    <button
+                      type="submit"
+                      disabled={!payStudentId}
+                      className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Simpan Pembayaran
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowSppForm(false)}
+                      className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                    >
+                      Batal
+                    </button>
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Status Setoran Uang Fisik</label>
-                  <select
-                    value={editingTx.depositStatus}
-                    onChange={(e) => setEditingTx({ ...editingTx, depositStatus: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
-                  >
-                    <option value="Belum Disetor">Belum Disetor (Kas Pending)</option>
-                    <option value="Sudah Disetor">Sudah Disetor (Kas Fisik Riil)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Keterangan / Uraian</label>
-                  <input
-                    type="text"
-                    required
-                    value={editingTx.description}
-                    onChange={(e) => setEditingTx({ ...editingTx, description: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
-                  />
-                </div>
-
-                {/* Submit / Action buttons fixed at bottom of scrollable drawer */}
-                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
-                  <button
-                    type="submit"
-                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
-                  >
-                    Simpan Perubahan
-                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+  
+        {/* Edit SppTransaction Sliding Side Drawer */}
+        {editingTx && (
+          <div className="fixed inset-0 z-50 overflow-hidden">
+            <div 
+              className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+              onClick={() => setEditingTx(null)}
+            />
+            
+            <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+              <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
+                <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+                  <h4 className="font-baloo text-base font-bold text-neutral-dark">Ubah Transaksi SPP & Les</h4>
                   <button
                     type="button"
                     onClick={() => setEditingTx(null)}
-                    className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                    className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
                   >
-                    Batal
+                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
-              </form>
+  
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    
+                    const studentName = students.find(s => s.id === editingTx.studentId)?.name || "Siswa";
+                    triggerConfirm(
+                      "Ubah Transaksi SPP",
+                      `Apakah Anda yakin ingin menyimpan perubahan transaksi SPP/Les untuk "${studentName}"?`,
+                      () => {
+                        onUpdateSppLesPayment({
+                          ...editingTx,
+                          total: Number(editingTx.spp) + Number(editingTx.les)
+                        });
+                        setEditingTx(null);
+                      }
+                    );
+                  }}
+                  className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark"
+                >
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Siswa</label>
+                    <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-neutral-dark">
+                      {students.find(s => s.id === editingTx.studentId)?.name || "Siswa"}
+                    </div>
+                  </div>
+  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tanggal Bayar</label>
+                      <input
+                        type="date"
+                        required
+                        value={editingTx.date}
+                        onChange={(e) => setEditingTx({ ...editingTx, date: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Total</label>
+                      <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
+                        Rp {(Number(editingTx.spp) + Number(editingTx.les)).toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal SPP (Rp)</label>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        value={editingTx.spp}
+                        onChange={(e) => setEditingTx({ ...editingTx, spp: Number(e.target.value) })}
+                        className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nominal Les (Rp)</label>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        value={editingTx.les}
+                        onChange={(e) => setEditingTx({ ...editingTx, les: Number(e.target.value) })}
+                        className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                      />
+                    </div>
+                  </div>
+  
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Status Setoran Uang Fisik</label>
+                    <select
+                      value={editingTx.depositStatus}
+                      onChange={(e) => setEditingTx({ ...editingTx, depositStatus: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                    >
+                      <option value="Belum Disetor">Belum Disetor (Kas Pending)</option>
+                      <option value="Sudah Disetor">Sudah Disetor (Kas Fisik Riil)</option>
+                    </select>
+                  </div>
+  
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Keterangan / Uraian</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingTx.description}
+                      onChange={(e) => setEditingTx({ ...editingTx, description: e.target.value })}
+                      className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                    />
+                  </div>
+  
+                  <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                    <button
+                      type="submit"
+                      className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                    >
+                      Simpan Perubahan
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingTx(null)}
+                      className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                    >
+                      Batal
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+      {/* ── Custom Confirmation Modal Pop-up ── */}
+      {confirmDialog.isOpen && (
+        <div className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-sm p-6 relative shadow-2xl text-center space-y-4 animate-scale-in text-neutral-dark">
+            <div className="mx-auto w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="space-y-1.5">
+              <h4 className="font-baloo text-base font-bold text-neutral-dark">{confirmDialog.title}</h4>
+              <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed px-2">
+                {confirmDialog.message}
+              </p>
+            </div>
+            <div className="flex gap-2.5 pt-2 select-none">
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirmDialog.action) confirmDialog.action();
+                  setConfirmDialog({ isOpen: false, title: "", message: "", action: null });
+                }}
+                className="flex-1 py-2.5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-3xs"
+              >
+                Ya, Konfirmasi
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDialog({ isOpen: false, title: "", message: "", action: null })}
+                className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Batal
+              </button>
             </div>
           </div>
         </div>

@@ -1,0 +1,2219 @@
+{
+  "info": {
+    "_postman_id": "fd9c5600-1503-401a-a34a-c5ff2001573f",
+    "name": "KB RA Sahabat",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52385280",
+    "_collection_link": "https://go.postman.co/collection/52385280-fd9c5600-1503-401a-a34a-c5ff2001573f?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Get Me",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjkwNjE2YzYyLTc4YmUtNDY1ZS05ZmM2LWI1ZDJkMjJkMjkzNCIsInVzZXJuYW1lIjoiZ3VydSIsInJvbGUiOiJHVVJVIiwiaWF0IjoxNzg1ODMyNzQ4LCJleHAiOjE3ODU5MTkxNDh9.yORigKPQoCj72RVEGMJJUWBVh9tZBYZOsDlfaLeuw5E",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"admin\",\r\n  \"password\": \"admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nama\": \"Guru PAUD\",\r\n  \"username\": \"guru\",\r\n  \"password\": \"guru\",\r\n  \"role\": \"GURU\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI4YzZlMjc5LWJlZDYtNGZhNi1iZGIxLTNmMWQ2ZTEzYTE4NSIsInVzZXJuYW1lIjoieWF5YSIsInJvbGUiOiJHVVJVIiwiaWF0IjoxNzg1OTk2NjgzLCJleHAiOjE3ODYwODMwODN9.9APd8bB0WD8G4R-ASWVx660OVq8zJFyPsPHaBfWm-OM",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"oldPassword\": \"admin\",\r\n  \"newPassword\": \"osas\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "change-password"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Kelas",
+      "item": [
+        {
+          "name": "Tambah Kelas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzYzODQ2OSwiZXhwIjoxNzg3NzI0ODY5fQ.IQw-OKtsrBF0fMKms9mDIct3-3KZ0MYyzSLpwfEwQEc",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"namaKelas\": \"Kelas B (Melati)\",\r\n  \"tahunAjaran\": \"2026/2027\",\r\n  \"guruId\": \"b8909db0-126a-4e69-858e-a145a3f38ad6\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/kelas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "kelas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Kelas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzYzODQ2OSwiZXhwIjoxNzg3NzI0ODY5fQ.IQw-OKtsrBF0fMKms9mDIct3-3KZ0MYyzSLpwfEwQEc",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"namaKelas\": \"Kelas B - Bintang\",\r\n  \"tahunAjaran\": \"2025/2026\",\r\n  \"guruId\": \"ea8b0f79-844f-4934-83c2-c9aa7c1fdddb\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/kelas/:idkelas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "kelas",
+                ":idkelas"
+              ],
+              "variable": [
+                {
+                  "key": "idkelas",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Kelas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/kelas/:idKelas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "kelas",
+                ":idKelas"
+              ],
+              "variable": [
+                {
+                  "key": "idKelas",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Show All Kelas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/kelas/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "kelas",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Show Kelas By Id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjEwOTY1NCwiZXhwIjoxNzg2MTk2MDU0fQ.dt4pOhJFIu_0zDZ_DpMeilnrM7dcQg3bGAt3gmFMSjU",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/kelas/:idKelas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "kelas",
+                ":idKelas"
+              ],
+              "variable": [
+                {
+                  "key": "idKelas",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Murojaah",
+      "item": [
+        {
+          "name": "Kategori",
+          "item": [
+            {
+              "name": "Update Kategori",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"nama\": \"Doa Harian & Adab\",\r\n  \"urutan\": 2\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/kategori/:idkategori",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "kategori",
+                    ":idkategori"
+                  ],
+                  "variable": [
+                    {
+                      "key": "idkategori",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Tambah Kategori",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"nama\": \"Doa Sehari hari\",\r\n  \"urutan\": 2\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/kategori",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "kategori"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Kategori",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/kategori/:idkategori",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "kategori",
+                    ":idkategori"
+                  ],
+                  "variable": [
+                    {
+                      "key": "idkategori",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Show All Kategori dan materi",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/kelas/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "kelas",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Penilaian",
+          "item": [
+            {
+              "name": "Update Penilaian",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"namaKelas\": \"Kelas B - Bintang\",\r\n  \"tahunAjaran\": \"2025/2026\",\r\n  \"waliKelas\": \"Mariya Arteni Nur, S.Pd\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/kelas/5813f4cf-81a6-47b3-a764-52121a5ad0a6",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "kelas",
+                    "5813f4cf-81a6-47b3-a764-52121a5ad0a6"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Tambah Penilaian",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"siswaId\": \"0e6d80e5-43c2-4547-a996-fb79b4ed7972\",\r\n  \"materiId\": \"5e169ad6-094b-48f5-bc8f-02f1d6a9e792\",\r\n  \"predikat\": \"B\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/penilaian",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "penilaian"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Kategori",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/kelas/:idPenilaian",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "kelas",
+                    ":idPenilaian"
+                  ],
+                  "variable": [
+                    {
+                      "key": "idPenilaian",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Show All Kategori dan materi",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhODMwZTc4LWIyNDMtNDkxOS05MDAxLWVmYjkzZDIyNjA3NCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU4MzI5NzcsImV4cCI6MTc4NTkxOTM3N30.h9pT4BDHK2R5uAgJbb7fBuk77yPruZ832x2YBnxco94",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/kelas/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "kelas",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Materi",
+          "item": [
+            {
+              "name": "Update Materi",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"kategoriId\": \"71851949-e424-4c67-813d-d55ef84ec9d5\",\r\n  \"nama\": \"Doa Kedua orang tua\",\r\n  \"urutan\": 8\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/materi/:idMateri",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "materi",
+                    ":idMateri"
+                  ],
+                  "variable": [
+                    {
+                      "key": "idMateri",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Tambah Materi",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"kategoriId\": \"e69ace5c-518d-404f-8506-8f5fad0570b2\",\r\n  \"nama\": \"Doa Makan\",\r\n  \"urutan\": 2\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/materi",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "materi"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Materi",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/murojaah/materi/:idMateri",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "murojaah",
+                    "materi",
+                    ":idMateri"
+                  ],
+                  "variable": [
+                    {
+                      "key": "idMateri",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Get Lembar Murojaah",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/murojaah/siswa/:idSiswa",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "murojaah",
+                "siswa",
+                ":idSiswa"
+              ],
+              "variable": [
+                {
+                  "key": "idSiswa",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Siswa",
+      "item": [
+        {
+          "name": "Tambah Siswa",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"namaLengkap\": \"Ahmad Fauzi\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"nisn\": \"0012345678\",\r\n  \"nis\": \"2026001\",\r\n  \"kelasId\": null,\r\n  \"alamat\": \"Jl. Kaliurang KM 5, Yogyakarta\",\r\n  \"tinggiBadan\": 100,\r\n  \"beratBadan\": 16,\r\n  \"lingkarKepala\": 48,\r\n  \"semester\": \"Semester 1 (Ganjil)\",\r\n  \"tahunAjaran\": \"2026/2027\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/siswa",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "siswa"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tambah Siswa By Excel",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4Nzc0NTY5MywiZXhwIjoxNzg3ODMyMDkzfQ.86lUrnyix0Op6lExwLwVoISCiUBPSWAiFmsKN6KOOeQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "kelasId",
+                  "value": "17a3c344-2e4f-4a37-854a-fda766503a45",
+                  "type": "text",
+                  "uuid": "b5706580-97ae-4314-8ce2-26e09ccdf4ee"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "uuid": "b62fcbaf-eff2-4de0-bc3a-5c78ccd04e09",
+                  "src": "/C:/Users/ADVAN/Downloads/template_import_siswa_filled.xlsx"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/siswas/import",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "siswas",
+                "import"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Siswa",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4Nzc0NTY5MywiZXhwIjoxNzg3ODMyMDkzfQ.86lUrnyix0Op6lExwLwVoISCiUBPSWAiFmsKN6KOOeQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"namaLengkap\": \"Ahmad Fauzi\",\r\n  \"jenisKelamin\": \"PEREMPUAN\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"nisn\": \"001234567\",\r\n  \"nis\": \"202600\",\r\n  \"kelasId\": null,\r\n  \"alamat\": \"Jl. Kaliurang KM 5, Yogyakarta\",\r\n  \"tinggiBadan\": 100,\r\n  \"beratBadan\": 16,\r\n  \"lingkarKepala\": 48,\r\n  \"semester\": \"Semester 1 (Ganjil)\",\r\n  \"tahunAjaran\": \"2026/2027\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/siswa/:idSiswa",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "siswa",
+                ":idSiswa"
+              ],
+              "variable": [
+                {
+                  "key": "idSiswa",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Siswa",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzAyMzMwMSwiZXhwIjoxNzg3MTA5NzAxfQ.kszqFWkqLPkVHFYDVQLc3nA6aRFC4WCphp0jUNVildg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/siswa/:idSiswa",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "siswa",
+                ":idSiswa"
+              ],
+              "variable": [
+                {
+                  "key": "idSiswa",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Show All Siswa",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/siswa",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "siswa"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Template Excel",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4Nzc0NTY5MywiZXhwIjoxNzg3ODMyMDkzfQ.86lUrnyix0Op6lExwLwVoISCiUBPSWAiFmsKN6KOOeQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/siswas/template",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "siswas",
+                "template"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Show Siswa By Id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzAyMzMwMSwiZXhwIjoxNzg3MTA5NzAxfQ.kszqFWkqLPkVHFYDVQLc3nA6aRFC4WCphp0jUNVildg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/siswa/:idSiswa",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "siswa",
+                ":idSiswa"
+              ],
+              "variable": [
+                {
+                  "key": "idSiswa",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Delete User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwYjViNTdkLWY1ZTItNGZjMi04NzZlLTBjNzUwNjlmZDNjMSIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzgwMTQzMywiZXhwIjoxNzg3ODg3ODMzfQ.Yi5SXn4LGS_Xhc6h7uasUvF--dTesxVUORruwNP9qco",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:idUser",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                ":idUser"
+              ],
+              "variable": [
+                {
+                  "key": "idUser",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password By Admin",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"admin\",\r\n  \"password\": \"admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/:id/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                ":id",
+                "reset-password"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "SPP",
+      "item": [
+        {
+          "name": "Get List Transaksi",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tambah Pembayaran SPP",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwYjViNTdkLWY1ZTItNGZjMi04NzZlLTBjNzUwNjlmZDNjMSIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzgwMTQzMywiZXhwIjoxNzg3ODg3ODMzfQ.Yi5SXn4LGS_Xhc6h7uasUvF--dTesxVUORruwNP9qco",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "// {\r\n    //bulan batch\r\n//   \"siswaId\": \"03be56fb-e7be-4ca1-88c0-b7fb440289f5\",\r\n//   \"tanggalBayar\": \"2026-08-18\",\r\n//   \"tahunAjaran\": \"2026/2027\",\r\n//   \"nominalSpp\": 150000,\r\n//   \"nominalLes\": 50000,\r\n//   \"statusSetoran\": \"BELUM\",\r\n//   \"catatan\": \"Pelunasan SPP & Les Juli s/d September 2026\",\r\n//   \"bulanList\": [\r\n//     { \"bulan\": 7, \"tahun\": 2026 },\r\n//     { \"bulan\": 8, \"tahun\": 2026 },\r\n//     { \"bulan\": 9, \"tahun\": 2026 }\r\n//   ]\r\n// }\r\n  //bulan tunggal\r\n  {\r\n  \"siswaId\": \"03be56fb-e7be-4ca1-88c0-b7fb440289f5\",\r\n  \"tanggalBayar\": \"2026-09-18\",\r\n  \"tahunAjaran\": \"2026/2027\",\r\n  \"nominalSpp\": 150000,\r\n  \"nominalLes\": 50000,\r\n  \"statusSetoran\": \"BELUM\",\r\n  \"catatan\": \"Pembayaran SPP & Les Agustus 2026\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Pembayaran SPP",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzA0OTQ2NSwiZXhwIjoxNzg3MTM1ODY1fQ.qkfh5x4aPJ2nUZvIjDB-sZ_kNQIQl64OJDUcv6q93h4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nominalSpp\": 10000,\r\n  \"nominalLes\": 4000,\r\n  \"statusSetoran\": \"SUDAH\",\r\n  \"tanggalBayar\": \"2026-08-14\",\r\n  \"catatan\": \"Pembayaran lunas SPP + Les bulan Agustus\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les/:idSPP",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les",
+                ":idSPP"
+              ],
+              "variable": [
+                {
+                  "key": "idSPP",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Restore Pembayaran SPP",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"siswaId\": \"8e3e8e24-25db-430b-8263-6a7ebfc189a6\",\r\n  \"tanggalBayar\": \"2026-08-14\",\r\n  \"nominalSpp\": 75000,\r\n  \"nominalLes\": 40000,\r\n  \"catatan\": \"Pembayaran SPP + Les - Agustus 2026\",\r\n  \"statusSetoran\": \"SUDAH\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les/:idSpp/restore",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les",
+                ":idSpp",
+                "restore"
+              ],
+              "variable": [
+                {
+                  "key": "idSpp",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ringkasan Kas Sumarry",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les?tahun=2026",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les"
+              ],
+              "query": [
+                {
+                  "key": "tahun",
+                  "value": "2026"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Transaksi",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjEwMjQ3MSwiZXhwIjoxNzg2MTg4ODcxfQ.pzUxkObPLe_Ah4SGgjz5TyAMCPmqbbe3zOOuLba-rA4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les/:idSPP",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les",
+                ":idSPP"
+              ],
+              "variable": [
+                {
+                  "key": "idSPP",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Matriks Pembayaran Tahunan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2NWExZjY3LTczYWUtNDAwZi1hNDcyLWVmZThkNmI4YjAwZSIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzAyNTU2NywiZXhwIjoxNzg3MTExOTY3fQ.TFQXYjFFdDSl5j5TKA3E3Wo0sKFNxFT9NNrl_jmRKwg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les/matriks?tahunAjaran=2026/2027",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les",
+                "matriks"
+              ],
+              "query": [
+                {
+                  "key": "tahunAjaran",
+                  "value": "2026/2027"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tabungan",
+      "item": [
+        {
+          "name": "Get List Tabungan By id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/tabungan/siswa/:siswaId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tabungan",
+                "siswa",
+                ":siswaId"
+              ],
+              "variable": [
+                {
+                  "key": "siswaId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tambah Data Tabungan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"siswaId\": \"8e3e8e24-25db-430b-8263-6a7ebfc189a6\",\r\n  \"tanggalBayar\": \"2026-08-14\",\r\n  \"nominalSpp\": 75000,\r\n  \"nominalLes\": 40000,\r\n  \"catatan\": \"Pembayaran SPP + Les - Agustus 2026\",\r\n  \"statusSetoran\": \"SUDAH\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/tabungan/mutasi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tabungan",
+                "mutasi"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Restore Pembayaran SPP",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/tabungan/mutasi/:id/restore",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tabungan",
+                "mutasi",
+                ":id",
+                "restore"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All List",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les?tahun=2026",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les"
+              ],
+              "query": [
+                {
+                  "key": "tahun",
+                  "value": "2026"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Transaksi",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/tabungan/mutasi/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tabungan",
+                "mutasi",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dokumentasi",
+      "item": [
+        {
+          "name": "Tambah Dokumentasi",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7"
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd"
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                },
+                {
+                  "key": "kategori",
+                  "value": "AGENDA TAHUNAN",
+                  "type": "text",
+                  "uuid": "c2ff2dfd-9720-425c-a893-c42282b2a04d"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Data kegiatan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7"
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd"
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                },
+                {
+                  "key": "kategori",
+                  "value": "AGENDA UPDATE",
+                  "type": "text",
+                  "uuid": "3a41dfc8-83d8-4915-b08f-3decb8e06437"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Kegiatan Dan Foto Didalamnya",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7"
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd"
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi/:idKegiatan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi",
+                ":idKegiatan"
+              ],
+              "variable": [
+                {
+                  "key": "idKegiatan",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Foto By Id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7"
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd"
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi/foto/:fotoID",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi",
+                "foto",
+                ":fotoID"
+              ],
+              "variable": [
+                {
+                  "key": "fotoID",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All dokumentasi",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7",
+                  "disabled": true
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd",
+                  "disabled": true
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75",
+                  "disabled": true
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Detail Kegiatan",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7"
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd"
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Public Galery",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"isPublic\": true,\r\n  \"thumbnailFotoId\": \"ID_FOTO_PILIHAN_ADMIN\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dokumentasi/:idKegiatan/toggle-public",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dokumentasi",
+                ":idKegiatan",
+                "toggle-public"
+              ],
+              "variable": [
+                {
+                  "key": "idKegiatan",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Public galery",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjgwMDE3MCwiZXhwIjoxNzg2ODg2NTcwfQ.oL_AR50RmJNg70kJpAV8P8fvFyhzqVVlXSYHOoc4MRw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "namaKegiatan",
+                  "value": "Peringatan Maulid Nabi 1448 H",
+                  "type": "text",
+                  "uuid": "ee8227a7-7559-4ae5-91f1-7a7474b6cac7"
+                },
+                {
+                  "key": "deskripsi",
+                  "value": "Kegiatan mendongeng dan lomba mewarnai santri",
+                  "type": "text",
+                  "uuid": "026db445-ae79-44b6-b583-e6eae8231cfd"
+                },
+                {
+                  "key": "tanggalKegiatan",
+                  "value": "2026-08-14",
+                  "type": "text",
+                  "uuid": "cb7c024c-4102-4a83-807d-f89e8f2e6e75"
+                },
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
+                  "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/galeri",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "public",
+                "galeri"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

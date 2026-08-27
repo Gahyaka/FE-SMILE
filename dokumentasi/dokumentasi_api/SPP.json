@@ -59,7 +59,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzA0OTQ2NSwiZXhwIjoxNzg3MTM1ODY1fQ.qkfh5x4aPJ2nUZvIjDB-sZ_kNQIQl64OJDUcv6q93h4",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwYjViNTdkLWY1ZTItNGZjMi04NzZlLTBjNzUwNjlmZDNjMSIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzgwMTQzMywiZXhwIjoxNzg3ODg3ODMzfQ.Yi5SXn4LGS_Xhc6h7uasUvF--dTesxVUORruwNP9qco",
                   "type": "string"
                 }
               ]
@@ -68,7 +68,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    //bulan batch\r\n  \"siswaId\": \"0e6d80e5-43c2-4547-a996-fb79b4ed7972\",\r\n  \"tanggalBayar\": \"2026-08-18\",\r\n  \"tahunAjaran\": \"2026/2027\",\r\n  \"nominalSpp\": 150000,\r\n  \"nominalLes\": 50000,\r\n  \"statusSetoran\": \"BELUM\",\r\n  \"catatan\": \"Pelunasan SPP & Les Juli s/d September 2026\",\r\n  \"bulanList\": [\r\n    { \"bulan\": 7, \"tahun\": 2026 },\r\n    { \"bulan\": 8, \"tahun\": 2026 },\r\n    { \"bulan\": 9, \"tahun\": 2026 }\r\n  ]\r\n\r\n  //bulan tunggal\r\n//   {\r\n//   \"siswaId\": \"0e6d80e5-43c2-4547-a996-fb79b4ed7972\",\r\n//   \"tanggalBayar\": \"2026-08-18\",\r\n//   \"tahunAjaran\": \"2026/2027\",\r\n//   \"nominalSpp\": 150000,\r\n//   \"nominalLes\": 50000,\r\n//   \"statusSetoran\": \"BELUM\",\r\n//   \"catatan\": \"Pembayaran SPP & Les Agustus 2026\"\r\n// }\r\n}",
+              "raw": "// {\r\n    //bulan batch\r\n//   \"siswaId\": \"03be56fb-e7be-4ca1-88c0-b7fb440289f5\",\r\n//   \"tanggalBayar\": \"2026-08-18\",\r\n//   \"tahunAjaran\": \"2026/2027\",\r\n//   \"nominalSpp\": 150000,\r\n//   \"nominalLes\": 50000,\r\n//   \"statusSetoran\": \"BELUM\",\r\n//   \"catatan\": \"Pelunasan SPP & Les Juli s/d September 2026\",\r\n//   \"bulanList\": [\r\n//     { \"bulan\": 7, \"tahun\": 2026 },\r\n//     { \"bulan\": 8, \"tahun\": 2026 },\r\n//     { \"bulan\": 9, \"tahun\": 2026 }\r\n//   ]\r\n// }\r\n  //bulan tunggal\r\n  {\r\n  \"siswaId\": \"03be56fb-e7be-4ca1-88c0-b7fb440289f5\",\r\n  \"tanggalBayar\": \"2026-09-18\",\r\n  \"tahunAjaran\": \"2026/2027\",\r\n  \"nominalSpp\": 150000,\r\n  \"nominalLes\": 50000,\r\n  \"statusSetoran\": \"BELUM\",\r\n  \"catatan\": \"Pembayaran SPP & Les Agustus 2026\"\r\n}\r\n",
               "options": {
                 "raw": {
                   "language": "json"
@@ -288,6 +288,225 @@
                 {
                   "key": "tahunAjaran",
                   "value": "2026/2027"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tabungan",
+      "item": [
+        {
+          "name": "Get List Tabungan By id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/tabungan/siswa/:siswaId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tabungan",
+                "siswa",
+                ":siswaId"
+              ],
+              "variable": [
+                {
+                  "key": "siswaId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tambah Data Tabungan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"siswaId\": \"8e3e8e24-25db-430b-8263-6a7ebfc189a6\",\r\n  \"tanggalBayar\": \"2026-08-14\",\r\n  \"nominalSpp\": 75000,\r\n  \"nominalLes\": 40000,\r\n  \"catatan\": \"Pembayaran SPP + Les - Agustus 2026\",\r\n  \"statusSetoran\": \"SUDAH\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/tabungan/mutasi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tabungan",
+                "mutasi"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Restore Pembayaran SPP",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/tabungan/mutasi/:id/restore",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tabungan",
+                "mutasi",
+                ":id",
+                "restore"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All List",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxMzI2N2NjLWU3ZTgtNDg3Yi04M2M2LWVkZDU5NmM1OTBiOSIsInVzZXJuYW1lIjoiYWRtaW5fdHgiLCJyb2xlIjoiQURNSU5fVFJBTlNBS1NJIiwiaWF0IjoxNzg2MTAyMTQ4LCJleHAiOjE3ODYxODg1NDh9.kuPRlEeMUwxMqhxICURc_ASYU2caPdTCzIdovu_30qw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pembayaran-spp-les?tahun=2026",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pembayaran-spp-les"
+              ],
+              "query": [
+                {
+                  "key": "tahun",
+                  "value": "2026"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Transaksi",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NjYyNDEzNCwiZXhwIjoxNzg2NzEwNTM0fQ.Ibl2SPDmMSCzgQFddoemkfZ7UDZiV6pg_Ap4rduLC90",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/tabungan/mutasi/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tabungan",
+                "mutasi",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
                 }
               ]
             }

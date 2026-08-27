@@ -49,6 +49,53 @@
           "response": []
         },
         {
+          "name": "Tambah Siswa By Excel",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4Nzc0NTY5MywiZXhwIjoxNzg3ODMyMDkzfQ.86lUrnyix0Op6lExwLwVoISCiUBPSWAiFmsKN6KOOeQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "kelasId",
+                  "value": "17a3c344-2e4f-4a37-854a-fda766503a45",
+                  "type": "text",
+                  "uuid": "b5706580-97ae-4314-8ce2-26e09ccdf4ee"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "uuid": "b62fcbaf-eff2-4de0-bc3a-5c78ccd04e09",
+                  "src": "/C:/Users/ADVAN/Downloads/template_import_siswa_filled.xlsx"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/siswas/import",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "siswas",
+                "import"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Update Siswa",
           "request": {
             "auth": {
@@ -56,7 +103,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4NzAyMzMwMSwiZXhwIjoxNzg3MTA5NzAxfQ.kszqFWkqLPkVHFYDVQLc3nA6aRFC4WCphp0jUNVildg",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4Nzc0NTY5MywiZXhwIjoxNzg3ODMyMDkzfQ.86lUrnyix0Op6lExwLwVoISCiUBPSWAiFmsKN6KOOeQ",
                   "type": "string"
                 }
               ]
@@ -65,7 +112,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"namaLengkap\": \"Ahmad Fauzi\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"nisn\": \"001234567\",\r\n  \"nis\": \"202600\",\r\n  \"kelasId\": null,\r\n  \"alamat\": \"Jl. Kaliurang KM 5, Yogyakarta\",\r\n  \"tinggiBadan\": 100,\r\n  \"beratBadan\": 16,\r\n  \"lingkarKepala\": 48,\r\n  \"semester\": \"Semester 1 (Ganjil)\",\r\n  \"tahunAjaran\": \"2026/2027\"\r\n}",
+              "raw": "{\r\n  \"namaLengkap\": \"Ahmad Fauzi\",\r\n  \"jenisKelamin\": \"PEREMPUAN\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"nisn\": \"001234567\",\r\n  \"nis\": \"202600\",\r\n  \"kelasId\": null,\r\n  \"alamat\": \"Jl. Kaliurang KM 5, Yogyakarta\",\r\n  \"tinggiBadan\": 100,\r\n  \"beratBadan\": 16,\r\n  \"lingkarKepala\": 48,\r\n  \"semester\": \"Semester 1 (Ganjil)\",\r\n  \"tahunAjaran\": \"2026/2027\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -147,6 +194,36 @@
                 "api",
                 "v1",
                 "siswa"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Template Excel",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4Nzc0NTY5MywiZXhwIjoxNzg3ODMyMDkzfQ.86lUrnyix0Op6lExwLwVoISCiUBPSWAiFmsKN6KOOeQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/siswas/template",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "siswas",
+                "template"
               ]
             }
           },

@@ -51,6 +51,12 @@
                   "type": "file",
                   "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
                   "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                },
+                {
+                  "key": "kategori",
+                  "value": "AGENDA TAHUNAN",
+                  "type": "text",
+                  "uuid": "c2ff2dfd-9720-425c-a893-c42282b2a04d"
                 }
               ]
             },
@@ -109,6 +115,12 @@
                   "type": "file",
                   "uuid": "474485d9-61db-44ca-8d9a-c5ffb01b08c1",
                   "src": "/C:/Users/ADVAN/OneDrive/Gambar/Screenshots/Screenshot 2026-08-14 172446.png"
+                },
+                {
+                  "key": "kategori",
+                  "value": "AGENDA UPDATE",
+                  "type": "text",
+                  "uuid": "3a41dfc8-83d8-4915-b08f-3decb8e06437"
                 }
               ]
             },

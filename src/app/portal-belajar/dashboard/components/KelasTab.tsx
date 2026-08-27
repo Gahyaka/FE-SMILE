@@ -53,6 +53,28 @@ export default function KelasTab({
   const [newTeacherName, setNewTeacherName] = useState("");
   const [newTeacherId, setNewTeacherId] = useState<string | number>("");
 
+  // Custom Local Confirmation State
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    action: (() => void) | null;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    action: null,
+  });
+
+  const triggerConfirm = (title: string, message: string, action: () => void) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      action,
+    });
+  };
+
   const teachersList = users.filter((u) => {
     const role = (u.role || "").trim().toLowerCase();
     return role === "guru";
@@ -63,7 +85,6 @@ export default function KelasTab({
 
   // Determine which classes this user can see
   const visibleClasses = classes.filter((cls) => {
-    // Search filter
     const matchesSearch =
       cls.className.toLowerCase().includes(searchQuery.toLowerCase()) ||
       cls.teacherName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -71,19 +92,14 @@ export default function KelasTab({
     if (!matchesSearch) return false;
 
     if (isGuru) {
-      // Guru only sees class they teach (matching their display name)
-      // Standardize comparison to be case insensitive and flexible
       return cls.teacherName.toLowerCase().includes(currentUserDisplayName.toLowerCase()) || 
              currentUserDisplayName.toLowerCase().includes(cls.teacherName.toLowerCase());
     }
 
-    return true; // Admin Adm can see all
+    return true;
   });
 
-  const handleAddSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newClassName || !newTeacherName || !newTeacherId) return;
-
+  const executeAddClass = () => {
     onAddClass({
       className: newClassName,
       fase: newFase,
@@ -92,7 +108,6 @@ export default function KelasTab({
       description: "Tidak ada deskripsi",
     });
 
-    // Reset Form
     setNewClassName("");
     setNewFase("2026/2027");
     setNewTeacherName("");
@@ -100,14 +115,34 @@ export default function KelasTab({
     setShowAddForm(false);
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
+  const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingClass || !editingClass.className || !editingClass.teacherName) return;
+    if (!newClassName || !newTeacherName || !newTeacherId) return;
+
+    triggerConfirm(
+      "Tambah Kelas Baru",
+      `Apakah Anda yakin ingin mendaftarkan kelas baru "${newClassName}" dengan wali kelas "${newTeacherName}"?`,
+      executeAddClass
+    );
+  };
+
+  const executeEditClass = () => {
+    if (!editingClass) return;
     onUpdateClass(editingClass);
     setEditingClass(null);
   };
 
-  // Helper to count students in a class
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingClass || !editingClass.className || !editingClass.teacherName) return;
+
+    triggerConfirm(
+      "Simpan Perubahan Kelas",
+      `Apakah Anda yakin ingin menyimpan perubahan data kelas "${editingClass.className}"?`,
+      executeEditClass
+    );
+  };
+
   const getStudentCount = (className: string) => {
     return students.filter((s) => s.class === className).length;
   };
@@ -149,16 +184,12 @@ export default function KelasTab({
       {/* 2. Add / Edit Sliding Side Drawers */}
       {showAddForm && isAdminAdministrasi && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Backdrop Overlay */}
           <div 
             className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
             onClick={() => setShowAddForm(false)}
           />
-          
-          {/* Drawer Container */}
           <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
             <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
-              {/* Header */}
               <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
                 <h4 className="font-baloo text-base font-bold text-neutral-dark">Tambah Kelas Baru</h4>
                 <button
@@ -172,7 +203,6 @@ export default function KelasTab({
                 </button>
               </div>
 
-              {/* Form Content (Scrollable) */}
               <form onSubmit={handleAddSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
                 <div>
                   <label htmlFor="className" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Kelas</label>
@@ -219,7 +249,6 @@ export default function KelasTab({
                   />
                 </div>
 
-                {/* Sticky buttons at bottom */}
                 <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
                   <button
                     type="submit"
@@ -243,16 +272,13 @@ export default function KelasTab({
 
       {editingClass && isAdminAdministrasi && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Backdrop Overlay */}
           <div 
             className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
             onClick={() => setEditingClass(null)}
           />
           
-          {/* Drawer Container */}
           <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
             <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
-              {/* Header */}
               <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
                 <h4 className="font-baloo text-base font-bold text-neutral-dark">
                   Edit Data Kelas: <span className="text-primary-green">{editingClass.className}</span>
@@ -268,7 +294,6 @@ export default function KelasTab({
                 </button>
               </div>
 
-              {/* Form Content (Scrollable) */}
               <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
                 <div>
                   <label htmlFor="editClassName" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5">Nama Kelas</label>
@@ -316,7 +341,6 @@ export default function KelasTab({
                   />
                 </div>
 
-                {/* Sticky buttons at bottom */}
                 <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
                   <button
                     type="submit"
@@ -350,13 +374,11 @@ export default function KelasTab({
               className="bg-white rounded-2xl border border-primary-green/10 p-5 shadow-3xs hover:shadow-xs transition-all relative flex flex-col justify-between gap-4"
             >
               <div className="space-y-3">
-                {/* Header Card dengan Kebab Menu */}
                 <div className="flex justify-between items-start">
                   <span className="text-[9px] font-extrabold px-2.5 py-1 bg-primary-green/10 text-primary-green rounded-full">
                     {cls.fase}
                   </span>
                   <div className="flex items-center gap-1.5">
-                    {/* Kebab Dropdown Menu untuk Admin Administrasi */}
                     {isAdminAdministrasi && (
                       <div className="relative">
                         <button
@@ -415,7 +437,6 @@ export default function KelasTab({
                   </div>
                 </div>
 
-                {/* Judul & Avatar Kelas */}
                 <div className="flex items-center gap-3 pr-4">
                   <div className="w-10 h-10 rounded-full bg-primary-green/10 text-primary-green flex items-center justify-center font-baloo font-bold text-sm flex-shrink-0">
                     {initials}
@@ -427,7 +448,6 @@ export default function KelasTab({
                   </div>
                 </div>
 
-                {/* Detail Pengampu & Jumlah Siswa */}
                 <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5 space-y-2 text-[11px] font-semibold text-neutral-gray">
                   <div className="flex justify-between items-center">
                     <span>Guru Pengampu:</span>
@@ -440,7 +460,6 @@ export default function KelasTab({
                 </div>
               </div>
 
-              {/* Action Button: Lihat Daftar Siswa */}
               <div className="pt-2 border-t border-neutral-gray/5">
                 <button
                   type="button"
@@ -467,16 +486,12 @@ export default function KelasTab({
       {/* 4. Sliding Side Drawer List Siswa */}
       {selectedClassForStudents && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Backdrop Overlay */}
           <div 
             className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
             onClick={() => setSelectedClassForStudents(null)}
           />
-          
-          {/* Drawer Container */}
           <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
             <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
-              {/* Header */}
               <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
                 <div>
                   <h4 className="font-baloo text-base font-bold text-neutral-dark">Daftar Santri Kelas</h4>
@@ -493,7 +508,6 @@ export default function KelasTab({
                 </button>
               </div>
 
-              {/* Content (Scrollable) */}
               <div className="flex-1 overflow-y-auto p-6 space-y-3">
                 {students.filter(s => s.class === selectedClassForStudents).length === 0 ? (
                   <p className="text-xs text-neutral-gray italic text-center py-6">Belum ada murid yang terdaftar di kelas ini.</p>
@@ -519,7 +533,6 @@ export default function KelasTab({
                 )}
               </div>
 
-              {/* Sticky bottom close button */}
               <div className="p-6 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
                 <button
                   type="button"
@@ -529,6 +542,44 @@ export default function KelasTab({
                   Tutup
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Custom Confirmation Modal Pop-up ── */}
+      {confirmDialog.isOpen && (
+        <div className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-sm p-6 relative shadow-2xl text-center space-y-4 animate-scale-in text-neutral-dark">
+            <div className="mx-auto w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="space-y-1.5">
+              <h4 className="font-baloo text-base font-bold text-neutral-dark">{confirmDialog.title}</h4>
+              <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed px-2">
+                {confirmDialog.message}
+              </p>
+            </div>
+            <div className="flex gap-2.5 pt-2 select-none">
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirmDialog.action) confirmDialog.action();
+                  setConfirmDialog({ isOpen: false, title: "", message: "", action: null });
+                }}
+                className="flex-1 py-2.5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-3xs"
+              >
+                Ya, Konfirmasi
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDialog({ isOpen: false, title: "", message: "", action: null })}
+                className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Batal
+              </button>
             </div>
           </div>
         </div>
