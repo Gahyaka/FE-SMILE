@@ -568,6 +568,22 @@ export default function DashboardClient() {
     }
   };
 
+  const handleDownloadStudentTemplate = async () => {
+    try {
+      const blobData = await studentService.getTemplate();
+      const url = window.URL.createObjectURL(new Blob([blobData]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "Template_Import_Siswa_RA_Sahabat.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (err: any) {
+      console.error("Gagal mendownload template dari server backend:", err);
+      throw err;
+    }
+  };
+
   const handleDeleteStudent = (studentId: number) => {
     if (!isAdminAdministrasi) return;
     const studentName = students.find((s) => s.id === studentId)?.name || "Siswa";
@@ -1674,6 +1690,7 @@ const handleDeleteUser = (userId: number) => {
                     onUpdateStudent={handleUpdateStudent}
                     onDeleteStudent={handleDeleteStudent}
                     onUpdateStudentStatus={handleUpdateStudentStatus}
+                    onDownloadTemplate={handleDownloadStudentTemplate}
                   />
                 );
               })()}

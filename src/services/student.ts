@@ -46,5 +46,15 @@ export const studentService = {
   async delete(id: string | number) {
     const response = await api.delete(`/api/v1/siswa/${id}`);
     return response.data;
+  },
+
+  /**
+   * Mengunduh template Excel dari backend database
+   */
+  async getTemplate() {
+    const response = await api.get("/api/v1/siswas/template", {
+      responseType: "blob"
+    });
+    return response.data;
   }
 };

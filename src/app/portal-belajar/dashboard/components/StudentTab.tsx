@@ -28,6 +28,7 @@ interface StudentTabProps {
   onUpdateStudent: (updatedStudent: Student) => void;
   onDeleteStudent: (studentId: number) => void;
   onUpdateStudentStatus: (studentId: number, status: string) => void;
+  onDownloadTemplate?: () => Promise<void>;
   classes: any[];
 }
 
@@ -39,6 +40,7 @@ export default function StudentTab({
   onUpdateStudent,
   onDeleteStudent,
   onUpdateStudentStatus,
+  onDownloadTemplate,
   classes,
 }: StudentTabProps) {
   // ── UI States ─────────────────────────────────────────────────────
@@ -167,7 +169,16 @@ export default function StudentTab({
   };
 
   // ── 2. Download Template Kosong untuk Import ──────────────────────
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = async () => {
+    if (onDownloadTemplate) {
+      try {
+        await onDownloadTemplate();
+        showToast("Template Excel berhasil diunduh dari server!");
+        return;
+      } catch (err) {
+        console.warn("Gagal mengunduh template dari backend, menggunakan file lokal generator.");
+      }
+    }
     const template = [
       {
         No: 1,
