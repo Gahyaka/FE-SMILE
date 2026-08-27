@@ -447,7 +447,7 @@ export default function UserTab({
                               <span>Reset Sandi</span>
                             </button>
 
-                            {u.role !== "admin_adm" && u.role !== "admin_trx" && (
+                            {u.username !== "admin_adm" && (
                               <button
                                 type="button"
                                 onClick={() => {

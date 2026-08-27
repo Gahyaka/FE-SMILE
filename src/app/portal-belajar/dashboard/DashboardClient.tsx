@@ -156,22 +156,7 @@ function mapSppTransactions(rawTxs: any[]): any[] {
 
   return grouped;
 }
-
 function mapUsersData(rawUsers: any[]): any[] {
-  const allowedRoles = ["ADMIN", "ADMIN_ADMINISTRASI", "ADMIN_TRANSAKSI", "GURU"];
-  
-  // Sembunyikan akun dummy legacy bawaan backend agar tabel bersih.
-  // Tapi tetap loloskan akun utama (admin_adm, admin_trx, guru123) serta semua akun baru yang dibuat user.
-  const dummyUsernames = [
-    "admin_trx70",
-    "admin_trx27",
-    "admin_trx31",
-    "admin_trx53",
-    "echa_guru16",
-    "fariz_guru37",
-    "fariz_guru27"
-  ];
-  
   // Read locally deleted user IDs to filter them out from backend response
   let deletedUserIds: any[] = [];
   if (typeof window !== "undefined") {
@@ -180,9 +165,7 @@ function mapUsersData(rawUsers: any[]): any[] {
   }
 
   return rawUsers
-    .filter((u: any) => allowedRoles.includes((u.role || "").toUpperCase()))
     .filter((u: any) => !deletedUserIds.includes(u.id))
-    .filter((u: any) => !dummyUsernames.includes(u.username))
     .map((u: any) => {
       const rawRole = (u.role || "").toUpperCase();
       const mappedRole = rawRole === "ADMIN_ADMINISTRASI" || rawRole === "ADMIN" 
@@ -887,8 +870,12 @@ const handleDeleteUser = (userId: number) => {
       } else if (actionType === "delete_user") {
         const targetUser = users.find(u => u.id === targetId);
         if (targetUser) {
-          // Karena backend Adonis tidak menyediakan endpoint delete user (sesuai spesifikasi Users.json),
-          // kita lakukan penghapusan lokal secara aman agar console bersih dari error Axios 404.
+          try {
+            await userService.delete(targetId);
+          } catch (err) {
+            console.warn("Backend user deletion failed/unsupported. Falling back to local storage deletion.");
+          }
+
           const raw = localStorage.getItem("deleted_user_ids");
           const deletedUserIds = raw ? JSON.parse(raw) : [];
           if (!deletedUserIds.includes(targetId)) {
@@ -904,7 +891,7 @@ const handleDeleteUser = (userId: number) => {
             id: Date.now(),
             time: new Date().toISOString().replace('T', ' ').substring(0, 16),
             user: session.name,
-            action: `Menghapus akun pengguna: ${targetUser.name} (Lokal / Backend)`,
+            action: `Menghapus akun pengguna: ${targetUser.name}`,
           };
           setLogs([newLog, ...logs]);
         }
