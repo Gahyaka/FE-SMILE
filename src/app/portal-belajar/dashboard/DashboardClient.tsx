@@ -31,6 +31,7 @@ import { authService } from "@/services/auth";
 import { sppService } from "@/services/spp";
 import { activityService } from "@/services/activity";
 import { murojaahService } from "@/services/murojaah";
+import { tabunganService } from "@/services/tabungan";
 
 type TabKey = "siswa" | "kelas" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "users" | "audit";
 
@@ -245,6 +246,39 @@ export default function DashboardClient() {
     }
   };
 
+  const loadTabunganData = async (activeStudents: any[]) => {
+    try {
+      const allSavings: any[] = [];
+      await Promise.all(
+        activeStudents.map(async (st: any) => {
+          try {
+            const res = await tabunganService.getBySiswaId(st.id);
+            const rawSavings = Array.isArray(res) ? res : res?.data || [];
+            rawSavings.forEach((tx: any) => {
+              const isDebet = String(tx.jenisMutasi || tx.jenis_mutasi || "DEBET").toUpperCase() === "DEBET";
+              allSavings.push({
+                id: tx.id,
+                studentId: tx.siswaId || tx.siswa_id,
+                date: parseLocalDateString(tx.tanggalBayar || tx.tanggal_bayar || tx.createdAt || tx.created_at || ""),
+                description: tx.catatan || tx.description || (isDebet ? "Setoran rutin" : "Penarikan tabungan"),
+                debet: isDebet ? (Number(tx.nominal) || 0) : 0,
+                kredit: !isDebet ? (Number(tx.nominal) || 0) : 0,
+                admin: tx.adminName || tx.admin || "Petugas",
+              });
+            });
+          } catch (stErr) {
+            // Ignore single student fetch error
+          }
+        })
+      );
+      if (allSavings.length > 0) {
+        setSavings(allSavings);
+      }
+    } catch (err) {
+      console.warn("[SGW] Failed to fetch tabungan from backend:", err);
+    }
+  };
+
   useEffect(() => {
     // Authenticate session on client side
     const cachedSession = localStorage.getItem("user_session");
@@ -278,7 +312,9 @@ export default function DashboardClient() {
         try {
           const studentRes = await studentService.getAll();
           const rawStudents = Array.isArray(studentRes) ? studentRes : studentRes?.data || [];
-          setStudents(mapStudentsData(rawStudents));
+          const mappedStudents = mapStudentsData(rawStudents);
+          setStudents(mappedStudents);
+          await loadTabunganData(mappedStudents);
 
           try {
             const classRes = await classService.getAll();
@@ -1408,7 +1444,7 @@ const handleDeleteUser = (userId: number) => {
     });
   };
 
-  const handleAddSavingsTransaction = (data: {
+  const handleAddSavingsTransaction = async (data: {
     studentId: string | number;
     description: string;
     debet: number;
@@ -1428,27 +1464,34 @@ const handleDeleteUser = (userId: number) => {
       }
     }
 
-    const newTrans = {
-      id: Date.now(),
-      studentId: data.studentId,
-      date: new Date().toISOString().substring(0, 10),
-      description: data.description || "Setoran rutin",
-      debet: data.debet,
-      kredit: data.kredit,
-      admin: session.name,
-    };
+    try {
+      await tabunganService.create({
+        siswaId: data.studentId,
+        siswa_id: data.studentId,
+        jenisMutasi: data.transType === "Setoran" ? "DEBET" : "KREDIT",
+        jenis_mutasi: data.transType === "Setoran" ? "DEBET" : "KREDIT",
+        nominal: data.amountNum,
+        catatan: data.description || (data.transType === "Setoran" ? "Setoran rutin" : "Penarikan tabungan"),
+        tanggalBayar: new Date().toISOString().substring(0, 10),
+        tanggal_bayar: new Date().toISOString().substring(0, 10)
+      });
 
-    setSavings([newTrans, ...savings]);
+      // Reload all savings to reflect updated balances from backend
+      await loadTabunganData(students);
 
-    const studentName = students.find(s => String(s.id) === String(data.studentId))?.name || "Anak";
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Mencatat ${data.transType} tabungan Rp ${data.amountNum.toLocaleString()} untuk ${studentName}`,
-    };
-    setLogs([newLog, ...logs]);
-    return true;
+      const studentName = students.find(s => String(s.id) === String(data.studentId))?.name || "Anak";
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Mencatat ${data.transType} tabungan Rp ${data.amountNum.toLocaleString()} untuk ${studentName}`,
+      };
+      setLogs([newLog, ...logs]);
+      return true;
+    } catch (err: any) {
+      alert("Gagal mencatat transaksi tabungan ke backend: " + (err.response?.data?.message || err.message));
+      return false;
+    }
   };
 
   const handleUpdateMurajaah = async (studentId: string | number, param: string, score: string) => {
