@@ -29,13 +29,55 @@ const FALLBACK_PARAMS = {
 };
 
 const FALLBACK_CATEGORY_TABS = [
-  { key: "suratPendek",  label: "Surat Pendek",  icon: "📖" },
-  { key: "doaSehariHari", label: "Doa Harian",   icon: "🤲" },
-  { key: "haditsPilihan", label: "Hadits",        icon: "📜" },
-  { key: "pai",           label: "PAI",           icon: "🕌" },
-  { key: "sholatDhuha",   label: "Sholat Dhuha",  icon: "🧎" },
-  { key: "ekskul",        label: "Ekskul",        icon: "🎵" },
+  { key: "suratPendek",  label: "Surat Pendek",  icon: "surat" },
+  { key: "doaSehariHari", label: "Doa Harian",   icon: "doa" },
+  { key: "haditsPilihan", label: "Hadits",        icon: "hadits" },
+  { key: "pai",           label: "PAI",           icon: "pai" },
+  { key: "sholatDhuha",   label: "Sholat Dhuha",  icon: "sholat" },
+  { key: "ekskul",        label: "Ekskul",        icon: "ekskul" },
 ];
+
+function getCategorySvg(iconKey: string, className = "w-3.5 h-3.5") {
+  switch (iconKey) {
+    case "doa":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      );
+    case "hadits":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      );
+    case "pai":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      );
+    case "sholat":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      );
+    case "ekskul":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+        </svg>
+      );
+    case "surat":
+    default:
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      );
+  }
+}
 
 interface Student {
   id: string | number;
@@ -136,12 +178,12 @@ export default function MurajaahTab({
 
     return murojaahCategories.map(cat => {
       const nameLower = cat.nama.toLowerCase();
-      let icon = "📖";
-      if (nameLower.includes("doa")) icon = "🤲";
-      else if (nameLower.includes("hadits") || nameLower.includes("hadist")) icon = "📜";
-      else if (nameLower.includes("pai") || nameLower.includes("agama")) icon = "🕌";
-      else if (nameLower.includes("sholat") || nameLower.includes("shalat") || nameLower.includes("dhuha")) icon = "🧎";
-      else if (nameLower.includes("ekskul") || nameLower.includes("musik") || nameLower.includes("seni") || nameLower.includes("olahraga")) icon = "🎵";
+      let icon = "surat";
+      if (nameLower.includes("doa")) icon = "doa";
+      else if (nameLower.includes("hadits") || nameLower.includes("hadist")) icon = "hadits";
+      else if (nameLower.includes("pai") || nameLower.includes("agama")) icon = "pai";
+      else if (nameLower.includes("sholat") || nameLower.includes("shalat") || nameLower.includes("dhuha")) icon = "sholat";
+      else if (nameLower.includes("ekskul") || nameLower.includes("musik") || nameLower.includes("seni") || nameLower.includes("olahraga")) icon = "ekskul";
 
       const materiList = cat.materi || cat.materis || [];
       return {
@@ -493,13 +535,13 @@ export default function MurajaahTab({
                             // Only trigger select if not dragging
                             if (!isDragging) setEditingCategory(tab.id);
                           }}
-                          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-bold whitespace-nowrap border transition-all cursor-pointer flex-shrink-0 select-none ${
+                          className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-[10px] font-bold whitespace-nowrap border transition-all cursor-pointer flex-shrink-0 select-none ${
                             isActive
                               ? "bg-primary-green text-white border-primary-green shadow-sm"
                               : "bg-stone-50 text-neutral-gray border-neutral-gray/12 hover:border-primary-green/30 hover:text-neutral-dark"
                           }`}
                         >
-                          <span>{tab.icon}</span>
+                          <span className="opacity-90">{getCategorySvg(tab.icon, "w-3.5 h-3.5 flex-shrink-0")}</span>
                           <span>{tab.nama}</span>
                           <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-md ${isActive ? "bg-white/20 text-white" : "bg-stone-200 text-neutral-gray"}`}>
                             {done}/{tab.materi.length}
