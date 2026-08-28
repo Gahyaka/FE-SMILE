@@ -98,6 +98,8 @@ interface MurajaahTabProps {
   isAdminAdministrasi: boolean;
   isGuru: boolean;
   onUpdateMurajaah: (studentId: string | number, param: string, score: string) => void;
+  selectedStudentId?: string | number;
+  onStudentChange?: (studentId: string | number) => void;
 }
 
 export default function MurajaahTab({
@@ -108,8 +110,15 @@ export default function MurajaahTab({
   isAdminAdministrasi,
   isGuru,
   onUpdateMurajaah,
+  selectedStudentId,
+  onStudentChange,
 }: MurajaahTabProps) {
-  const [murajaahStudentId, setMurajaahStudentId] = useState<string | number>(students[0]?.id || "");
+  const [internalStudentId, setInternalStudentId] = useState<string | number>(students[0]?.id || "");
+  const murajaahStudentId = selectedStudentId !== undefined ? selectedStudentId : internalStudentId;
+  const setMurajaahStudentId = (id: string | number) => {
+    if (onStudentChange) onStudentChange(id);
+    setInternalStudentId(id);
+  };
   const [editingCategory, setEditingCategory] = useState<string>("");
   const [classFilter, setClassFilter] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");
