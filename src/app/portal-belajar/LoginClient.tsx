@@ -157,32 +157,27 @@ export default function LoginClient() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen text-neutral-dark bg-[#FAF8F5] pt-24 pb-12 select-none justify-center items-center px-4">
-      {/* Background Chalkboard grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.015)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10"></div>
+    <div className="flex flex-col min-h-screen text-neutral-dark bg-[#FAF8F5] pt-20 pb-12 select-none justify-center items-center px-4">
+      {/* Premium subtle background grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.012)_1.5px,transparent_1.5px),linear-gradient(90deg,rgba(44,178,74,0.012)_1.5px,transparent_1.5px)] bg-[size:32px_32px] pointer-events-none -z-10"></div>
       
-      {/* Decorative stars */}
-      <div className="absolute top-16 left-12 text-warm-yellow/20 text-5xl font-bold hidden md:block animate-pulse">★</div>
-      <div className="absolute bottom-20 right-16 text-primary-green/15 text-5xl font-bold hidden md:block">★</div>
-
-      <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-[35px_15px_30px_20px]/[20px_30px_15px_35px] border-2 border-dashed border-primary-green/30 shadow-md relative">
-        {/* Notebook grid watermark */}
-        <div className="absolute inset-x-0 top-0 h-full bg-[linear-gradient(rgba(44,178,74,0.01)_1px,transparent_1px)] bg-[size:100%_24px] pointer-events-none rounded-[35px_15px_30px_20px]/[20px_30px_15px_35px]"></div>
+      {/* Sleek, professional login container card */}
+      <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl border border-neutral-gray/8 shadow-xl relative">
         
         {/* School Logo */}
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 rounded-full border-2 border-primary-green overflow-hidden bg-white shadow-xs">
-            <img src="/images/logo.jpg" alt="Logo RA Sahabat" className="w-full h-full object-cover" />
+          <div className="w-20 h-20 rounded-full border border-neutral-gray/8 overflow-hidden bg-white shadow-sm flex items-center justify-center p-1.5">
+            <img src="/images/logo.jpg" alt="Logo RA Sahabat" className="w-full h-full object-cover rounded-full" />
           </div>
         </div>
 
-        <h2 className="font-baloo text-2xl font-bold text-center text-neutral-dark mb-1 relative z-10">Portal RA Sahabat</h2>
-        <p className="text-xs text-neutral-gray font-bold text-center mb-8 relative z-10">Silakan masuk untuk mengakses sistem informasi sekolah.</p>
+        <h2 className="font-baloo text-2xl font-bold text-center text-neutral-dark mb-1.5">Portal RA Sahabat</h2>
+        <p className="text-xs text-neutral-gray font-semibold text-center mb-8">Silakan masuk untuk mengakses sistem informasi sekolah.</p>
 
         {error && (
-          <div className="mb-5 p-4 rounded-2xl bg-accent-soft border-2 border-dashed border-accent/30 text-neutral-dark space-y-1 relative z-10">
-            <div className="flex items-center gap-2 text-accent font-black text-xs">
-              <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 text-neutral-dark space-y-1 animate-fade-in">
+            <div className="flex items-center gap-2 text-rose-700 font-extrabold text-xs">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <span>{error}</span>
@@ -190,11 +185,11 @@ export default function LoginClient() {
             <p className="text-[10px] text-neutral-gray font-semibold leading-relaxed pl-6">{errorDetails}</p>
             
             {isServerOffline && (
-              <div className="pt-2 pl-6">
+              <div className="pt-2.5 pl-6">
                 <button
                   type="button"
                   onClick={handleOfflineBypass}
-                  className="py-1.5 px-3 bg-primary-green hover:bg-primary-dark text-white rounded-lg text-[9px] font-extrabold shadow-3xs cursor-pointer transition-all uppercase tracking-wider"
+                  className="py-2 px-3.5 bg-primary-green hover:bg-primary-dark text-white rounded-xl text-[10px] font-extrabold shadow-sm hover:shadow-md transition-all uppercase tracking-wider cursor-pointer"
                 >
                   Gunakan Mode Demo (Lokal)
                 </button>
@@ -203,9 +198,9 @@ export default function LoginClient() {
           </div>
         )}
 
-        <form onSubmit={handleLoginSubmit} className="space-y-5 relative z-10">
+        <form onSubmit={handleLoginSubmit} className="space-y-6">
           <div>
-            <label htmlFor="username" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">Nama Pengguna (Username)</label>
+            <label htmlFor="username" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-2 tracking-wider">Nama Pengguna (Username)</label>
             <input
               type="text"
               id="username"
@@ -213,13 +208,13 @@ export default function LoginClient() {
               onChange={(e) => setUsername(e.target.value)}
               required
               suppressHydrationWarning
-              className="w-full px-4 py-3 rounded-xl border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-xs transition-colors font-semibold select-text"
+              className="w-full px-4 py-3 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-semibold select-text transition-all"
               placeholder="Masukkan nama pengguna"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-1.5 tracking-wide">Kata Sandi (Password)</label>
+            <label htmlFor="password" className="block text-[10px] font-extrabold uppercase text-neutral-gray mb-2 tracking-wider">Kata Sandi (Password)</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -228,7 +223,7 @@ export default function LoginClient() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 suppressHydrationWarning
-                className="w-full pl-4 pr-10 py-3 rounded-xl border-2 border-primary-green/20 focus:border-primary-green focus:outline-none text-xs transition-colors font-semibold select-text"
+                className="w-full pl-4 pr-10 py-3 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-semibold select-text transition-all"
                 placeholder="Masukkan kata sandi"
               />
               <button
@@ -255,10 +250,10 @@ export default function LoginClient() {
             type="submit"
             disabled={loading}
             suppressHydrationWarning
-            className={`w-full py-3.5 rounded-[15px_35px_15px_40px]/[40px_15px_35px_15px] font-extrabold text-xs transition-all border-2 border-primary-dark shadow-md cursor-pointer ${
+            className={`w-full py-3.5 rounded-xl font-extrabold text-xs transition-all shadow-sm cursor-pointer select-none active:scale-98 ${
               loading
-                ? "bg-neutral-gray text-white cursor-not-allowed"
-                : "bg-accent hover:bg-accent-dark text-white hover:shadow-lg hover:-translate-y-0.5"
+                ? "bg-neutral-gray/50 text-white cursor-not-allowed"
+                : "bg-primary-green hover:bg-primary-dark text-white hover:shadow-md"
             }`}
           >
             {loading ? "Menghubungkan..." : "Masuk ke Dashboard"}
