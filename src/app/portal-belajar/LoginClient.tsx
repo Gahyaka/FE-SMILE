@@ -157,12 +157,12 @@ export default function LoginClient() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen text-neutral-dark bg-[#FAF8F5] pt-20 pb-12 select-none justify-center items-center px-4">
+    <div className="flex flex-col h-screen text-neutral-dark bg-[#FAF8F5] select-none justify-center items-center px-4 overflow-hidden">
       {/* Premium subtle background grid */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.012)_1.5px,transparent_1.5px),linear-gradient(90deg,rgba(44,178,74,0.012)_1.5px,transparent_1.5px)] bg-[size:32px_32px] pointer-events-none -z-10"></div>
       
       {/* Sleek, professional login container card */}
-      <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl border border-neutral-gray/8 shadow-xl relative">
+      <div className="w-full max-w-md bg-white p-6 sm:p-8 rounded-3xl border border-neutral-gray/8 shadow-xl relative max-h-[95vh] overflow-y-auto scrollbar-none">
         
         {/* School Logo */}
         <div className="flex justify-center mb-6">
