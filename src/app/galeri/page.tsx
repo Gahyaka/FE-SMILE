@@ -20,7 +20,7 @@ const getPhotoUrl = (rawUrl: string) => {
 
   // Jika link Google Drive (lh3.googleusercontent.com / drive.google.com), gunakan server-side proxy
   if (rawUrl.includes("googleusercontent.com") || rawUrl.includes("drive.google.com")) {
-    return `/api/proxy-image?url=${encodeURIComponent(rawUrl)}`;
+    return `/api-proxy-image?url=${encodeURIComponent(rawUrl)}`;
   }
   
   // Jika mengandung host backend local atau production
@@ -162,22 +162,19 @@ export default function GaleriPage() {
   return (
     <div className="w-full min-h-screen bg-[#FAF8F5] select-none flex flex-col">
       
-      {/* HEADER SECTION (Consistent with other public pages) */}
-      <section className="relative bg-gradient-to-b from-[#FAF8F5] to-white py-16 text-center overflow-hidden border-b border-soft-mint pt-32">
-        {/* Chalkboard grid overlay background */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(44,178,74,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(44,178,74,0.015)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none -z-10"></div>
-        {/* Swirly background doodles */}
-        <div className="absolute top-28 left-10 text-warm-yellow/30 text-5xl select-none font-bold hidden md:block">★</div>
-        <div className="absolute bottom-6 right-12 text-primary-green/20 text-5xl select-none font-bold hidden md:block">★</div>
+      {/* HEADER SECTION */}
+      <section className="relative bg-gradient-to-b from-[#FAF8F5] to-white py-16 text-center overflow-hidden border-b border-neutral-gray/8 pt-32">
+        {/* Subtle modern dot-grid pattern background */}
+        <div className="absolute inset-0 bg-[radial-gradient(rgba(44,178,74,0.015)_1.5px,transparent_1.5px)] bg-[size:32px_32px] pointer-events-none -z-10"></div>
 
         <div className="max-w-4xl mx-auto px-4 space-y-5 relative z-10">
-          <span className="inline-block text-xs uppercase font-extrabold text-primary-dark tracking-widest bg-soft-mint px-4 py-2 rounded-[99px_15px_99px_15px]/[15px_99px_15px_99px] border-2 border-dashed border-primary-green/30">
+          <span className="inline-block text-xs font-accent font-bold uppercase tracking-wider text-primary-green bg-primary-green/8 px-4 py-2 rounded-full border border-primary-green/10">
             Dokumentasi Kegiatan
           </span>
           <h1 className="font-baloo text-4xl sm:text-5xl font-bold text-neutral-dark leading-tight">
             Galeri Foto <span className="text-primary-green relative">KB/RA Sahabat
               {/* Underline sketch */}
-              <svg className="absolute -bottom-2 left-0 w-full h-2.5 text-warm-yellow" viewBox="0 0 100 10" preserveAspectRatio="none" fill="none">
+              <svg className="absolute -bottom-2 left-0 w-full h-2.5 text-primary-green/20" viewBox="0 0 100 10" preserveAspectRatio="none" fill="none">
                 <path d="M0,5 Q50,9 100,5" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
               </svg>
             </span>
@@ -196,11 +193,12 @@ export default function GaleriPage() {
           {categoriesList.map((cat) => (
             <button
               key={cat}
+              type="button"
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 transform active:scale-95 cursor-pointer ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-300 transform active:scale-95 cursor-pointer border ${
                 selectedCategory === cat
-                  ? "bg-primary-green text-white border-2 border-primary-green shadow-xs"
-                  : "bg-white text-neutral-gray border-2 border-stone-200/50 hover:text-neutral-dark hover:border-stone-300"
+                  ? "bg-primary-green text-white border-primary-green shadow-sm"
+                  : "bg-white text-neutral-gray border-neutral-gray/12 hover:text-neutral-dark hover:border-neutral-gray/35"
               }`}
             >
               {cat}
@@ -219,10 +217,9 @@ export default function GaleriPage() {
               Array.from({ length: 3 }).map((_, idx) => (
                 <div 
                   key={`skeleton-${idx}`}
-                  className="bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/10 shadow-3xs relative flex flex-col justify-between animate-pulse"
+                  className="bg-white p-4 pb-6 rounded-2xl border border-neutral-gray/8 shadow-sm relative flex flex-col justify-between animate-pulse"
                 >
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/20 rotate-[-1deg] shadow-3xs pointer-events-none"></div>
-                  <div className="w-full aspect-[4/3] rounded-md bg-stone-200/50" />
+                  <div className="w-full aspect-[4/3] rounded-xl bg-stone-200/50" />
                   <div className="mt-4 space-y-2 flex flex-col items-center">
                     <div className="w-3/4 h-4 bg-stone-200/50 rounded-md" />
                     <div className="w-1/2 h-3 bg-stone-200/40 rounded-md" />
@@ -231,14 +228,6 @@ export default function GaleriPage() {
               ))
             ) : (
               filteredItems.map((item, index) => {
-                // Alternate rotation angles for polaroid organic feel
-                const rotationClass = 
-                  index % 3 === 0 
-                    ? "rotate-[-1.5deg] hover:rotate-[1deg]" 
-                    : index % 3 === 1 
-                      ? "rotate-[2deg] hover:rotate-[-1deg]" 
-                      : "rotate-[-1deg] hover:rotate-[2deg]";
-
                 return (
                   <motion.div
                     key={item.id}
@@ -248,21 +237,18 @@ export default function GaleriPage() {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.25 }}
                     onClick={() => setLightboxIndex(index)}
-                    className={`bg-white p-4 pb-6 rounded-lg border-2 border-dashed border-primary-green/20 shadow-xs relative hover:shadow-md transition-all duration-300 cursor-pointer ${rotationClass}`}
+                    className="bg-white p-4 pb-6 rounded-2xl border border-neutral-gray/8 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer"
                   >
-                    {/* Polaroid tape */}
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 bg-warm-yellow/60 rotate-[-1deg] shadow-3xs pointer-events-none z-20"></div>
-
                     {/* Photo Container */}
-                    <div className="w-full aspect-[4/3] rounded-md overflow-hidden bg-stone-100 relative group">
+                    <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 relative group">
                       <img
                         src={item.image}
                         alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
                       />
                       
                       {/* Category tag */}
-                      <span className="absolute top-2 left-2 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark shadow-3xs">
+                      <span className="absolute top-3 left-3 bg-white/95 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-green/10 text-neutral-dark shadow-3xs">
                         {item.category}
                       </span>
                     </div>
@@ -283,11 +269,11 @@ export default function GaleriPage() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Empty State (Only show when not loading) */}
+        {/* Empty State */}
         {!isLoading && filteredItems.length === 0 && (
-          <div className="text-center py-12 px-6 bg-[#FAF8F5] rounded-3xl border-2 border-dashed border-primary-green/20 max-w-md mx-auto space-y-5 shadow-3xs animate-fade-in">
+          <div className="text-center py-12 px-6 bg-white rounded-3xl border border-neutral-gray/8 max-w-md mx-auto space-y-5 shadow-sm animate-fade-in">
             {/* Premium Camera SVG Icon */}
-            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-2xs border border-primary-green/10">
+            <div className="w-16 h-16 bg-stone-50 rounded-2xl flex items-center justify-center mx-auto shadow-3xs border border-neutral-gray/8">
               <svg className="w-8 h-8 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316A2.192 2.192 0 0014.512 4H9.488c-.696 0-1.332.327-1.745.889l-.916 1.286z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 11.75a3 3 0 11-6 0 3 3 0 016 0z" />

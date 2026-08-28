@@ -31,6 +31,7 @@ import { authService } from "@/services/auth";
 import { sppService } from "@/services/spp";
 import { activityService } from "@/services/activity";
 import { murojaahService } from "@/services/murojaah";
+import { tabunganService } from "@/services/tabungan";
 
 type TabKey = "siswa" | "kelas" | "kegiatan" | "spp" | "tabungan" | "murajaah" | "users" | "audit";
 
@@ -205,6 +206,7 @@ export default function DashboardClient() {
   const [sppMatriksData, setSppMatriksData] = useState<any[]>([]);
   const [savings, setSavings] = useState<any[]>(initialSavings);
   const [murajaahData, setMurajaahData] = useState<{[studentId: string]: {[param: string]: string}}>(initialMurajaah);
+  const [selectedMurajaahStudentId, setSelectedMurajaahStudentId] = useState<string | number>("");
   const [murojaahMateriList, setMurojaahMateriList] = useState<any[]>([]);
   const [murojaahCategories, setMurojaahCategories] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
@@ -245,6 +247,39 @@ export default function DashboardClient() {
     }
   };
 
+  const loadTabunganData = async (activeStudents: any[]) => {
+    try {
+      const allSavings: any[] = [];
+      await Promise.all(
+        activeStudents.map(async (st: any) => {
+          try {
+            const res = await tabunganService.getBySiswaId(st.id);
+            const rawSavings = Array.isArray(res) ? res : res?.data || [];
+            rawSavings.forEach((tx: any) => {
+              const isDebet = String(tx.jenisMutasi || tx.jenis_mutasi || "DEBET").toUpperCase() === "DEBET";
+              allSavings.push({
+                id: tx.id,
+                studentId: tx.siswaId || tx.siswa_id,
+                date: parseLocalDateString(tx.tanggalBayar || tx.tanggal_bayar || tx.createdAt || tx.created_at || ""),
+                description: tx.catatan || tx.description || (isDebet ? "Setoran rutin" : "Penarikan tabungan"),
+                debet: isDebet ? (Number(tx.nominal) || 0) : 0,
+                kredit: !isDebet ? (Number(tx.nominal) || 0) : 0,
+                admin: tx.adminName || tx.admin || "Petugas",
+              });
+            });
+          } catch (stErr) {
+            // Ignore single student fetch error
+          }
+        })
+      );
+      if (allSavings.length > 0) {
+        setSavings(allSavings);
+      }
+    } catch (err) {
+      console.warn("[SGW] Failed to fetch tabungan from backend:", err);
+    }
+  };
+
   useEffect(() => {
     // Authenticate session on client side
     const cachedSession = localStorage.getItem("user_session");
@@ -273,12 +308,16 @@ export default function DashboardClient() {
         localStorage.setItem("sgw_activities", JSON.stringify(initialActivities));
       }
 
-      // Fetch real data from backend Adonis server
+      // Fetch real data from backend Adonis server (Core entities for fast load)
       const loadBackendData = async () => {
         try {
           const studentRes = await studentService.getAll();
           const rawStudents = Array.isArray(studentRes) ? studentRes : studentRes?.data || [];
-          setStudents(mapStudentsData(rawStudents));
+          const mappedStudents = mapStudentsData(rawStudents);
+          setStudents(mappedStudents);
+          if (mappedStudents.length > 0) {
+            setSelectedMurajaahStudentId(mappedStudents[0].id);
+          }
 
           try {
             const classRes = await classService.getAll();
@@ -288,91 +327,7 @@ export default function DashboardClient() {
             console.warn("[SGW] Failed to fetch classes from backend. Using local mock/cache.", classErr);
           }
 
-          // Fetch SPP transactions from backend Adonis
-          try {
-            const sppRes = await sppService.getAll();
-            const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
-            setSppTransactions(mapSppTransactions(rawSpp));
-            
-            // Fetch Matriks monitoring SPP
-            await loadSppMatriks("2026/2027");
-          } catch (sppErr) {
-            console.warn("[SGW] Failed to fetch SPP transactions from backend. Using mock fallbacks.");
-          }
-
-           // Fetch users from backend Adonis (Only for Admin Administrasi)
-          if (parsed.role === "admin_adm") {
-            try {
-              const userRes = await userService.getAll();
-              const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
-              setUsers(mapUsersData(rawUsers));
-            } catch (userErr) {
-              console.warn("Backend users list API not fully supported/accessible. Using local mock storage.");
-              const storedUsers = localStorage.getItem("system_users");
-              if (storedUsers) {
-                setUsers(JSON.parse(storedUsers));
-              } else {
-                setUsers(initialUsers);
-                localStorage.setItem("system_users", JSON.stringify(initialUsers));
-              }
-            }
-          } else {
-            // Non-admin roles fallback to local store for UI compatibility
-            const storedUsers = localStorage.getItem("system_users");
-            setUsers(storedUsers ? JSON.parse(storedUsers) : initialUsers);
-          }
-
-          // Fetch Dokumentasi Kegiatan dari backend Adonis
-          try {
-            const actRes = await activityService.getAll();
-            const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
-            // Backend mengembalikan foto dalam array relasi: fotos: [{id, url, isDefault, ...}]
-            const mappedAct = rawAct.map((item: any) => {
-              const fotosArr = Array.isArray(item.foto) ? item.foto
-                : Array.isArray(item.fotos) ? item.fotos
-                : [];
-              const thumbnail = (fotosArr && fotosArr.length > 0) 
-                ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0]) 
-                : null;
-              const imageUrl = thumbnail?.viewUrl 
-                || (thumbnail?.url ? (thumbnail.url.startsWith("http") ? thumbnail.url : `/api-proxy/${thumbnail.url.replace(/^\//, "")}`) : null)
-                || (thumbnail?.path ? (thumbnail.path.startsWith("http") ? thumbnail.path : `/api-proxy/${thumbnail.path.replace(/^\//, "")}`) : null)
-                || (thumbnail?.foto ? (thumbnail.foto.startsWith("http") ? thumbnail.foto : `/api-proxy/${thumbnail.foto.replace(/^\//, "")}`) : null)
-                || (typeof item.foto === "string" ? (item.foto.startsWith("http") ? item.foto : `/api-proxy/${item.foto.replace(/^\//, "")}`) : null)
-                || (typeof item.image === "string" ? (item.image.startsWith("http") ? item.image : `/api-proxy/${item.image.replace(/^\//, "")}`) : null)
-                || "";
-
-              return {
-                id: item.id,
-                title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
-                description: item.deskripsi || item.description || "",
-                date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
-                featuredImage: imageUrl,
-                fotos: fotosArr.map((f: any) => ({
-                  ...f,
-                  url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
-                  viewUrl: f.viewUrl || ""
-                })),
-                driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
-                  || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
-                  || item.linkDrive || item.urlDrive || "",
-                category: item.kategori || item.category || "AGENDA TAHUNAN",
-                isPublic: item.isPublic !== undefined ? item.isPublic : true
-              };
-            });
-            if (mappedAct.length > 0) {
-              console.log("=== SGW DEBUG: mappedAct ===", JSON.stringify(mappedAct, null, 2));
-              setActivities(mappedAct);
-              localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
-            }
-          } catch (actErr: any) {
-            console.warn("[SGW] Failed to fetch activities from backend. Using local storage.",
-              actErr?.response?.status, actErr?.response?.data || actErr?.message);
-            const stored = localStorage.getItem("sgw_activities");
-            if (stored) setActivities(JSON.parse(stored));
-          }
-
-          // Fetch Murojaah Kategori, Materi, & Penilaian dari backend Adonis
+          // Fetch Murojaah Kategori & Materi list ONLY (No student progress loading yet!)
           try {
             const kategoriRes = await murojaahService.getKategori();
             const rawKategori = Array.isArray(kategoriRes) ? kategoriRes : kategoriRes?.data || [];
@@ -389,46 +344,11 @@ export default function DashboardClient() {
               return [...acc, ...mapped];
             }, []);
             setMurojaahMateriList(rawMateri);
-
-            // Fetch progress murojaah per siswa untuk data yang valid
-            const updatedMurajaahData: {[studentId: string]: {[param: string]: string}} = {};
-            
-            // Lakukan fetch paralel lembar murojaah untuk siswa yang terdaftar
-            await Promise.all(
-              rawStudents.map(async (st: any) => {
-                try {
-                  const lembarRes = await murojaahService.getLembarMurojaah(st.id);
-                  const progressList = Array.isArray(lembarRes) ? lembarRes : lembarRes?.data || [];
-                  const scores: {[param: string]: string} = {};
-                  
-                  progressList.forEach((p: any) => {
-                    const materiInfo = rawMateri.find((m: any) => m.id === p.materiId);
-                    if (materiInfo) {
-                      scores[materiInfo.namaMateri] = p.predikat || "-";
-                    }
-                  });
-                  updatedMurajaahData[String(st.id)] = scores;
-                } catch (stErr) {
-                  // Fallback
-                }
-              })
-            );
-
-            if (Object.keys(updatedMurajaahData).length > 0) {
-              setMurajaahData(updatedMurajaahData);
-            }
           } catch (muroErr) {
-            console.warn("[SGW] Murojaah API sync failed / 404. Using local mockup storage.");
-            const stored = localStorage.getItem("sgw_murajaah_data");
-            if (stored) {
-              setMurajaahData(JSON.parse(stored));
-            } else {
-              setMurajaahData(initialMurajaah);
-              localStorage.setItem("sgw_murajaah_data", JSON.stringify(initialMurajaah));
-            }
+            console.warn("[SGW] Failed to fetch murojaah categories list. Using fallback categories.");
           }
         } catch (err) {
-          console.warn("Backend data fetch warning (using mock fallbacks):", err);
+          console.warn("Backend data fetch warning:", err);
         } finally {
           setLoadingData(false);
         }
@@ -436,6 +356,107 @@ export default function DashboardClient() {
       loadBackendData();
     }
   }, [router]);
+
+  // Hook for lazy loading tab data on tab switch
+  useEffect(() => {
+    if (!session) return;
+
+    const lazyLoadTabData = async () => {
+      if (activeTab === "spp") {
+        try {
+          const sppRes = await sppService.getAll();
+          const rawSpp = Array.isArray(sppRes) ? sppRes : sppRes?.data || [];
+          setSppTransactions(mapSppTransactions(rawSpp));
+          await loadSppMatriks("2026/2027");
+        } catch (err) {
+          console.warn("[SGW] Failed to lazy load SPP transactions", err);
+        }
+      } else if (activeTab === "tabungan" && students.length > 0) {
+        await loadTabunganData(students);
+      } else if (activeTab === "kegiatan") {
+        try {
+          const actRes = await activityService.getAll();
+          const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
+          const mappedAct = rawAct.map((item: any) => {
+            const fotosArr = Array.isArray(item.foto) ? item.foto
+              : Array.isArray(item.fotos) ? item.fotos
+              : [];
+            const thumbnail = (fotosArr && fotosArr.length > 0) 
+              ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0]) 
+              : null;
+            const imageUrl = thumbnail?.viewUrl 
+              || (thumbnail?.url ? (thumbnail.url.startsWith("http") ? thumbnail.url : `/api-proxy/${thumbnail.url.replace(/^\//, "")}`) : null)
+              || (thumbnail?.path ? (thumbnail.path.startsWith("http") ? thumbnail.path : `/api-proxy/${thumbnail.path.replace(/^\//, "")}`) : null)
+              || (thumbnail?.foto ? (thumbnail.foto.startsWith("http") ? thumbnail.foto : `/api-proxy/${thumbnail.foto.replace(/^\//, "")}`) : null)
+              || (typeof item.foto === "string" ? (item.foto.startsWith("http") ? item.foto : `/api-proxy/${item.foto.replace(/^\//, "")}`) : null)
+              || (typeof item.image === "string" ? (item.image.startsWith("http") ? item.image : `/api-proxy/${item.image.replace(/^\//, "")}`) : null)
+              || "";
+
+            return {
+              id: item.id,
+              title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+              description: item.deskripsi || item.description || "",
+              date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
+              featuredImage: imageUrl,
+              fotos: fotosArr.map((f: any) => ({
+                ...f,
+                url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
+                viewUrl: f.viewUrl || ""
+              })),
+              driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
+                || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
+                || item.linkDrive || item.urlDrive || "",
+              category: item.kategori || item.category || "AGENDA TAHUNAN",
+              isPublic: item.isPublic !== undefined ? item.isPublic : true
+            };
+          });
+          setActivities(mappedAct);
+          localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
+        } catch (err) {
+          console.warn("[SGW] Failed to lazy load activities", err);
+        }
+      } else if (activeTab === "users" && session.role === "admin_adm") {
+        try {
+          const userRes = await userService.getAll();
+          const rawUsers = Array.isArray(userRes) ? userRes : userRes?.data || [];
+          setUsers(mapUsersData(rawUsers));
+        } catch (err) {
+          console.warn("[SGW] Failed to lazy load users list from API. Using local mock cache.");
+        }
+      }
+    };
+
+    lazyLoadTabData();
+  }, [activeTab, students, session]);
+
+  // Hook for lazy loading selected student murajaah progress on-demand
+  useEffect(() => {
+    if (!selectedMurajaahStudentId || murojaahMateriList.length === 0) return;
+
+    const fetchStudentMurajaahData = async () => {
+      try {
+        const lembarRes = await murojaahService.getLembarMurojaah(selectedMurajaahStudentId);
+        const progressList = Array.isArray(lembarRes) ? lembarRes : lembarRes?.data || [];
+        const scores: {[param: string]: string} = {};
+        
+        progressList.forEach((p: any) => {
+          const materiInfo = murojaahMateriList.find((m: any) => m.id === p.materiId);
+          if (materiInfo) {
+            scores[materiInfo.namaMateri] = p.predikat || "-";
+          }
+        });
+
+        setMurajaahData(prev => ({
+          ...prev,
+          [String(selectedMurajaahStudentId)]: scores
+        }));
+      } catch (err) {
+        console.warn("[SGW] Failed to load murojaah progress for student:", selectedMurajaahStudentId, err);
+      }
+    };
+
+    fetchStudentMurajaahData();
+  }, [selectedMurajaahStudentId, murojaahMateriList]);
 
   const handleLogout = () => {
     localStorage.removeItem("user_session");
@@ -1408,7 +1429,7 @@ const handleDeleteUser = (userId: number) => {
     });
   };
 
-  const handleAddSavingsTransaction = (data: {
+  const handleAddSavingsTransaction = async (data: {
     studentId: string | number;
     description: string;
     debet: number;
@@ -1428,27 +1449,34 @@ const handleDeleteUser = (userId: number) => {
       }
     }
 
-    const newTrans = {
-      id: Date.now(),
-      studentId: data.studentId,
-      date: new Date().toISOString().substring(0, 10),
-      description: data.description || "Setoran rutin",
-      debet: data.debet,
-      kredit: data.kredit,
-      admin: session.name,
-    };
+    try {
+      await tabunganService.create({
+        siswaId: data.studentId,
+        siswa_id: data.studentId,
+        jenisMutasi: data.transType === "Setoran" ? "DEBET" : "KREDIT",
+        jenis_mutasi: data.transType === "Setoran" ? "DEBET" : "KREDIT",
+        nominal: data.amountNum,
+        catatan: data.description || (data.transType === "Setoran" ? "Setoran rutin" : "Penarikan tabungan"),
+        tanggalBayar: new Date().toISOString().substring(0, 10),
+        tanggal_bayar: new Date().toISOString().substring(0, 10)
+      });
 
-    setSavings([newTrans, ...savings]);
+      // Reload all savings to reflect updated balances from backend
+      await loadTabunganData(students);
 
-    const studentName = students.find(s => String(s.id) === String(data.studentId))?.name || "Anak";
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Mencatat ${data.transType} tabungan Rp ${data.amountNum.toLocaleString()} untuk ${studentName}`,
-    };
-    setLogs([newLog, ...logs]);
-    return true;
+      const studentName = students.find(s => String(s.id) === String(data.studentId))?.name || "Anak";
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Mencatat ${data.transType} tabungan Rp ${data.amountNum.toLocaleString()} untuk ${studentName}`,
+      };
+      setLogs([newLog, ...logs]);
+      return true;
+    } catch (err: any) {
+      alert("Gagal mencatat transaksi tabungan ke backend: " + (err.response?.data?.message || err.message));
+      return false;
+    }
   };
 
   const handleUpdateMurajaah = async (studentId: string | number, param: string, score: string) => {
@@ -1874,6 +1902,8 @@ const handleDeleteUser = (userId: number) => {
                     isAdminAdministrasi={isAdminAdministrasi}
                     isGuru={isGuru}
                     onUpdateMurajaah={handleUpdateMurajaah}
+                    selectedStudentId={selectedMurajaahStudentId}
+                    onStudentChange={setSelectedMurajaahStudentId}
                   />
                 );
               })()}

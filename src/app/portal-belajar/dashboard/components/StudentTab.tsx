@@ -377,7 +377,7 @@ export default function StudentTab({
     <div className="w-full space-y-6">
       <div className="space-y-6">
         {/* Kelas & Tahun Ajaran Filter */}
-        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs">
+        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 bg-white p-4 rounded-2xl border border-neutral-gray/8 shadow-sm">
           {!isGuru ? (
             <div className="flex items-center gap-1 bg-stone-100/70 p-1 rounded-xl w-full sm:w-auto overflow-x-auto scrollbar-none whitespace-nowrap">
               {["Semua", ...classes.map((c: any) => c.className)].map((cls) => {
@@ -433,7 +433,7 @@ export default function StudentTab({
         </div>
 
         {/* Search Bar & Action Buttons */}
-        <div className="bg-white p-4 rounded-2xl border border-primary-green/10 shadow-3xs flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
+        <div className="bg-white p-4 rounded-2xl border border-neutral-gray/8 shadow-sm flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
           <div className="relative flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="relative flex-1">
               <svg
@@ -454,7 +454,7 @@ export default function StudentTab({
                 value={studentSearchQuery}
                 onChange={(e) => setStudentSearchQuery(e.target.value)}
                 placeholder="Cari nama murid atau NISN..."
-                className="w-full pl-10 pr-4 py-2 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark placeholder:text-neutral-gray/40 transition-all shadow-3xs"
               />
             </div>
             {(studentSearchQuery !== "" ||
@@ -481,7 +481,7 @@ export default function StudentTab({
                 <button
                   type="button"
                   onClick={openImportDrawer}
-                  className="px-3.5 py-2.5 bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-3xs text-center"
+                  className="px-3.5 py-2.5 bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm text-center"
                 >
                   <svg
                     className="w-3.5 h-3.5 text-stone-500"
@@ -503,7 +503,7 @@ export default function StudentTab({
                 <button
                   type="button"
                   onClick={handleExportExcel}
-                  className="px-3.5 py-2.5 bg-white hover:bg-primary-green/5 text-primary-green border-2 border-dashed border-primary-green/30 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-3xs"
+                  className="px-3.5 py-2.5 bg-white hover:bg-primary-green/5 text-primary-green border border-dashed border-primary-green/30 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
                   title="Ekspor Data Siswa Terfilter ke Excel"
                 >
                   <svg
@@ -526,7 +526,7 @@ export default function StudentTab({
                 <button
                   type="button"
                   onClick={() => setShowStudentForm(!showStudentForm)}
-                  className="col-span-2 sm:col-span-1 px-4 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-3xs"
+                  className="col-span-2 sm:col-span-1 px-4 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm hover:shadow-md"
                 >
                   <svg
                     className="w-3.5 h-3.5"
@@ -550,7 +550,7 @@ export default function StudentTab({
 
         {/* Grid of Student Cards */}
         {filteredStudents.length === 0 ? (
-          <div className="bg-white p-12 text-center rounded-2xl border border-primary-green/10">
+          <div className="bg-white p-12 text-center rounded-2xl border border-neutral-gray/8 shadow-sm">
             <p className="text-xs text-neutral-gray font-bold">
               Tidak ada data murid yang sesuai dengan filter atau pencarian Anda.
             </p>
@@ -568,7 +568,7 @@ export default function StudentTab({
               return (
                 <div
                   key={st.id}
-                  className="bg-white rounded-2xl border border-primary-green/10 p-5 shadow-3xs flex flex-col justify-between gap-4 hover:shadow-xs transition-all relative"
+                  className="bg-white rounded-2xl border border-neutral-gray/8 p-5 shadow-sm flex flex-col justify-between gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 relative animate-fade-in"
                 >
                   <div className="absolute top-4 right-4">
                     <button
@@ -653,11 +653,11 @@ export default function StudentTab({
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-[10px] font-semibold text-neutral-gray">
-                    <div className="bg-[#FAF8F5] p-2 rounded-lg border border-neutral-gray/5">
+                    <div className="bg-[#FAF8F5] p-2 rounded-xl border border-neutral-gray/5">
                       <span className="block text-[8px] text-neutral-gray/60 uppercase">Kelas & Fase</span>
                       <span className="font-bold text-neutral-dark">{st.class}</span>
                     </div>
-                    <div className="bg-[#FAF8F5] p-2 rounded-lg border border-neutral-gray/5">
+                    <div className="bg-[#FAF8F5] p-2 rounded-xl border border-neutral-gray/5">
                       <span className="block text-[8px] text-neutral-gray/60 uppercase">TB / BB</span>
                       <span className="font-bold text-neutral-dark">{st.height}cm / {st.weight}kg</span>
                     </div>
@@ -668,10 +668,10 @@ export default function StudentTab({
                       disabled={!isAdminAdministrasi}
                       value={st.activeStatus}
                       onChange={(e) => handleStatusChange(st.id, st.name, e.target.value)}
-                      className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold border focus:outline-none transition-colors max-w-[100px] text-center ${
+                      className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold border focus:outline-none transition-all max-w-[100px] text-center ${
                         !isAdminAdministrasi
                           ? "bg-neutral-gray/5 border-neutral-gray/10 cursor-not-allowed text-neutral-gray"
-                          : "cursor-pointer"
+                          : "cursor-pointer hover:border-primary-green/40 focus:border-primary-green"
                       } ${
                         st.activeStatus === "Aktif"
                           ? "bg-emerald-50 text-emerald-700 border-emerald-200"
@@ -695,11 +695,11 @@ export default function StudentTab({
 
       {/* ── Detail Modal ─────────────────────────────────────────────── */}
       {activeDetailStudent && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-md p-6 relative shadow-lg space-y-4">
-            <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-3">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-neutral-gray/8 w-full max-w-md p-6 relative shadow-lg space-y-4 animate-scale-in">
+            <div className="flex justify-between items-center border-b border-neutral-gray/8 pb-3">
               <h4 className="font-baloo text-base font-bold text-neutral-dark">Detail Profil Santri</h4>
-              <button type="button" onClick={() => setActiveDetailStudent(null)} className="w-6 h-6 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors hover:bg-neutral-gray/5">
+              <button type="button" onClick={() => setActiveDetailStudent(null)} className="w-6 h-6 rounded-full bg-[#FAF8F5] border border-neutral-gray/12 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors hover:bg-neutral-gray/5">
                 <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -756,7 +756,7 @@ export default function StudentTab({
                 ))}
               </div>
             </div>
-            <button onClick={() => setActiveDetailStudent(null)} className="w-full py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs mt-2">
+            <button onClick={() => setActiveDetailStudent(null)} className="w-full py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-sm mt-2">
               Tutup Detail
             </button>
           </div>
@@ -766,50 +766,53 @@ export default function StudentTab({
       {/* ── Edit Student Drawer ───────────────────────────────────────── */}
       {editingStudent && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          <div className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in" onClick={() => setEditingStudent(null)} />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity animate-fade-in" onClick={() => setEditingStudent(null)} />
           <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
-            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
-              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+            <div className="w-screen max-w-md bg-white border-l border-neutral-gray/8 flex flex-col shadow-2xl h-full animate-slide-in">
+              <div className="px-6 py-5 border-b border-neutral-gray/8 flex justify-between items-center bg-[#FAF8F5]">
                 <h4 className="font-baloo text-base font-bold text-neutral-dark">Ubah Profil Santri</h4>
-                <button type="button" onClick={() => setEditingStudent(null)} className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors">
+                <button type="button" onClick={() => setEditingStudent(null)} className="w-6 h-6 rounded-full bg-white border border-neutral-gray/12 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors">
                   <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
               <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
                 <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Lengkap</label>
-                  <input type="text" required value={editingStudent.name} onChange={(e) => setEditingStudent({ ...editingStudent, name: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-bold text-neutral-dark" /></div>
+                  <input type="text" required value={editingStudent.name} onChange={(e) => setEditingStudent({ ...editingStudent, name: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none font-bold text-neutral-dark" /></div>
                 <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Orang Tua / Wali</label>
-                  <input type="text" required value={editingStudent.parentName || ""} onChange={(e) => setEditingStudent({ ...editingStudent, parentName: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark" placeholder="Nama Orang Tua Murid" /></div>
+                  <input type="text" required value={editingStudent.parentName || ""} onChange={(e) => setEditingStudent({ ...editingStudent, parentName: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none text-neutral-dark" placeholder="Nama Orang Tua Murid" /></div>
                 <div className="grid grid-cols-2 gap-3">
                   <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NISN (10 Digit)</label>
-                    <input type="text" required maxLength={10} pattern="[0-9]{10}" title="NISN harus berisi 10 digit angka murni" value={editingStudent.nisn} onChange={(e) => setEditingStudent({ ...editingStudent, nisn: e.target.value.replace(/[^0-9]/g, "") })} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-mono text-neutral-dark" /></div>
+                    <input type="text" required maxLength={10} pattern="[0-9]{10}" title="NISN harus berisi 10 digit angka murni" value={editingStudent.nisn} onChange={(e) => setEditingStudent({ ...editingStudent, nisn: e.target.value.replace(/[^0-9]/g, "") })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none font-mono text-neutral-dark" /></div>
                   <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NIS (Nomor Induk)</label>
-                    <input type="text" required value={editingStudent.nis || ""} onChange={(e) => setEditingStudent({ ...editingStudent, nis: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-mono text-neutral-dark" placeholder="Contoh: 2026001" /></div>
+                    <input type="text" required value={editingStudent.nis || ""} onChange={(e) => setEditingStudent({ ...editingStudent, nis: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none font-mono text-neutral-dark" placeholder="Contoh: 2026001" /></div>
                 </div>
                 <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kelas</label>
-                  <select value={editingStudent.class} onChange={(e) => setEditingStudent({ ...editingStudent, class: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark">
+                  <select value={editingStudent.class} onChange={(e) => setEditingStudent({ ...editingStudent, class: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark">
                     {classes.length > 0 ? classes.map((c: any) => <option key={c.id} value={c.className}>{c.className}</option>) : <><option value="KB">KB</option><option value="RA (A)">RA (A)</option><option value="RA (B)">RA (B)</option></>}
                   </select></div>
                 <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Alamat Rumah</label>
-                  <input type="text" required value={editingStudent.address} onChange={(e) => setEditingStudent({ ...editingStudent, address: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
+                  <input type="text" required value={editingStudent.address} onChange={(e) => setEditingStudent({ ...editingStudent, address: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
                 <div className="grid grid-cols-3 gap-2.5">
                   <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tinggi (cm)</label>
-                    <input type="number" required min="30" max="200" value={editingStudent.height} onChange={(e) => setEditingStudent({ ...editingStudent, height: Number(e.target.value) })} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
+                    <input type="number" required min="30" max="200" value={editingStudent.height} onChange={(e) => setEditingStudent({ ...editingStudent, height: Number(e.target.value) })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
                   <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Berat (kg)</label>
-                    <input type="number" required min="5" max="100" value={editingStudent.weight} onChange={(e) => setEditingStudent({ ...editingStudent, weight: Number(e.target.value) })} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
+                    <input type="number" required min="5" max="100" value={editingStudent.weight} onChange={(e) => setEditingStudent({ ...editingStudent, weight: Number(e.target.value) })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
                   <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">LK (cm)</label>
-                    <input type="number" required min="20" max="100" value={editingStudent.headCircumference || 48} onChange={(e) => setEditingStudent({ ...editingStudent, headCircumference: Number(e.target.value) })} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-semibold" /></div>
+                    <input type="number" required min="30" max="70" value={editingStudent.headCircumference || 48} onChange={(e) => setEditingStudent({ ...editingStudent, headCircumference: Number(e.target.value) })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Semester</label>
-                    <select value={editingStudent.semester} onChange={(e) => setEditingStudent({ ...editingStudent, semester: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white text-neutral-dark">
-                      <option value="Semester 1">Semester 1</option><option value="Semester 2">Semester 2</option>
+                    <select value={editingStudent.semester} onChange={(e) => setEditingStudent({ ...editingStudent, semester: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none bg-white text-neutral-dark">
+                      <option value="Semester 1">Semester 1</option>
+                      <option value="Semester 2">Semester 2</option>
                     </select></div>
                   <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tahun Ajaran</label>
-                    <input type="text" required value={editingStudent.academicYear} onChange={(e) => setEditingStudent({ ...editingStudent, academicYear: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
+                    <select value={editingStudent.academicYear} onChange={(e) => setEditingStudent({ ...editingStudent, academicYear: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none bg-white text-neutral-dark">
+                      {uniqueYears.map(yr => <option key={yr} value={yr}>{yr}</option>)}
+                    </select></div>
                 </div>
-                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
-                  <button type="submit" className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs">Simpan Perubahan</button>
+                <div className="flex gap-2 pt-4 border-t border-neutral-gray/8 sticky bottom-0 bg-white">
+                  <button type="submit" className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-sm">Simpan Perubahan</button>
                   <button type="button" onClick={() => setEditingStudent(null)} className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer">Batal</button>
                 </div>
               </form>
@@ -818,58 +821,56 @@ export default function StudentTab({
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════
-          JALUR 1: Daftarkan Offline — Input Manual Satu per Satu
-      ══════════════════════════════════════════════════════════════ */}
-      {isAdminAdministrasi && showStudentForm && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          <div className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in" onClick={() => setShowStudentForm(false)} />
+      {/* ── Offline Student Manual Registration Form Drawer ─────────────── */}
+      {showStudentForm && (
+        <div className="fixed inset-0 z-50 overflow-hidden animate-fade-in">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setShowStudentForm(false)} />
           <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
-            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
-              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
-                <div>
-                  <h4 className="font-baloo text-base font-bold text-neutral-dark">Daftarkan Murid Baru</h4>
-                  <p className="text-[10px] text-neutral-gray font-semibold mt-0.5">Input satu per satu secara offline</p>
-                </div>
-                <button type="button" onClick={() => setShowStudentForm(false)} className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors">
+            <div className="w-screen max-w-md bg-white border-l border-neutral-gray/8 flex flex-col shadow-2xl h-full animate-slide-in">
+              <div className="px-6 py-5 border-b border-neutral-gray/8 flex justify-between items-center bg-[#FAF8F5]">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Pendaftaran Murid Baru (Manual)</h4>
+                <button type="button" onClick={() => setShowStudentForm(false)} className="w-6 h-6 rounded-full bg-white border border-neutral-gray/12 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors">
                   <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
               <form onSubmit={handleAddSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
-                <div><label htmlFor="newStudentName" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Lengkap Murid</label>
-                  <input type="text" id="newStudentName" required value={newStudentName} onChange={(e) => setNewStudentName(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-bold text-neutral-dark" placeholder="Nama Lengkap Murid" /></div>
-                <div><label htmlFor="newStudentParent" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Orang Tua / Wali</label>
-                  <input type="text" id="newStudentParent" required value={newStudentParentName} onChange={(e) => setNewStudentParentName(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark" placeholder="Contoh: Siti Aminah" /></div>
+                <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Lengkap</label>
+                  <input type="text" required value={newStudentName} onChange={(e) => setNewStudentName(e.target.value)} placeholder="Masukkan nama murid baru" className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark" /></div>
+                <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Orang Tua / Wali</label>
+                  <input type="text" required value={newStudentParentName} onChange={(e) => setNewStudentParentName(e.target.value)} placeholder="Nama Orang Tua Murid" className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark" /></div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><label htmlFor="newStudentNisn" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NISN (10 Digit)</label>
-                    <input type="text" required maxLength={10} pattern="[0-9]{10}" title="NISN harus berisi 10 digit angka murni" id="newStudentNisn" value={newStudentNisn} onChange={(e) => setNewStudentNisn(e.target.value.replace(/[^0-9]/g, ""))} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-mono text-neutral-dark" placeholder="10 digit NISN" /></div>
-                  <div><label htmlFor="newStudentNis" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NIS (Nomor Induk)</label>
-                    <input type="text" required id="newStudentNis" value={newStudentNis} onChange={(e) => setNewStudentNis(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none font-mono text-neutral-dark" placeholder="Contoh: 2026001" /></div>
+                  <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NISN (10 Digit)</label>
+                    <input type="text" required maxLength={10} pattern="[0-9]{10}" title="NISN harus berisi 10 digit angka murni" value={newStudentNisn} onChange={(e) => setNewStudentNisn(e.target.value.replace(/[^0-9]/g, ""))} placeholder="Contoh: 1234567890" className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-mono font-bold text-neutral-dark" /></div>
+                  <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">NIS (Nomor Induk)</label>
+                    <input type="text" required value={newStudentNis} onChange={(e) => setNewStudentNis(e.target.value)} placeholder="Contoh: 2026001" className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-mono font-bold text-neutral-dark" /></div>
                 </div>
-                <div><label htmlFor="newStudentClass" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kelas</label>
-                  <select id="newStudentClass" value={newStudentClass} onChange={(e) => setNewStudentClass(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark">
+                <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kelas</label>
+                  <select value={newStudentClass} onChange={(e) => setNewStudentClass(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-white focus:border-primary-green focus:outline-none text-xs font-bold text-neutral-dark cursor-pointer">
                     {classes.length > 0 ? classes.map((c: any) => <option key={c.id} value={c.className}>{c.className}</option>) : <><option value="KB">KB</option><option value="RA (A)">RA (A)</option><option value="RA (B)">RA (B)</option></>}
                   </select></div>
-                <div><label htmlFor="newStudentAddress" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Alamat Rumah</label>
-                  <input type="text" required id="newStudentAddress" value={newStudentAddress} onChange={(e) => setNewStudentAddress(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark" placeholder="Alamat rumah tinggal" /></div>
+                <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Alamat Rumah</label>
+                  <input type="text" required value={newStudentAddress} onChange={(e) => setNewStudentAddress(e.target.value)} placeholder="Contoh: Tegaltirto, Berbah, Sleman" className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark" /></div>
                 <div className="grid grid-cols-3 gap-2.5">
-                  <div><label htmlFor="newStudentHeight" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tinggi (cm)</label>
-                    <input type="number" required min="30" max="200" id="newStudentHeight" value={newStudentHeight} onChange={(e) => setNewStudentHeight(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
-                  <div><label htmlFor="newStudentWeight" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Berat (kg)</label>
-                    <input type="number" required min="5" max="100" id="newStudentWeight" value={newStudentWeight} onChange={(e) => setNewStudentWeight(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
-                  <div><label htmlFor="newStudentHead" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">LK (cm)</label>
-                    <input type="number" required min="20" max="100" id="newStudentHead" value={newStudentHead} onChange={(e) => setNewStudentHead(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-semibold" /></div>
+                  <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tinggi (cm)</label>
+                    <input type="number" required min="30" max="200" value={newStudentHeight} onChange={(e) => setNewStudentHeight(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
+                  <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Berat (kg)</label>
+                    <input type="number" required min="5" max="100" value={newStudentWeight} onChange={(e) => setNewStudentWeight(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
+                  <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">LK (cm)</label>
+                    <input type="number" required min="30" max="70" value={newStudentHead} onChange={(e) => setNewStudentHead(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><label htmlFor="newStudentSemester" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Semester</label>
-                    <select id="newStudentSemester" value={newStudentSemester} onChange={(e) => setNewStudentSemester(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white text-neutral-dark">
-                      <option value="Semester 1">Semester 1 (Ganjil)</option><option value="Semester 2">Semester 2 (Genap)</option>
+                  <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Semester</label>
+                    <select value={newStudentSemester} onChange={(e) => setNewStudentSemester(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-white focus:border-primary-green focus:outline-none text-xs font-bold text-neutral-dark">
+                      <option value="Semester 1">Semester 1</option>
+                      <option value="Semester 2">Semester 2</option>
                     </select></div>
-                  <div><label htmlFor="newStudentYear" className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tahun Ajaran</label>
-                    <input type="text" required id="newStudentYear" value={newStudentYear} onChange={(e) => setNewStudentYear(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark" /></div>
+                  <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tahun Ajaran</label>
+                    <select value={newStudentYear} onChange={(e) => setNewStudentYear(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-white focus:border-primary-green focus:outline-none text-xs font-bold text-neutral-dark">
+                      {uniqueYears.map(yr => <option key={yr} value={yr}>{yr}</option>)}
+                    </select></div>
                 </div>
-                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
-                  <button type="submit" className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs">Daftarkan Murid</button>
+                <div className="flex gap-2 pt-4 border-t border-neutral-gray/8 sticky bottom-0 bg-white">
+                  <button type="submit" className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-sm">Daftarkan Murid</button>
                   <button type="button" onClick={() => setShowStudentForm(false)} className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer">Batal</button>
                 </div>
               </form>
@@ -878,110 +879,67 @@ export default function StudentTab({
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════
-          JALUR 2: Import Excel — Pilih Kelas Dulu, Baru Upload File
-      ══════════════════════════════════════════════════════════════ */}
-      {isAdminAdministrasi && showImportDrawer && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          <div className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in" onClick={() => setShowImportDrawer(false)} />
+      {/* ── Import Excel Drawer ──────────────────────────────────────── */}
+      {showImportDrawer && (
+        <div className="fixed inset-0 z-50 overflow-hidden animate-fade-in">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setShowImportDrawer(false)} />
           <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
-            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
-              {/* Header */}
-              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
-                <div>
-                  <h4 className="font-baloo text-base font-bold text-neutral-dark">Impor Siswa dari Excel</h4>
-                  <p className="text-[10px] text-neutral-gray font-semibold mt-0.5">Pilih kelas dahulu, lalu upload file per kelas</p>
-                </div>
-                <button type="button" onClick={() => setShowImportDrawer(false)} className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors">
+            <div className="w-screen max-w-md bg-white border-l border-neutral-gray/8 flex flex-col shadow-2xl h-full animate-slide-in">
+              <div className="px-6 py-5 border-b border-neutral-gray/8 flex justify-between items-center bg-[#FAF8F5]">
+                <h4 className="font-baloo text-base font-bold text-neutral-dark">Unggah & Impor Berkas Excel</h4>
+                <button type="button" onClick={() => setShowImportDrawer(false)} className="w-6 h-6 rounded-full bg-white border border-neutral-gray/12 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors">
                   <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
-
-              {/* Content */}
               <div className="flex-1 overflow-y-auto p-6 space-y-5 text-xs font-semibold text-neutral-dark">
-
-                {/* Step 1: Pilih Kelas */}
-                <div className="bg-[#FAF8F5] rounded-xl p-4 border border-primary-green/10 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-primary-green text-white text-[9px] font-black flex items-center justify-center flex-shrink-0">1</span>
-                    <span className="text-[10px] font-extrabold text-neutral-dark uppercase tracking-wide">Pilih Kelas Tujuan</span>
-                  </div>
-                  <p className="text-[10px] text-neutral-gray leading-relaxed pl-7">Semua siswa dalam file Excel akan otomatis masuk ke kelas yang dipilih. Kolom kelas di Excel tidak perlu diisi.</p>
-                  <div className="pl-7 space-y-3">
-                    <div>
-                      <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Kelas</label>
-                      <select value={importClass} onChange={(e) => setImportClass(e.target.value)} className="w-full px-3 py-2 rounded-lg border-2 border-primary-green/30 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark">
-                        {classes.length > 0 ? classes.map((c: any) => <option key={c.id} value={c.className}>{c.className}</option>) : <><option value="KB">KB</option><option value="RA (A)">RA (A)</option><option value="RA (B)">RA (B)</option></>}
-                      </select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Semester</label>
-                        <select value={importSemester} onChange={(e) => setImportSemester(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white text-neutral-dark">
-                          <option value="Semester 1">Semester 1</option>
-                          <option value="Semester 2">Semester 2</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Tahun Ajaran</label>
-                        <input type="text" value={importYear} onChange={(e) => setImportYear(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark" placeholder="2026/2027" />
-                      </div>
-                    </div>
-                  </div>
+                {/* Petunjuk download template */}
+                <div className="p-4 bg-amber-50/70 border border-amber-200 text-amber-800 rounded-xl space-y-2 leading-relaxed">
+                  <h5 className="font-extrabold uppercase text-[9px] tracking-wide flex items-center gap-1.5">
+                    <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    Wajib Gunakan Template Resmi
+                  </h5>
+                  <p className="text-[10.5px]">Harap masukkan data murid sesuai dengan struktur kolom template Excel agar proses sinkronisasi database berjalan dengan benar.</p>
+                  <button type="button" onClick={handleDownloadTemplate} className="mt-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors cursor-pointer text-[10px] font-extrabold flex items-center gap-1">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    Unduh Template Excel
+                  </button>
                 </div>
 
-                {/* Step 2: Download Template */}
-                <div className="bg-[#FAF8F5] rounded-xl p-4 border border-primary-green/10 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-stone-400 text-white text-[9px] font-black flex items-center justify-center flex-shrink-0">2</span>
-                    <span className="text-[10px] font-extrabold text-neutral-dark uppercase tracking-wide">Download Template (Opsional)</span>
-                  </div>
-                  <p className="text-[10px] text-neutral-gray leading-relaxed pl-7">Gunakan template agar format kolom sesuai. <strong>Kolom Kelas tidak ada di template</strong> — kelas ditentukan dari pilihan di atas.</p>
-                  <div className="pl-7">
-                    <button type="button" onClick={handleDownloadTemplate} className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 hover:bg-stone-50 rounded-xl text-stone-600 font-extrabold text-[10px] uppercase transition-all cursor-pointer shadow-3xs">
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                      <span>Unduh Template Excel</span>
-                    </button>
-                  </div>
-                </div>
+                <div className="space-y-4 pt-2">
+                  <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1.5">Pilih Target Kelas Impor</label>
+                    <select value={importClass} onChange={(e) => setImportClass(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-white text-xs font-bold text-neutral-dark cursor-pointer">
+                      {classes.map((c: any) => <option key={c.id} value={c.className}>{c.className}</option>)}
+                    </select></div>
 
-                {/* Step 3: Upload File */}
-                <div className="bg-[#FAF8F5] rounded-xl p-4 border border-primary-green/10 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-primary-green text-white text-[9px] font-black flex items-center justify-center flex-shrink-0">3</span>
-                    <span className="text-[10px] font-extrabold text-neutral-dark uppercase tracking-wide">Upload File Excel</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1.5">Semester</label>
+                      <select value={importSemester} onChange={(e) => setImportSemester(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-white text-xs font-bold text-neutral-dark">
+                        <option value="Semester 1">Semester 1</option>
+                        <option value="Semester 2">Semester 2</option>
+                      </select></div>
+                    <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1.5">Tahun Ajaran</label>
+                      <select value={importYear} onChange={(e) => setImportYear(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-white text-xs font-bold text-neutral-dark">
+                        {uniqueYears.map(yr => <option key={yr} value={yr}>{yr}</option>)}
+                      </select></div>
                   </div>
-                  <p className="text-[10px] text-neutral-gray leading-relaxed pl-7">Isi data siswa sesuai template, lalu upload di sini untuk kelas <strong className="text-primary-green">{importClass || "yang dipilih"}</strong>.</p>
-                  <div className="pl-7">
-                    <label className={`flex flex-col items-center justify-center w-full p-5 border-2 border-dashed rounded-xl cursor-pointer transition-all ${importFile ? "border-primary-green bg-soft-mint/20" : "border-primary-green/25 hover:border-primary-green bg-white"}`}>
-                      <input type="file" accept=".xlsx,.xls" className="hidden" onChange={(e) => { if (e.target.files && e.target.files.length > 0) setImportFile(e.target.files[0]); }} />
-                      {importFile ? (
-                        <div className="flex items-center gap-2 text-primary-green">
-                          <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                          <div>
-                            <p className="font-extrabold text-[11px]">{importFile.name}</p>
-                            <p className="text-[9px] text-primary-green/70 font-semibold">File siap diimpor — klik untuk ganti</p>
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <svg className="w-8 h-8 text-neutral-gray mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-                          <p className="text-[11px] font-extrabold text-neutral-dark">Klik atau drop file di sini</p>
-                          <p className="text-[9px] text-neutral-gray mt-1">Format: .xlsx / .xls</p>
-                        </>
-                      )}
-                    </label>
-                  </div>
+
+                  <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1.5">Pilih Berkas Excel (.xlsx / .xls)</label>
+                    <div className="relative border-2 border-dashed border-neutral-gray/15 hover:border-primary-green/40 transition-colors rounded-2xl p-6 text-center bg-stone-50/50">
+                      <input type="file" accept=".xlsx, .xls" onChange={(e) => setImportFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                      <div className="space-y-1.5">
+                        <svg className="w-8 h-8 text-neutral-gray/45 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 13h6m-3-3v6m-9 1V4a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg>
+                        <p className="text-[10px] text-neutral-gray font-bold">{importFile ? importFile.name : "Klik atau seret file Excel ke sini"}</p>
+                        {importFile && <span className="inline-block text-[8px] text-primary-green bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 font-bold">Berkas Siap</span>}
+                      </div>
+                    </div></div>
                 </div>
               </div>
-
-              {/* Footer */}
-              <div className="px-6 py-4 border-t border-neutral-gray/10 bg-white flex gap-2">
+              <div className="flex gap-2 p-6 border-t border-neutral-gray/8 sticky bottom-0 bg-white">
                 <button
                   type="button"
                   onClick={handleImportFromDrawer}
                   disabled={!importFile || !importClass}
-                  className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                   Proses Impor Data
@@ -997,8 +955,8 @@ export default function StudentTab({
 
       {/* ── Custom Confirmation Modal Pop-up ─────────────────────────── */}
       {confirmDialog.isOpen && (
-        <div className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-sm p-6 relative shadow-2xl text-center space-y-4 animate-scale-in text-neutral-dark">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-neutral-gray/8 w-full max-w-sm p-6 relative shadow-2xl text-center space-y-4 animate-scale-in text-neutral-dark">
             <div className="mx-auto w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -1017,7 +975,7 @@ export default function StudentTab({
                   if (confirmDialog.action) confirmDialog.action();
                   setConfirmDialog({ isOpen: false, title: "", message: "", action: null });
                 }}
-                className="flex-1 py-2.5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-3xs"
+                className="flex-1 py-2.5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-sm"
               >
                 Ya, Konfirmasi
               </button>
@@ -1035,8 +993,8 @@ export default function StudentTab({
 
       {/* ── Notifikasi Hasil Import ────────────────────────────────── */}
       {importResult && importResult.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs select-none p-4 animate-fade-in">
-          <div className="w-full max-w-sm bg-white rounded-3xl border border-primary-green/10 shadow-2xl p-6 space-y-4 animate-scale-in text-neutral-dark">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm select-none p-4 animate-fade-in">
+          <div className="w-full max-w-sm bg-white rounded-3xl border border-neutral-gray/8 shadow-2xl p-6 space-y-4 animate-scale-in text-neutral-dark">
             <div className="text-center space-y-3">
               {importResult.errorMessage ? (
                 <>
@@ -1057,22 +1015,22 @@ export default function StudentTab({
               )}
             </div>
             {!importResult.errorMessage && (
-              <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-primary-green/5 space-y-2.5 text-xs font-semibold text-neutral-gray">
+              <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-neutral-gray/6 space-y-2.5 text-xs font-semibold text-neutral-gray">
                 <div className="flex justify-between items-center">
                   <span>Siswa Berhasil Ditambahkan:</span>
                   <span className="text-primary-green font-extrabold font-mono text-sm bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">{importResult.successCount}</span>
                 </div>
-                <div className="flex justify-between items-center border-t border-neutral-gray/5 pt-2.5">
+                <div className="flex justify-between items-center border-t border-neutral-gray/6 pt-2.5">
                   <span>Ditolak (Sudah Terdaftar/Duplikat):</span>
                   <span className="text-yellow-700 font-extrabold font-mono text-sm bg-yellow-50 px-2 py-0.5 rounded-lg border border-yellow-100">{importResult.duplicateCount}</span>
                 </div>
-                <div className="flex justify-between items-center border-t border-neutral-gray/5 pt-2.5">
+                <div className="flex justify-between items-center border-t border-neutral-gray/6 pt-2.5">
                   <span>Gagal (Format Kolom Tidak Valid):</span>
                   <span className="text-accent font-extrabold font-mono text-sm bg-red-50 px-2 py-0.5 rounded-lg border border-red-100">{importResult.failCount}</span>
                 </div>
               </div>
             )}
-            <button type="button" onClick={() => setImportResult(null)} className="w-full py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs">
+            <button type="button" onClick={() => setImportResult(null)} className="w-full py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-sm">
               Selesai &amp; Tutup
             </button>
           </div>

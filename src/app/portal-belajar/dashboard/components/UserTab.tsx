@@ -179,7 +179,7 @@ export default function UserTab({
     <div className="space-y-6">
       
       {/* 1. Header & Search Panel */}
-      <div className="bg-white p-5 rounded-2xl border border-primary-green/10 shadow-3xs flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+      <div className="bg-white p-5 rounded-2xl border border-neutral-gray/8 shadow-sm flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
         <div className="relative flex-1">
           <svg className="w-4 h-4 text-neutral-gray absolute left-3.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -189,7 +189,7 @@ export default function UserTab({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari pengguna berdasarkan nama, username, atau peran..."
-            className="w-full pl-10 pr-4 py-2 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-semibold"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark placeholder:text-neutral-gray/40 transition-all shadow-3xs"
           />
         </div>
 
@@ -198,7 +198,7 @@ export default function UserTab({
             setResetPasswordUser(null);
             setShowAddForm(!showAddForm);
           }}
-          className="px-4 py-2 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-3xs whitespace-nowrap"
+          className="px-4 py-2.5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm hover:shadow-md active:scale-98 whitespace-nowrap"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -211,17 +211,17 @@ export default function UserTab({
       {showAddForm && (
         <div className="fixed inset-0 z-50 overflow-hidden">
           <div 
-            className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity animate-fade-in"
             onClick={() => setShowAddForm(false)}
           />
           <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
-            <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
-              <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+            <div className="w-screen max-w-md bg-white border-l border-neutral-gray/8 flex flex-col shadow-2xl h-full animate-slide-in">
+              <div className="px-6 py-5 border-b border-neutral-gray/8 flex justify-between items-center bg-[#FAF8F5]">
                 <h4 className="font-baloo text-base font-bold text-neutral-dark">Registrasi Akun Petugas Baru</h4>
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                  className="w-6 h-6 rounded-full bg-white border border-neutral-gray/12 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
                 >
                   <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -239,7 +239,7 @@ export default function UserTab({
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="Contoh: Bunda Fitri, S.Pd."
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-semibold"
                   />
                 </div>
                  <div>
@@ -250,7 +250,7 @@ export default function UserTab({
                     disabled
                     value={newUsername}
                     placeholder="Auto-generated dari nama & peran"
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-mono font-bold bg-stone-50 text-stone-500 cursor-not-allowed"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/8 focus:outline-none text-xs font-mono font-bold bg-[#FAF8F5] text-stone-500 cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -260,7 +260,7 @@ export default function UserTab({
                     id="role"
                     disabled
                     value="Guru (Pendidik Kelas)"
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/10 focus:border-primary-green focus:outline-none text-xs font-bold bg-stone-50 text-stone-500 cursor-not-allowed"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/8 focus:outline-none text-xs font-bold bg-[#FAF8F5] text-stone-500 cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -272,14 +272,14 @@ export default function UserTab({
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Masukkan kata sandi untuk akun baru"
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-primary-green/15 focus:border-primary-green focus:outline-none text-xs font-semibold select-text"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-semibold select-text"
                   />
                 </div>
 
-                <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                <div className="flex gap-2 pt-4 border-t border-neutral-gray/8 sticky bottom-0 bg-white">
                   <button
                     type="submit"
-                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                    className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-sm hover:shadow-md"
                   >
                     Simpan Akun
                   </button>
@@ -299,9 +299,9 @@ export default function UserTab({
 
       {/* 2b. Reset Password Modal Dialog */}
       {resetPasswordUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="w-full max-w-sm bg-white rounded-3xl border border-primary-green/10 shadow-2xl p-6 space-y-4 animate-scale-in text-neutral-dark">
-            <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="w-full max-w-sm bg-white rounded-3xl border border-neutral-gray/8 shadow-2xl p-6 space-y-4 animate-scale-in text-neutral-dark">
+            <div className="flex justify-between items-center border-b border-neutral-gray/8 pb-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -349,7 +349,7 @@ export default function UserTab({
                     setResetError(null);
                   }}
                   placeholder="Ketikkan sandi manual baru..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/15 focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark bg-stone-50/50 focus:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark bg-stone-50/50 focus:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -357,7 +357,7 @@ export default function UserTab({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <>
@@ -397,14 +397,14 @@ export default function UserTab({
           return (
             <div
               key={u.id}
-              className="bg-white rounded-2xl border border-primary-green/10 p-5 shadow-3xs hover:shadow-xs transition-all relative flex flex-col justify-between gap-4"
+              className="bg-white rounded-2xl border border-neutral-gray/8 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 relative flex flex-col justify-between gap-4"
             >
               <div className="space-y-3">
                 <div className="flex justify-between items-start">
-                  <span className={`text-[9px] font-extrabold px-2.5 py-1 rounded-full ${
-                    u.role === "admin_adm" ? "bg-red-50 text-red-700" :
-                    u.role === "admin_trx" ? "bg-amber-50 text-amber-700" :
-                    "bg-emerald-50 text-emerald-700"
+                  <span className={`text-[9.5px] font-extrabold px-2.5 py-1 rounded-md border ${
+                    u.role === "admin_adm" ? "bg-rose-50 text-rose-700 border-rose-100" :
+                    u.role === "admin_trx" ? "bg-amber-50 text-amber-700 border-amber-100" :
+                    "bg-emerald-50 text-emerald-700 border-emerald-100"
                   }`}>
                     {u.role === "admin_adm" ? "Admin Administrasi" :
                      u.role === "admin_trx" ? "Admin Transaksi" : "Guru Kelas"}
@@ -417,7 +417,7 @@ export default function UserTab({
                           e.stopPropagation();
                           setActiveDropdownId(isDropdownOpen ? null : u.id);
                         }}
-                        className="w-6 h-6 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 hover:bg-neutral-gray/5 text-neutral-dark font-extrabold flex items-center justify-center cursor-pointer transition-colors"
+                        className="w-6.5 h-6.5 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 hover:bg-neutral-gray/5 text-neutral-dark font-extrabold flex items-center justify-center cursor-pointer transition-colors"
                       >
                         ⋮
                       </button>
@@ -484,7 +484,7 @@ export default function UserTab({
                 <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5 space-y-1.5 text-[11px] font-semibold text-neutral-gray">
                   <div className="flex justify-between items-center">
                     <span>Kata Sandi:</span>
-                    <span className="font-mono text-neutral-gray/50 font-bold tracking-widest text-[9px] select-none bg-stone-100/50 px-2 py-0.5 rounded">
+                    <span className="font-mono text-neutral-gray/50 font-bold tracking-widest text-[9px] select-none bg-stone-100/50 px-2 py-0.5 rounded border border-neutral-gray/5">
                       ••••••••
                     </span>
                   </div>
@@ -495,7 +495,7 @@ export default function UserTab({
         })}
 
         {visibleUsers.length === 0 && (
-          <div className="col-span-full bg-white p-12 text-center rounded-2xl border border-primary-green/10">
+          <div className="col-span-full bg-white p-12 text-center rounded-2xl border border-neutral-gray/8 shadow-sm">
             <p className="text-xs text-neutral-gray font-bold">Tidak ada pengguna yang dapat ditampilkan.</p>
           </div>
         )}
@@ -503,8 +503,8 @@ export default function UserTab({
 
       {/* 4. Credentials Success Modal Dialog */}
       {successCredentials && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs select-none p-4 animate-fade-in">
-          <div className="w-full max-w-sm bg-white rounded-3xl border border-primary-green/10 shadow-2xl p-6 space-y-4 animate-scale-in text-neutral-dark">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm select-none p-4 animate-fade-in">
+          <div className="w-full max-w-sm bg-white rounded-3xl border border-neutral-gray/8 shadow-2xl p-6 space-y-4 animate-scale-in text-neutral-dark">
             <div className="text-center space-y-3">
               <div className="mx-auto w-14 h-14 bg-yellow-50 rounded-full flex items-center justify-center text-yellow-600 shadow-3xs animate-pulse">
                 <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -517,12 +517,12 @@ export default function UserTab({
               </p>
             </div>
 
-            <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-primary-green/5 space-y-3 text-xs font-semibold text-neutral-gray font-mono">
+            <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-neutral-gray/6 space-y-3 text-xs font-semibold text-neutral-gray font-mono">
               <div>
                 <span className="block text-[8px] text-neutral-gray/60 uppercase font-sans tracking-wider mb-0.5">Nama Lengkap</span>
                 <span className="text-neutral-dark font-bold font-sans text-xs">{successCredentials.name}</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 border-t border-b border-neutral-gray/5 py-2.5 my-2">
+              <div className="grid grid-cols-2 gap-2 border-t border-b border-neutral-gray/6 py-2.5 my-2">
                 <div>
                   <span className="block text-[8px] text-neutral-gray/60 uppercase font-sans tracking-wider mb-0.5">Username</span>
                   <span className="text-neutral-dark font-bold bg-white px-2 py-0.5 rounded border border-neutral-gray/10 text-[11px] block w-fit">{successCredentials.username}</span>
@@ -547,7 +547,7 @@ export default function UserTab({
                   setToastMessage("Kredensial login disalin ke clipboard! Siap dikirim via WhatsApp.");
                   setTimeout(() => setToastMessage(null), 3000);
                 }}
-                className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-3xs"
+                className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
@@ -568,8 +568,8 @@ export default function UserTab({
 
       {/* ── Custom Confirmation Modal Pop-up ── */}
       {confirmDialog.isOpen && (
-        <div className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-sm p-6 relative shadow-2xl text-center space-y-4 animate-scale-in text-neutral-dark">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-neutral-gray/8 w-full max-w-sm p-6 relative shadow-2xl text-center space-y-4 animate-scale-in text-neutral-dark">
             <div className="mx-auto w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -588,7 +588,7 @@ export default function UserTab({
                   if (confirmDialog.action) confirmDialog.action();
                   setConfirmDialog({ isOpen: false, title: "", message: "", action: null });
                 }}
-                className="flex-1 py-2.5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-3xs"
+                className="flex-1 py-2.5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-sm"
               >
                 Ya, Konfirmasi
               </button>
