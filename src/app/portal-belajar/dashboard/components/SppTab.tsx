@@ -390,7 +390,7 @@ export default function SppTab({
       {/* Widget Ringkasan Rekonsiliasi Kas */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Total Kas SPP */}
-        <div className="bg-white p-4 rounded-2xl border border-neutral-gray/10 flex items-center justify-between shadow-3xs hover:shadow-xs transition-shadow duration-300">
+        <div className="bg-white p-5 rounded-2xl border border-neutral-gray/8 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-300">
           <div className="space-y-1">
             <span className="text-[10px] text-neutral-gray font-extrabold uppercase tracking-wider">Total Kas SPP (Yayasan)</span>
             <h4 className="font-mono text-xl font-bold text-neutral-dark">Rp {totalSppTerbayarVal.toLocaleString()}</h4>
@@ -403,10 +403,10 @@ export default function SppTab({
         </div>
 
         {/* Uang Les Sudah Disetor */}
-        <div className="bg-white p-4 rounded-2xl border border-neutral-gray/10 flex items-center justify-between shadow-3xs hover:shadow-xs transition-shadow duration-300">
+        <div className="bg-white p-5 rounded-2xl border border-neutral-gray/8 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-300">
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[10px] text-neutral-gray font-extrabold uppercase tracking-wider">Setoran Les (Selesai)</span>
             </div>
             <h4 className="font-mono text-xl font-bold text-neutral-dark">Rp {totalLesSudahDisetor.toLocaleString()}</h4>
@@ -419,7 +419,7 @@ export default function SppTab({
         </div>
 
         {/* Uang Les Belum Disetor */}
-        <div className="bg-white p-4 rounded-2xl border border-neutral-gray/10 flex items-center justify-between shadow-3xs hover:shadow-xs transition-shadow duration-300">
+        <div className="bg-white p-5 rounded-2xl border border-neutral-gray/8 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-300">
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -435,7 +435,7 @@ export default function SppTab({
         </div>
       </div>
 
-      <div className="flex items-center justify-between flex-wrap gap-3 bg-[#FAF8F5] p-3 rounded-2xl border border-primary-green/10">
+      <div className="flex items-center justify-between flex-wrap gap-3 bg-[#FAF8F5] p-3.5 rounded-2xl border border-neutral-gray/8 shadow-sm">
         <div className="flex items-center gap-2">
           <svg className="w-3.5 h-3.5 text-primary-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -446,7 +446,7 @@ export default function SppTab({
         </div>
         
         <div className="flex items-center gap-1">
-          <span className="text-[9px] font-extrabold text-neutral-gray uppercase mr-1">Kelas:</span>
+          <span className="text-[9.5px] font-extrabold text-neutral-gray uppercase mr-1">Kelas:</span>
           <div className="flex items-center gap-1">
             {["Semua", ...classes.map((c) => c.className)].map((cls) => (
               <button
@@ -455,8 +455,8 @@ export default function SppTab({
                 onClick={() => setSelectedClass(cls)}
                 className={`px-2.5 py-1 rounded-lg text-[9px] font-extrabold border transition-all cursor-pointer ${
                   selectedClass === cls
-                    ? "bg-primary-green text-white border-primary-green shadow-3xs"
-                    : "bg-white text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark"
+                    ? "bg-primary-green text-white border-primary-green shadow-xs"
+                    : "bg-white text-neutral-gray border-neutral-gray/10 hover:text-neutral-dark hover:border-neutral-gray/30"
                 }`}
               >
                 {cls} ({getStudentCount(cls)})
@@ -497,9 +497,9 @@ export default function SppTab({
 
       {activeSubTab === "buku-kas" ? (
         <div className="w-full space-y-4">
-          <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border border-primary-green/10 shadow-xs space-y-6">
+          <div className="bg-white p-6 md:p-8 rounded-3xl border border-neutral-gray/8 shadow-sm space-y-6">
             
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/8 pb-4">
               <div>
                 <h3 className="font-baloo text-xl font-bold text-neutral-dark">Buku Kas Pembayaran SPP & Les</h3>
               <p className="text-[11px] text-neutral-gray font-semibold mt-1 flex items-center gap-1">
@@ -516,12 +516,12 @@ export default function SppTab({
 
             <div className="flex items-center gap-3.5 flex-wrap sm:flex-nowrap">
               {selectedPeriod === "Semua" && (
-                <div className="flex items-center gap-1.5 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-primary-green/10">
+                <div className="flex items-center gap-1.5 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-neutral-gray/12">
                   <span className="text-[9px] font-extrabold text-neutral-gray uppercase">Tahun Ajaran:</span>
                   <select
                     value={selectedAcademicYear}
                     onChange={(e) => setSelectedAcademicYear(e.target.value)}
-                    className="px-2 py-1 rounded-lg text-[10px] font-extrabold bg-white border border-primary-green/15 focus:outline-none cursor-pointer"
+                    className="px-2 py-1 rounded-lg text-[10px] font-extrabold bg-white border border-neutral-gray/12 focus:outline-none cursor-pointer text-neutral-dark"
                   >
                     {uniqueAcademicYears.map((ay) => (
                       <option key={ay} value={ay}>{ay}</option>
@@ -533,7 +533,7 @@ export default function SppTab({
               {isAdminTransaksi && (
                 <button
                   onClick={() => setShowSppForm(true)}
-                  className="px-4 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center gap-2 cursor-pointer shadow-3xs"
+                  className="px-4 py-2.5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -720,7 +720,6 @@ export default function SppTab({
               </tbody>
             </table>
           </div>
-
           {/* Tampilan Mobile: Card List (Ditampilkan di Layar Kecil) */}
           <div className="block sm:hidden space-y-4">
             {filteredTransactions.length === 0 ? (
@@ -731,7 +730,7 @@ export default function SppTab({
               paginatedTransactions.map((tx) => {
                 const student = students.find((s) => s.id === tx.studentId);
                 return (
-                  <div key={tx.id} className="bg-[#FAF8F5] p-4 rounded-2xl border border-primary-green/10 shadow-3xs space-y-3">
+                  <div key={tx.id} className="bg-[#FAF8F5] p-4 rounded-2xl border border-neutral-gray/8 shadow-sm space-y-3">
                     <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-2 gap-2">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="text-[10px] text-neutral-gray font-mono font-bold">{tx.date}</span>
@@ -778,7 +777,7 @@ export default function SppTab({
                                   onClick={() => setActiveMobileKebabId(null)}
                                   className="fixed inset-0 z-30 bg-transparent"
                                 />
-                                <div className="absolute right-0 top-7 bg-white border border-primary-green/10 rounded-xl py-1.5 shadow-md w-28 z-40 animate-fade-in text-left">
+                                <div className="absolute right-0 top-7 bg-white border border-neutral-gray/10 rounded-xl py-1.5 shadow-md w-28 z-40 animate-fade-in text-left">
                                   <button
                                     type="button"
                                     onClick={() => {
@@ -823,7 +822,7 @@ export default function SppTab({
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 pt-2 border-t border-neutral-gray/5 text-center text-[10px] font-bold">
-                      <div className="bg-white p-2 rounded-lg border border-neutral-gray/5 flex flex-col justify-center">
+                      <div className="bg-white p-2 rounded-xl border border-neutral-gray/5 flex flex-col justify-center">
                         <span className="block text-[8px] text-neutral-gray/60 uppercase">SPP</span>
                         <span className={`font-mono mt-0.5 font-bold ${
                           tx.spp === 0 ? "text-rose-500" : "text-emerald-600"
@@ -831,7 +830,7 @@ export default function SppTab({
                           {tx.spp === 0 ? "Rp 0 ⚠" : `Rp ${tx.spp.toLocaleString()}`}
                         </span>
                       </div>
-                      <div className="bg-white p-2 rounded-lg border border-neutral-gray/5 flex flex-col justify-center">
+                      <div className="bg-white p-2 rounded-xl border border-neutral-gray/5 flex flex-col justify-center">
                         <span className="block text-[8px] text-neutral-gray/60 uppercase">Les</span>
                         <span className={`font-mono mt-0.5 font-bold ${
                           tx.les === 0 ? "text-rose-500" : "text-emerald-600"
@@ -839,7 +838,7 @@ export default function SppTab({
                           {tx.les === 0 ? "Rp 0 ⚠" : `Rp ${tx.les.toLocaleString()}`}
                         </span>
                       </div>
-                      <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20 flex flex-col justify-center">
+                      <div className="bg-emerald-500/10 p-2 rounded-xl border border-emerald-500/20 flex flex-col justify-center">
                         <span className="block text-[8px] text-primary-green uppercase">Total</span>
                         <span className="text-primary-green font-mono font-black mt-0.5">Rp {tx.total.toLocaleString()}</span>
                       </div>
@@ -857,7 +856,7 @@ export default function SppTab({
                 Halaman <span className="font-black text-neutral-dark">{currentPage}</span> dari <span className="font-black text-neutral-dark">{totalPages}</span>
                 {" "}({filteredTransactions.length} entri)
               </span>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 select-none">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(1)}
@@ -882,7 +881,7 @@ export default function SppTab({
                     onClick={() => setCurrentPage(page)}
                     className={`w-7 h-7 rounded-lg text-[9px] font-extrabold border transition-all cursor-pointer ${
                       currentPage === page
-                        ? "bg-primary-green text-white border-primary-green shadow-3xs"
+                        ? "bg-primary-green text-white border-primary-green shadow-xs"
                         : "bg-[#FAF8F5] text-neutral-gray border-neutral-gray/15 hover:bg-primary-green/10 hover:text-primary-green"
                     }`}
                   >
@@ -913,22 +912,22 @@ export default function SppTab({
         </div>
         ) : (
           /* Matriks Monitoring SPP */
-          <div className="bg-white p-6 md:p-8 rounded-[30px_15px_25px_20px]/[20px_25px_15px_30px] border border-primary-green/10 shadow-xs space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/10 pb-4">
+          <div className="bg-white p-6 md:p-8 rounded-3xl border border-neutral-gray/8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-gray/8 pb-4">
               <div>
                 <h3 className="font-baloo text-xl font-bold text-neutral-dark">Matriks Monitoring SPP</h3>
                 <p className="text-[11px] text-neutral-gray font-semibold mt-1">
                   Melacak lunas/tidaknya SPP tiap murid berdasarkan tahun pembukuan yang dipilih.
                 </p>
               </div>
-              <div className="flex items-center gap-3 bg-[#FAF8F5] px-4 py-2.5 rounded-xl border border-primary-green/10">
-                <div className="text-center border-r border-neutral-gray/10 pr-3">
+              <div className="flex items-center gap-3 bg-[#FAF8F5] px-4 py-2.5 rounded-xl border border-neutral-gray/12">
+                <div className="text-center border-r border-neutral-gray/12 pr-3">
                   <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold">Total Murid</span>
                   <span className="font-mono text-xs font-black text-neutral-dark">
                     {students.filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif").length}
                   </span>
                 </div>
-                <div className="text-center pr-3 border-r border-neutral-gray/10">
+                <div className="text-center pr-3 border-r border-neutral-gray/12">
                   <span className="block text-[8px] text-neutral-gray/60 uppercase font-bold text-emerald-600">Lunas SPP</span>
                   <span className="font-mono text-xs font-black text-emerald-600">
                     {
@@ -957,16 +956,16 @@ export default function SppTab({
               </div>
             </div>
             
-            <div className="overflow-x-auto rounded-xl border border-neutral-gray/10">
+            <div className="overflow-x-auto rounded-xl border border-neutral-gray/8 shadow-sm">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-[#FAF8F5] text-[10px] font-extrabold uppercase text-neutral-gray border-b border-neutral-gray/10">
-                    <th className="py-3 px-4 min-w-[150px]">Nama Murid (Kelas)</th>
+                    <th className="py-3.5 px-4 min-w-[150px]">Nama Murid (Kelas)</th>
                     {academicMonths.map(m => {
                       const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
                       const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
                       return (
-                        <th key={m.value} className="py-3 px-2 text-center whitespace-nowrap">
+                        <th key={m.value} className="py-3.5 px-2 text-center whitespace-nowrap">
                           {m.name} <span className="block text-[8px] text-neutral-gray/50">{labelYear}</span>
                         </th>
                       );
@@ -988,7 +987,7 @@ export default function SppTab({
                             const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
                             
                             const studentMatrix = sppMatriksData.find(
-                              (item: any) => String(item.siswaId) === String(student.id)
+                               (item: any) => String(item.siswaId) === String(student.id)
                             );
                             
                             const monthNameUpper = m.name.toUpperCase();
@@ -1009,16 +1008,16 @@ export default function SppTab({
                                 <div className="flex justify-center">
                                   {isPaid ? (
                                     <span 
-                                      className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200/50 shadow-3xs" 
+                                      className="inline-flex items-center justify-center w-5.5 h-5.5 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200/50 shadow-3xs" 
                                       title={`Lunas SPP ${m.name} ${labelYear}`}
                                     >
-                                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                       </svg>
                                     </span>
                                   ) : (
                                     <span 
-                                      className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-rose-50 text-rose-400 border border-rose-100 shadow-3xs" 
+                                      className="inline-flex items-center justify-center w-5.5 h-5.5 rounded-md bg-rose-50 text-rose-400 border border-rose-100 shadow-3xs" 
                                       title={`Belum Bayar SPP ${m.name} ${labelYear}`}
                                     >
                                       <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
@@ -1043,18 +1042,18 @@ export default function SppTab({
         {showSppForm && isAdminTransaksi && (
           <div className="fixed inset-0 z-50 overflow-hidden">
             <div 
-              className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity animate-fade-in"
               onClick={() => setShowSppForm(false)}
             />
             
             <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
-              <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
-                <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+              <div className="w-screen max-w-md bg-white border-l border-neutral-gray/8 flex flex-col shadow-2xl h-full animate-slide-in">
+                <div className="px-6 py-5 border-b border-neutral-gray/8 flex justify-between items-center bg-[#FAF8F5]">
                   <h4 className="font-baloo text-base font-bold text-neutral-dark">Catat Pembayaran SPP & Les</h4>
                   <button
                     type="button"
                     onClick={() => setShowSppForm(false)}
-                    className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                    className="w-6 h-6 rounded-full bg-white border border-neutral-gray/12 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
                   >
                     <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -1070,7 +1069,7 @@ export default function SppTab({
                       id="formClassSelect"
                       value={formSelectedClass}
                       onChange={(e) => setFormSelectedClass(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border-2 border-primary-green/30 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark cursor-pointer"
+                      className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-white font-bold text-neutral-dark cursor-pointer"
                     >
                       {classes.map((c) => (
                         <option key={c.id} value={c.className}>{c.className}</option>
@@ -1085,7 +1084,7 @@ export default function SppTab({
                       id="payStudent"
                       value={payStudentId}
                       onChange={(e) => setPayStudentId(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                      className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-white font-bold text-neutral-dark"
                     >
                       <option value="">-- Pilih Murid --</option>
                       {formFilteredStudents.map((st) => (
@@ -1106,12 +1105,12 @@ export default function SppTab({
                         value={payDate}
                         onChange={(e) => setPayDate(e.target.value)}
                         required
-                        className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark"
+                        className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:outline-none text-xs font-semibold text-neutral-dark"
                       />
                     </div>
                     <div>
                       <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Total (Otomatis)</label>
-                      <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
+                      <div className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/8 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
                         Rp {((Number(paySpp || 0) * Math.max(1, payPaidMonths.length)) + Number(payLes || 0)).toLocaleString()}
                       </div>
                     </div>
@@ -1127,7 +1126,7 @@ export default function SppTab({
                         value={paySpp}
                         onChange={(e) => setPaySpp(e.target.value)}
                         required
-                        className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                        className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:outline-none text-neutral-dark font-mono font-bold"
                         placeholder="Default 75000"
                       />
                     </div>
@@ -1140,14 +1139,14 @@ export default function SppTab({
                         value={payLes}
                         onChange={(e) => setPayLes(e.target.value)}
                         required
-                        className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                        className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:outline-none text-neutral-dark font-mono font-bold"
                         placeholder="Default 40000"
                       />
                     </div>
                   </div>
   
                   <div>
-                    <span className="block text-[8px] text-neutral-gray/60 uppercase mb-1.5 font-bold tracking-wide">Pilih Pintasan Nominal (Hemat Waktu)</span>
+                    <span className="block text-[8.5px] text-neutral-gray/60 uppercase mb-1.5 font-bold tracking-wide">Pilih Pintasan Nominal (Hemat Waktu)</span>
                     <div className="grid grid-cols-3 gap-2">
                       <button
                         type="button"
@@ -1184,7 +1183,7 @@ export default function SppTab({
   
                   <div>
                     <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Pilih Bulan Pembayaran SPP (Bisa Rapel)</label>
-                    <div className="grid grid-cols-2 gap-2 bg-[#FAF8F5] p-3 rounded-lg border border-primary-green/10 max-h-[140px] overflow-y-auto">
+                    <div className="grid grid-cols-2 gap-2 bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/12 max-h-[140px] overflow-y-auto">
                       {academicMonths.map((m) => {
                         const [startYearStr, endYearStr] = selectedAcademicYear.split("/");
                         const labelYear = Number(m.value) >= 7 ? startYearStr : endYearStr;
@@ -1207,7 +1206,7 @@ export default function SppTab({
                                   setPayPaidMonths(payPaidMonths.filter(x => x !== monthKey));
                                 }
                               }}
-                              className="rounded text-primary-green focus:ring-primary-green disabled:opacity-50"
+                              className="rounded text-primary-green focus:ring-primary-green disabled:opacity-50 cursor-pointer"
                             />
                             <span className="text-[10px] font-bold">
                               {m.name} <span className="text-[8px] opacity-75">'{labelYear.substring(2)}</span>
@@ -1227,7 +1226,7 @@ export default function SppTab({
                       value={payDesc}
                       onChange={(e) => setPayDesc(e.target.value)}
                       required
-                      className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                      className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:outline-none text-neutral-dark"
                       placeholder="Contoh: Pembayaran SPP Agustus + Les"
                     />
                   </div>
@@ -1238,18 +1237,18 @@ export default function SppTab({
                       id="newDepositStatus"
                       value={newDepositStatus}
                       onChange={(e) => setNewDepositStatus(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                      className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-white font-bold text-neutral-dark cursor-pointer"
                     >
                       <option value="Belum Disetor">Belum Disetor (Kas Pending)</option>
                       <option value="Sudah Disetor">Sudah Disetor (Kas Fisik Riil)</option>
                     </select>
                   </div>
   
-                  <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <div className="flex gap-2 pt-4 border-t border-neutral-gray/8 sticky bottom-0 bg-white">
                     <button
                       type="submit"
                       disabled={!payStudentId}
-                      className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Simpan Pembayaran
                     </button>
@@ -1271,18 +1270,18 @@ export default function SppTab({
         {editingTx && (
           <div className="fixed inset-0 z-50 overflow-hidden">
             <div 
-              className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity animate-fade-in"
               onClick={() => setEditingTx(null)}
             />
             
             <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
-              <div className="w-screen max-w-md bg-white border-l border-primary-green/10 flex flex-col shadow-2xl h-full animate-slide-in">
-                <div className="px-6 py-5 border-b border-neutral-gray/10 flex justify-between items-center bg-[#FAF8F5]">
+              <div className="w-screen max-w-md bg-white border-l border-neutral-gray/8 flex flex-col shadow-2xl h-full animate-slide-in">
+                <div className="px-6 py-5 border-b border-neutral-gray/8 flex justify-between items-center bg-[#FAF8F5]">
                   <h4 className="font-baloo text-base font-bold text-neutral-dark">Ubah Transaksi SPP & Les</h4>
                   <button
                     type="button"
                     onClick={() => setEditingTx(null)}
-                    className="w-6 h-6 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
+                    className="w-6 h-6 rounded-full bg-white border border-neutral-gray/12 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors"
                   >
                     <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -1311,7 +1310,7 @@ export default function SppTab({
                 >
                   <div>
                     <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Siswa</label>
-                    <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-neutral-dark">
+                    <div className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/8 bg-[#FAF8F5] text-xs font-bold text-neutral-dark">
                       {students.find(s => s.id === editingTx.studentId)?.name || "Siswa"}
                     </div>
                   </div>
@@ -1324,12 +1323,12 @@ export default function SppTab({
                         required
                         value={editingTx.date}
                         onChange={(e) => setEditingTx({ ...editingTx, date: e.target.value })}
-                        className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                        className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:outline-none text-neutral-dark"
                       />
                     </div>
                     <div>
                       <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Total</label>
-                      <div className="w-full px-3 py-2.5 rounded-lg border border-primary-green/10 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
+                      <div className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/8 bg-[#FAF8F5] text-xs font-bold text-primary-green flex items-center justify-center font-mono">
                         Rp {(Number(editingTx.spp) + Number(editingTx.les)).toLocaleString()}
                       </div>
                     </div>
@@ -1344,7 +1343,7 @@ export default function SppTab({
                         min="0"
                         value={editingTx.spp}
                         onChange={(e) => setEditingTx({ ...editingTx, spp: Number(e.target.value) })}
-                        className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                        className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:outline-none text-neutral-dark font-mono font-bold"
                       />
                     </div>
                     <div>
@@ -1355,7 +1354,7 @@ export default function SppTab({
                         min="0"
                         value={editingTx.les}
                         onChange={(e) => setEditingTx({ ...editingTx, les: Number(e.target.value) })}
-                        className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark font-mono font-bold"
+                        className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:outline-none text-neutral-dark font-mono font-bold"
                       />
                     </div>
                   </div>
@@ -1365,7 +1364,7 @@ export default function SppTab({
                     <select
                       value={editingTx.depositStatus}
                       onChange={(e) => setEditingTx({ ...editingTx, depositStatus: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark"
+                      className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-white font-bold text-neutral-dark cursor-pointer"
                     >
                       <option value="Belum Disetor">Belum Disetor (Kas Pending)</option>
                       <option value="Sudah Disetor">Sudah Disetor (Kas Fisik Riil)</option>
@@ -1379,14 +1378,14 @@ export default function SppTab({
                       required
                       value={editingTx.description}
                       onChange={(e) => setEditingTx({ ...editingTx, description: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-lg border border-primary-green/20 focus:border-primary-green focus:outline-none text-neutral-dark"
+                      className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:outline-none text-neutral-dark"
                     />
                   </div>
   
-                  <div className="flex gap-2 pt-3 border-t border-neutral-gray/10 sticky bottom-0 bg-white">
+                  <div className="flex gap-2 pt-4 border-t border-neutral-gray/8 sticky bottom-0 bg-white">
                     <button
                       type="submit"
-                      className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-3xs"
+                      className="flex-1 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-sm"
                     >
                       Simpan Perubahan
                     </button>
@@ -1403,11 +1402,11 @@ export default function SppTab({
             </div>
           </div>
         )}
-
+ 
       {/* ── Custom Confirmation Modal Pop-up ── */}
       {confirmDialog.isOpen && (
-        <div className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl border border-primary-green/10 w-full max-w-sm p-6 relative shadow-2xl text-center space-y-4 animate-scale-in text-neutral-dark">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-neutral-gray/8 w-full max-w-sm p-6 relative shadow-2xl text-center space-y-4 animate-scale-in text-neutral-dark">
             <div className="mx-auto w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -1426,7 +1425,7 @@ export default function SppTab({
                   if (confirmDialog.action) confirmDialog.action();
                   setConfirmDialog({ isOpen: false, title: "", message: "", action: null });
                 }}
-                className="flex-1 py-2.5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-3xs"
+                className="flex-1 py-2.5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-sm"
               >
                 Ya, Konfirmasi
               </button>
