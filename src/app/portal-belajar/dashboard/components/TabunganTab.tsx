@@ -25,7 +25,7 @@ interface TabunganTabProps {
   savings: SavingTransaction[];
   isAdminTransaksi: boolean;
   adminName: string;
-  onAddTransaction: (newTrans: Omit<SavingTransaction, "id" | "date" | "admin"> & { transType: "Setoran" | "Penarikan", amountNum: number }) => boolean;
+  onAddTransaction: (newTrans: Omit<SavingTransaction, "id" | "date" | "admin"> & { transType: "Setoran" | "Penarikan", amountNum: number }) => Promise<boolean>;
 }
 
 export default function TabunganTab({
@@ -113,9 +113,9 @@ export default function TabunganTab({
     return mapped.reverse(); // Newest first for visual list
   };
 
-  const executeAddTransaction = () => {
+  const executeAddTransaction = async () => {
     const amountNum = Number(transAmount);
-    const success = onAddTransaction({
+    const success = await onAddTransaction({
       studentId: selectedStudentId,
       description: transDesc || "Setoran rutin",
       debet: transType === "Setoran" ? amountNum : 0,
