@@ -51,6 +51,8 @@ export default function StudentTab({
   const [activeDropdownId, setActiveDropdownId] = useState<number | null>(null);
   const [activeDetailStudent, setActiveDetailStudent] = useState<Student | null>(null);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Jalur 1: Manual Registration
   const [showStudentForm, setShowStudentForm] = useState(false);
@@ -394,7 +396,10 @@ export default function StudentTab({
                   <button
                     key={cls}
                     type="button"
-                    onClick={() => setSelectedFilterClass(cls)}
+                    onClick={() => {
+                      setSelectedFilterClass(cls);
+                      setCurrentPage(1);
+                    }}
                     className={`px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all duration-200 cursor-pointer ${
                       isActive
                         ? "bg-primary-green text-white shadow-xs"
@@ -428,7 +433,10 @@ export default function StudentTab({
             </span>
             <select
               value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
+              onChange={(e) => {
+                setSelectedYear(e.target.value);
+                setCurrentPage(1);
+              }}
               className="px-3 py-1.5 rounded-xl text-[10px] font-extrabold bg-[#FAF8F5] border border-neutral-gray/10 text-neutral-dark focus:outline-none cursor-pointer"
             >
               {uniqueYears.map((yr) => (
@@ -460,7 +468,10 @@ export default function StudentTab({
               <input
                 type="text"
                 value={studentSearchQuery}
-                onChange={(e) => setStudentSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setStudentSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
                 placeholder="Cari nama murid atau NISN..."
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark placeholder:text-neutral-gray/40 transition-all shadow-3xs"
               />
@@ -474,6 +485,7 @@ export default function StudentTab({
                   setStudentSearchQuery("");
                   setSelectedFilterClass("Semua");
                   setSelectedYear("2026/2027");
+                  setCurrentPage(1);
                 }}
                 className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-[10px] uppercase rounded-xl transition-colors cursor-pointer whitespace-nowrap shadow-3xs text-center"
               >
@@ -563,152 +575,204 @@ export default function StudentTab({
               Tidak ada data murid yang sesuai dengan filter atau pencarian Anda.
             </p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filteredStudents.map((st) => {
-              const initials = st.name
-                .split(" ")
-                .slice(0, 2)
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase();
-              const isDropdownOpen = activeDropdownId === st.id;
-              return (
-                <div
-                  key={st.id}
-                  className="bg-white rounded-2xl border border-neutral-gray/8 p-5 shadow-sm flex flex-col justify-between gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 relative animate-fade-in"
-                >
-                  <div className="absolute top-4 right-4">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveDropdownId(isDropdownOpen ? null : st.id);
-                      }}
-                      className="w-7 h-7 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 hover:bg-neutral-gray/5 text-neutral-dark font-extrabold flex items-center justify-center cursor-pointer transition-colors"
+        ) : (() => {
+          const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+          const indexOfLastItem = currentPage * itemsPerPage;
+          const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+          const currentStudents = filteredStudents.slice(indexOfFirstItem, indexOfLastItem);
+          return (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                {currentStudents.map((st) => {
+                  const initials = st.name
+                    .split(" ")
+                    .slice(0, 2)
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase();
+                  const isDropdownOpen = activeDropdownId === st.id;
+                  return (
+                    <div
+                      key={st.id}
+                      className="bg-white rounded-2xl border border-neutral-gray/8 p-5 shadow-sm flex flex-col justify-between gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 relative animate-fade-in"
                     >
-                      ⋮
-                    </button>
-                    {isDropdownOpen && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-20 cursor-default"
+                      <div className="absolute top-4 right-4">
+                        <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setActiveDropdownId(null);
+                            setActiveDropdownId(isDropdownOpen ? null : st.id);
                           }}
-                        />
-                        <div className="absolute right-0 mt-1 w-32 bg-white border border-neutral-gray/10 rounded-xl shadow-lg z-30 py-1.5 font-semibold text-xs text-neutral-dark">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setActiveDetailStudent(st);
-                              setActiveDropdownId(null);
-                            }}
-                            className="w-full px-3 py-2 text-left hover:bg-soft-mint/30 cursor-pointer flex items-center gap-1.5"
-                          >
-                            <svg className="w-3.5 h-3.5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            <span>Detail</span>
-                          </button>
-                          {isAdminAdministrasi && (
-                            <>
+                          className="w-7 h-7 rounded-full bg-[#FAF8F5] border border-neutral-gray/10 hover:bg-neutral-gray/5 text-neutral-dark font-extrabold flex items-center justify-center cursor-pointer transition-colors"
+                        >
+                          ⋮
+                        </button>
+                        {isDropdownOpen && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-20 cursor-default"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveDropdownId(null);
+                              }}
+                            />
+                            <div className="absolute right-0 mt-1 w-32 bg-white border border-neutral-gray/10 rounded-xl shadow-lg z-30 py-1.5 font-semibold text-xs text-neutral-dark">
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setEditingStudent({ ...st });
+                                  setActiveDetailStudent(st);
                                   setActiveDropdownId(null);
                                 }}
-                                className="w-full px-3 py-2 text-left hover:bg-soft-mint/30 cursor-pointer text-yellow-700 flex items-center gap-1.5"
+                                className="w-full px-3 py-2 text-left hover:bg-soft-mint/30 cursor-pointer flex items-center gap-1.5"
                               >
-                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                <svg className="w-3.5 h-3.5 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
-                                <span>Edit</span>
+                                <span>Detail</span>
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  onDeleteStudent(st.id);
-                                  setActiveDropdownId(null);
-                                }}
-                                className="w-full px-3 py-2 text-left hover:bg-accent/10 cursor-pointer text-accent flex items-center gap-1.5"
-                              >
-                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                                <span>Hapus</span>
-                              </button>
-                            </>
-                          )}
+                              {isAdminAdministrasi && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEditingStudent({ ...st });
+                                      setActiveDropdownId(null);
+                                    }}
+                                    className="w-full px-3 py-2 text-left hover:bg-soft-mint/30 cursor-pointer text-yellow-700 flex items-center gap-1.5"
+                                  >
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    <span>Edit</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      onDeleteStudent(st.id);
+                                      setActiveDropdownId(null);
+                                    }}
+                                    className="w-full px-3 py-2 text-left hover:bg-accent/10 cursor-pointer text-accent flex items-center gap-1.5"
+                                  >
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    <span>Hapus</span>
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="flex items-start gap-3 pr-6">
+                        <div className="w-10 h-10 rounded-full bg-primary-green/10 text-primary-green flex items-center justify-center font-baloo font-bold text-sm flex-shrink-0">
+                          {initials}
                         </div>
-                      </>
-                    )}
-                  </div>
+                        <div className="overflow-hidden flex-1">
+                          <h4 className="font-baloo text-sm font-bold text-neutral-dark truncate leading-tight flex items-center gap-1.5" title={st.name}>
+                            {st.name}
+                            <span className={`px-1 py-0.5 rounded text-[8px] font-black leading-none ${
+                              st.jenisKelamin === "P"
+                                ? "bg-pink-50 text-pink-600 border border-pink-100/50"
+                                : "bg-blue-50 text-blue-600 border border-blue-100/50"
+                            }`}>
+                              {st.jenisKelamin === "P" ? "P" : "L"}
+                            </span>
+                          </h4>
+                          <span className="text-[10px] text-neutral-gray font-mono block mt-0.5">NISN: {st.nisn}</span>
+                        </div>
+                      </div>
 
-                  <div className="flex items-start gap-3 pr-6">
-                    <div className="w-10 h-10 rounded-full bg-primary-green/10 text-primary-green flex items-center justify-center font-baloo font-bold text-sm flex-shrink-0">
-                      {initials}
-                    </div>
-                    <div className="overflow-hidden flex-1">
-                      <h4 className="font-baloo text-sm font-bold text-neutral-dark truncate leading-tight flex items-center gap-1.5" title={st.name}>
-                        {st.name}
-                        <span className={`px-1 py-0.5 rounded text-[8px] font-black leading-none ${
-                          st.jenisKelamin === "P"
-                            ? "bg-pink-50 text-pink-600 border border-pink-100/50"
-                            : "bg-blue-50 text-blue-600 border border-blue-100/50"
-                        }`}>
-                          {st.jenisKelamin === "P" ? "P" : "L"}
-                        </span>
-                      </h4>
-                      <span className="text-[10px] text-neutral-gray font-mono block mt-0.5">NISN: {st.nisn}</span>
-                    </div>
-                  </div>
+                      <div className="grid grid-cols-2 gap-2 text-[10px] font-semibold text-neutral-gray">
+                        <div className="bg-[#FAF8F5] p-2 rounded-xl border border-neutral-gray/5">
+                          <span className="block text-[8px] text-neutral-gray/60 uppercase">Kelas & Fase</span>
+                          <span className="font-bold text-neutral-dark">{st.class}</span>
+                        </div>
+                        <div className="bg-[#FAF8F5] p-2 rounded-xl border border-neutral-gray/5">
+                          <span className="block text-[8px] text-neutral-gray/60 uppercase">TB / BB</span>
+                          <span className="font-bold text-neutral-dark">{st.height}cm / {st.weight}kg</span>
+                        </div>
+                      </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-[10px] font-semibold text-neutral-gray">
-                    <div className="bg-[#FAF8F5] p-2 rounded-xl border border-neutral-gray/5">
-                      <span className="block text-[8px] text-neutral-gray/60 uppercase">Kelas & Fase</span>
-                      <span className="font-bold text-neutral-dark">{st.class}</span>
+                      <div className="flex justify-between items-center pt-2 border-t border-neutral-gray/5 gap-2">
+                        <select
+                          disabled={!isAdminAdministrasi}
+                          value={st.activeStatus}
+                          onChange={(e) => handleStatusChange(st.id, st.name, e.target.value)}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold border focus:outline-none transition-all max-w-[100px] text-center ${
+                            !isAdminAdministrasi
+                              ? "bg-neutral-gray/5 border-neutral-gray/10 cursor-not-allowed text-neutral-gray"
+                              : "cursor-pointer hover:border-primary-green/40 focus:border-primary-green"
+                          } ${
+                            st.activeStatus === "Aktif"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : st.activeStatus === "Lulus"
+                              ? "bg-blue-50 text-blue-700 border-blue-200"
+                              : "bg-stone-100 text-stone-600 border-stone-300"
+                          }`}
+                        >
+                          <option value="Aktif">Aktif</option>
+                          <option value="Lulus">Lulus</option>
+                          <option value="Keluar">Keluar</option>
+                        </select>
+                        <span className="text-[9px] text-neutral-gray font-bold">TA: {st.academicYear}</span>
+                      </div>
                     </div>
-                    <div className="bg-[#FAF8F5] p-2 rounded-xl border border-neutral-gray/5">
-                      <span className="block text-[8px] text-neutral-gray/60 uppercase">TB / BB</span>
-                      <span className="font-bold text-neutral-dark">{st.height}cm / {st.weight}kg</span>
-                    </div>
-                  </div>
+                  );
+                })}
+              </div>
 
-                  <div className="flex justify-between items-center pt-2 border-t border-neutral-gray/5 gap-2">
-                    <select
-                      disabled={!isAdminAdministrasi}
-                      value={st.activeStatus}
-                      onChange={(e) => handleStatusChange(st.id, st.name, e.target.value)}
-                      className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold border focus:outline-none transition-all max-w-[100px] text-center ${
-                        !isAdminAdministrasi
-                          ? "bg-neutral-gray/5 border-neutral-gray/10 cursor-not-allowed text-neutral-gray"
-                          : "cursor-pointer hover:border-primary-green/40 focus:border-primary-green"
-                      } ${
-                        st.activeStatus === "Aktif"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : st.activeStatus === "Lulus"
-                          ? "bg-blue-50 text-blue-700 border-blue-200"
-                          : "bg-stone-100 text-stone-600 border-stone-300"
-                      }`}
+              {/* Premium Pagination Bar */}
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-neutral-gray/8 shadow-sm">
+                  <span className="text-[10px] font-bold text-neutral-gray uppercase">
+                    Menampilkan {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredStudents.length)} dari {filteredStudents.length} Santri
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      className="w-8 h-8 rounded-xl border border-neutral-gray/10 hover:bg-neutral-gray/5 text-neutral-dark font-extrabold flex items-center justify-center cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-xs shadow-3xs"
                     >
-                      <option value="Aktif">Aktif</option>
-                      <option value="Lulus">Lulus</option>
-                      <option value="Keluar">Keluar</option>
-                    </select>
-                    <span className="text-[9px] text-neutral-gray font-bold">TA: {st.academicYear}</span>
+                      ‹
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                      const isActive = page === currentPage;
+                      return (
+                        <button
+                          key={page}
+                          type="button"
+                          onClick={() => setCurrentPage(page)}
+                          className={`w-8 h-8 rounded-xl text-[10px] font-black transition-all cursor-pointer ${
+                            isActive
+                              ? "bg-primary-green text-white shadow-xs"
+                              : "border border-neutral-gray/10 hover:bg-neutral-gray/5 text-neutral-dark"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    })}
+                    <button
+                      type="button"
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      className="w-8 h-8 rounded-xl border border-neutral-gray/10 hover:bg-neutral-gray/5 text-neutral-dark font-extrabold flex items-center justify-center cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-xs shadow-3xs"
+                    >
+                      ›
+                    </button>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              )}
+            </div>
+          );
+        })()}
       </div>
 
-      {/* ── Detail Modal ─────────────────────────────────────────────── */}
+      {/* -- Detail Modal ----------------------------------------------- */}
       {activeDetailStudent && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl border border-neutral-gray/8 w-full max-w-md p-6 relative shadow-lg space-y-4 animate-scale-in">
