@@ -18,7 +18,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmI3NTJjLTJhZGYtNDQwZi04MmIxLTE3NDdlYmViNjE1YiIsInVzZXJuYW1lIjoiYWRtaW5fYWRtIiwicm9sZSI6IkFETUlOX0FETUlOSVNUUkFTSSIsImlhdCI6MTc4Nzc0NTY5MywiZXhwIjoxNzg3ODMyMDkzfQ.86lUrnyix0Op6lExwLwVoISCiUBPSWAiFmsKN6KOOeQ",
                   "type": "string"
                 }
               ]
@@ -27,7 +27,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"namaLengkap\": \"Ahmad Fauzi\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"nisn\": \"0012345678\",\r\n  \"nis\": \"2026001\",\r\n  \"kelasId\": null,\r\n  \"alamat\": \"Jl. Kaliurang KM 5, Yogyakarta\",\r\n  \"tinggiBadan\": 100,\r\n  \"beratBadan\": 16,\r\n  \"lingkarKepala\": 48,\r\n  \"semester\": \"Semester 1 (Ganjil)\",\r\n  \"tahunAjaran\": \"2026/2027\"\r\n}",
+              "raw": "{\r\n  \"namaLengkap\": \"Doni Prasetyo\",\r\n  \"jenisKelamin\": \"L\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"nisn\": \"444\",\r\n  \"nis\": \"222223\",\r\n  \"kelasId\": \"8ae80bab-9a42-4b1c-956c-d1362ca50e27\",\r\n  \"alamat\": \"Jl. Kaliurang KM 5, Yogyakarta\",\r\n  \"tinggiBadan\": 100, \r\n  \"beratBadan\": 16,\r\n  \"lingkarKepala\": 48,\r\n  \"semester\": \"Semester 1 (Ganjil)\",\r\n  \"tahunAjaran\": \"2026/2027\"\r\n  \r\n}\r\n",
               "options": {
                 "raw": {
                   "language": "json"
@@ -112,7 +112,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"namaLengkap\": \"Ahmad Fauzi\",\r\n  \"jenisKelamin\": \"PEREMPUAN\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"nisn\": \"001234567\",\r\n  \"nis\": \"202600\",\r\n  \"kelasId\": null,\r\n  \"alamat\": \"Jl. Kaliurang KM 5, Yogyakarta\",\r\n  \"tinggiBadan\": 100,\r\n  \"beratBadan\": 16,\r\n  \"lingkarKepala\": 48,\r\n  \"semester\": \"Semester 1 (Ganjil)\",\r\n  \"tahunAjaran\": \"2026/2027\"\r\n}",
+              "raw": "{\r\n  \"namaLengkap\": \"Ahmad Fauzi\",\r\n  \"jenisKelamin\": \"P\",\r\n  \"namaOrangTua\": \"Siti Aminah\",\r\n  \"nisn\": \"001234567\",\r\n  \"nis\": \"202600\",\r\n  \"kelasId\": null,\r\n  \"alamat\": \"Jl. Kaliurang KM 5, Yogyakarta\",\r\n  \"tinggiBadan\": 100,\r\n  \"beratBadan\": 16,\r\n  \"lingkarKepala\": 48,\r\n  \"semester\": \"Semester 1 (Ganjil)\",\r\n  \"tahunAjaran\": \"2026/2027\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"

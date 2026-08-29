@@ -8,6 +8,7 @@ interface Student {
   name: string;
   nisn: string;
   nis: string;
+  jenisKelamin: string;
   address: string;
   semester: string;
   class: string;
@@ -243,10 +244,14 @@ export default function StudentTab({
             if (isDuplicate) {
               duplicateCount++;
             } else {
+              const rawGender = String(row["Jenis Kelamin"] || row["JK"] || row["L/P"] || "L").trim().toUpperCase();
+              const gender = rawGender.startsWith("P") ? "P" : "L";
+
               onAddStudent({
                 name,
                 nisn,
                 nis: String(row["NIS"] || ""),
+                jenisKelamin: gender,
                 parentName: row["Nama Orang Tua"] || "",
                 class: importClass,
                 semester: importSemester,
@@ -293,6 +298,7 @@ export default function StudentTab({
   const [newStudentName, setNewStudentName] = useState("");
   const [newStudentNisn, setNewStudentNisn] = useState("");
   const [newStudentNis, setNewStudentNis] = useState("");
+  const [newStudentGender, setNewStudentGender] = useState("L");
   const [newStudentAddress, setNewStudentAddress] = useState("");
   const [newStudentSemester, setNewStudentSemester] = useState("Semester 1");
   const [newStudentClass, setNewStudentClass] = useState("KB");
@@ -332,6 +338,7 @@ export default function StudentTab({
       name: newStudentName,
       nisn: newStudentNisn,
       nis: newStudentNis,
+      jenisKelamin: newStudentGender,
       address: newStudentAddress || "Alamat belum diinput",
       semester: newStudentSemester,
       class: newStudentClass,
@@ -345,6 +352,7 @@ export default function StudentTab({
     setNewStudentName("");
     setNewStudentNisn("");
     setNewStudentNis("");
+    setNewStudentGender("L");
     setNewStudentAddress("");
     setNewStudentParentName("");
     setShowStudentForm(false);
@@ -645,8 +653,15 @@ export default function StudentTab({
                       {initials}
                     </div>
                     <div className="overflow-hidden flex-1">
-                      <h4 className="font-baloo text-sm font-bold text-neutral-dark truncate leading-tight" title={st.name}>
+                      <h4 className="font-baloo text-sm font-bold text-neutral-dark truncate leading-tight flex items-center gap-1.5" title={st.name}>
                         {st.name}
+                        <span className={`px-1 py-0.5 rounded text-[8px] font-black leading-none ${
+                          st.jenisKelamin === "P"
+                            ? "bg-pink-50 text-pink-600 border border-pink-100/50"
+                            : "bg-blue-50 text-blue-600 border border-blue-100/50"
+                        }`}>
+                          {st.jenisKelamin === "P" ? "P" : "L"}
+                        </span>
                       </h4>
                       <span className="text-[10px] text-neutral-gray font-mono block mt-0.5">NISN: {st.nisn}</span>
                     </div>
@@ -704,9 +719,15 @@ export default function StudentTab({
               </button>
             </div>
             <div className="space-y-3 text-xs font-semibold text-neutral-dark">
-              <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
-                <span className="block text-[8px] text-neutral-gray/60 uppercase">Nama Lengkap</span>
-                <span className="text-sm font-bold text-neutral-dark">{activeDetailStudent.name}</span>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2 bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase">Nama Lengkap</span>
+                  <span className="text-sm font-bold text-neutral-dark">{activeDetailStudent.name}</span>
+                </div>
+                <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
+                  <span className="block text-[8px] text-neutral-gray/60 uppercase">Jenis Kelamin</span>
+                  <span className="text-xs font-bold text-neutral-dark">{activeDetailStudent.jenisKelamin === "P" ? "Perempuan" : "Laki-laki"}</span>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-[#FAF8F5] p-3 rounded-xl border border-neutral-gray/5">
@@ -776,8 +797,19 @@ export default function StudentTab({
                 </button>
               </div>
               <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
-                <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Lengkap</label>
-                  <input type="text" required value={editingStudent.name} onChange={(e) => setEditingStudent({ ...editingStudent, name: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none font-bold text-neutral-dark" /></div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-2">
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Lengkap</label>
+                    <input type="text" required value={editingStudent.name} onChange={(e) => setEditingStudent({ ...editingStudent, name: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none font-bold text-neutral-dark" />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Jenis Kelamin</label>
+                    <select value={editingStudent.jenisKelamin} onChange={(e) => setEditingStudent({ ...editingStudent, jenisKelamin: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none bg-white font-bold text-neutral-dark">
+                      <option value="L">Laki-laki</option>
+                      <option value="P">Perempuan</option>
+                    </select>
+                  </div>
+                </div>
                 <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Orang Tua / Wali</label>
                   <input type="text" required value={editingStudent.parentName || ""} onChange={(e) => setEditingStudent({ ...editingStudent, parentName: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-neutral-gray/12 focus:border-primary-green focus:outline-none text-neutral-dark" placeholder="Nama Orang Tua Murid" /></div>
                 <div className="grid grid-cols-2 gap-3">
@@ -834,8 +866,19 @@ export default function StudentTab({
                 </button>
               </div>
               <form onSubmit={handleAddSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold text-neutral-dark">
-                <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Lengkap</label>
-                  <input type="text" required value={newStudentName} onChange={(e) => setNewStudentName(e.target.value)} placeholder="Masukkan nama murid baru" className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark" /></div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-2">
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Lengkap</label>
+                    <input type="text" required value={newStudentName} onChange={(e) => setNewStudentName(e.target.value)} placeholder="Masukkan nama murid baru" className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark" />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Jenis Kelamin</label>
+                    <select value={newStudentGender} onChange={(e) => setNewStudentGender(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-white focus:border-primary-green focus:outline-none text-xs font-bold text-neutral-dark cursor-pointer">
+                      <option value="L">Laki-laki</option>
+                      <option value="P">Perempuan</option>
+                    </select>
+                  </div>
+                </div>
                 <div><label className="block text-[9px] text-neutral-gray/60 uppercase mb-1">Nama Orang Tua / Wali</label>
                   <input type="text" required value={newStudentParentName} onChange={(e) => setNewStudentParentName(e.target.value)} placeholder="Nama Orang Tua Murid" className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-xs font-semibold text-neutral-dark" /></div>
                 <div className="grid grid-cols-2 gap-3">
