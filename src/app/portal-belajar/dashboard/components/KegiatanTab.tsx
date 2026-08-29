@@ -165,14 +165,9 @@ export default function KegiatanTab({
     }
   };
 
-  const handleDeletePhoto = async (photoId: string | number) => {
+  const handleDeletePhoto = (photoId: string | number) => {
     if (!detailActivity || !onDeletePhoto || detailFotos.length <= 1) return;
-    setDeletingPhotoId(photoId);
-    try {
-      await onDeletePhoto(photoId, detailActivity.id);
-      setDetailFotos((p) => p.filter((f) => f.id !== photoId));
-      if (lightboxIdx !== null && lightboxIdx >= detailFotos.length - 1) setLightboxIdx(Math.max(0, detailFotos.length - 2));
-    } finally { setDeletingPhotoId(null); }
+    onDeletePhoto(photoId, detailActivity.id);
   };
 
   const getPhotoUrl = (foto: FotoItem) => {

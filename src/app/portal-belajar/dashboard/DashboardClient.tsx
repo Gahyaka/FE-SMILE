@@ -216,7 +216,7 @@ export default function DashboardClient() {
     isOpen: boolean;
     title: string;
     message: string;
-    actionType: "delete_student" | "delete_class" | "delete_spp" | "delete_user" | "delete_activity" | "toggle_public_activity" | null;
+    actionType: "delete_student" | "delete_class" | "delete_spp" | "delete_user" | "delete_activity" | "toggle_public_activity" | "delete_photo" | null;
     targetId: string | number | null;
     extraData?: any;
   }>({
@@ -1032,6 +1032,54 @@ const handleDeleteUser = (userId: number) => {
           action: `Mengubah publikasi kegiatan '${targetAct?.title || "kegiatan"}' menjadi ${isPublic ? "Publik" : "Privat"}`,
         };
         setLogs([newLog, ...logs]);
+      } else if (actionType === "delete_photo") {
+        const activityId = confirmModal.extraData?.activityId;
+        try {
+          await activityService.deletePhoto(targetId);
+
+          // Optimistic local state update
+          setActivities(prev => prev.map(a => {
+            if (String(a.id) !== String(activityId)) return a;
+            const newFotos = (a.fotos || []).filter((f: any) => String(f.id) !== String(targetId));
+            const thumb = newFotos.length > 0
+              ? (newFotos.find((f: any) => f.isDefault || f.isThumbnail) || newFotos[0])
+              : null;
+            const rawUrl = thumb?.viewUrl || thumb?.url || thumb?.path || "";
+            const imageUrl = rawUrl && !rawUrl.startsWith("http") && !rawUrl.startsWith("/api-proxy")
+              ? `/api-proxy${rawUrl.startsWith("/") ? rawUrl : `/${rawUrl}`}`
+              : rawUrl;
+            return { ...a, featuredImage: imageUrl, fotos: newFotos };
+          }));
+
+          const newLog = {
+            id: Date.now(),
+            time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            user: session.name,
+            action: `Menghapus foto di kegiatan ID ${activityId}`,
+          };
+          setLogs([newLog, ...logs]);
+
+          // Trigger background reload from backend
+          activityService.getById(activityId).then((detail: any) => {
+            const item: any = Array.isArray(detail) ? detail[0] : detail?.data || detail;
+            const fotosArr = Array.isArray(item?.foto) ? item.foto
+              : Array.isArray(item?.fotos) ? item.fotos : null;
+            if (!fotosArr) return;
+            const thumb = fotosArr.length > 0
+              ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
+              : null;
+            const rawUrl = thumb?.viewUrl || thumb?.url || thumb?.path || "";
+            const imageUrl = rawUrl && !rawUrl.startsWith("http") && !rawUrl.startsWith("/api-proxy")
+              ? `/api-proxy${rawUrl.startsWith("/") ? rawUrl : `/${rawUrl}`}`
+              : rawUrl;
+            setActivities(prev => prev.map(a => String(a.id) === String(activityId)
+              ? { ...a, featuredImage: imageUrl, fotos: fotosArr }
+              : a
+            ));
+          }).catch(() => {});
+        } catch (err: any) {
+          alert("Gagal menghapus foto: " + (err.response?.data?.message || err.message));
+        }
       }
     } finally {
       setIsConfirming(false);
@@ -1115,61 +1163,17 @@ const handleDeleteUser = (userId: number) => {
     setLogs([newLog, ...logs]);
   };
 
-  const handleDeletePhoto = async (photoId: string | number, activityId: string | number) => {
+  const handleDeletePhoto = (photoId: string | number, activityId: string | number) => {
     if (!isAdminAdministrasi && !isGuru) return;
-    try {
-      // 1. Hapus foto dari backend
-      await activityService.deletePhoto(photoId);
 
-      // 2. Langsung update state lokal terlebih dahulu (optimistic update)
-      //    agar UI tetap akurat meskipun refresh getById gagal
-      setActivities(prev => prev.map(a => {
-        if (a.id !== activityId) return a;
-        const newFotos = (a.fotos || []).filter((f: any) => f.id !== photoId);
-        const thumb = newFotos.length > 0
-          ? (newFotos.find((f: any) => f.isDefault || f.isThumbnail) || newFotos[0])
-          : null;
-        const rawUrl = thumb?.viewUrl || thumb?.url || thumb?.path || "";
-        const imageUrl = rawUrl && !rawUrl.startsWith("http") && !rawUrl.startsWith("/api-proxy")
-          ? `/api-proxy${rawUrl.startsWith("/") ? rawUrl : `/${rawUrl}`}`
-          : rawUrl;
-        return { ...a, featuredImage: imageUrl, fotos: newFotos };
-      }));
-
-      const newLog = {
-        id: Date.now(),
-        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-        user: session.name,
-        action: `Menghapus foto di kegiatan ID ${activityId}`,
-      };
-      setLogs([newLog, ...logs]);
-
-      // 3. Coba refresh dari backend secara background (opsional, abaikan jika gagal)
-      activityService.getById(activityId).then((detail: any) => {
-        const item: any = Array.isArray(detail) ? detail[0] : detail?.data || detail;
-        const fotosArr = Array.isArray(item?.foto) ? item.foto
-          : Array.isArray(item?.fotos) ? item.fotos : null;
-        if (!fotosArr) return; // backend belum mengembalikan data yang valid, skip
-        const thumb = fotosArr.length > 0
-          ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
-          : null;
-        const rawUrl = thumb?.viewUrl || thumb?.url || thumb?.path || "";
-        const imageUrl = rawUrl && !rawUrl.startsWith("http") && !rawUrl.startsWith("/api-proxy")
-          ? `/api-proxy${rawUrl.startsWith("/") ? rawUrl : `/${rawUrl}`}`
-          : rawUrl;
-        setActivities(prev => prev.map(a => a.id === activityId
-          ? { ...a, featuredImage: imageUrl, fotos: fotosArr }
-          : a
-        ));
-      }).catch(() => {
-        // Backend 500 setelah hapus foto — abaikan, state lokal sudah benar
-        console.warn("[handleDeletePhoto] Refresh getById gagal (backend 500), state lokal dipertahankan.");
-      });
-    } catch (err: any) {
-      // Hanya tampilkan alert jika deletePhoto sendiri yang gagal
-      const msg = err.response?.data?.message || err.message || "Terjadi kesalahan";
-      alert("Gagal menghapus foto: " + msg);
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: "Konfirmasi Hapus Foto",
+      message: "Apakah Anda yakin ingin menghapus foto ini secara permanen dari Google Drive?",
+      actionType: "delete_photo",
+      targetId: photoId,
+      extraData: { activityId }
+    });
   };
 
   const handleUpdateActivity = async (updatedAct: any) => {
