@@ -13,6 +13,7 @@ export interface StudentPayload {
   semester?: string;
   tahunAjaran?: string;
   activeStatus?: string;
+  jenisKelamin?: string;
 }
 
 export const studentService = {
