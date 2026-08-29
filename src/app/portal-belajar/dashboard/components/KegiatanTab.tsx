@@ -34,7 +34,7 @@ interface KegiatanTabProps {
   onAddPhotos?: (activityId: number | string, files: File[]) => Promise<void>;
   onDeleteActivity?: (activityId: number | string) => void;
   onTogglePublic?: (activityId: number | string, isPublic: boolean) => void;
-  onDeletePhoto?: (photoId: string | number, activityId: string | number) => Promise<void>;
+  onDeletePhoto?: (photoId: string | number, activityId: string | number) => void;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
