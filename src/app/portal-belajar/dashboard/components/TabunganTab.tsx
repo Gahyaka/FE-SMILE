@@ -43,6 +43,12 @@ export default function TabunganTab({
   const [transAmount, setTransAmount] = useState("");
   const [savingFilterStudentId, setSavingFilterStudentId] = useState<string | number>(students.filter(s => s.activeStatus === "Aktif")[0]?.id || "");
   const [showMutasiForm, setShowMutasiForm] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [savingFilterStudentId]);
 
   // Form Filter Kelas (baru untuk mencegah loading berat)
   const [formSelectedClass, setFormSelectedClass] = useState(classes[0]?.className || "KB");
@@ -253,6 +259,7 @@ export default function TabunganTab({
                       <input
                         type="number"
                         id="transAmount"
+                        step="1000"
                         value={transAmount}
                         onChange={(e) => setTransAmount(e.target.value)}
                         required
@@ -435,74 +442,160 @@ export default function TabunganTab({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-gray/5 font-semibold text-neutral-dark">
-                  {getStudentTabunganRows(savingFilterStudentId).map((t) => (
-                    <tr key={t.id} className="hover:bg-soft-mint/30 transition-colors">
-                      <td className="py-3 px-4 text-neutral-gray font-mono">{t.date}</td>
-                      <td className="py-3 px-4 text-neutral-dark">{t.description}</td>
-                      <td className="py-3 px-3 text-right text-emerald-600 font-mono font-bold">
-                        {t.debet > 0 ? `+Rp ${t.debet.toLocaleString()}` : "-"}
-                      </td>
-                      <td className="py-3 px-3 text-right text-rose-600 font-mono font-bold">
-                        {t.kredit > 0 ? `-Rp ${t.kredit.toLocaleString()}` : "-"}
-                      </td>
-                      <td className="py-3 px-4 text-right font-bold text-primary-green font-mono">
-                        Rp {t.saldo.toLocaleString()}
-                      </td>
-                      <td className="py-3 px-2 text-center text-neutral-gray text-[10px] truncate max-w-[80px]" title={t.admin}>
-                        {t.admin}
-                      </td>
-                    </tr>
-                  ))}
-                  {getStudentTabunganRows(savingFilterStudentId).length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="text-center py-6 text-neutral-gray italic">Belum ada riwayat transaksi tabungan.</td>
-                    </tr>
-                  )}
+                  {(() => {
+                    const allRows = getStudentTabunganRows(savingFilterStudentId);
+                    const paginatedRows = allRows.slice(
+                      (currentPage - 1) * ITEMS_PER_PAGE,
+                      currentPage * ITEMS_PER_PAGE
+                    );
+
+                    if (paginatedRows.length === 0) {
+                      return (
+                        <tr>
+                          <td colSpan={6} className="text-center py-6 text-neutral-gray italic">Belum ada riwayat transaksi tabungan.</td>
+                        </tr>
+                      );
+                    }
+
+                    return paginatedRows.map((t) => (
+                      <tr key={t.id} className="hover:bg-soft-mint/30 transition-colors">
+                        <td className="py-3 px-4 text-neutral-gray font-mono">{t.date}</td>
+                        <td className="py-3 px-4 text-neutral-dark">{t.description}</td>
+                        <td className="py-3 px-3 text-right text-emerald-600 font-mono font-bold">
+                          {t.debet > 0 ? `+Rp ${t.debet.toLocaleString()}` : "-"}
+                        </td>
+                        <td className="py-3 px-3 text-right text-rose-600 font-mono font-bold">
+                          {t.kredit > 0 ? `-Rp ${t.kredit.toLocaleString()}` : "-"}
+                        </td>
+                        <td className="py-3 px-4 text-right font-bold text-primary-green font-mono">
+                          Rp {t.saldo.toLocaleString()}
+                        </td>
+                        <td className="py-3 px-2 text-center text-neutral-gray text-[10px] truncate max-w-[80px]" title={t.admin}>
+                          {t.admin}
+                        </td>
+                      </tr>
+                    ));
+                  })()}
                 </tbody>
               </table>
             </div>
 
             {/* Tampilan Mobile: Card List */}
             <div className="block sm:hidden space-y-3">
-              {getStudentTabunganRows(savingFilterStudentId).map((t) => (
-                <div key={t.id} className="bg-[#FAF8F5] p-3.5 rounded-2xl border border-neutral-gray/8 shadow-sm space-y-2.5 animate-fade-in hover:shadow-xs transition-shadow">
-                  <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-1.5 gap-2">
-                    <span className="text-[10px] text-neutral-gray font-mono font-bold">{t.date}</span>
-                    <span className="text-[9px] text-neutral-gray/80 font-bold bg-white px-2 py-0.5 rounded border border-neutral-gray/10 truncate max-w-[90px]" title={t.admin}>
-                      Oleh: {t.admin}
-                    </span>
-                  </div>
+              {(() => {
+                const allRows = getStudentTabunganRows(savingFilterStudentId);
+                const paginatedRows = allRows.slice(
+                  (currentPage - 1) * ITEMS_PER_PAGE,
+                  currentPage * ITEMS_PER_PAGE
+                );
 
-                  <div className="text-[11px] text-neutral-dark font-medium leading-relaxed">
-                    {t.description}
-                  </div>
+                if (paginatedRows.length === 0) {
+                  return <p className="text-[11px] text-neutral-gray italic text-center py-6">Belum ada riwayat transaksi tabungan.</p>;
+                }
 
-                  <div className="grid grid-cols-3 gap-2 pt-1 text-center text-[10px] font-bold">
-                    <div className="bg-white p-1.5 rounded-xl border border-neutral-gray/5 flex flex-col justify-center">
-                      <span className="block text-[8px] text-neutral-gray/60 uppercase">Setor (+)</span>
-                      <span className="text-emerald-600 font-mono mt-0.5 font-bold">
-                        {t.debet > 0 ? `Rp ${t.debet.toLocaleString()}` : "-"}
+                return paginatedRows.map((t) => (
+                  <div key={t.id} className="bg-[#FAF8F5] p-3.5 rounded-2xl border border-neutral-gray/8 shadow-sm space-y-2.5 animate-fade-in hover:shadow-xs transition-shadow">
+                    <div className="flex justify-between items-center border-b border-neutral-gray/10 pb-1.5 gap-2">
+                      <span className="text-[10px] text-neutral-gray font-mono font-bold">{t.date}</span>
+                      <span className="text-[9px] text-neutral-gray/80 font-bold bg-white px-2 py-0.5 rounded border border-neutral-gray/10 truncate max-w-[90px]" title={t.admin}>
+                        Oleh: {t.admin}
                       </span>
                     </div>
-                    <div className="bg-white p-1.5 rounded-xl border border-neutral-gray/5 flex flex-col justify-center">
-                      <span className="block text-[8px] text-neutral-gray/60 uppercase">Tarik (-)</span>
-                      <span className="text-rose-600 font-mono mt-0.5 font-bold">
-                        {t.kredit > 0 ? `Rp ${t.kredit.toLocaleString()}` : "-"}
-                      </span>
+
+                    <div className="text-[11px] text-neutral-dark font-medium leading-relaxed">
+                      {t.description}
                     </div>
-                    <div className="bg-emerald-500/10 p-1.5 rounded-xl border border-emerald-500/20 flex flex-col justify-center">
-                      <span className="block text-[8px] text-primary-green uppercase">Saldo</span>
-                      <span className="text-primary-green font-mono font-black mt-0.5">
-                        Rp {t.saldo.toLocaleString()}
-                      </span>
+
+                    <div className="grid grid-cols-3 gap-2 pt-1 text-center text-[10px] font-bold">
+                      <div className="bg-white p-1.5 rounded-xl border border-neutral-gray/5 flex flex-col justify-center">
+                        <span className="block text-[8px] text-neutral-gray/60 uppercase">Setor (+)</span>
+                        <span className="text-emerald-600 font-mono mt-0.5 font-bold">
+                          {t.debet > 0 ? `Rp ${t.debet.toLocaleString()}` : "-"}
+                        </span>
+                      </div>
+                      <div className="bg-white p-1.5 rounded-xl border border-neutral-gray/5 flex flex-col justify-center">
+                        <span className="block text-[8px] text-neutral-gray/60 uppercase">Tarik (-)</span>
+                        <span className="text-rose-600 font-mono mt-0.5 font-bold">
+                          {t.kredit > 0 ? `Rp ${t.kredit.toLocaleString()}` : "-"}
+                        </span>
+                      </div>
+                      <div className="bg-emerald-500/10 p-1.5 rounded-xl border border-emerald-500/20 flex flex-col justify-center">
+                        <span className="block text-[8px] text-primary-green uppercase">Saldo</span>
+                        <span className="text-primary-green font-mono font-black mt-0.5">
+                          Rp {t.saldo.toLocaleString()}
+                        </span>
+                      </div>
                     </div>
+                  </div>
+                ));
+              })()}
+            </div>
+
+            {/* Pagination Controls */}
+            {(() => {
+              const allRows = getStudentTabunganRows(savingFilterStudentId);
+              const totalPages = Math.max(1, Math.ceil(allRows.length / ITEMS_PER_PAGE));
+              if (totalPages <= 1) return null;
+
+              return (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-neutral-gray/10">
+                  <span className="text-[10px] text-neutral-gray font-semibold">
+                    Halaman <span className="font-black text-neutral-dark">{currentPage}</span> dari <span className="font-black text-neutral-dark">{totalPages}</span>
+                    {" "}({allRows.length} entri)
+                  </span>
+                  <div className="flex items-center gap-1.5 select-none">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                      className="px-2 py-1 rounded-lg text-[9px] font-extrabold border border-neutral-gray/15 bg-[#FAF8F5] text-neutral-gray hover:bg-primary-green/10 hover:text-primary-green transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      title="Halaman pertama"
+                    >
+                      «
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="px-2.5 py-1 rounded-lg text-[9px] font-extrabold border border-neutral-gray/15 bg-[#FAF8F5] text-neutral-gray hover:bg-primary-green/10 hover:text-primary-green transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      ‹ Prev
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-7 h-7 rounded-lg text-[9px] font-extrabold border transition-all cursor-pointer ${
+                          currentPage === page
+                            ? "bg-primary-green text-white border-primary-green shadow-xs"
+                            : "bg-[#FAF8F5] text-neutral-gray border-neutral-gray/15 hover:bg-primary-green/10 hover:text-primary-green"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-2.5 py-1 rounded-lg text-[9px] font-extrabold border border-neutral-gray/15 bg-[#FAF8F5] text-neutral-gray hover:bg-primary-green/10 hover:text-primary-green transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      Next ›
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                      className="px-2 py-1 rounded-lg text-[9px] font-extrabold border border-neutral-gray/15 bg-[#FAF8F5] text-neutral-gray hover:bg-primary-green/10 hover:text-primary-green transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      title="Halaman terakhir"
+                    >
+                      »
+                    </button>
                   </div>
                 </div>
-              ))}
-              {getStudentTabunganRows(savingFilterStudentId).length === 0 && (
-                <p className="text-[11px] text-neutral-gray italic text-center py-6">Belum ada riwayat transaksi tabungan.</p>
-              )}
-            </div>
+              );
+            })()}
           </div>
 
         </div>

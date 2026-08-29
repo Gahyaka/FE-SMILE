@@ -82,6 +82,7 @@ export default function SppTab({
   const [editingTx, setEditingTx] = useState<SppTransaction | null>(null);
   const [activeMobileKebabId, setActiveMobileKebabId] = useState<string | number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentPageMatriks, setCurrentPageMatriks] = useState(1);
   const ITEMS_PER_PAGE = 10;
   
   // Sub-tab state
@@ -233,10 +234,11 @@ export default function SppTab({
     currentPage * ITEMS_PER_PAGE
   );
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters or sub-tabs change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedAcademicYear, selectedClass, selectedPeriod]);
+    setCurrentPageMatriks(1);
+  }, [selectedAcademicYear, selectedClass, selectedPeriod, activeSubTab]);
 
   // Dynamic Description Effect based on selection (generates multi-month details if checkboxes are ticked)
   useEffect(() => {
@@ -973,9 +975,24 @@ export default function SppTab({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-gray/5 font-semibold text-neutral-dark">
-                  {students
-                    .filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif")
-                    .map(student => {
+                  {(() => {
+                    const activeStudents = students.filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif");
+                    const paginatedStudents = activeStudents.slice(
+                      (currentPageMatriks - 1) * ITEMS_PER_PAGE,
+                      currentPageMatriks * ITEMS_PER_PAGE
+                    );
+                    
+                    if (paginatedStudents.length === 0) {
+                      return (
+                        <tr>
+                          <td colSpan={13} className="py-10 text-center text-neutral-gray font-semibold italic">
+                            Tidak ada data murid aktif untuk matriks monitoring ini.
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return paginatedStudents.map(student => {
                       return (
                         <tr key={student.id} className="hover:bg-soft-mint/30 transition-colors">
                           <td className="py-2.5 px-4 font-bold">
@@ -1031,10 +1048,77 @@ export default function SppTab({
                           })}
                         </tr>
                       );
-                    })}
+                    });
+                  })()}
                 </tbody>
               </table>
             </div>
+
+            {/* Matriks Pagination Switcher */}
+            {(() => {
+              const activeStudents = students.filter(s => (selectedClass === "Semua" || s.class === selectedClass) && s.activeStatus === "Aktif");
+              const totalPagesMatriks = Math.max(1, Math.ceil(activeStudents.length / ITEMS_PER_PAGE));
+              if (totalPagesMatriks <= 1) return null;
+
+              return (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-neutral-gray/10">
+                  <span className="text-[10px] text-neutral-gray font-semibold">
+                    Halaman <span className="font-black text-neutral-dark">{currentPageMatriks}</span> dari <span className="font-black text-neutral-dark">{totalPagesMatriks}</span>
+                    {" "}({activeStudents.length} murid)
+                  </span>
+                  <div className="flex items-center gap-1.5 select-none">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPageMatriks(1)}
+                      disabled={currentPageMatriks === 1}
+                      className="px-2 py-1 rounded-lg text-[9px] font-extrabold border border-neutral-gray/15 bg-[#FAF8F5] text-neutral-gray hover:bg-primary-green/10 hover:text-primary-green transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      title="Halaman pertama"
+                    >
+                      «
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPageMatriks(p => Math.max(1, p - 1))}
+                      disabled={currentPageMatriks === 1}
+                      className="px-2.5 py-1 rounded-lg text-[9px] font-extrabold border border-neutral-gray/15 bg-[#FAF8F5] text-neutral-gray hover:bg-primary-green/10 hover:text-primary-green transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      ‹ Prev
+                    </button>
+                    {Array.from({ length: totalPagesMatriks }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() => setCurrentPageMatriks(page)}
+                        className={`w-7 h-7 rounded-lg text-[9px] font-extrabold border transition-all cursor-pointer ${
+                          currentPageMatriks === page
+                            ? "bg-primary-green text-white border-primary-green shadow-xs"
+                            : "bg-[#FAF8F5] text-neutral-gray border-neutral-gray/15 hover:bg-primary-green/10 hover:text-primary-green"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPageMatriks(p => Math.min(totalPagesMatriks, p + 1))}
+                      disabled={currentPageMatriks === totalPagesMatriks}
+                      className="px-2.5 py-1 rounded-lg text-[9px] font-extrabold border border-neutral-gray/15 bg-[#FAF8F5] text-neutral-gray hover:bg-primary-green/10 hover:text-primary-green transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      Next ›
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPageMatriks(totalPagesMatriks)}
+                      disabled={currentPageMatriks === totalPagesMatriks}
+                      className="px-2 py-1 rounded-lg text-[9px] font-extrabold border border-neutral-gray/15 bg-[#FAF8F5] text-neutral-gray hover:bg-primary-green/10 hover:text-primary-green transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      title="Halaman terakhir"
+                    >
+                      »
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
   
@@ -1123,6 +1207,7 @@ export default function SppTab({
                         type="number"
                         id="paySpp"
                         min="0"
+                        step="1000"
                         value={paySpp}
                         onChange={(e) => setPaySpp(e.target.value)}
                         required
@@ -1136,6 +1221,7 @@ export default function SppTab({
                         type="number"
                         id="payLes"
                         min="0"
+                        step="1000"
                         value={payLes}
                         onChange={(e) => setPayLes(e.target.value)}
                         required
@@ -1341,6 +1427,7 @@ export default function SppTab({
                         type="number"
                         required
                         min="0"
+                        step="1000"
                         value={editingTx.spp}
                         onChange={(e) => setEditingTx({ ...editingTx, spp: Number(e.target.value) })}
                         className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:outline-none text-neutral-dark font-mono font-bold"
@@ -1352,6 +1439,7 @@ export default function SppTab({
                         type="number"
                         required
                         min="0"
+                        step="1000"
                         value={editingTx.les}
                         onChange={(e) => setEditingTx({ ...editingTx, les: Number(e.target.value) })}
                         className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:outline-none text-neutral-dark font-mono font-bold"
