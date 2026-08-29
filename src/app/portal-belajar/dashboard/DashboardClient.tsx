@@ -216,8 +216,9 @@ export default function DashboardClient() {
     isOpen: boolean;
     title: string;
     message: string;
-    actionType: "delete_student" | "delete_class" | "delete_spp" | "delete_user" | "delete_activity" | null;
+    actionType: "delete_student" | "delete_class" | "delete_spp" | "delete_user" | "delete_activity" | "toggle_public_activity" | null;
     targetId: string | number | null;
+    extraData?: any;
   }>({
     isOpen: false,
     title: "",
@@ -978,6 +979,59 @@ const handleDeleteUser = (userId: number) => {
           };
           setLogs([newLog, ...logs]);
         }
+      } else if (actionType === "toggle_public_activity") {
+        const isPublic = confirmModal.extraData?.isPublic;
+        const targetAct = activities.find(a => a.id === targetId);
+        try {
+          await activityService.togglePublic(targetId, isPublic);
+          
+          const actRes = await activityService.getAll();
+          const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
+          const mappedAct = rawAct.map((item: any) => {
+            const fotosArr = Array.isArray(item.foto) ? item.foto
+              : Array.isArray(item.fotos) ? item.fotos : [];
+            const thumb = (fotosArr && fotosArr.length > 0)
+              ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
+              : null;
+            const imageUrl = thumb?.viewUrl 
+              || (thumb?.url ? (thumb.url.startsWith("http") ? thumb.url : `/api-proxy/${thumb.url.replace(/^\//, "")}`) : null)
+              || (thumb?.path ? (thumb.path.startsWith("http") ? thumb.path : `/api-proxy/${thumb.path.replace(/^\//, "")}`) : null)
+              || (typeof item.foto === "string" ? (item.foto.startsWith("http") ? item.foto : `/api-proxy/${item.foto.replace(/^\//, "")}`) : "");
+            return {
+              id: item.id,
+              title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+              description: item.deskripsi || item.description || "",
+              date: item.tanggalKegiatan || item.date || "",
+              featuredImage: imageUrl,
+              fotos: fotosArr.map((f: any) => ({
+                ...f,
+                url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
+                viewUrl: f.viewUrl || ""
+              })),
+              driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
+                || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
+                || item.linkDrive || item.urlDrive || "",
+              category: item.kategori || item.category || "AGENDA TAHUNAN",
+              isPublic: item.isPublic !== undefined ? item.isPublic : true
+            };
+          });
+          setActivities(mappedAct);
+          localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
+        } catch (err) {
+          const updated = activities.map((act) => 
+            act.id === targetId ? { ...act, isPublic } : act
+          );
+          setActivities(updated);
+          localStorage.setItem("sgw_activities", JSON.stringify(updated));
+        }
+
+        const newLog = {
+          id: Date.now(),
+          time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          user: session.name,
+          action: `Mengubah publikasi kegiatan '${targetAct?.title || "kegiatan"}' menjadi ${isPublic ? "Publik" : "Privat"}`,
+        };
+        setLogs([newLog, ...logs]);
       }
     } finally {
       setIsConfirming(false);
@@ -1171,60 +1225,23 @@ const handleDeleteUser = (userId: number) => {
     setLogs([newLog, ...logs]);
   };
 
-  const handleTogglePublicActivity = async (actId: string | number, isPublic: boolean) => {
+  const handleTogglePublicActivity = (actId: string | number, isPublic: boolean) => {
     if (!isAdminAdministrasi && !isGuru) return;
 
-    try {
-      await activityService.togglePublic(actId, isPublic);
-      
-      const actRes = await activityService.getAll();
-      const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
-      const mappedAct = rawAct.map((item: any) => {
-        const fotosArr = Array.isArray(item.foto) ? item.foto
-          : Array.isArray(item.fotos) ? item.fotos : [];
-        const thumb = (fotosArr && fotosArr.length > 0)
-          ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
-          : null;
-        const imageUrl = thumb?.viewUrl 
-          || (thumb?.url ? (thumb.url.startsWith("http") ? thumb.url : `/api-proxy/${thumb.url.replace(/^\//, "")}`) : null)
-          || (thumb?.path ? (thumb.path.startsWith("http") ? thumb.path : `/api-proxy/${thumb.path.replace(/^\//, "")}`) : null)
-          || (typeof item.foto === "string" ? (item.foto.startsWith("http") ? item.foto : `/api-proxy/${item.foto.replace(/^\//, "")}`) : "");
-        return {
-          id: item.id,
-          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
-          description: item.deskripsi || item.description || "",
-          date: item.tanggalKegiatan || item.date || "",
-          featuredImage: imageUrl,
-          fotos: fotosArr.map((f: any) => ({
-            ...f,
-            url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
-            viewUrl: f.viewUrl || ""
-          })),
-          driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
-            || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
-            || item.linkDrive || item.urlDrive || "",
-          category: item.kategori || item.category || "AGENDA TAHUNAN",
-          isPublic: item.isPublic !== undefined ? item.isPublic : true
-        };
-      });
-      setActivities(mappedAct);
-      localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
-    } catch (err) {
-      const updated = activities.map((act) => 
-        act.id === actId ? { ...act, isPublic } : act
-      );
-      setActivities(updated);
-      localStorage.setItem("sgw_activities", JSON.stringify(updated));
-    }
-
     const targetAct = activities.find(a => a.id === actId);
-    const newLog = {
-      id: Date.now(),
-      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      user: session.name,
-      action: `Mengubah publikasi kegiatan '${targetAct?.title || "kegiatan"}' menjadi ${isPublic ? "Publik" : "Privat"}`,
-    };
-    setLogs([newLog, ...logs]);
+    const title = isPublic ? "Publikasikan Dokumentasi" : "Tarik dari Publikasi";
+    const message = isPublic 
+      ? `Apakah Anda yakin ingin mempublikasikan kegiatan "${targetAct?.title || "kegiatan ini"}" agar dapat dilihat oleh masyarakat di halaman depan website?`
+      : `Apakah Anda yakin ingin menarik publikasi kegiatan "${targetAct?.title || "kegiatan ini"}"? Kegiatan ini tidak akan muncul lagi di halaman depan website.`;
+
+    setConfirmModal({
+      isOpen: true,
+      title: title,
+      message: message,
+      actionType: "toggle_public_activity",
+      targetId: actId,
+      extraData: { isPublic }
+    });
   };
 
   const handleDeleteActivity = (actId: string | number) => {
