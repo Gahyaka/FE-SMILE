@@ -1207,6 +1207,7 @@ export default function SppTab({
                         type="number"
                         id="paySpp"
                         min="0"
+                        step="1000"
                         value={paySpp}
                         onChange={(e) => setPaySpp(e.target.value)}
                         required
@@ -1220,6 +1221,7 @@ export default function SppTab({
                         type="number"
                         id="payLes"
                         min="0"
+                        step="1000"
                         value={payLes}
                         onChange={(e) => setPayLes(e.target.value)}
                         required
@@ -1425,6 +1427,7 @@ export default function SppTab({
                         type="number"
                         required
                         min="0"
+                        step="1000"
                         value={editingTx.spp}
                         onChange={(e) => setEditingTx({ ...editingTx, spp: Number(e.target.value) })}
                         className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:outline-none text-neutral-dark font-mono font-bold"
@@ -1436,6 +1439,7 @@ export default function SppTab({
                         type="number"
                         required
                         min="0"
+                        step="1000"
                         value={editingTx.les}
                         onChange={(e) => setEditingTx({ ...editingTx, les: Number(e.target.value) })}
                         className="w-full px-3 py-2.5 rounded-xl border border-neutral-gray/12 bg-stone-50 focus:bg-white focus:outline-none text-neutral-dark font-mono font-bold"

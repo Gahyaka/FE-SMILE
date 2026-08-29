@@ -259,6 +259,7 @@ export default function TabunganTab({
                       <input
                         type="number"
                         id="transAmount"
+                        step="1000"
                         value={transAmount}
                         onChange={(e) => setTransAmount(e.target.value)}
                         required
