@@ -1179,7 +1179,11 @@ const handleDeleteUser = (userId: number) => {
       const formData = new FormData();
       formData.append("namaKegiatan", updatedAct.title);
       formData.append("deskripsi", updatedAct.description || "");
-      formData.append("tanggalKegiatan", updatedAct.date || new Date().toISOString().split("T")[0]);
+      
+      const cleanDate = updatedAct.date ? updatedAct.date.split("T")[0] : new Date().toISOString().split("T")[0];
+      formData.append("tanggalKegiatan", cleanDate);
+      formData.append("kategori", updatedAct.category || "AGENDA TAHUNAN");
+
       // Kirim file foto baru jika ada (dari edit form)
       const files: File[] = Array.isArray(updatedAct.imageFiles) ? updatedAct.imageFiles : [];
       if (updatedAct.imageFile) files.unshift(updatedAct.imageFile); // backward compat
@@ -1202,15 +1206,22 @@ const handleDeleteUser = (userId: number) => {
           description: item.deskripsi || item.description || "",
           date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
           featuredImage: imageUrl,
+          fotos: fotosArr.map((f: any) => ({
+            ...f,
+            url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
+            viewUrl: f.viewUrl || ""
+          })),
           driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
             || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
             || item.linkDrive || item.urlDrive || "",
+          category: item.kategori || item.category || "AGENDA TAHUNAN",
           isPublic: item.isPublic !== undefined ? item.isPublic : true
         };
       });
       setActivities(mappedAct);
       localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
-    } catch (err) {
+    } catch (err: any) {
+      alert("Gagal memperbarui kegiatan di backend: " + (err.response?.data?.message || err.message));
       const updated = activities.map((act) => (act.id === updatedAct.id ? updatedAct : act));
       setActivities(updated);
       localStorage.setItem("sgw_activities", JSON.stringify(updated));
@@ -1223,6 +1234,66 @@ const handleDeleteUser = (userId: number) => {
       action: `Memperbarui dokumentasi kegiatan: ${updatedAct.title}`,
     };
     setLogs([newLog, ...logs]);
+  };
+
+  const handleAddPhotosToActivity = async (activityId: string | number, files: File[]) => {
+    if (!isAdminAdministrasi && !isGuru) return;
+    
+    const act = activities.find(a => String(a.id) === String(activityId));
+    if (!act) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("namaKegiatan", act.title);
+      formData.append("deskripsi", act.description || "");
+      formData.append("tanggalKegiatan", act.date ? act.date.split("T")[0] : new Date().toISOString().split("T")[0]);
+      formData.append("kategori", act.category || "AGENDA TAHUNAN");
+      files.forEach((file) => formData.append("foto", file));
+
+      // POST to create with same name to merge/append photos to same Drive folder
+      await activityService.create(formData);
+
+      // Reload activities list
+      const actRes = await activityService.getAll();
+      const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
+      const mappedAct = rawAct.map((item: any) => {
+        const fotosArr = Array.isArray(item.foto) ? item.foto
+          : Array.isArray(item.fotos) ? item.fotos : [];
+        const thumb = (fotosArr && fotosArr.length > 0)
+          ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
+          : null;
+        const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
+        return {
+          id: item.id,
+          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+          description: item.deskripsi || item.description || "",
+          date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
+          featuredImage: imageUrl,
+          fotos: fotosArr.map((f: any) => ({
+            ...f,
+            url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
+            viewUrl: f.viewUrl || ""
+          })),
+          driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
+            || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
+            || item.linkDrive || item.urlDrive || "",
+          category: item.kategori || item.category || "AGENDA TAHUNAN",
+          isPublic: item.isPublic !== undefined ? item.isPublic : true
+        };
+      });
+      setActivities(mappedAct);
+      localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
+      
+      const newLog = {
+        id: Date.now(),
+        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        user: session.name,
+        action: `Menambahkan ${files.length} foto ke kegiatan: ${act.title}`,
+      };
+      setLogs([newLog, ...logs]);
+    } catch (err: any) {
+      alert("Gagal menambahkan foto ke Google Drive: " + (err.response?.data?.message || err.message));
+    }
   };
 
   const handleTogglePublicActivity = (actId: string | number, isPublic: boolean) => {
@@ -1868,6 +1939,7 @@ const handleDeleteUser = (userId: number) => {
                   isGuru={isGuru}
                   onAddActivity={handleAddActivity}
                   onUpdateActivity={handleUpdateActivity}
+                  onAddPhotos={handleAddPhotosToActivity}
                   onDeleteActivity={handleDeleteActivity}
                   onTogglePublic={handleTogglePublicActivity}
                   onDeletePhoto={handleDeletePhoto}

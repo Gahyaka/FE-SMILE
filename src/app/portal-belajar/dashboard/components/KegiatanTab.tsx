@@ -30,7 +30,8 @@ interface KegiatanTabProps {
   isAdminAdministrasi: boolean;
   isGuru: boolean;
   onAddActivity: (newActivity: Omit<Activity, "id">) => void;
-  onUpdateActivity?: (updatedActivity: Activity) => void;
+  onUpdateActivity?: (updatedActivity: Activity) => Promise<void>;
+  onAddPhotos?: (activityId: number | string, files: File[]) => Promise<void>;
   onDeleteActivity?: (activityId: number | string) => void;
   onTogglePublic?: (activityId: number | string, isPublic: boolean) => void;
   onDeletePhoto?: (photoId: string | number, activityId: string | number) => Promise<void>;
@@ -58,6 +59,7 @@ export default function KegiatanTab({
   isGuru,
   onAddActivity,
   onUpdateActivity,
+  onAddPhotos,
   onDeleteActivity,
   onTogglePublic,
   onDeletePhoto,
@@ -72,11 +74,14 @@ export default function KegiatanTab({
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [activeKebabId, setActiveKebabId] = useState<number | string | null>(null);
 
-  // Detail panel
-  const [detailActivity, setDetailActivity] = useState<Activity | null>(null);
-  const [detailFotos, setDetailFotos] = useState<FotoItem[]>([]);
+  // Detail panel (reactive to activities prop)
+  const [detailActivityId, setDetailActivityId] = useState<string | number | null>(null);
   const [deletingPhotoId, setDeletingPhotoId] = useState<string | number | null>(null);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [isUploadingDetailPhoto, setIsUploadingDetailPhoto] = useState(false);
+
+  const detailActivity = activities.find((a) => String(a.id) === String(detailActivityId)) || null;
+  const detailFotos = detailActivity ? (detailActivity.fotos || []) : [];
 
   // Upload form
   const [newTitle, setNewTitle] = useState("");
@@ -131,12 +136,34 @@ export default function KegiatanTab({
   };
 
   const openDetail = (act: Activity) => {
-    setDetailActivity(act);
-    setDetailFotos(act.fotos || []);
+    setDetailActivityId(act.id);
     setLightboxIdx(null);
   };
 
-  const closeDetail = () => { setDetailActivity(null); setDetailFotos([]); setLightboxIdx(null); };
+  // Edit drawer cancel helper
+  const closeEditDrawer = () => {
+    setEditingActivity(null);
+  };
+
+  const closeDetail = () => {
+    setDetailActivityId(null);
+    setLightboxIdx(null);
+  };
+
+  const handleAddPhotosDirectly = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !detailActivity || !onAddPhotos) return;
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    setIsUploadingDetailPhoto(true);
+    try {
+      await onAddPhotos(detailActivity.id, files);
+    } catch (err) {
+      console.error("Gagal menambahkan foto secara langsung:", err);
+    } finally {
+      setIsUploadingDetailPhoto(false);
+    }
+  };
 
   const handleDeletePhoto = async (photoId: string | number) => {
     if (!detailActivity || !onDeletePhoto || detailFotos.length <= 1) return;
@@ -448,9 +475,7 @@ export default function KegiatanTab({
       )}
 
 
-      {/* ══════════════════════════════════════════════════════
-          DETAIL PANEL — Galeri Foto Kegiatan
-      ══════════════════════════════════════════════════════ */}
+      {/* ── DETAIL PANEL ─────────────────────────────────── */}
       {detailActivity && (
         <div className="fixed inset-0 z-50 flex">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" onClick={closeDetail} />
@@ -504,12 +529,26 @@ export default function KegiatanTab({
                     <span className="ml-1.5 text-[9px] font-bold bg-primary-green/10 text-primary-green px-2 py-0.5 rounded-full">{detailFotos.length} foto</span>
                   </span>
                 </div>
-                {(isAdminAdministrasi || isGuru) && detailFotos.length > 0 && (
-                  <span className={`text-[9px] font-semibold flex items-center gap-1 ${detailFotos.length <= 1 ? "text-amber-600" : "text-neutral-gray/60"}`}>
-                    {detailFotos.length <= 1 ? (
-                      <><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>Foto terakhir tidak bisa dihapus</>
-                    ) : "Hover pada foto untuk menghapus"}
-                  </span>
+                {(isAdminAdministrasi || isGuru) && (
+                  <label className={`flex items-center gap-1.5 px-3 py-1.5 bg-primary-green hover:bg-primary-dark text-white rounded-lg text-[10px] font-extrabold cursor-pointer transition-all shadow-sm ${isUploadingDetailPhoto ? "opacity-50 cursor-not-allowed" : ""}`}>
+                    <input type="file" multiple accept="image/*" disabled={isUploadingDetailPhoto} onChange={handleAddPhotosDirectly} className="sr-only" />
+                    {isUploadingDetailPhoto ? (
+                      <>
+                        <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        <span>Mengunggah...</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Tambah Foto</span>
+                      </>
+                    )}
+                  </label>
                 )}
               </div>
             </div>
@@ -762,12 +801,10 @@ export default function KegiatanTab({
       )}
 
 
-      {/* ══════════════════════════════════════════════════════
-          EDIT DRAWER
-      ══════════════════════════════════════════════════════ */}
+      {/* ── EDIT DRAWER ──────────────────────────────────── */}
       {editingActivity && (isAdminAdministrasi || isGuru) && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setEditingActivity(null)} />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={closeEditDrawer} />
           <div className="absolute inset-y-0 right-0 max-w-full flex">
             <div className="w-screen max-w-md bg-white flex flex-col shadow-2xl h-full animate-slide-in">
               <div className="px-6 py-5 border-b border-neutral-gray/8 flex justify-between items-center bg-[#FAF8F5]">
@@ -775,7 +812,7 @@ export default function KegiatanTab({
                   <h4 className="font-baloo text-sm font-bold text-neutral-dark">Edit Info Kegiatan</h4>
                   <p className="text-[10px] text-neutral-gray font-medium mt-0.5 truncate max-w-[220px]">{editingActivity.title}</p>
                 </div>
-                <button type="button" onClick={() => setEditingActivity(null)}
+                <button type="button" onClick={closeEditDrawer}
                   className="w-7 h-7 rounded-full bg-white border border-neutral-gray/10 flex items-center justify-center text-neutral-gray hover:text-neutral-dark cursor-pointer transition-colors">
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
@@ -811,6 +848,7 @@ export default function KegiatanTab({
                     className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-gray/15 bg-stone-50 focus:bg-white focus:border-primary-green focus:outline-none text-sm font-medium text-neutral-dark transition-all"
                     placeholder="https://drive.google.com/..." />
                 </div>
+
                 <div>
                   <label className="block text-[10px] font-extrabold text-neutral-gray/70 uppercase tracking-wide mb-1.5">Deskripsi <span className="text-red-500">*</span></label>
                   <textarea required rows={5} value={editingActivity.description}
@@ -821,7 +859,7 @@ export default function KegiatanTab({
                   <button type="submit" className="flex-1 py-3 bg-primary-green hover:bg-primary-dark text-white font-bold text-sm rounded-xl cursor-pointer transition-all">
                     Simpan Perubahan
                   </button>
-                  <button type="button" onClick={() => setEditingActivity(null)}
+                  <button type="button" onClick={closeEditDrawer}
                     className="px-4 py-3 bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold text-sm rounded-xl cursor-pointer transition-all">
                     Batal
                   </button>
