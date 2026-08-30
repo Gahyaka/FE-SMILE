@@ -72,6 +72,42 @@ function mapClassesData(rawClasses: any[]): any[] {
   }));
 }
 
+function mapActivitiesData(rawActivities: any[]): any[] {
+  return rawActivities.map((item: any) => {
+    const fotosArr = Array.isArray(item.foto) ? item.foto
+      : Array.isArray(item.fotos) ? item.fotos
+      : [];
+    const thumbnail = (fotosArr && fotosArr.length > 0) 
+      ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail || String(f.id) === String(item.thumbnailFotoId)) || fotosArr[0]) 
+      : null;
+    const imageUrl = thumbnail?.viewUrl 
+      || (thumbnail?.url ? (thumbnail.url.startsWith("http") ? thumbnail.url : `/api-proxy/${thumbnail.url.replace(/^\//, "")}`) : null)
+      || (thumbnail?.path ? (thumbnail.path.startsWith("http") ? thumbnail.path : `/api-proxy/${thumbnail.path.replace(/^\//, "")}`) : null)
+      || (thumbnail?.foto ? (thumbnail.foto.startsWith("http") ? thumbnail.foto : `/api-proxy/${thumbnail.foto.replace(/^\//, "")}`) : null)
+      || (typeof item.foto === "string" ? (item.foto.startsWith("http") ? item.foto : `/api-proxy/${item.foto.replace(/^\//, "")}`) : null)
+      || (typeof item.image === "string" ? (item.image.startsWith("http") ? item.image : `/api-proxy/${item.image.replace(/^\//, "")}`) : null)
+      || "";
+
+    return {
+      id: item.id,
+      title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
+      description: item.deskripsi || item.description || "",
+      date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
+      featuredImage: imageUrl,
+      fotos: fotosArr.map((f: any) => ({
+        ...f,
+        url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : (f.viewUrl || ""),
+        viewUrl: f.viewUrl || ""
+      })),
+      driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
+        || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
+        || item.linkDrive || item.urlDrive || "",
+      category: item.kategori || item.category || "AGENDA TAHUNAN",
+      isPublic: item.isPublic !== undefined ? item.isPublic : true
+    };
+  });
+}
+
 function parseLocalDateString(dateStr: string): string {
   if (!dateStr) return "";
   if (dateStr.includes("T")) {
@@ -379,39 +415,7 @@ export default function DashboardClient() {
         try {
           const actRes = await activityService.getAll();
           const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
-          const mappedAct = rawAct.map((item: any) => {
-            const fotosArr = Array.isArray(item.foto) ? item.foto
-              : Array.isArray(item.fotos) ? item.fotos
-              : [];
-            const thumbnail = (fotosArr && fotosArr.length > 0) 
-              ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0]) 
-              : null;
-            const imageUrl = thumbnail?.viewUrl 
-              || (thumbnail?.url ? (thumbnail.url.startsWith("http") ? thumbnail.url : `/api-proxy/${thumbnail.url.replace(/^\//, "")}`) : null)
-              || (thumbnail?.path ? (thumbnail.path.startsWith("http") ? thumbnail.path : `/api-proxy/${thumbnail.path.replace(/^\//, "")}`) : null)
-              || (thumbnail?.foto ? (thumbnail.foto.startsWith("http") ? thumbnail.foto : `/api-proxy/${thumbnail.foto.replace(/^\//, "")}`) : null)
-              || (typeof item.foto === "string" ? (item.foto.startsWith("http") ? item.foto : `/api-proxy/${item.foto.replace(/^\//, "")}`) : null)
-              || (typeof item.image === "string" ? (item.image.startsWith("http") ? item.image : `/api-proxy/${item.image.replace(/^\//, "")}`) : null)
-              || "";
-
-            return {
-              id: item.id,
-              title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
-              description: item.deskripsi || item.description || "",
-              date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
-              featuredImage: imageUrl,
-              fotos: fotosArr.map((f: any) => ({
-                ...f,
-                url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
-                viewUrl: f.viewUrl || ""
-              })),
-              driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
-                || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
-                || item.linkDrive || item.urlDrive || "",
-              category: item.kategori || item.category || "AGENDA TAHUNAN",
-              isPublic: item.isPublic !== undefined ? item.isPublic : true
-            };
-          });
+          const mappedAct = mapActivitiesData(rawAct);
           setActivities(mappedAct);
           localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
         } catch (err) {
@@ -990,34 +994,7 @@ const handleDeleteUser = (userId: number) => {
           
           const actRes = await activityService.getAll();
           const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
-          const mappedAct = rawAct.map((item: any) => {
-            const fotosArr = Array.isArray(item.foto) ? item.foto
-              : Array.isArray(item.fotos) ? item.fotos : [];
-            const thumb = (fotosArr && fotosArr.length > 0)
-              ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
-              : null;
-            const imageUrl = thumb?.viewUrl 
-              || (thumb?.url ? (thumb.url.startsWith("http") ? thumb.url : `/api-proxy/${thumb.url.replace(/^\//, "")}`) : null)
-              || (thumb?.path ? (thumb.path.startsWith("http") ? thumb.path : `/api-proxy/${thumb.path.replace(/^\//, "")}`) : null)
-              || (typeof item.foto === "string" ? (item.foto.startsWith("http") ? item.foto : `/api-proxy/${item.foto.replace(/^\//, "")}`) : "");
-            return {
-              id: item.id,
-              title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
-              description: item.deskripsi || item.description || "",
-              date: item.tanggalKegiatan || item.date || "",
-              featuredImage: imageUrl,
-              fotos: fotosArr.map((f: any) => ({
-                ...f,
-                url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
-                viewUrl: f.viewUrl || ""
-              })),
-              driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
-                || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
-                || item.linkDrive || item.urlDrive || "",
-              category: item.kategori || item.category || "AGENDA TAHUNAN",
-              isPublic: item.isPublic !== undefined ? item.isPublic : true
-            };
-          });
+          const mappedAct = mapActivitiesData(rawAct);
           setActivities(mappedAct);
           localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
         } catch (err) {
@@ -1065,18 +1042,11 @@ const handleDeleteUser = (userId: number) => {
           // Trigger background reload from backend
           activityService.getById(activityId).then((detail: any) => {
             const item: any = Array.isArray(detail) ? detail[0] : detail?.data || detail;
-            const fotosArr = Array.isArray(item?.foto) ? item.foto
-              : Array.isArray(item?.fotos) ? item.fotos : null;
-            if (!fotosArr) return;
-            const thumb = fotosArr.length > 0
-              ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
-              : null;
-            const rawUrl = thumb?.viewUrl || thumb?.url || thumb?.path || "";
-            const imageUrl = rawUrl && !rawUrl.startsWith("http") && !rawUrl.startsWith("/api-proxy")
-              ? `/api-proxy${rawUrl.startsWith("/") ? rawUrl : `/${rawUrl}`}`
-              : rawUrl;
+            if (!item) return;
+            const mappedItem = mapActivitiesData([item])[0];
+            if (!mappedItem) return;
             setActivities(prev => prev.map(a => String(a.id) === String(activityId)
-              ? { ...a, featuredImage: imageUrl, fotos: fotosArr }
+              ? { ...a, featuredImage: mappedItem.featuredImage, fotos: mappedItem.fotos }
               : a
             ));
           }).catch(() => {});
@@ -1115,34 +1085,7 @@ const handleDeleteUser = (userId: number) => {
       // Reload dari backend
       const actRes = await activityService.getAll();
       const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
-      const mappedAct = rawAct.map((item: any) => {
-        const fotosArr = Array.isArray(item.foto) ? item.foto
-          : Array.isArray(item.fotos) ? item.fotos : [];
-        const thumb = (fotosArr && fotosArr.length > 0)
-          ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
-          : null;
-        const imageUrl = thumb?.viewUrl 
-          || (thumb?.url ? (thumb.url.startsWith("http") ? thumb.url : `/api-proxy/${thumb.url.replace(/^\//, "")}`) : null)
-          || (thumb?.path ? (thumb.path.startsWith("http") ? thumb.path : `/api-proxy/${thumb.path.replace(/^\//, "")}`) : null)
-          || (typeof item.foto === "string" ? (item.foto.startsWith("http") ? item.foto : `/api-proxy/${item.foto.replace(/^\//, "")}`) : "");
-        return {
-          id: item.id,
-          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
-          description: item.deskripsi || item.description || "",
-          date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
-          featuredImage: imageUrl,
-          fotos: fotosArr.map((f: any) => ({
-            ...f,
-            url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
-            viewUrl: f.viewUrl || ""
-          })),
-          driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
-            || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
-            || item.linkDrive || item.urlDrive || "",
-          category: item.kategori || item.category || "AGENDA TAHUNAN",
-          isPublic: item.isPublic !== undefined ? item.isPublic : true
-        };
-      });
+      const mappedAct = mapActivitiesData(rawAct);
       setActivities(mappedAct);
       localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
     } catch (err) {
@@ -1200,31 +1143,7 @@ const handleDeleteUser = (userId: number) => {
       
       const actRes = await activityService.getAll();
       const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
-      const mappedAct = rawAct.map((item: any) => {
-        const fotosArr = Array.isArray(item.foto) ? item.foto
-          : Array.isArray(item.fotos) ? item.fotos : [];
-        const thumb = (fotosArr && fotosArr.length > 0)
-          ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
-          : null;
-        const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
-        return {
-          id: item.id,
-          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
-          description: item.deskripsi || item.description || "",
-          date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
-          featuredImage: imageUrl,
-          fotos: fotosArr.map((f: any) => ({
-            ...f,
-            url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
-            viewUrl: f.viewUrl || ""
-          })),
-          driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
-            || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
-            || item.linkDrive || item.urlDrive || "",
-          category: item.kategori || item.category || "AGENDA TAHUNAN",
-          isPublic: item.isPublic !== undefined ? item.isPublic : true
-        };
-      });
+      const mappedAct = mapActivitiesData(rawAct);
       setActivities(mappedAct);
       localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
     } catch (err: any) {
@@ -1263,31 +1182,7 @@ const handleDeleteUser = (userId: number) => {
       // Reload activities list
       const actRes = await activityService.getAll();
       const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
-      const mappedAct = rawAct.map((item: any) => {
-        const fotosArr = Array.isArray(item.foto) ? item.foto
-          : Array.isArray(item.fotos) ? item.fotos : [];
-        const thumb = (fotosArr && fotosArr.length > 0)
-          ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0])
-          : null;
-        const imageUrl = thumb?.viewUrl || thumb?.url || thumb?.path || (typeof item.foto === "string" ? item.foto : "");
-        return {
-          id: item.id,
-          title: item.namaKegiatan || item.title || "Kegiatan Madrasah",
-          description: item.deskripsi || item.description || "",
-          date: item.tanggalKegiatan || item.date || new Date().toISOString().split("T")[0],
-          featuredImage: imageUrl,
-          fotos: fotosArr.map((f: any) => ({
-            ...f,
-            url: f.url ? (f.url.startsWith("http") ? f.url : `/api-proxy/${f.url.replace(/^\//, "")}`) : "",
-            viewUrl: f.viewUrl || ""
-          })),
-          driveLink: item.gdriveFolderUrl || item.driveLink || item.folderUrl || item.driveFolderUrl
-            || item.googleDriveUrl || item.folderDriveUrl || item.urlFolder
-            || item.linkDrive || item.urlDrive || "",
-          category: item.kategori || item.category || "AGENDA TAHUNAN",
-          isPublic: item.isPublic !== undefined ? item.isPublic : true
-        };
-      });
+      const mappedAct = mapActivitiesData(rawAct);
       setActivities(mappedAct);
       localStorage.setItem("sgw_activities", JSON.stringify(mappedAct));
       
