@@ -20,7 +20,7 @@ const getPhotoUrl = (rawUrl: string) => {
 
   // Jika link Google Drive (lh3.googleusercontent.com / drive.google.com), gunakan server-side proxy
   if (rawUrl.includes("googleusercontent.com") || rawUrl.includes("drive.google.com")) {
-    return `/api/proxy-image?url=${encodeURIComponent(rawUrl)}`;
+    return `/api/proxy-image?url=${encodeURIComponent(rawUrl)}&v=2`;
   }
   
   // Jika mengandung host backend local atau production
