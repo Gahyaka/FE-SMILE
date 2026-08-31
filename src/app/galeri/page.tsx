@@ -71,14 +71,14 @@ export default function GaleriPage() {
         const res = await activityService.getPublicGallery();
         const rawAct = res && Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
         const items: GalleryItem[] = rawAct.map((item: any) => {
-          // Cari URL gambar cover dari relasi fotos
-          const fotosArr = Array.isArray(item.foto) ? item.foto
+          const fotosArr = Array.isArray(item.galeri) ? item.galeri
+            : Array.isArray(item.foto) ? item.foto
             : Array.isArray(item.fotos) ? item.fotos
             : [];
           const thumbnail = (fotosArr && fotosArr.length > 0) 
-            ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail) || fotosArr[0]) 
+            ? (fotosArr.find((f: any) => f.isDefault || f.isThumbnail || String(f.id) === String(item.thumbnailFotoId)) || fotosArr[0]) 
             : null;
-          const rawCoverUrl = thumbnail?.viewUrl || thumbnail?.url || thumbnail?.path || thumbnail?.foto || item.foto || item.image || "";
+          const rawCoverUrl = item.fotoSampul || thumbnail?.viewUrl || thumbnail?.url || thumbnail?.path || thumbnail?.foto || (typeof item.foto === "string" ? item.foto : "") || item.image || "";
           
           const imageUrl = rawCoverUrl 
             ? getPhotoUrl(rawCoverUrl)
