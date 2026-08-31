@@ -990,7 +990,10 @@ const handleDeleteUser = (userId: number) => {
         const isPublic = confirmModal.extraData?.isPublic;
         const targetAct = activities.find(a => a.id === targetId);
         try {
-          await activityService.togglePublic(targetId, isPublic);
+          const defaultThumbnailId = targetAct?.fotos?.find((f: any) => f.isDefault || f.isThumbnail)?.id 
+            || targetAct?.fotos?.[0]?.id 
+            || "";
+          await activityService.togglePublic(targetId, isPublic, String(defaultThumbnailId));
           
           const actRes = await activityService.getAll();
           const rawAct = Array.isArray(actRes) ? actRes : actRes?.data || [];
