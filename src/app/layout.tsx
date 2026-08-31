@@ -27,9 +27,9 @@ export const metadata: Metadata = {
   description: "Membangun ekosistem pendidikan anak usia dini yang cerdas, berakhlak mulia, dan berkarakter Islami di KB/RA Sahabat Berbah Sleman.",
   keywords: ["RA Sahabat", "KB Sahabat", "Raudhatul Athfal Sleman", "PAUD Berbah", "Pendidikan Anak Usia Dini", "Kemenag", "Nahdlatul Ulama"],
   icons: {
-    icon: "/images/logo.jpg",
-    shortcut: "/images/logo.jpg",
-    apple: "/images/logo.jpg",
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
   }
 };
 
