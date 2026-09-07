@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api-proxy/:path*",
-        destination: "https://be-smile-production.up.railway.app/:path*",
+        destination: "https://paudbackend.alwaysdata.net/:path*",
       },
     ];
   },
