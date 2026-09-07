@@ -29,6 +29,7 @@ interface KelasTabProps {
   onAddClass: (newClass: Omit<ClassData, "id">) => void;
   onUpdateClass: (updatedClass: ClassData) => void;
   onDeleteClass: (classId: number) => void;
+  onNavigateTab?: (tabKey: any) => void;
 }
 
 export default function KelasTab({
@@ -41,8 +42,10 @@ export default function KelasTab({
   onAddClass,
   onUpdateClass,
   onDeleteClass,
+  onNavigateTab,
 }: KelasTabProps) {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showPrerequisiteModal, setShowPrerequisiteModal] = useState(false);
   const [editingClass, setEditingClass] = useState<ClassData | null>(null);
   const [selectedClassForStudents, setSelectedClassForStudents] = useState<string | null>(null);
   const [activeDropdownId, setActiveDropdownId] = useState<number | null>(null);
@@ -168,6 +171,10 @@ export default function KelasTab({
         {isAdminAdministrasi && (
           <button
             onClick={() => {
+              if (teachersList.length === 0) {
+                setShowPrerequisiteModal(true);
+                return;
+              }
               setEditingClass(null);
               setShowAddForm(!showAddForm);
             }}
@@ -577,6 +584,53 @@ export default function KelasTab({
                 type="button"
                 onClick={() => setConfirmDialog({ isOpen: false, title: "", message: "", action: null })}
                 className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Prerequisite Warning Modal ── */}
+      {showPrerequisiteModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-neutral-gray/10 w-full max-w-sm p-6 relative shadow-2xl text-center space-y-4 animate-scale-in text-neutral-dark">
+            <div className="mx-auto w-14 h-14 bg-gradient-to-br from-amber-400 to-amber-500 text-white rounded-2xl flex items-center justify-center shadow-md shadow-amber-200">
+              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="text-[9px] font-extrabold uppercase px-2.5 py-0.5 bg-amber-50 text-amber-700 rounded border border-amber-200 tracking-wider inline-block">
+                Prasyarat Pendaftaran Kelas
+              </span>
+              <h4 className="font-baloo text-lg font-bold text-neutral-dark">Belum Ada Akun Guru</h4>
+              <p className="text-xs text-neutral-gray font-semibold leading-relaxed px-1">
+                Untuk mendaftarkan kelas baru, Anda harus mendaftarkan minimal <strong className="text-neutral-dark">1 Akun Guru (Wali Kelas)</strong> terlebih dahulu di menu Kelola Pengguna.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-2 select-none">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPrerequisiteModal(false);
+                  if (onNavigateTab) onNavigateTab("users");
+                }}
+                className="w-full py-3 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md flex items-center justify-center gap-2 active:scale-98"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                <span>Buat Akun Guru Sekarang</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowPrerequisiteModal(false)}
+                className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
               >
                 Batal
               </button>

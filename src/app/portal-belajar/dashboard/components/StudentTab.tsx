@@ -31,6 +31,7 @@ interface StudentTabProps {
   onUpdateStudentStatus: (studentId: number, status: string) => void;
   onDownloadTemplate?: () => Promise<void>;
   classes: any[];
+  onNavigateTab?: (tabKey: any) => void;
 }
 
 export default function StudentTab({
@@ -42,9 +43,11 @@ export default function StudentTab({
   onDeleteStudent,
   onUpdateStudentStatus,
   onDownloadTemplate,
-  classes,
+  classes = [],
+  onNavigateTab,
 }: StudentTabProps) {
   // ── UI States ─────────────────────────────────────────────────────
+  const [showPrerequisiteModal, setShowPrerequisiteModal] = useState(false);
   const [selectedFilterClass, setSelectedFilterClass] = useState("Semua");
   const [selectedYear, setSelectedYear] = useState("2026/2027");
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
@@ -500,7 +503,13 @@ export default function StudentTab({
                 {/* ── JALUR 2: Import Excel ── */}
                 <button
                   type="button"
-                  onClick={openImportDrawer}
+                  onClick={() => {
+                    if (!classes || classes.length === 0) {
+                      setShowPrerequisiteModal(true);
+                      return;
+                    }
+                    openImportDrawer();
+                  }}
                   className="px-3.5 py-2.5 bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm text-center"
                 >
                   <svg
@@ -545,7 +554,13 @@ export default function StudentTab({
                 {/* ── JALUR 1: Daftarkan Manual ── */}
                 <button
                   type="button"
-                  onClick={() => setShowStudentForm(!showStudentForm)}
+                  onClick={() => {
+                    if (!classes || classes.length === 0) {
+                      setShowPrerequisiteModal(true);
+                      return;
+                    }
+                    setShowStudentForm(!showStudentForm);
+                  }}
                   className="col-span-2 sm:col-span-1 px-4 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm hover:shadow-md"
                 >
                   <svg
@@ -1140,6 +1155,53 @@ export default function StudentTab({
             <button type="button" onClick={() => setImportResult(null)} className="w-full py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-sm">
               Selesai &amp; Tutup
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Prerequisite Warning Modal ── */}
+      {showPrerequisiteModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-neutral-gray/10 w-full max-w-sm p-6 relative shadow-2xl text-center space-y-4 animate-scale-in text-neutral-dark">
+            <div className="mx-auto w-14 h-14 bg-gradient-to-br from-amber-400 to-amber-500 text-white rounded-2xl flex items-center justify-center shadow-md shadow-amber-200">
+              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="text-[9px] font-extrabold uppercase px-2.5 py-0.5 bg-amber-50 text-amber-700 rounded border border-amber-200 tracking-wider inline-block">
+                Prasyarat Pendaftaran Siswa
+              </span>
+              <h4 className="font-baloo text-lg font-bold text-neutral-dark">Belum Ada Data Kelas</h4>
+              <p className="text-xs text-neutral-gray font-semibold leading-relaxed px-1">
+                Untuk mendaftarkan siswa baru, Anda harus mendaftarkan minimal <strong className="text-neutral-dark">1 Kelas</strong> terlebih dahulu di menu Data Kelas.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-2 select-none">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPrerequisiteModal(false);
+                  if (onNavigateTab) onNavigateTab("kelas");
+                }}
+                className="w-full py-3 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md flex items-center justify-center gap-2 active:scale-98"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Buat Kelas Baru Sekarang</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowPrerequisiteModal(false)}
+                className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Batal
+              </button>
+            </div>
           </div>
         </div>
       )}

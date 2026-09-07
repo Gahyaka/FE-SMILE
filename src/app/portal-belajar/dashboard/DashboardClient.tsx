@@ -1805,6 +1805,7 @@ const handleDeleteUser = (userId: number) => {
                     onDeleteStudent={handleDeleteStudent}
                     onUpdateStudentStatus={handleUpdateStudentStatus}
                     onDownloadTemplate={handleDownloadStudentTemplate}
+                    onNavigateTab={(tabKey: TabKey) => setActiveTab(tabKey)}
                   />
                 );
               })()}
@@ -1820,6 +1821,7 @@ const handleDeleteUser = (userId: number) => {
                   onAddClass={handleAddClass}
                   onUpdateClass={handleUpdateClass}
                   onDeleteClass={handleDeleteClass}
+                  onNavigateTab={(tabKey: TabKey) => setActiveTab(tabKey)}
                 />
               )}
 
