@@ -65,6 +65,7 @@ export default function SppTab({
   uniqueAcademicYears.sort().reverse();
 
   const [showSppForm, setShowSppForm] = useState(false);
+  const [showPrerequisiteModal, setShowPrerequisiteModal] = useState(false);
   const [selectedAcademicYear, setSelectedAcademicYear] = useState(uniqueAcademicYears[0]);
   const [selectedClass, setSelectedClass] = useState("Semua");
   const [selectedPeriod, setSelectedPeriod] = useState<"Hari Ini" | "Minggu Ini" | "Bulan Ini" | "Semester 1" | "Semester 2" | "Semua">("Semua");
@@ -534,8 +535,14 @@ export default function SppTab({
 
               {isAdminTransaksi && (
                 <button
-                  onClick={() => setShowSppForm(true)}
-                  className="px-4 py-2.5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+                  onClick={() => {
+                    if (!students || students.length === 0) {
+                      setShowPrerequisiteModal(true);
+                      return;
+                    }
+                    setShowSppForm(true);
+                  }}
+                  className="px-4 py-2.5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm hover:shadow-md active:scale-98"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -1523,6 +1530,47 @@ export default function SppTab({
                 className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
               >
                 Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ── Prerequisite Warning Modal for SPP & Les ── */}
+      {showPrerequisiteModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-neutral-gray/10 w-full max-w-md p-6 sm:p-7 relative shadow-2xl text-center space-y-5 animate-scale-in text-neutral-dark">
+            {/* Top Soft Round Icon */}
+            <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center ring-8 ring-amber-500/5">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+
+            {/* Header Title */}
+            <div>
+              <h3 className="font-baloo text-xl font-bold text-neutral-dark">Belum Ada Data Siswa</h3>
+              <p className="text-xs text-neutral-gray font-medium mt-1">Langkah prasyarat diperlukan sebelum mencatat transaksi SPP &amp; Les.</p>
+            </div>
+
+            {/* Formatted Spaced Callout Box */}
+            <div className="bg-[#FAF8F5] border border-amber-200/60 rounded-2xl p-4 text-left space-y-1.5">
+              <div className="flex items-center gap-2 text-amber-700 font-extrabold text-[10px] uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0 animate-pulse"></span>
+                <span>Prasyarat Transaksi Keuangan</span>
+              </div>
+              <p className="text-xs text-neutral-gray font-medium leading-relaxed">
+                Untuk mencatat pembayaran SPP &amp; Les, harus terdapat minimal <strong className="text-neutral-dark font-bold">1 Siswa</strong> terdaftar di dalam sistem. Silakan minta <strong className="text-neutral-dark font-bold">Admin Administrasi</strong> untuk mendaftarkan siswa terlebih dahulu.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-1 select-none">
+              <button
+                type="button"
+                onClick={() => setShowPrerequisiteModal(false)}
+                className="w-full py-3 px-5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md"
+              >
+                Saya Mengerti
               </button>
             </div>
           </div>

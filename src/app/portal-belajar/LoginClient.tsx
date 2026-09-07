@@ -21,9 +21,9 @@ export default function LoginClient() {
 
     // Initialize or force-reset mock users in localStorage to enforce correct credentials
     const defaultUsers = [
-      { id: 1, name: "Admin Administrasi (Bunda Nisa)", username: "admin_adm", password: "admin123", role: "admin_adm" },
-      { id: 2, name: "Admin Transaksi (Bunda Ajeng)", username: "admin_trx", password: "admin123", role: "admin_trx" },
-      { id: 3, name: "Guru Kelas (Bunda Rahma)", username: "guru", password: "guru123", role: "guru" }
+      { id: 1, name: "Super Admin Administrasi", username: "admin_adm", password: "admin123", role: "admin_adm" },
+      { id: 2, name: "Admin Keuangan & Transaksi", username: "admin_tx", password: "admin123", role: "admin_trx" },
+      { id: 3, name: "Guru Kelas", username: "guru", password: "guru123", role: "guru" }
     ];
 
     const existingUsersStr = localStorage.getItem("system_users");
@@ -32,10 +32,11 @@ export default function LoginClient() {
     } else {
       try {
         const parsed = JSON.parse(existingUsersStr);
-        // If we detect legacy randomized data (like admin_trx70 or sgw_QpNyn83v), override it
+        // If we detect legacy randomized or stale mock names/usernames, override it
         const hasStaleData = parsed.some((u: any) => 
-          u.username.startsWith("admin_trx") && u.username !== "admin_trx" ||
-          u.password !== "admin123" && (u.role === "admin_adm" || u.role === "admin_trx")
+          (u.name && u.name.includes("Bunda")) ||
+          u.username === "admin_trx" ||
+          (u.password !== "admin123" && (u.role === "admin_adm" || u.role === "admin_trx"))
         );
         if (hasStaleData) {
           localStorage.setItem("system_users", JSON.stringify(defaultUsers));
@@ -82,10 +83,25 @@ export default function LoginClient() {
         mappedRole = "guru";
       }
 
-      // Ambil nama lengkap riil dari data user dalam respons login
-      // Catatan: /auth/me hanya mengembalikan JWT claim (tanpa nama), 
-      //          sehingga sumber nama terpercaya adalah loginRes.data.user.nama
+      // Ambil nama lengkap riil dari data user dalam respons login (misal: "Super Admin Administrasi")
       const realName = loginUser?.nama || loginUser?.name || username;
+
+      // Sync local system_users store to maintain consistency across the app
+      try {
+        const existingUsersStr = localStorage.getItem("system_users");
+        if (existingUsersStr) {
+          const parsed = JSON.parse(existingUsersStr);
+          const updated = parsed.map((u: any) => {
+            if (u.username === (loginUser?.username || username)) {
+              return { ...u, name: realName };
+            }
+            return u;
+          });
+          localStorage.setItem("system_users", JSON.stringify(updated));
+        }
+      } catch (sysErr) {
+        console.warn("Could not sync system_users", sysErr);
+      }
 
       // 5. Simpan session user yang sudah dimapping
       localStorage.setItem(

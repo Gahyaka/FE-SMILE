@@ -43,6 +43,7 @@ export default function TabunganTab({
   const [transAmount, setTransAmount] = useState("");
   const [savingFilterStudentId, setSavingFilterStudentId] = useState<string | number>(students.filter(s => s.activeStatus === "Aktif")[0]?.id || "");
   const [showMutasiForm, setShowMutasiForm] = useState(false);
+  const [showPrerequisiteModal, setShowPrerequisiteModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
@@ -165,7 +166,13 @@ export default function TabunganTab({
         {isAdminTransaksi && (
           <button
             type="button"
-            onClick={() => setShowMutasiForm(true)}
+            onClick={() => {
+              if (!students || students.length === 0) {
+                setShowPrerequisiteModal(true);
+                return;
+              }
+              setShowMutasiForm(true);
+            }}
             className="py-2.5 px-4 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:shadow-md active:scale-98"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -634,6 +641,47 @@ export default function TabunganTab({
                 className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
               >
                 Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ── Prerequisite Warning Modal for Tabungan ── */}
+      {showPrerequisiteModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-neutral-gray/10 w-full max-w-md p-6 sm:p-7 relative shadow-2xl text-center space-y-5 animate-scale-in text-neutral-dark">
+            {/* Top Soft Round Icon */}
+            <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center ring-8 ring-amber-500/5">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+
+            {/* Header Title */}
+            <div>
+              <h3 className="font-baloo text-xl font-bold text-neutral-dark">Belum Ada Data Siswa</h3>
+              <p className="text-xs text-neutral-gray font-medium mt-1">Langkah prasyarat diperlukan sebelum mencatat mutasi tabungan.</p>
+            </div>
+
+            {/* Formatted Spaced Callout Box */}
+            <div className="bg-[#FAF8F5] border border-amber-200/60 rounded-2xl p-4 text-left space-y-1.5">
+              <div className="flex items-center gap-2 text-amber-700 font-extrabold text-[10px] uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0 animate-pulse"></span>
+                <span>Prasyarat Tabungan Digital</span>
+              </div>
+              <p className="text-xs text-neutral-gray font-medium leading-relaxed">
+                Untuk mencatat transaksi mutasi tabungan (setoran/penarikan), harus terdapat minimal <strong className="text-neutral-dark font-bold">1 Siswa</strong> terdaftar di dalam sistem. Silakan minta <strong className="text-neutral-dark font-bold">Admin Administrasi</strong> untuk mendaftarkan siswa terlebih dahulu.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-1 select-none">
+              <button
+                type="button"
+                onClick={() => setShowPrerequisiteModal(false)}
+                className="w-full py-3 px-5 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md"
+              >
+                Saya Mengerti
               </button>
             </div>
           </div>

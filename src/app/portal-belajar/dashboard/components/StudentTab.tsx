@@ -31,6 +31,7 @@ interface StudentTabProps {
   onUpdateStudentStatus: (studentId: number, status: string) => void;
   onDownloadTemplate?: () => Promise<void>;
   classes: any[];
+  onNavigateTab?: (tabKey: any) => void;
 }
 
 export default function StudentTab({
@@ -42,9 +43,11 @@ export default function StudentTab({
   onDeleteStudent,
   onUpdateStudentStatus,
   onDownloadTemplate,
-  classes,
+  classes = [],
+  onNavigateTab,
 }: StudentTabProps) {
   // ── UI States ─────────────────────────────────────────────────────
+  const [showPrerequisiteModal, setShowPrerequisiteModal] = useState(false);
   const [selectedFilterClass, setSelectedFilterClass] = useState("Semua");
   const [selectedYear, setSelectedYear] = useState("2026/2027");
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
@@ -500,7 +503,13 @@ export default function StudentTab({
                 {/* ── JALUR 2: Import Excel ── */}
                 <button
                   type="button"
-                  onClick={openImportDrawer}
+                  onClick={() => {
+                    if (!classes || classes.length === 0) {
+                      setShowPrerequisiteModal(true);
+                      return;
+                    }
+                    openImportDrawer();
+                  }}
                   className="px-3.5 py-2.5 bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200 font-extrabold text-[10px] uppercase rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm text-center"
                 >
                   <svg
@@ -545,7 +554,13 @@ export default function StudentTab({
                 {/* ── JALUR 1: Daftarkan Manual ── */}
                 <button
                   type="button"
-                  onClick={() => setShowStudentForm(!showStudentForm)}
+                  onClick={() => {
+                    if (!classes || classes.length === 0) {
+                      setShowPrerequisiteModal(true);
+                      return;
+                    }
+                    setShowStudentForm(!showStudentForm);
+                  }}
                   className="col-span-2 sm:col-span-1 px-4 py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm hover:shadow-md"
                 >
                   <svg
@@ -1140,6 +1155,62 @@ export default function StudentTab({
             <button type="button" onClick={() => setImportResult(null)} className="w-full py-2.5 bg-primary-green text-white font-extrabold text-xs rounded-xl hover:bg-primary-dark transition-all cursor-pointer shadow-sm">
               Selesai &amp; Tutup
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Prerequisite Warning Modal ── */}
+      {showPrerequisiteModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-neutral-gray/10 w-full max-w-md p-6 sm:p-7 relative shadow-2xl text-center space-y-5 animate-scale-in text-neutral-dark">
+            {/* Top Soft Round Icon */}
+            <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center ring-8 ring-amber-500/5">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+
+            {/* Header Title */}
+            <div>
+              <h3 className="font-baloo text-xl font-bold text-neutral-dark">Belum Ada Data Kelas</h3>
+              <p className="text-xs text-neutral-gray font-medium mt-1">Langkah prasyarat diperlukan sebelum mendaftarkan siswa.</p>
+            </div>
+
+            {/* Formatted Spaced Callout Box */}
+            <div className="bg-[#FAF8F5] border border-amber-200/60 rounded-2xl p-4 text-left space-y-1.5">
+              <div className="flex items-center gap-2 text-amber-700 font-extrabold text-[10px] uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0 animate-pulse"></span>
+                <span>Prasyarat Pendaftaran Siswa</span>
+              </div>
+              <p className="text-xs text-neutral-gray font-medium leading-relaxed">
+                Untuk mendaftarkan siswa baru, Anda harus mendaftarkan minimal <strong className="text-neutral-dark font-bold">1 Kelas</strong> terlebih dahulu di menu <strong>Data Kelas</strong>.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-1 select-none">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPrerequisiteModal(false);
+                  if (onNavigateTab) onNavigateTab("kelas");
+                }}
+                className="flex-1 py-3 px-4 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md flex items-center justify-center gap-2 active:scale-98"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Buat Kelas Baru Sekarang</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowPrerequisiteModal(false)}
+                className="py-3 px-5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Batal
+              </button>
+            </div>
           </div>
         </div>
       )}

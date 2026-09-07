@@ -212,10 +212,10 @@ function mapUsersData(rawUsers: any[]): any[] {
           ? "admin_trx" 
           : "guru";
 
-      // Gunakan username asli dari database — JANGAN override
+      // Gunakan nama asli dari API response backend (u.nama / u.name) — JANGAN buat-buat fallback
       return {
         id: u.id,
-        name: u.nama || u.name || (mappedRole === "admin_adm" ? "Admin Administrasi" : mappedRole === "admin_trx" ? "Admin Transaksi" : "Guru"),
+        name: u.nama || u.name || u.username,
         username: u.username,
         role: mappedRole
       };
@@ -1696,8 +1696,7 @@ const handleDeleteUser = (userId: number) => {
           {/* Clickable Sidebar User Profile Card */}
           <div 
             onClick={() => {
-              const currentDbUser = users.find(u => u.username === session?.username);
-              setProfileName(currentDbUser ? currentDbUser.name : (session?.name || ""));
+              setProfileName(session?.name || "");
               setProfilePassword("");
               setShowProfileDrawer(true);
             }}
@@ -1709,10 +1708,7 @@ const handleDeleteUser = (userId: number) => {
             </div>
             <div className="overflow-hidden">
               <p className="text-[10px] text-neutral-dark font-bold leading-tight truncate">
-                {(() => {
-                  const currentDbUser = users.find(u => u.username === session?.username);
-                  return currentDbUser ? currentDbUser.name : (session?.name || "Guru Madrasah");
-                })()}
+                {session?.name || session?.username || "Pengguna"}
               </p>
               <span className="text-[8px] text-primary-green font-bold uppercase mt-1 block">
                 {isAdminAdministrasi ? "Admin Administrasi" : isAdminTransaksi ? "Admin Transaksi" : "Guru"}
@@ -1809,6 +1805,7 @@ const handleDeleteUser = (userId: number) => {
                     onDeleteStudent={handleDeleteStudent}
                     onUpdateStudentStatus={handleUpdateStudentStatus}
                     onDownloadTemplate={handleDownloadStudentTemplate}
+                    onNavigateTab={(tabKey: TabKey) => setActiveTab(tabKey)}
                   />
                 );
               })()}
@@ -1824,6 +1821,7 @@ const handleDeleteUser = (userId: number) => {
                   onAddClass={handleAddClass}
                   onUpdateClass={handleUpdateClass}
                   onDeleteClass={handleDeleteClass}
+                  onNavigateTab={(tabKey: TabKey) => setActiveTab(tabKey)}
                 />
               )}
 
@@ -1992,10 +1990,7 @@ const handleDeleteUser = (userId: number) => {
                   </div>
                   <div>
                     <h5 className="font-baloo text-sm font-bold text-neutral-dark">
-                      {(() => {
-                        const currentDbUser = users.find(u => u.username === session?.username);
-                        return currentDbUser ? currentDbUser.name : (session?.name || "Guru Madrasah");
-                      })()}
+                      {session?.name || session?.username || "Pengguna"}
                     </h5>
                     <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 bg-amber-50 text-amber-700 rounded border border-amber-200 mt-1 inline-block">
                       {session.role === "admin_adm" ? "Admin Administrasi" : session.role === "admin_trx" ? "Admin Transaksi" : "Guru Kelas"}
