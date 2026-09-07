@@ -1559,7 +1559,7 @@ export default function SppTab({
                 <span>Prasyarat Transaksi Keuangan</span>
               </div>
               <p className="text-xs text-neutral-gray font-medium leading-relaxed">
-                Untuk mencatat pembayaran SPP &amp; Les, harus terdapat minimal <strong className="text-neutral-dark font-bold">1 Siswa</strong> terdaftar di dalam sistem. Silakan minta <strong>Admin Administrasi</strong> atau <strong>Guru</strong> untuk mendaftarkan siswa terlebih dahulu.
+                Untuk mencatat pembayaran SPP &amp; Les, harus terdapat minimal <strong className="text-neutral-dark font-bold">1 Siswa</strong> terdaftar di dalam sistem. Silakan minta <strong className="text-neutral-dark font-bold">Admin Administrasi</strong> untuk mendaftarkan siswa terlebih dahulu.
               </p>
             </div>
 
