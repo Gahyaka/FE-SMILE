@@ -594,32 +594,41 @@ export default function KelasTab({
 
       {/* ── Prerequisite Warning Modal ── */}
       {showPrerequisiteModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999] flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl border border-neutral-gray/10 w-full max-w-sm p-6 relative shadow-2xl text-center space-y-4 animate-scale-in text-neutral-dark">
-            <div className="mx-auto w-14 h-14 bg-gradient-to-br from-amber-400 to-amber-500 text-white rounded-2xl flex items-center justify-center shadow-md shadow-amber-200">
-              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-neutral-gray/10 w-full max-w-md p-6 sm:p-7 relative shadow-2xl text-center space-y-5 animate-scale-in text-neutral-dark">
+            {/* Top Soft Round Icon */}
+            <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center ring-8 ring-amber-500/5">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
 
-            <div className="space-y-1.5">
-              <span className="text-[9px] font-extrabold uppercase px-2.5 py-0.5 bg-amber-50 text-amber-700 rounded border border-amber-200 tracking-wider inline-block">
-                Prasyarat Pendaftaran Kelas
-              </span>
-              <h4 className="font-baloo text-lg font-bold text-neutral-dark">Belum Ada Akun Guru</h4>
-              <p className="text-xs text-neutral-gray font-semibold leading-relaxed px-1">
-                Untuk mendaftarkan kelas baru, Anda harus mendaftarkan minimal <strong className="text-neutral-dark">1 Akun Guru (Wali Kelas)</strong> terlebih dahulu di menu Kelola Pengguna.
+            {/* Header Title */}
+            <div>
+              <h3 className="font-baloo text-xl font-bold text-neutral-dark">Belum Ada Akun Guru</h3>
+              <p className="text-xs text-neutral-gray font-medium mt-1">Langkah prasyarat diperlukan sebelum menambah kelas baru.</p>
+            </div>
+
+            {/* Formatted Spaced Callout Box */}
+            <div className="bg-[#FAF8F5] border border-amber-200/60 rounded-2xl p-4 text-left space-y-1.5">
+              <div className="flex items-center gap-2 text-amber-700 font-extrabold text-[10px] uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0 animate-pulse"></span>
+                <span>Prasyarat Pendaftaran Kelas</span>
+              </div>
+              <p className="text-xs text-neutral-gray font-medium leading-relaxed">
+                Untuk mendaftarkan kelas baru, Anda harus mendaftarkan minimal <strong className="text-neutral-dark font-bold">1 Akun Guru (Wali Kelas)</strong> terlebih dahulu di menu <strong>Kelola Pengguna</strong>.
               </p>
             </div>
 
-            <div className="flex flex-col gap-2 pt-2 select-none">
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-1 select-none">
               <button
                 type="button"
                 onClick={() => {
                   setShowPrerequisiteModal(false);
                   if (onNavigateTab) onNavigateTab("users");
                 }}
-                className="w-full py-3 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md flex items-center justify-center gap-2 active:scale-98"
+                className="flex-1 py-3 px-4 bg-primary-green hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md flex items-center justify-center gap-2 active:scale-98"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -630,7 +639,7 @@ export default function KelasTab({
               <button
                 type="button"
                 onClick={() => setShowPrerequisiteModal(false)}
-                className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                className="py-3 px-5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
               >
                 Batal
               </button>
