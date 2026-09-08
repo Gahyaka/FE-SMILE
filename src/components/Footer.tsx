@@ -47,9 +47,9 @@ export default function Footer() {
             <h4 className="font-baloo font-bold text-sm uppercase tracking-wider text-primary-light">Menu Cepat</h4>
             <ul className="space-y-2 text-xs text-stone-300/85 font-semibold">
               <li><Link href="/" className="hover:text-white transition-colors">Beranda</Link></li>
-              <li><Link href="/tim" className="hover:text-white transition-colors">Profil Guru</Link></li>
               <li><Link href="/program" className="hover:text-white transition-colors">Kegiatan</Link></li>
-              <li><Link href="/kontak" className="hover:text-white transition-colors">PPDB & Kontak</Link></li>
+              <li><Link href="/galeri" className="hover:text-white transition-colors">Galeri</Link></li>
+              <li><Link href="/kontak" className="hover:text-white transition-colors">Kontak</Link></li>
             </ul>
           </div>
 
@@ -70,16 +70,9 @@ export default function Footer() {
                 <svg className="w-4 h-4 text-primary-light flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" strokeDasharray="3 1" />
                 </svg>
-                <span>+62 812-3456-7890 (Admin RA Sahabat)</span>
+                <span>0858-4259-4081 (Admin RA Sahabat)</span>
               </li>
-              <li className="flex items-center gap-2.5">
-                {/* Sketched Email Envelope SVG */}
-                <svg className="w-4 h-4 text-primary-light flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" strokeDasharray="3 1" />
-                  <polyline points="22,6 12,13 2,6" />
-                </svg>
-                <span>admin@rasahabat.sch.id</span>
-              </li>
+
             </ul>
           </div>
         </div>

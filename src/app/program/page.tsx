@@ -243,12 +243,14 @@ export default function ProgramPage() {
             Silakan hubungi kami untuk informasi kuota kelas pendaftaran melalui WhatsApp Admin di halaman utama.
           </p>
           <div className="pt-2">
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-primary-green hover:bg-primary-dark text-white font-extrabold text-base transition-all shadow-sm hover:shadow-md"
+            <a
+              href="https://wa.me/6285842594081?text=Halo%20Admin%20RA%20Sahabat,%20saya%20ingin%20bertanya%20mengenai%20program%20dan%20pendaftaran%20sekolah..."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-primary-green hover:bg-primary-dark text-white font-extrabold text-base transition-all shadow-sm hover:shadow-md cursor-pointer"
             >
-              Hubungi WhatsApp Admin
-            </Link>
+              Hubungi WhatsApp Admin (0858-4259-4081)
+            </a>
           </div>
         </div>
       </section>
