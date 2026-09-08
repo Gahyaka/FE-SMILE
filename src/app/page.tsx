@@ -588,7 +588,7 @@ export default function HomePage() {
 
           <div className="pt-2">
             <a
-              href="https://wa.me/6281234567890?text=Halo%20Admin%20RA%20Sahabat,%20saya%20ingin%20mendaftarkan%20anak%20saya%20di%20KB/RA%20Sahabat%20Sleman..."
+              href="https://wa.me/6285842594081?text=Halo%20Admin%20RA%20Sahabat,%20saya%20ingin%20mendaftarkan%20anak%20saya%20di%20KB/RA%20Sahabat%20Sleman..."
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-10 py-4 rounded-xl bg-[#18B36F] hover:bg-[#0E7A4D] text-white font-extrabold text-base transition-all shadow-sm hover:shadow-md"
