@@ -150,7 +150,7 @@ export default function HomePage() {
             {/* Left Info Column */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
               <span className="inline-block text-xs font-accent font-bold uppercase tracking-wider text-primary-green bg-primary-green/8 px-4 py-2 rounded-full border border-primary-green/10">
-                Pendaftaran PPDB TA 2026/2027 Dibuka!
+                Lembaga Pendidikan Anak Usia Dini Terpadu
               </span>
               <h1 className="font-baloo text-4xl sm:text-5xl lg:text-6xl font-bold text-neutral-dark leading-tight">
                 Membentuk Generasi <span className="text-primary-green">Cerdas</span> & Berkarakter Islami

@@ -1655,8 +1655,8 @@ const handleDeleteUser = (userId: number) => {
               </button>
             )}
 
-            {/* Laporan Murajaah — Admin Administrasi & Guru */}
-            {(isAdminAdministrasi || isGuru) && (
+            {/* Laporan Murajaah — Guru only */}
+            {isGuru && (
               <button
                 onClick={() => { setActiveTab("murajaah"); setSidebarOpen(false); }}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
@@ -1669,23 +1669,6 @@ const handleDeleteUser = (userId: number) => {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 <span>Laporan Murajaah</span>
-              </button>
-            )}
-
-            {/* Log Aktivitas — Admin Administrasi only */}
-            {isAdminAdministrasi && (
-              <button
-                onClick={() => { setActiveTab("audit"); setSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer ${
-                  activeTab === "audit"
-                    ? "bg-primary-green/10 text-primary-green border-l-4 border-primary-green font-extrabold shadow-3xs"
-                    : "text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray/5 border-l-4 border-transparent font-medium"
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Log Aktivitas</span>
               </button>
             )}
           </nav>
