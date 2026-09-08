@@ -87,17 +87,7 @@ Saya ingin bertanya mengenai sekolah:
                     KB/RA Sahabat, Berbah, Kabupaten Sleman, D.I. Yogyakarta, Indonesia.
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-3.5">
-                  <svg className="w-5 h-5 text-primary-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                    <polyline points="22,6 12,13 2,6" />
-                  </svg>
-                  <div>
-                    <strong className="text-neutral-dark block mb-1">Email Resmi:</strong>
-                    admin@rasahabat.sch.id
-                  </div>
-                </div>
+
 
                 <a
                   href="https://wa.me/6285842594081?text=Halo%20Admin%20RA%20Sahabat,%20saya%20ingin%20bertanya%20mengenai%20sekolah..."

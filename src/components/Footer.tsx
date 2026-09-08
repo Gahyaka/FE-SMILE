@@ -72,14 +72,7 @@ export default function Footer() {
                 </svg>
                 <span>0858-4259-4081 (Admin RA Sahabat)</span>
               </li>
-              <li className="flex items-center gap-2.5">
-                {/* Sketched Email Envelope SVG */}
-                <svg className="w-4 h-4 text-primary-light flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" strokeDasharray="3 1" />
-                  <polyline points="22,6 12,13 2,6" />
-                </svg>
-                <span>admin@rasahabat.sch.id</span>
-              </li>
+
             </ul>
           </div>
         </div>
